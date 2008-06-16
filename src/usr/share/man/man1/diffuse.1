@@ -1,0 +1,905 @@
+.TH "DIFFUSE" "1" "06/15/2008" "diffuse 0\.2\.13" "Diffuse Manual"
+.nh
+.ad l
+.SH "NAME"
+diffuse - graphical tool for merging and comparing text files
+.SH "SYNOPSIS"
+.HP 8
+\fBdiffuse\fR [\fB\-h\fR | \fB\-?\fR | \fB\-\-help\fR | \fB\-v\fR | \fB\-\-version\fR]
+.HP 8
+\fBdiffuse\fR [\fB\-\-no\-rcfile\fR | \fB\-\-rcfile\ \fR\fB\fIfile\fR\fR] [[\fIoption\fR...] | [\fIfile\fR...]...]
+.SH "DESCRIPTION"
+.PP
+Diffuse is a graphical tool for merging and comparing text files\. Diffuse is able to compare an arbitrary number of files side\-by\-side and gives users the ability to manually adjust line\-matching and directly edit files\. Diffuse can also retrieve revisions of files from bazaar, CVS, darcs, git, mercurial, monotone, and subversion repositories for comparison and merging\.
+.SH "OPTIONS"
+.SS "Help Options"
+.PP
+If a help option is specified, it must be the only argument specified on the command line\. Diffuse will immediately quit after displaying the help information\.
+.PP
+\fB\-h\fR, \fB\-?\fR, \fB\-\-help\fR
+.RS 4
+Display usage information\.
+.RE
+.PP
+\fB\-v\fR, \fB\-\-version\fR
+.RS 4
+Display version number and copyright information\.
+.RE
+.SS "Configuration Options"
+.PP
+If a configuration option is specified, it must be the first argument specified on the command line\.
+.PP
+\fB\-\-no\-rcfile\fR
+.RS 4
+Do not read the system wide initialisation file
+\fI/etc/diffuserc\fR
+and personal initialisation file
+\fI~/\.diffuse/diffuserc\fR\.
+.RE
+.PP
+\fB\-\-rcfile \fR\fB\fIfile\fR\fR
+.RS 4
+Read initialisation commands from file
+\fIfile\fR
+instead of the system wide initialisation file
+\fI/etc/diffuserc\fR
+and personal initialisation file
+\fI~/\.diffuse/diffuserc\fR\.
+.RE
+.SS "General Options"
+.PP
+\fB\-e\fR, \fB\-\-encoding\fR \fIcodec\fR
+.RS 4
+Use
+\fIcodec\fR
+to read and write files\.
+.RE
+.PP
+\fB\-r\fR, \fB\-\-revision\fR \fIrev\fR
+.RS 4
+Include revision
+\fIrev\fR
+of the next file named in the command line arguments in a file comparison tab\.
+.RE
+.PP
+\fB\-s\fR, \fB\-\-separate\fR
+.RS 4
+Open all remaining files specified in the command line arguments in separate file comparison tabs\.
+.RE
+.PP
+\fB\-t\fR, \fB\-\-tab\fR \fIlabel\fR
+.RS 4
+Start a new tab called
+\fIlabel\fR
+for any remaining files named in the command line arguments\.
+.RE
+.SS "Display Options"
+.PP
+Display options specified in the command line arguments will override saved preference values\.
+.PP
+\fB\-b\fR, \fB\-\-ignore\-space\-change\fR
+.RS 4
+Ignore changes to the amount of white space\.
+.RE
+.PP
+\fB\-B\fR, \fB\-\-ignore\-blank\-lines\fR
+.RS 4
+Ignore changes whose lines are all blank\.
+.RE
+.PP
+\fB\-i\fR, \fB\-\-ignore\-case\fR
+.RS 4
+Ignore case differences in file contents\.
+.RE
+.PP
+\fB\-w\fR, \fB\-\-ignore\-all\-space\fR
+.RS 4
+Ignore all white space\.
+.RE
+.SH "FILE COMPARISON"
+.PP
+Use the
+File → New 2\-Way File Merge
+and
+File → New 3\-Way File Merge
+menu items to create additional tabs for comparing text files\.
+.SS "Comparing"
+.PP
+Diffuse displays files side\-by\-side inserting gaps to align similar lines of text\. Differences are highlighted with a different background colour\. The mouse pointer or keyboard can be used to manually align lines of text from neighbouring files\. To aligning lines of text using the mouse pointer, select a line of text with the left mouse button, right click on a line of text from a neighbouring file, and choose "Align to Selection"\. To align lines of text using the keyboard, move the selection with the cursor keys, press the space bar to pick the current line of text, move the selection with the cursor keys to a line of text in a neighbouring file, and press the space bar to pick the target line of text\. Pressing the escape key will cancel the operation\.
+.SS "Editing"
+.PP
+Press the enter key or double click on a text area to enter text editing mode\. Diffuse will identify differences in neighbouring files during editing and highlight modified lines\. Press the escape key or click on another file\'s text area using the left mouse button to leave editing mode\.
+.SS "Merging"
+.PP
+Use the difference buttons to navigate blocks of differences within a file\. Use the merge buttons to copy blocks of text into the selected range of lines\. The revert tool will undo all changes to the selected lines regardless of the order they were made\.
+.SH "RESOURCES"
+.PP
+Diffuse reads commands from the system wide initialisation file
+\fI/etc/diffuserc\fR
+and personal initialisation file
+\fI~/\.diffuse/diffuserc\fR\. A Bourne shell\-like lexical analyser is used to parse initialisation commands\. Comments and special characters can be embedded using the same method manner used in Bourne shell scripts\.
+.SS "General"
+.PP
+\fBimport \fR\fB\fIfile\fR\fR
+.RS 4
+Processes initialisation commands from
+\fIfile\fR\. Initialisation files will only be processed once\.
+.RE
+.SS "Key Bindings"
+.PP
+\fBkeybinding \fR\fB\fIcontext\fR\fR\fB \fR\fB\fIaction\fR\fR\fB \fR\fB\fIkey_combination\fR\fR
+.RS 4
+Binds a key combination to
+\fIaction\fR
+when used in
+\fIcontext\fR\. Specify
+Shift
+and
+Control
+modifiers by prepending
+\fBShift+\fR
+and
+\fBCtrl+\fR
+to
+\fIkey_combination\fR
+respectively\. Keys normally modified by the
+Shift
+key should be specified using their modified value if
+\fIkey_combination\fR
+involves the
+Shift
+key\. For example,
+\fBCtrl+g\fR
+and
+\fBShift+Ctrl+G\fR\. Remove bindings for
+\fIkey_combination\fR
+by specifying
+\fBNone\fR
+for the
+\fIaction\fR\.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+Menu Item Key Bindings
+.RS
+.PP
+Use
+\fBmenu\fR
+for the
+\fIcontext\fR
+to define key bindings for menu items\. The following values are valid for
+\fIaction\fR:
+.PP
+\fBopen_file\fR
+.RS 4
+File → Open File\.\.\.
+menu item
+.RE
+.PP
+\fBreload_file\fR
+.RS 4
+File → Reload File
+menu item
+.RE
+.PP
+\fBsave_file\fR
+.RS 4
+File → Save File
+menu item
+.RE
+.PP
+\fBsave_file_as\fR
+.RS 4
+File → Save File As\.\.\.
+menu item
+.RE
+.PP
+\fBnew_2_way_file_merge\fR
+.RS 4
+File → New 2\-Way File Merge
+menu item
+.RE
+.PP
+\fBnew_3_way_file_merge\fR
+.RS 4
+File → New 3\-Way File Merge
+menu item
+.RE
+.PP
+\fBquit\fR
+.RS 4
+File → Quit
+menu item
+.RE
+.PP
+\fBundo\fR
+.RS 4
+Edit → Undo
+menu item
+.RE
+.PP
+\fBredo\fR
+.RS 4
+Edit → Redo
+menu item
+.RE
+.PP
+\fBcut\fR
+.RS 4
+Edit → Cut
+menu item
+.RE
+.PP
+\fBcopy\fR
+.RS 4
+Edit → Copy
+menu item
+.RE
+.PP
+\fBpaste\fR
+.RS 4
+Edit → Paste
+menu item
+.RE
+.PP
+\fBselect_all\fR
+.RS 4
+Edit → Select All
+menu item
+.RE
+.PP
+\fBfind\fR
+.RS 4
+Edit → Find\.\.\.
+menu item
+.RE
+.PP
+\fBfind_next\fR
+.RS 4
+Edit → Find Next
+menu item
+.RE
+.PP
+\fBfind_previous\fR
+.RS 4
+Edit → Find Previous
+menu item
+.RE
+.PP
+\fBno_syntax_highlighting\fR
+.RS 4
+View → Syntax Highlighting → None
+menu item
+.RE
+.PP
+\fBsyntax_highlighting_\fR\fB\fIsyntax\fR\fR
+.RS 4
+View → Syntax Highlighting → \fIsyntax\fR
+menu item
+.RE
+.PP
+\fBprevious_tab\fR
+.RS 4
+View → Previous Tab
+menu item
+.RE
+.PP
+\fBnext_tab\fR
+.RS 4
+View → Next Tab
+menu item
+.RE
+.PP
+\fBclose_tab\fR
+.RS 4
+View → Close Tab
+menu item
+.RE
+.PP
+\fBpreferences\fR
+.RS 4
+View → Preferences
+menu item
+.RE
+.PP
+\fBrealign_all\fR
+.RS 4
+Merge → Realign All
+menu item
+.RE
+.PP
+\fBfirst_difference\fR
+.RS 4
+Merge → First Difference
+menu item
+.RE
+.PP
+\fBprevious_difference\fR
+.RS 4
+Merge → Previous Difference
+menu item
+.RE
+.PP
+\fBnext_difference\fR
+.RS 4
+Merge → Next Difference
+menu item
+.RE
+.PP
+\fBlast_difference\fR
+.RS 4
+Merge → Last Difference
+menu item
+.RE
+.PP
+\fBrevent\fR
+.RS 4
+Merge → Revert
+menu item
+.RE
+.PP
+\fBmerge_from_left\fR
+.RS 4
+Merge → Merge From Left
+menu item
+.RE
+.PP
+\fBmerge_from_right\fR
+.RS 4
+Merge → Merge From Right
+menu item
+.RE
+.PP
+\fBisolate\fR
+.RS 4
+Merge → Isolate
+menu item
+.RE
+.PP
+\fBhelp_contents\fR
+.RS 4
+Help → Help Contents
+menu item
+.RE
+.PP
+\fBabout\fR
+.RS 4
+Help → About
+menu item
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+Line Editing Mode Key Bindings
+.RS
+.PP
+Use
+\fBline_mode\fR
+for the
+\fIcontext\fR
+to define key bindings for line editing mode\. The following values are valid for
+\fIaction\fR:
+.PP
+\fBenter_align_mode\fR
+.RS 4
+enter alignment editing mode
+.RE
+.PP
+\fBenter_character_mode\fR
+.RS 4
+enter character editing mode
+.RE
+.PP
+\fBup\fR
+.RS 4
+move cursor up one line
+.RE
+.PP
+\fBextend_up\fR
+.RS 4
+move cursor up one line, extending the selection
+.RE
+.PP
+\fBdown\fR
+.RS 4
+move cursor down one line
+.RE
+.PP
+\fBextend_down\fR
+.RS 4
+move cursor down one line, extending the selection
+.RE
+.PP
+\fBleft\fR
+.RS 4
+move cursor left one file
+.RE
+.PP
+\fBextend_left\fR
+.RS 4
+move cursor left one file, extending the selection
+.RE
+.PP
+\fBright\fR
+.RS 4
+move cursor right one file
+.RE
+.PP
+\fBextend_right\fR
+.RS 4
+move cursor right one file, extending the selection
+.RE
+.PP
+\fBpage_up\fR
+.RS 4
+move cursor up one page
+.RE
+.PP
+\fBextend_page_up\fR
+.RS 4
+move cursor up one page, extending the selection
+.RE
+.PP
+\fBpage_down\fR
+.RS 4
+move cursor down one page
+.RE
+.PP
+\fBextend_page_down\fR
+.RS 4
+move cursor down one page, extending the selection
+.RE
+.PP
+\fBdelete_text\fR
+.RS 4
+delete the selected text
+.RE
+.PP
+\fBmerge_from_left\fR
+.RS 4
+merge lines from file on the left
+.RE
+.PP
+\fBmerge_from_right\fR
+.RS 4
+merge lines from file on the right
+.RE
+.PP
+\fBfirst_difference\fR
+.RS 4
+select the first difference
+.RE
+.PP
+\fBprevious_difference\fR
+.RS 4
+select the previous difference
+.RE
+.PP
+\fBnext_difference\fR
+.RS 4
+select the next difference
+.RE
+.PP
+\fBlast_difference\fR
+.RS 4
+select the last difference
+.RE
+.PP
+\fBisolate\fR
+.RS 4
+isolate the selected lines
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+Alignment Editing Mode Key Bindings
+.RS
+.PP
+Use
+\fBalign_mode\fR
+for the
+\fIcontext\fR
+to define key bindings for alignment editing mode\. The following values are valid for
+\fIaction\fR:
+.PP
+\fBenter_line_mode\fR
+.RS 4
+enter line editing mode
+.RE
+.PP
+\fBenter_character_mode\fR
+.RS 4
+enter character editing mode
+.RE
+.PP
+\fBup\fR
+.RS 4
+move cursor up one line
+.RE
+.PP
+\fBdown\fR
+.RS 4
+move cursor down one line
+.RE
+.PP
+\fBleft\fR
+.RS 4
+move cursor left one file
+.RE
+.PP
+\fBright\fR
+.RS 4
+move cursor right one file
+.RE
+.PP
+\fBpage_up\fR
+.RS 4
+move cursor up one page
+.RE
+.PP
+\fBpage_down\fR
+.RS 4
+move cursor down one page
+.RE
+.PP
+\fBalign\fR
+.RS 4
+align the selected line to the cursor position
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+Character Editing Mode Key Bindings
+.RS
+.PP
+Use
+\fBcharacter_mode\fR
+for the
+\fIcontext\fR
+to define key bindings for character editing mode\. The following values are valid for
+\fIaction\fR:
+.PP
+\fBenter_line_mode\fR
+.RS 4
+enter line editing mode
+.RE
+.RE
+.SS "Strings"
+.PP
+\fBstring \fR\fB\fIname\fR\fR\fB \fR\fB\fIvalue\fR\fR
+.RS 4
+Declares a string resource called
+\fIname\fR
+with value
+\fIvalue\fR\.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+Used String Resources
+.RS
+.PP
+The following string resources are used by Diffuse:
+.PP
+\fBauto_detect_encodings\fR
+.RS 4
+a list of encodings to try when attempting to identify a file\'s encoding
+.RE
+.PP
+\fBcharacter_classes\fR
+.RS 4
+describes mapping used to identify characters of a similar class for selection when double clicking
+.sp
+This resource is a series of
+\fIrange\fR:\fIvalue\fR
+pairs\. The
+\fIrange\fR
+is either a single number or
+\fIlow\fR\-\fIhigh\fR
+corresponding to the code for the character or characters to be set\. Neighbouring characters that map to the same
+\fIvalue\fR
+will be selected as a group when double clicking on a word\.
+.RE
+.PP
+\fBbzr_bin\fR
+.RS 4
+executable used to query bazaar repositories
+.RE
+.PP
+\fBbzr_default_revision\fR
+.RS 4
+default revision to retrieve from bazaar repositories for comparison
+.RE
+.PP
+\fBcvs_bin\fR
+.RS 4
+executable used to query CVS repositories
+.RE
+.PP
+\fBcvs_default_revision\fR
+.RS 4
+default revision to retrieve from CVS repositories for comparison
+.RE
+.PP
+\fBdarcs_bin\fR
+.RS 4
+executable used to query darcs repositories
+.RE
+.PP
+\fBdarcs_default_revision\fR
+.RS 4
+default revision to retrieve from darcs repositories for comparison
+.RE
+.PP
+\fBdifference_colours\fR
+.RS 4
+a list of colour resources used to indicate differences
+.RE
+.PP
+\fBfont\fR
+.RS 4
+font used to render text
+.RE
+.PP
+\fBgit_bin\fR
+.RS 4
+executable used to query git repositories
+.RE
+.PP
+\fBgit_default_revision\fR
+.RS 4
+default revision to retrieve from git repositories for comparison
+.RE
+.PP
+\fBhelp_browser\fR
+.RS 4
+executable used to browse help documentation
+.RE
+.PP
+\fBhelp_dir\fR
+.RS 4
+directory containing the localised help documents
+.RE
+.PP
+\fBhg_bin\fR
+.RS 4
+executable used to query mercurial repositories
+.RE
+.PP
+\fBhg_default_revision\fR
+.RS 4
+default revision to retrieve from mercurial repositories for comparison
+.RE
+.PP
+\fBmtn_bin\fR
+.RS 4
+executable used to query monotone repositories
+.RE
+.PP
+\fBmtn_default_revision\fR
+.RS 4
+default revision to retrieve from monotone repositories for comparison
+.RE
+.PP
+\fBsvn_bin\fR
+.RS 4
+executable used to query subversion repositories
+.RE
+.PP
+\fBsvn_default_revision\fR
+.RS 4
+default revision to retrieve from subversion repositories for comparison
+.RE
+.RE
+.SS "Colours"
+.PP
+\fB[ colour | color ] \fR\fB\fIname\fR\fR\fB \fR\fB\fIred\fR\fR\fB \fR\fB\fIgreen\fR\fR\fB \fR\fB\fIblue\fR\fR
+.RS 4
+Declares a colour resource called
+\fIname\fR\. Individual colour components should be expressed as a value between 0 and 1\.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+Used Colour Resources
+.RS
+.PP
+The following colour resources are used by Diffuse:
+.PP
+\fBalign\fR
+.RS 4
+colour used to indicate a line picked for manual alignment
+.RE
+.PP
+\fBchar_selection\fR
+.RS 4
+colour used to indicate selected characters
+.RE
+.PP
+\fBcursor\fR
+.RS 4
+colour used for the cursor
+.RE
+.PP
+\fBdifference_1\fR
+.RS 4
+colour used to identify differences between the first pair of files
+.RE
+.PP
+\fBdifference_2\fR
+.RS 4
+colour used to identify differences between the second pair of files
+.RE
+.PP
+\fBdifference_3\fR
+.RS 4
+colour used to identify differences between the third pair of files
+.RE
+.PP
+\fBhatch\fR
+.RS 4
+colour used for indicating alignment gaps
+.RE
+.PP
+\fBline_number\fR
+.RS 4
+colour used for line numbers
+.RE
+.PP
+\fBline_number_background\fR
+.RS 4
+colour of background in line number area
+.RE
+.PP
+\fBline_selection\fR
+.RS 4
+colour used to indicate selected lines
+.RE
+.PP
+\fBmodified\fR
+.RS 4
+colour used to indicate modified lines
+.RE
+.PP
+\fBtext\fR
+.RS 4
+regular text colour
+.RE
+.PP
+\fBtext_background\fR
+.RS 4
+colour of background in text area
+.RE
+.RE
+.SS "Floating Point Values"
+.PP
+\fBfloat \fR\fB\fIname\fR\fR\fB \fR\fB\fIvalue\fR\fR
+.RS 4
+Declares a floating point resource called
+\fIname\fR
+with value
+\fIvalue\fR\.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+Used Floating Point Resources
+.RS
+.PP
+The following floating point resources are used by Diffuse:
+.PP
+\fBalign_alpha\fR
+.RS 4
+alpha value used when compositing the manual alignment colour
+.RE
+.PP
+\fBchar_difference_alpha\fR
+.RS 4
+alpha value used when compositing character difference colours
+.RE
+.PP
+\fBchar_selection_alpha\fR
+.RS 4
+alpha value used when compositing the character selection colour
+.RE
+.PP
+\fBline_difference_alpha\fR
+.RS 4
+alpha value used when compositing line difference colours
+.RE
+.PP
+\fBline_selection_alpha\fR
+.RS 4
+alpha value used when compositing the line selection colour
+.RE
+.PP
+\fBmodified_alpha\fR
+.RS 4
+alpha value used when compositing the modified line colour
+.RE
+.RE
+.SS "Syntax Highlighting"
+.PP
+\fBsyntax \fR\fB\fIname\fR\fR\fB \fR\fB\fIinitial_state\fR\fR\fB \fR\fB\fIdefault_tag\fR\fR
+.RS 4
+Declares a new syntax style called
+\fIname\fR\. Syntax highlighting uses a simple state machine that transitions between states when certain patterns are matched\. The initial state for the state machine will be
+\fIinitial_state\fR\. All characters not matched by a pattern will be tagged as
+\fIdefault_tag\fR
+for highlighting\.
+.RE
+.PP
+\fBsyntax_file \fR\fB\fIname\fR\fR\fB \fR\fB\fIpattern\fR\fR
+.RS 4
+Specifies that files with a name matching
+\fIpattern\fR
+should be highlighted using the syntax style called
+\fIname\fR\.
+.RE
+.PP
+\fBsyntax_pattern \fR\fB\fIname\fR\fR\fB \fR\fB\fIinitial_state\fR\fR\fB \fR\fB\fIfinal_state\fR\fR\fB \fR\fB\fItag\fR\fR\fB \fR\fB\fIpattern\fR\fR
+.RS 4
+Adds a pattern to the previously declared syntax style\. The pattern will only be used to match characters if the state machine is in the state
+\fIinitial_state\fR\. The state machine will transition to
+\fIfinal_state\fR
+if the pattern defined by
+\fIpattern\fR
+is matched\. All characters matched by the pattern will be tagged as
+\fItag\fR
+for highlighting\.
+.RE
+.SH "FILES"
+.PP
+\fI/etc/diffuserc\fR
+.RS 4
+System wide initialisations\.
+.RE
+.PP
+\fI/usr/share/diffuse/syntax/*\.syntax\fR
+.RS 4
+Syntax files for various languages\.
+.RE
+.PP
+\fI~/\.diffuse/config\fR
+.RS 4
+Data persistent across sessions\.
+.RE
+.PP
+\fI~/\.diffuse/diffuserc\fR
+.RS 4
+Your initialisations\.
+.RE
+.PP
+\fI~/\.diffuse/prefs\fR
+.RS 4
+Your saved preferences\.
+.RE
+.SH "AUTHOR"
+.PP
+Diffuse was written by Derrick Moser
+<derrick_moser@yahoo\.com>\.
+.SH "COPYRIGHT"
+.PP
+\(co 2006\-2008 Derrick Moser\. All Rights Reserved\.
+.PP
+Diffuse is free software; you may redistribute it and/or modify it under the terms of the
+GNU General Public License
+as published by the Free Software Foundation; either version 2 of the licence, or (at your option) any later version\.

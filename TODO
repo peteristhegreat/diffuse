@@ -1,0 +1,4 @@
+- merge / compare directories
+- improve syntax highlighting system
+- better integration with revision control systems
+- remove assumption that everything will be installed in "/usr"

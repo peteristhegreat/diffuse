@@ -1,0 +1,68 @@
+# Bash syntax file for Diffuse
+# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+syntax Bash normal text
+syntax_files Bash '^(.*/)?([^/]*\.sh|\.bashrc)$'
+
+# whitespace/comments
+syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal normal bash_comment '#$'
+syntax_pattern normal comment bash_comment '#'
+syntax_pattern comment normal bash_fixme '\b(TODO|FIXME|XXX)\b$'
+syntax_pattern comment comment bash_fixme '\b(TODO|FIXME|XXX)\b'
+syntax_pattern comment normal bash_comment '.[^TFX]+$'
+syntax_pattern comment comment bash_comment '.[^TFX]+'
+
+# '-style strings
+syntax_pattern normal single_string bash_string "'"
+syntax_pattern single_string normal bash_string "'"
+syntax_pattern single_string single_string bash_string "[^']+"
+
+# "-style strings
+syntax_pattern normal double_string bash_string '"'
+syntax_pattern double_string normal bash_string '"'
+syntax_pattern double_string double_subshell_string bash_subshell '`'
+syntax_pattern double_string double_string bash_string '[^\\"\$]+'
+syntax_pattern double_string double_string bash_variable '\$(\*|@|#|\?|-|\$|[a-zA-Z_0-9]+|{[a-zA-Z_0-9]+})'
+syntax_pattern double_string double_string bash_escapedchar '(\\.)+'
+
+# subshell within "-style strings
+syntax_pattern double_subshell_string double_string bash_subshell '`'
+syntax_pattern double_subshell_string double_subshell_string bash_subshell '[^\\`$]+'
+syntax_pattern double_subshell_string double_subshell_string bash_escapedchar '(\\.)+'
+
+# subshell
+syntax_pattern normal subshell_string bash_subshell '`'
+syntax_pattern subshell_string normal bash_subshell '`'
+syntax_pattern subshell_string subshell_string bash_subshell '[^\\`]+'
+syntax_pattern subshell_string subshell_string bash_variable '\$(\*|@|#|\?|-|\$|[a-zA-Z_0-9]*|{[a-zA-Z_0-9]*})'
+syntax_pattern subshell_string subshell_string bash_escapedchar '(\\.)+'
+
+# keywords
+syntax_pattern normal normal bash_keyword '\b(case|do|done|elif|else|esac|fi|for|if|in|select|then|until|while)\b'
+
+# function/class definitions
+syntax_pattern normal normal bash_keyword '\b(function)\b$'
+syntax_pattern normal declaration bash_keyword '\b(function)\b'
+syntax_pattern declaration normal text '[ \t]+$'
+syntax_pattern declaration declaration text '[ \t]+'
+syntax_pattern declaration normal function '\b[a-zA-Z_][a-zA-Z_0-9]*\b'
+syntax_pattern declaration normal text '.'
+
+# punctuation
+syntax_pattern normal normal bash_punctuation '(!|\||\&|;|\(|\)|\<|\>)'
+
+# environment variables
+syntax_pattern normal normal bash_variable '\$(\*|@|#|\?|-|\$|[a-zA-Z_0-9]+|{[a-zA-Z_0-9]+})'
+
+# parsing optimisation
+syntax_pattern normal normal text '\b[a-zA-Z_][a-zA-Z_0-9]*\b'
+
+# colours
+colour bash_comment 0.2 0.5 0.5
+colour bash_fixme 0.8 0.5 0.0
+colour bash_string 0.8 0.0 0.0
+colour bash_subshell 0.4 0.0 0.4
+colour bash_escapedchar 0.5 0.5 0.0
+colour bash_variable 1.0 0.5 0.0
+colour bash_keyword 0.6 0.4 0.0
+colour bash_punctuation 0.5 0.5 0.5

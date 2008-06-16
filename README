@@ -1,0 +1,34 @@
+Diffuse
+Version 0.2.13
+
+Copyright (C) 2006-2008 Derrick Moser <derrick_moser@yahoo.com>
+
+----
+
+Diffuse is a graphical tool for merging and comparing text files.  Diffuse is
+able to compare an arbitrary number of files side-by-side and gives users the
+ability to manually adjust line-matching and directly edit files.  Diffuse can
+also retrieve revisions of files from bazaar, CVS, darcs, git, mercurial,
+monotone, and subversion repositories for comparison and merging.
+
+Some key features of Diffuse:
+- ability to compare and merge an arbitrary number of files side-by-side (n-way merges)
+- line-matching can be manually corrected by the user
+- ability to directly edit files
+- syntax highlighting
+- bazaar, CVS, darcs, git, mercurial, monotone, and subversion support
+- support for UTF-8 encoded unicode
+- unlimited undo
+- easy keyboard navigation
+
+----
+
+Requirements:
+
+- python >= 2.4
+- pygtk >= 2.10
+
+----
+
+Diffuse is implemented in Python.  Installation simply involves copying files
+from the 'src' directory on the host system.

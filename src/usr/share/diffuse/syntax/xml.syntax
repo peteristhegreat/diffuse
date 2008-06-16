@@ -1,0 +1,66 @@
+# XML syntax file for Diffuse
+# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+syntax XML normal text
+syntax_files XML '\.xml$'
+
+# whitespace/comments
+syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal comment xml_comment '<!--'
+syntax_pattern comment normal xml_comment '-->'
+syntax_pattern comment comment xml_comment '[^TFX\-]+'
+syntax_pattern comment comment xml_fixme '\b(TODO|FIXME|XXX)\b'
+syntax_pattern comment comment xml_comment '.'
+
+# declarations
+syntax_pattern normal decl xml_declaration '<\?'
+syntax_pattern decl normal xml_declaration '\?>'
+syntax_pattern decl decl text '[ \t\n]+'
+syntax_pattern decl decl_attribs xml_tagname '\b[a-zA-Z][a-zA-Z0-9]*([ \t\n]*:[ \t\n]*[a-zA-Z][a-zA-Z0-9]*)?\b'
+syntax_pattern decl_attribs normal xml_declaration '\?>'
+syntax_pattern decl_attribs decl_attribs text '[ \t\n]+'
+syntax_pattern decl_attribs decl_attribs xml_attribute '[a-zA-Z][a-zA-Z0-9]*\b'
+syntax_pattern decl_attribs decl_attribs xml_punctuation '='
+syntax_pattern decl_attribs decl_string xml_string '"'
+syntax_pattern decl_string decl_attribs xml_string '"'
+syntax_pattern decl_string decl_string xml_escapedchar '\&(amp|lt|gt|quot|#[0-9]+);'
+syntax_pattern decl_string decl_string xml_string '[^\&"]+'
+syntax_pattern decl_string decl_string xml_string '.'
+
+# cdata
+syntax_pattern normal cdata xml_cdatatag '<!\[CDATA\['
+syntax_pattern cdata normal xml_cdatatag '\]\]>'
+syntax_pattern cdata cdata xml_cdata '.[^\]]+'
+
+# tags
+syntax_pattern normal tag xml_tag '</?'
+syntax_pattern tag normal xml_tag '/?>'
+
+syntax_pattern tag tag text '[ \t\n]+'
+syntax_pattern tag attribs xml_tagname '\b[a-zA-Z][a-zA-Z0-9]*([ \t\n]*:[ \t\n]*[a-zA-Z][a-zA-Z0-9]*)?\b'
+syntax_pattern attribs normal xml_tag '/?>'
+syntax_pattern attribs attribs text '[ \t\n]+'
+syntax_pattern attribs attribs xml_attribute '[a-zA-Z][a-zA-Z0-9]*\b'
+syntax_pattern attribs attribs xml_punctuation '='
+syntax_pattern attribs string xml_string '"'
+syntax_pattern string attribs xml_string '"'
+syntax_pattern string string xml_escapedchar '\&(amp|lt|gt|quot|#[0-9]+);'
+syntax_pattern string string xml_string '[^\&"]+'
+syntax_pattern string string xml_string '.'
+
+# text/parsing optimisation
+syntax_pattern normal normal text '[^\&<]+'
+syntax_pattern normal normal xml_escapedchar '\&(amp|lt|gt|quot|#[0-9]+);'
+syntax_pattern normal normal text '.'
+
+# colours
+colour xml_comment 0.2 0.5 0.5
+colour xml_fixme 0.8 0.5 0.0
+colour xml_escapedchar 0.5 0.5 0.0
+colour xml_declaration 0.5 0.2 0.0
+colour xml_tag 0.0 0.4 0.0
+colour xml_tagname 0.1 0.0 0.5
+colour xml_punctuation 0.5 0.5 0.5
+colour xml_attribute 0.5 0.0 0.5
+colour xml_string 0.8 0.0 0.0
+colour xml_cdatatag 0.0 0.4 0.0
+colour xml_cdata 0.5 0.2 0.0
