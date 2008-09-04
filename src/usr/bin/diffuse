@@ -277,7 +277,7 @@ class Resources:
 
         self.setFont('monospace 10')
         self.setDifferenceColours('difference_1 difference_2 difference_3')
-        self.setCharacterClasses('48-57:48 65-90:48 97-122:48 95:48 8:32')
+        self.setCharacterClasses('48-57:48 65-90:48 97-122:48 95:48 9:32')
         self.setAutoDetectEncodings('utf_8 latin_1')
 
     # keyboard action processing
@@ -562,12 +562,12 @@ class Preferences:
         vbox.pack_start(viewer_ignore_case_button, False, False, 0)
         viewer_ignore_case_button.show()
 
-        viewer_hide_carriagereturn_button = gtk.CheckButton(_('Hide Carriage Return Characters'))
+        viewer_hide_carriagereturn_button = gtk.CheckButton(_('Hide Carriage Return (^M) Characters'))
         viewer_hide_carriagereturn_button.set_active(self.viewer_hide_carriagereturn)
         vbox.pack_start(viewer_hide_carriagereturn_button, False, False, 0)
         viewer_hide_carriagereturn_button.show()
 
-        viewer_hide_newline_button = gtk.CheckButton(_('Hide New Line Characters'))
+        viewer_hide_newline_button = gtk.CheckButton(_('Hide New Line (^J) Characters'))
         viewer_hide_newline_button.set_active(self.viewer_hide_newline)
         vbox.pack_start(viewer_hide_newline_button, False, False, 0)
         viewer_hide_newline_button.show()
@@ -1131,8 +1131,8 @@ class FileDiffViewer(gtk.VBox):
            [ gtk.STOCK_GOTO_BOTTOM, self.last_difference_cb, None, _('Last Difference') ],
            [],
            [ gtk.STOCK_REVERT_TO_SAVED, self.revert_cb, None, _('Revert') ],
-           [ gtk.STOCK_GO_BACK, self.merge_from_left_cb, None, _('Merge From Left') ],
-           [ gtk.STOCK_GO_FORWARD, self.merge_from_right_cb, None, _('Merge From Right') ],
+           [ gtk.STOCK_GO_FORWARD, self.merge_from_left_cb, None, _('Merge From Left') ],
+           [ gtk.STOCK_GO_BACK, self.merge_from_right_cb, None, _('Merge From Right') ],
            [],
            [ gtk.STOCK_CUT, self.cut_cb, None, _('Cut') ],
            [ gtk.STOCK_COPY, self.copy_cb, None, _('Copy') ],
@@ -1249,6 +1249,26 @@ class FileDiffViewer(gtk.VBox):
                 col += 1
         return col
 
+    def characterWidth(self, i, c):
+        v = ord(c)
+        if v < 32:
+            if c == '\t':
+                return self.prefs.viewer_tab_width - i % self.prefs.viewer_tab_width
+            if (c == '\n' and self.prefs.viewer_hide_newline) or (c == '\r' and self.prefs.viewer_hide_carriagereturn):
+                return 0
+            return 2
+        if v >= 0x1100 and (v <= 0x115f
+            or v == 0x2329 or v == 0x232a
+            or (v >= 0x2e80 and v <= 0xa4cf and v != 0x303f)
+            or (v >= 0xac00 and v <= 0xd7a3)
+            or (v >= 0xf900 and v <= 0xfaff)
+            or (v >= 0xfe30 and v <= 0xfe6f)
+            or (v >= 0xff00 and v <= 0xff60)
+            or (v >= 0xffe0 and v <= 0xffe6)
+            or (v >= 0x20000 and v <= 0x2ffff)):
+            return 2
+        return 1
+
     def expand(self, s):
         col = 0
         result = []
@@ -1257,34 +1277,20 @@ class FileDiffViewer(gtk.VBox):
             if v < 32:
                 if c == '\t':
                     width = self.prefs.viewer_tab_width - col % self.prefs.viewer_tab_width
-                    col += width
                     result.append(width * ' ')
                 else:
                     if (c == '\n' and self.prefs.viewer_hide_newline) or (c == '\r' and self.prefs.viewer_hide_carriagereturn):
                         result.append('')
                     else:
                         result.append('^' + chr(v + 64))
-                        col += 2
             else:
-                if v >= 0x1100 and (v <= 0x115f
-                    or v == 0x2329
-                    or v == 0x232a
-                    or (v >= 0x2e80 and v <= 0xa4cf and v != 0x303f)
-                    or (v >= 0xac00 and v <= 0xd7a3)
-                    or (v >= 0xf900 and v <= 0xfaff)
-                    or (v >= 0xfe30 and v <= 0xfe6f)
-                    or (v >= 0xff00 and v <= 0xff60)
-                    or (v >= 0xffe0 and v <= 0xffe6)
-                    or (v >= 0x20000 and v <= 0x2ffff)):
-                    col += 2
-                else:
-                    col += 1
                 result.append(c)
+            col += self.characterWidth(col, c)
         return result
 
     def setLineMode(self):
         if self.mode == CHAR_MODE:
-            self.setStatus('')
+            self.updatePrompt()
             self.dareas[self.current_file].queue_draw()
             self.current_char = 0
             self.selection_char = 0
@@ -1738,7 +1744,7 @@ class FileDiffViewer(gtk.VBox):
                 for j in range(new_n):
                     if temp[j] is None:
                         self.insertNull(f_idx, j, False)
-        self.invalidateLineMatching(i, old_n, new_n)
+        self.invalidateLineMatching(0, old_n, new_n)
         self.updateBlocks(blocks)
 
     def load(self, f, spec):
@@ -1952,7 +1958,7 @@ class FileDiffViewer(gtk.VBox):
         if mode == CHAR_MODE:
             self.setCurrentChar(self.current_line, self.current_char, True)
         else:
-            self.setStatus('')
+            self.updatePrompt()
             self.setCurrentLine(self.current_file, self.current_line, True)
         self.dareas[old_f].queue_draw()
 
@@ -1980,6 +1986,18 @@ class FileDiffViewer(gtk.VBox):
         # queue draw
         self.dareas[old_f].queue_draw()
         self.dareas[f].queue_draw()
+
+    def updatePrompt(self):
+        if self.mode == LINE_MODE:
+            j = self.current_char
+            if j > 0:
+                text = self.getLineText(self.current_file, self.current_line)[:j]
+                j = 0
+                for c in text:
+                    j += self.characterWidth(j, c)
+            self.setStatus(_('Column %d') % j)
+        else:
+            self.setStatus('')
 
     def setCurrentChar(self, i, j, extend=False):
         f = self.current_file
@@ -2022,8 +2040,8 @@ class FileDiffViewer(gtk.VBox):
         elif upper > v + ps:
             hadj.set_value(upper - ps)
 
-        self.setStatus(_('Column %d') % j)
         self.dareas[f].queue_draw()
+        self.updatePrompt()
 
     def getSelectedText(self):
         f = self.current_file
@@ -3003,6 +3021,7 @@ class FileDiffViewer(gtk.VBox):
             darea.queue_draw()
         self.map_cache = None
         self.map.queue_draw()
+        self.updatePrompt()
 
     def revert_cb(self, widget, data):
         self.setLineMode()
@@ -3131,7 +3150,7 @@ class FileDiffViewer(gtk.VBox):
         text = self.getCompareString(f, i)
         return (f > 0 and self.getCompareString(f - 1, i) != text) or (f + 1 < len(self.files) and text != self.getCompareString(f + 1, i))
 
-    def goto_difference(self, i, delta, until_end, flip=False):
+    def goto_difference(self, i, delta, until_end):
         start = None
         end = None
         f = self.current_file
@@ -3152,7 +3171,7 @@ class FileDiffViewer(gtk.VBox):
                 break
         if start is not None:
             end -= delta
-            if flip:
+            if end < start:
                 start, end = end, start
             # centre the view on the selection
             vadj = self.vadj
@@ -3161,8 +3180,8 @@ class FileDiffViewer(gtk.VBox):
             pos = min(max(0, pos), vadj.upper - vadj.page_size)
             if (delta < 0 and pos < old_pos) or (delta > 0 and pos > old_pos):
                 vadj.set_value(pos)
-            self.selection_line = start
-            self.setCurrentLine(f, end, True)
+            self.selection_line = end
+            self.setCurrentLine(f, start, True)
 
     def realign_all_cb(self, widget, data):
         self.setLineMode()
@@ -3213,7 +3232,7 @@ class FileDiffViewer(gtk.VBox):
     def next_difference_cb(self, widget, data):
         self._next_difference()
 
-    def _last_difference():
+    def _last_difference(self):
         self.setLineMode()
         i = max(self.current_line, self.selection_line) + 1
         self.goto_difference(i, 1, True)
@@ -3232,7 +3251,7 @@ class FileDiffViewer(gtk.VBox):
         vadj.upper = max(h * (len(self.files[0].lines) + 1), vadj.page_size)
         vadj.set_value(0)
         self.setCurrentLine(self.current_file, 0, False)
-        self.goto_difference(0, 1, False, True)
+        self.goto_difference(0, 1, False)
 
 class SearchDialog(gtk.Dialog):
     def __init__(self, parent, pattern=None, history=None):
@@ -3353,8 +3372,8 @@ class Diffuse(gtk.Window):
                      [_('_Last Difference'), self.last_difference_cb, None, gtk.STOCK_GOTO_BOTTOM, 'last_difference'],
                      [],
                      [_('_Revert'), self.revert_cb, None, gtk.STOCK_REVERT_TO_SAVED, 'revert'],
-                     [_('Merge From Le_ft'), self.merge_from_left_cb, None, gtk.STOCK_GO_BACK, 'merge_from_left'],
-                     [_('Merge From Ri_ght'), self.merge_from_right_cb, None, gtk.STOCK_GO_FORWARD, 'merge_from_right'],
+                     [_('Merge From Le_ft'), self.merge_from_left_cb, None, gtk.STOCK_GO_FORWARD, 'merge_from_left'],
+                     [_('Merge From Ri_ght'), self.merge_from_right_cb, None, gtk.STOCK_GO_BACK, 'merge_from_right'],
                      [],
                      [_('_Isolate'), self.isolate_cb, None, None, 'isolate'] ] ])
 

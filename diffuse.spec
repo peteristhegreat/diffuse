@@ -1,11 +1,11 @@
-Summary: A graphical tool for merging and comparing text files.
+Summary: graphical tool for comparing and merging text files
 Name: diffuse
 Version: 0.2.13
 Release: 1
 License: GPL
-Group: Development/Tools
+Group: Development/Tools/Version Control
 Source: http://prdownloads.sourceforge.net/%{name}/%{name}-%{version}.tar.bz2
-BuildArchitectures: noarch
+BuildArch: noarch
 Requires: python >= 2.4, pygtk2 >= 2.10
 BuildRoot: %{_tmppath}/%{name}-root
 
@@ -20,12 +20,14 @@ monotone, and subversion repositories for comparison and merging.
 %setup -q
 
 %build
-mkdir -p $RPM_BUILD_ROOT
-cp -a src/* $RPM_BUILD_ROOT/
-gzip -9 $RPM_BUILD_ROOT/usr/share/man/man1/diffuse.1
+
+%install
+mkdir %{buildroot}
+cp -a src/* %{buildroot}/
+gzip -9 %{buildroot}/usr/share/man/man1/diffuse.1
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %post
 scrollkeeper-update -q
