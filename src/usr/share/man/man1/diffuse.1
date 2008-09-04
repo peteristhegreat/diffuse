@@ -855,14 +855,16 @@ should be highlighted using the syntax style called
 \fIname\fR\.
 .RE
 .PP
-\fBsyntax_pattern \fR\fB\fIname\fR\fR\fB \fR\fB\fIinitial_state\fR\fR\fB \fR\fB\fIfinal_state\fR\fR\fB \fR\fB\fItag\fR\fR\fB \fR\fB\fIpattern\fR\fR
+\fBsyntax_pattern \fR\fB\fIname\fR\fR\fB \fR\fB\fIinitial_state\fR\fR\fB \fR\fB\fIfinal_state\fR\fR\fB \fR\fB\fItag\fR\fR\fB \fR\fB\fIpattern\fR\fR\fB \fR\fB[ignorecase]\fR\fB \fR
 .RS 4
 Adds a pattern to the previously declared syntax style\. The pattern will only be used to match characters if the state machine is in the state
 \fIinitial_state\fR\. The state machine will transition to
 \fIfinal_state\fR
 if the pattern defined by
 \fIpattern\fR
-is matched\. All characters matched by the pattern will be tagged as
+is matched\. Case insensitive pattern matching will be used if
+\fBignorecase\fR
+is specified\. All characters matched by the pattern will be tagged as
 \fItag\fR
 for highlighting\.
 .RE

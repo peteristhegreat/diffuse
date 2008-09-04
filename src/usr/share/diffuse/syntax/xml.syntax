@@ -1,7 +1,7 @@
 # XML syntax file for Diffuse
 # Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
 syntax XML normal text
-syntax_files XML '\.xml$'
+syntax_files XML '\.(dtd|svg|xhtml|xml|xsd|xsl)$'
 
 # whitespace/comments
 syntax_pattern normal normal text '[ \t\n]+'
@@ -22,7 +22,7 @@ syntax_pattern decl_attribs decl_attribs xml_attribute '[a-zA-Z][a-zA-Z0-9]*\b'
 syntax_pattern decl_attribs decl_attribs xml_punctuation '='
 syntax_pattern decl_attribs decl_string xml_string '"'
 syntax_pattern decl_string decl_attribs xml_string '"'
-syntax_pattern decl_string decl_string xml_escapedchar '\&(amp|lt|gt|quot|#[0-9]+);'
+syntax_pattern decl_string decl_string xml_escapedchar '\&(amp|lt|gt|quot|apos|#[0-9]+|#x[0-9A-Fa-f]+);'
 syntax_pattern decl_string decl_string xml_string '[^\&"]+'
 syntax_pattern decl_string decl_string xml_string '.'
 
@@ -43,13 +43,13 @@ syntax_pattern attribs attribs xml_attribute '[a-zA-Z][a-zA-Z0-9]*\b'
 syntax_pattern attribs attribs xml_punctuation '='
 syntax_pattern attribs string xml_string '"'
 syntax_pattern string attribs xml_string '"'
-syntax_pattern string string xml_escapedchar '\&(amp|lt|gt|quot|#[0-9]+);'
+syntax_pattern string string xml_escapedchar '\&(amp|lt|gt|quot|apos|#[0-9]+|#x[0-9A-Fa-f]+);'
 syntax_pattern string string xml_string '[^\&"]+'
 syntax_pattern string string xml_string '.'
 
 # text/parsing optimisation
 syntax_pattern normal normal text '[^\&<]+'
-syntax_pattern normal normal xml_escapedchar '\&(amp|lt|gt|quot|#[0-9]+);'
+syntax_pattern normal normal xml_escapedchar '\&(amp|lt|gt|quot|apos|#[0-9]+|#x[0-9A-Fa-f]+);'
 syntax_pattern normal normal text '.'
 
 # colours

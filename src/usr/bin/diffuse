@@ -462,8 +462,14 @@ class Resources:
                        elif args[0] == 'syntax' and len(args) == 4:
                            self.current_syntax = SyntaxParser(args[2], args[3])
                            self.syntaxes[args[1]] = self.current_syntax
-                       elif args[0] == 'syntax_pattern' and len(args) == 5 and self.current_syntax is not None:
-                           self.current_syntax.addPattern(args[1], args[2], args[3], re.compile(args[4]))
+                       elif args[0] == 'syntax_pattern' and self.current_syntax is not None and len(args) >= 5:
+                           flags = 0
+                           for arg in args[5:]:
+                               if arg == 'ignorecase':
+                                   flags |= re.IGNORECASE
+                               else:
+                                   raise ValueError()
+                           self.current_syntax.addPattern(args[1], args[2], args[3], re.compile(args[4], flags))
                        elif args[0] == 'syntax_files' and len(args) == 3:
                            self.syntax_file_patterns[args[1]] = re.compile(args[2])
                        else:

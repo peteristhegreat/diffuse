@@ -4,19 +4,15 @@ syntax C++ normal text
 syntax_files C++ '\.(h|c|C|cc|cxx|c\+\+|cpp)$'
 
 # preprocessor
-syntax_pattern normal normal c++_cppkeyword '^[ \t\n]*#[ \t\n]*(define|undef|if|ifdef|ifndef|elif|else|endif|warning|error|include|line|pragma)\b$'
 syntax_pattern normal cpp c++_cppkeyword '^[ \t\n]*#[ \t\n]*(define|undef|if|ifdef|ifndef|elif|else|endif|warning|error|include|line|pragma)\b'
+syntax_pattern cpp normal c++_cppkeyword '\n'
 
 # C++ style comments
-syntax_pattern normal normal c++_comment '//$'
 syntax_pattern normal cpp_comment c++_comment '//'
-syntax_pattern cpp normal c++_comment '//$'
-syntax_pattern cpp cpp_comment c++_comment '//'
+syntax_pattern cpp normal c++_comment '\n'
 syntax_pattern cpp_comment cpp_comment c++_comment '\\$'
-syntax_pattern cpp_comment normal c++_fixme '\b(TODO|FIXME|XXX)\b$'
 syntax_pattern cpp_comment cpp_comment c++_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern cpp_comment normal c++_comment '.([^\\TFX]|\\.)*$'
-syntax_pattern cpp_comment cpp_comment c++_comment '.([^\\TFX]|\\.)*'
+syntax_pattern cpp_comment cpp_comment c++_comment '.[^\\TFX\n]*'
 
 # C style comments
 syntax_pattern normal comment c++_comment '/\*'
@@ -25,30 +21,29 @@ syntax_pattern comment comment c++_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern comment comment c++_comment '.[^\*TFX]*'
 
 syntax_pattern cpp comment_cpp c++_comment '/\*'
-syntax_pattern comment_cpp normal c++_comment '\*/$'
 syntax_pattern comment_cpp cpp c++_comment '\*/'
 syntax_pattern comment_cpp comment_cpp c++_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern comment_cpp comment_cpp c++_comment '.[^\*TFX]*'
 
 # preprocessor args
 syntax_pattern cpp cpp c++_cpp '\\$'
-syntax_pattern cpp normal c++_cpp '.([^\\/]|\\.)*$'
-syntax_pattern cpp cpp c++_cpp '.([^\\/]|\\.)*'
+syntax_pattern cpp cpp c++_cpp '.[^\\/]*'
 
 # char
 syntax_pattern normal char c++_string "L?'"
-syntax_pattern char char c++_escapedchar '(\\([0-7]{1,3}|[xX][0-9a-fA-F]{1,2}|.))+'
+syntax_pattern char char c++_escapedchar '(\\([0-7]{1,3}|x[0-9a-f]{1,2}|.))+' ignorecase
 syntax_pattern char char c++_string "[^\\\\']+"
 syntax_pattern char normal c++_string "'"
 
 # string
 syntax_pattern normal string c++_string 'L?"'
-syntax_pattern string string c++_escapedchar '(\\([0-7]{1,3}|[xX][0-9a-fA-F]{1,2}|.))+'
+syntax_pattern string string c++_escapedchar '(\\([0-7]{1,3}|x[0-9a-f]{1,2}|.))+' ignorecase
 syntax_pattern string string c++_string '[^\\"]+'
 syntax_pattern string normal c++_string '"'
 
 # literals
-syntax_pattern normal normal c++_literal '\b((0|[1-9][0-9]*)((\.[0-9]*)?([eE][\+\-]?[0-9]+)?[FfLl]?|[UuLl]?)|0[0-7]*|0[Xx][0-9A-Fa-f]+|true|false)\b'
+syntax_pattern normal normal c++_literal '\b((0|[1-9][0-9]*)((\.[0-9]*)?(e[\+\-]?[0-9]+)?[fl]?|[ul]?)|0[0-7]*|0x[0-9a-f]+)\b' ignorecase
+syntax_pattern normal normal c++_literal '\b(true|false)\b'
 
 # typing keywords
 syntax_pattern normal normal c++_type '\b(auto|bool|char|class|const|double|enum|explicit|export|extern|float|inline|int|long|mutable|namespace|register|short|signed|static|struct|template|typedef|typename|union|unsigned|virtual|void|volatile|wchar_t)\b'
@@ -60,7 +55,7 @@ syntax_pattern normal normal c++_keyword '\b(asm|break|case|catch|const_cast|con
 syntax_pattern normal normal c++_punctuation '[!~%\|\&\^\(\)\<\>\*-\+={}\[\]:,\.\/]+'
 
 # parsing optimisation
-syntax_pattern normal normal text '\b[a-zA-Z_][a-zA-Z_0-9]*\b'
+syntax_pattern normal normal text '\b[a-z_][a-z_0-9]*\b' ignorecase
 
 # colours
 colour c++_comment 0.2 0.5 0.5

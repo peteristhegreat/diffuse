@@ -1261,7 +1261,7 @@
         </varlistentry>
 
         <varlistentry>
-          <term><userinput>syntax_pattern <replaceable>name</replaceable> <replaceable>initial_state</replaceable> <replaceable>final_state</replaceable> <replaceable>tag</replaceable> <replaceable>pattern</replaceable></userinput></term>
+          <term><userinput>syntax_pattern <replaceable>name</replaceable> <replaceable>initial_state</replaceable> <replaceable>final_state</replaceable> <replaceable>tag</replaceable> <replaceable>pattern</replaceable> <optional>ignorecase</optional> </userinput></term>
           <listitem>
             <para>
               Adds a pattern to the previously declared syntax style.  The
@@ -1270,8 +1270,10 @@
               <replaceable>initial_state</replaceable>.  The state machine
               will transition to <replaceable>final_state</replaceable> if
               the pattern defined by <replaceable>pattern</replaceable> is
-              matched.  All characters matched by the pattern will be tagged
-              as <replaceable>tag</replaceable> for highlighting.
+              matched.  Case insensitive pattern matching will be used if
+              <userinput>ignorecase</userinput> is specified.  All characters
+              matched by the pattern will be tagged as
+              <replaceable>tag</replaceable> for highlighting.
             </para>
           </listitem>
         </varlistentry>
