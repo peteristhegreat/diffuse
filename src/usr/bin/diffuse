@@ -57,6 +57,7 @@ Configuration Options:
   --rcfile <file>                  Specify explicit resource file
 
 General Options:
+  ( -D | --close-if-same )         Close all tabs with no differences
   ( -e | --encoding ) <codec>      Use <codec> to read and write files
   ( -r | --revision ) <rev>        File revision <rev> from a repository
   ( -s | --separate )              Create a separate tab for each file
@@ -1224,6 +1225,9 @@ class FileDiffViewer(gtk.VBox):
         self.font_height = max(pango.PIXELS(metrics.get_ascent() + metrics.get_descent()), 1)
         self.digit_width = metrics.get_approximate_digit_width()
         self.updateSize(True)
+
+        # scroll to first difference when realised
+        self.connect_after('realize', self._realise_cb)
 
     def getStringColumnWidth(self, s):
         col = 0
@@ -3150,6 +3154,16 @@ class FileDiffViewer(gtk.VBox):
         text = self.getCompareString(f, i)
         return (f > 0 and self.getCompareString(f - 1, i) != text) or (f + 1 < len(self.files) and text != self.getCompareString(f + 1, i))
 
+    def hasDifferences(self):
+        n = len(self.files)
+        nlines = len(self.files[0].lines)
+        for i in range(nlines):
+            text = self.getCompareString(0, i)
+            for f in range(1, n):
+                if self.getCompareString(f, i) != text:
+                    return True
+        return False
+
     def goto_difference(self, i, delta, until_end):
         start = None
         end = None
@@ -3240,17 +3254,8 @@ class FileDiffViewer(gtk.VBox):
     def last_difference_cb(self, widget, data):
         self._last_difference()
 
-    def selectFirstDifference(self):
-        # the widget hasn't been created yet so initialise the vadj to
-        # something reasonable
+    def _realise_cb(self, widget):
         self.setLineMode()
-        h = self.font_height
-        vadj = self.vadj
-        vadj.lower = 0
-        vadj.page_size = 10 * h
-        vadj.upper = max(h * (len(self.files[0].lines) + 1), vadj.page_size)
-        vadj.set_value(0)
-        self.setCurrentLine(self.current_file, 0, False)
         self.goto_difference(0, 1, False)
 
 class SearchDialog(gtk.Dialog):
@@ -3453,8 +3458,6 @@ class Diffuse(gtk.Window):
         # load the files
         for i, spec in enumerate(specs):
             viewer.load(i, spec)
-        viewer.selectFirstDifference()
-        return viewer
 
     def confirmQuit(self):
         for i in range(self.notebook.get_n_pages()):
@@ -3690,8 +3693,8 @@ if __name__ == '__main__':
     specs = []
     revs = []
     isdirviewer = True
-    viewer = None
     separate = False
+    close_on_same = False
     while i < argc:
         arg = args[i]
         if len(arg) > 0 and arg[0] == '-':
@@ -3703,14 +3706,14 @@ if __name__ == '__main__':
                 # open items in separate tabs
                 n = len(specs)
                 if n > 0:
-                    viewer = diff.newLoadedFileDiffViewer(tab_label, specs)
+                    diff.newLoadedFileDiffViewer(tab_label, specs)
                     specs = []
                 separate = True
             elif i + 1 < argc and arg in [ '-t', '--tab' ]:
                 # start a new tab
                 n = len(specs)
                 if n > 0:
-                    viewer = diff.newLoadedFileDiffViewer(tab_label, specs)
+                    diff.newLoadedFileDiffViewer(tab_label, specs)
                     specs = []
                 i += 1
                 tab_label = args[i]
@@ -3719,22 +3722,24 @@ if __name__ == '__main__':
                 encoding = args[i]
                 if encodings.aliases.aliases.has_key(encoding):
                     encoding = encodings.aliases.aliases[encoding]
-            elif i < argc and arg in [ '-b', '--ignore-space-change' ]:
+            elif arg in [ '-b', '--ignore-space-change' ]:
                 diff.prefs.viewer_ignore_whitespace_changes = True
                 diff.prefs.align_ignore_whitespace_changes = True
                 diff.preferences_updated()
-            elif i < argc and arg in [ '-B', '--ignore-blank-lines' ]:
+            elif arg in [ '-B', '--ignore-blank-lines' ]:
                 diff.prefs.viewer_ignore_blanklines = True
                 diff.prefs.align_ignore_blanklines = True
                 diff.preferences_updated()
-            elif i < argc and arg in [ '-i', '--ignore-case' ]:
+            elif arg in [ '-i', '--ignore-case' ]:
                 diff.prefs.viewer_ignore_case = True
                 diff.prefs.align_ignore_case = True
                 diff.preferences_updated()
-            elif i < argc and arg in [ '-w', '--ignore-all-space' ]:
+            elif arg in [ '-w', '--ignore-all-space' ]:
                 diff.prefs.viewer_ignore_whitespace = True
                 diff.prefs.align_ignore_whitespace = True
                 diff.preferences_updated()
+            elif arg in [ '-D', '--close-if-same' ]:
+                close_on_same = True
             else:
                 print _('Skipping unknown argument %s.') % (repr(args[i]), )
         else:
@@ -3749,23 +3754,32 @@ if __name__ == '__main__':
                 specs.append(FileSpec(filename, None, None, encoding))
             revs = []
             if separate:
-                viewer = diff.newLoadedFileDiffViewer(filename, specs)
+                diff.newLoadedFileDiffViewer(filename, specs)
                 specs = []
         i += 1
     n = len(specs)
     if n > 0:
-        viewer = diff.newLoadedFileDiffViewer(tab_label, specs)
-    elif viewer is None:
-        viewer = diff.newLoadedFileDiffViewer(tab_label, [])
-    diff.notebook.get_nth_page(0).grab_focus()
-    diff.resize(window_width, window_height)
-    diff.show()
-    gtk.main()
-    # save state
-    try:
-        f = open(configpath, 'w')
-        f.write('# This config file was generated by %s %s.\n\n' % (APP_NAME, VERSION))
-        f.write('size %s %s\n' % (window_width, window_height))
-        f.close()
-    except IOError:
-        print _('Error writing %s.') % (repr(configpath), )
+        diff.newLoadedFileDiffViewer(tab_label, specs)
+    nb = diff.notebook
+    n = nb.get_n_pages()
+    if n == 0:
+        diff.newLoadedFileDiffViewer(tab_label, [])
+    elif close_on_same:
+        for i in range(n - 1, -1, -1):
+            if not nb.get_nth_page(i).hasDifferences():
+                nb.remove_page(i)
+    n = nb.get_n_pages()
+    if n > 0:
+        nb.set_show_tabs(n > 1)
+        nb.get_nth_page(0).grab_focus()
+        diff.resize(window_width, window_height)
+        diff.show()
+        gtk.main()
+        # save state
+        try:
+            f = open(configpath, 'w')
+            f.write('# This config file was generated by %s %s.\n\n' % (APP_NAME, VERSION))
+            f.write('size %s %s\n' % (window_width, window_height))
+            f.close()
+        except IOError:
+            print _('Error writing %s.') % (repr(configpath), )

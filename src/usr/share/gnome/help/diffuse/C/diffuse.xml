@@ -156,6 +156,16 @@
       <sect2 id="introduction-options-general">
         <title>General Options</title>
         <variablelist>
+
+          <varlistentry>
+            <term><userinput>-D</userinput>, <userinput>--close-if-same</userinput></term>
+            <listitem>
+              <para>
+                Close all tabs with no differences.
+              </para>
+            </listitem>
+          </varlistentry>
+
           <varlistentry>
             <term><userinput>-e</userinput>, <userinput>--encoding</userinput> <replaceable>codec</replaceable></term>
             <listitem>
