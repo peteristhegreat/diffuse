@@ -5,8 +5,8 @@ syntax_files Java '\.java$'
 
 # C++ style comments
 syntax_pattern normal cpp_comment java_comment '//'
-syntax_pattern normal cpp_comment java_comment '\n'
-syntax_pattern cpp_comment cpp_comment java_comment '\\$'
+syntax_pattern cpp_comment normal java_comment '\n'
+syntax_pattern cpp_comment cpp_comment java_comment '\\\n'
 syntax_pattern cpp_comment cpp_comment java_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern cpp_comment cpp_comment java_comment '.[^\\TFX\n]*'
 

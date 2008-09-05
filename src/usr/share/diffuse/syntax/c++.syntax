@@ -9,8 +9,9 @@ syntax_pattern cpp normal c++_cppkeyword '\n'
 
 # C++ style comments
 syntax_pattern normal cpp_comment c++_comment '//'
-syntax_pattern cpp normal c++_comment '\n'
-syntax_pattern cpp_comment cpp_comment c++_comment '\\$'
+syntax_pattern cpp cpp_comment c++_comment '//'
+syntax_pattern cpp_comment normal c++_comment '\n'
+syntax_pattern cpp_comment cpp_comment c++_comment '\\\n'
 syntax_pattern cpp_comment cpp_comment c++_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern cpp_comment cpp_comment c++_comment '.[^\\TFX\n]*'
 
@@ -26,8 +27,8 @@ syntax_pattern comment_cpp comment_cpp c++_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern comment_cpp comment_cpp c++_comment '.[^\*TFX]*'
 
 # preprocessor args
-syntax_pattern cpp cpp c++_cpp '\\$'
-syntax_pattern cpp cpp c++_cpp '.[^\\/]*'
+syntax_pattern cpp cpp c++_cpp '\\\n'
+syntax_pattern cpp cpp c++_cpp '.[^\\/\n]*'
 
 # char
 syntax_pattern normal char c++_string "L?'"
