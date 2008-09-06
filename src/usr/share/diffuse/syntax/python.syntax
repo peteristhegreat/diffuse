@@ -46,10 +46,9 @@ syntax_pattern normal normal python_reserved '\b(None|True|False)\b'
 
 # function/class definitions
 syntax_pattern normal declaration python_keyword '\b(class|def)\b'
-syntax_pattern declaration normal python_keyword '\n'
 syntax_pattern declaration declaration text '[ \t]+'
 syntax_pattern declaration normal python_function '\b[a-z_][a-z_0-9]*\b' ignorecase
-syntax_pattern declaration normal text '.'
+syntax_pattern declaration normal text ''
 
 # punctuation
 syntax_pattern normal normal python_punctuation '[!~%\|\&\^\(\)\<\>\*-\+={}\[\]:,\.\/]+'

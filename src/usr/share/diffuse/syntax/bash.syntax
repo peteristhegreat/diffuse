@@ -19,9 +19,9 @@ syntax_pattern single_string single_string bash_string "[^']+"
 syntax_pattern normal double_string bash_string '"'
 syntax_pattern double_string normal bash_string '"'
 syntax_pattern double_string double_subshell_string bash_subshell '`'
-syntax_pattern double_string double_string bash_string '[^\\"\$]+'
 syntax_pattern double_string double_string bash_variable '\$(\*|@|#|\?|-|\$|[a-z_0-9]+|{[a-z_0-9]+})' ignorecase
 syntax_pattern double_string double_string bash_escapedchar '(\\.)+'
+syntax_pattern double_string double_string bash_string '.[^\\"\$]*'
 
 # subshell within "-style strings
 syntax_pattern double_subshell_string double_string bash_subshell '`'
@@ -31,9 +31,9 @@ syntax_pattern double_subshell_string double_subshell_string bash_escapedchar '(
 # subshell
 syntax_pattern normal subshell_string bash_subshell '`'
 syntax_pattern subshell_string normal bash_subshell '`'
-syntax_pattern subshell_string subshell_string bash_subshell '[^\\`]+'
 syntax_pattern subshell_string subshell_string bash_variable '\$(\*|@|#|\?|-|\$|[a-z_0-9]*|{[a-z_0-9]*})' ignorecase
 syntax_pattern subshell_string subshell_string bash_escapedchar '(\\.)+'
+syntax_pattern subshell_string subshell_string bash_subshell '.[^\\`\$]*'
 
 # keywords
 syntax_pattern normal normal bash_keyword '\b(case|do|done|elif|else|esac|fi|for|if|in|select|then|until|while)\b'
