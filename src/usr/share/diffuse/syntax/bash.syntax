@@ -56,11 +56,11 @@ syntax_pattern normal normal bash_variable '\$(\*|@|#|\?|-|\$|[a-z_0-9]+|{[a-z_0
 syntax_pattern normal normal text '\b[a-z_][a-z_0-9]*\b' ignorecase
 
 # colours
-colour bash_comment 0.2 0.5 0.5
-colour bash_fixme 0.8 0.5 0.0
+colour bash_comment 0.2 0.4 0.64
+colour bash_fixme 1.0 0.5 0.0
 colour bash_string 0.8 0.0 0.0
-colour bash_subshell 0.4 0.0 0.4
-colour bash_escapedchar 0.5 0.5 0.0
-colour bash_variable 1.0 0.5 0.0
-colour bash_keyword 0.6 0.4 0.0
+colour bash_subshell 0.46 0.31 0.48
+colour bash_escapedchar 0.46 0.31 0.48
+colour bash_variable 0.02 0.6 0.6
+colour bash_keyword 0.77 0.63 0.0
 colour bash_punctuation 0.5 0.5 0.5

@@ -51,20 +51,20 @@ syntax_pattern declaration normal python_function '\b[a-z_][a-z_0-9]*\b' ignorec
 syntax_pattern declaration normal text ''
 
 # punctuation
-syntax_pattern normal normal python_punctuation '[!~%\|\&\^\(\)\<\>\*-\+={}\[\]:,\.\/]+'
+syntax_pattern normal normal python_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:,\.\/]+'
 
 # parsing optimisation
 syntax_pattern normal normal text '\b[a-z_][a-z_0-9]*\b' ignorecase
 
 # colours
-colour python_comment 0.2 0.5 0.5
-colour python_fixme 0.8 0.5 0.0
-colour python_keyword 0.6 0.4 0.0
-colour python_type 0.0 0.5 0.0
-colour python_import 0.4 0.0 0.4
-colour python_reserved 0.5 0.5 0.0
-colour python_literal 1.0 0.2 1.0
+colour python_comment 0.2 0.4 0.64
+colour python_fixme 1.0 0.5 0.0
+colour python_keyword 0.77 0.63 0.0
+colour python_type 0.3 0.6 0.02
+colour python_import 0.46 0.31 0.48
+colour python_reserved 0.64 0.56 0.25
+colour python_literal 1.0 0.2 0.8
 colour python_string 0.8 0.0 0.0
-colour python_escapedchar 0.5 0.5 0.0
-colour python_function 0.0 0.4 0.4
+colour python_escapedchar 0.46 0.31 0.48
+colour python_function 0.02 0.6 0.6
 colour python_punctuation 0.5 0.5 0.5
