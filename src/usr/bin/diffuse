@@ -1002,6 +1002,15 @@ class FileChooserDialog(gtk.FileChooserDialog):
             combobox.set_active(0)
         hbox.pack_start(combobox, False, False, 5)
         combobox.show()
+        if action == gtk.FILE_CHOOSER_ACTION_OPEN:
+            entry = gtk.Entry()
+            self.revision = entry
+            hbox.pack_end(entry, False, False, 0)
+            entry.show()
+            label = gtk.Label(_('Revision: '))
+            hbox.pack_end(label, False, False, 0)
+            label.show()
+
         self.vbox.pack_start(hbox, False, False, 0)
         hbox.show()
         self.set_current_folder(os.path.realpath(os.path.curdir))
@@ -1016,6 +1025,9 @@ class FileChooserDialog(gtk.FileChooserDialog):
         i = self.combobox.get_active()
         if i >= 0:
             return self.encodings[i]
+
+    def get_revision(self):
+        return self.revision.get_text()
 
 def nullToEmpty(s):
     if s is None:
@@ -1757,7 +1769,9 @@ class FileDiffViewer(gtk.VBox):
         if name is not None:
             rev = spec.revision
             try:
-                if rev is not None and spec.vcs is not None:
+                if rev is not None:
+                    if spec.vcs is None:
+                        raise IOError('Not under revision control.')
                     cmd = spec.vcs.getRevisionCommand(name, rev)
                     label = '%s (%s)' % (name, rev)
                     fd = os.popen(cmd, 'r')
@@ -1773,9 +1787,9 @@ class FileDiffViewer(gtk.VBox):
             except (IOError, UnicodeDecodeError):
                 # FIXME: this can occur before the toplevel window is drawn
                 if rev is not None:
-                    msg = 'Error reading pipe for revision %(rev)s of "%(file)s"' % { 'rev': rev, 'file': name }
+                    msg = 'Error reading revision %(rev)s of "%(file)s".' % { 'rev': rev, 'file': name }
                 else:
-                    msg = 'Error reading %s' % (repr(name), )
+                    msg = 'Error reading %s.' % (repr(name), )
                 dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, msg)
                 dialog.run()
                 dialog.destroy()
@@ -1963,8 +1977,8 @@ class FileDiffViewer(gtk.VBox):
         if mode == CHAR_MODE:
             self.setCurrentChar(self.current_line, self.current_char, True)
         else:
-            self.updatePrompt()
             self.setCurrentLine(self.current_file, self.current_line, True)
+        self.updatePrompt()
         self.dareas[old_f].queue_draw()
 
     def setCurrentLine(self, f, i, extend=False):
@@ -2836,9 +2850,17 @@ class FileDiffViewer(gtk.VBox):
             dialog = FileChooserDialog(_('Open File'), self.get_toplevel(), gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN)
             if spec.name is not None:
                 dialog.set_filename(os.path.realpath(spec.name))
+            dialog.set_encoding(spec.encoding)
             dialog.set_default_response(gtk.RESPONSE_OK)
             end = (dialog.run() != gtk.RESPONSE_OK)
-            spec = FileSpec(dialog.get_filename(), None, None, dialog.get_encoding())
+            name = dialog.get_filename()
+            rev = None
+            vcs = None
+            revision = dialog.get_revision().strip()
+            if revision != '':
+                rev = revision
+                vcs = theVCSs.findByFilename(name)
+            spec = FileSpec(name, rev, vcs, dialog.get_encoding())
             dialog.destroy()
             if end:
                 return
