@@ -14,7 +14,7 @@ syntax_pattern normal normal ini_section '\[.*\]' ignorecase
 syntax_pattern normal normal ini_variable '^[^:=]+[:=]' ignorecase
 
 # optimisation
-syntax_pattern normal normal text '^.+$'
+syntax_pattern normal normal text '.+'
 
 # colours
 colour ini_comment 0.2 0.4 0.64

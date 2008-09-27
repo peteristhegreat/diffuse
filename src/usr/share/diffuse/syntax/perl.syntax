@@ -1,7 +1,7 @@
 # Perl syntax file for Diffuse
 # Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
 syntax Perl normal text
-syntax_files Perl '\.pl$'
+syntax_files Perl '\.p[hlm]$'
 
 # whitespace/comments
 syntax_pattern normal normal text '[ \t\n]+'
@@ -35,7 +35,7 @@ syntax_pattern backquote backquote perl_variable '(@|\$#?|%)[a-z_][a-z_0-9]*\b' 
 syntax_pattern backquote backquote perl_string '.[^\\`@\$%]*'
 
 # literals
-syntax_pattern normal expr perl_literal '\b((0|[1-9][0-9]*)(\.[0-9]*)?(e[\+\-]?[0-9]+)?|0[0-7]*|0x[0-9a-f]+)\b' ignorecase # FIXME: is this correct?
+syntax_pattern normal expr perl_literal '\b((0|[1-9][0-9]*)(\.[0-9]*)?(e[\+\-]?[0-9]+)?|0[0-7]*|0x[0-9a-f]+)\b' ignorecase
 
 # variable
 syntax_pattern normal expr perl_variable "(@(\\+|-|[A-Za-z_][A-Za-z0-9_]*)?|%(\\+|-|!|^H|[A-Za-z_][A-Za-z0-9_]*)?|\\$([\\?&`'\\+\\./\\|,\\\\\\\";%=\\-~^:!\\$<>\\(\\)\\[\\]]|^[ACDEFHIMNOPRSTVWX]|#?[A-Za-z0-9_]+)?)"
@@ -80,10 +80,10 @@ syntax_pattern translate_replace translate_replace perl_regex '.[^\\/]*'
 # punctuation
 syntax_pattern normal normal perl_punctuation '[=\(,~!&\|\^;\[\{\}<>\+\-\*\.:]+'
 syntax_pattern normal expr perl_punctuation '[\)\]]+'
-syntax_pattern expr normal perl_punctuation '/+'
+syntax_pattern expr normal perl_punctuation '/'
 
 # parsing optimisation
-syntax_pattern normal expr text '\b[a-z_][a-z_0-9]*\b' ignorecase
+syntax_pattern normal expr text '[a-z_][a-z_0-9]*' ignorecase
 syntax_pattern expr normal perl_regex ''
 
 # colours

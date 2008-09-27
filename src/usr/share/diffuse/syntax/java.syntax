@@ -45,10 +45,11 @@ syntax_pattern normal normal java_type '\b(abstract|boolean|byte|char|class|cons
 syntax_pattern normal normal java_keyword '\b(assert|break|case|catch|continue|default|do|else|extends|finally|for|goto|if|implements|instanceof|new|return|strictfp|super|switch|this|throw|throws|try|while)\b'
 
 # punctuation
-syntax_pattern normal normal java_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\.\/\?]+'
+syntax_pattern normal normal java_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\.\?]+'
+syntax_pattern normal normal java_punctuation '/'
 
 # parsing optimisation
-syntax_pattern normal normal text '\b[a-z_][a-z_0-9]*\b' ignorecase
+syntax_pattern normal normal text '[a-z_][a-z_0-9]*' ignorecase
 
 # colours
 colour java_comment 0.2 0.4 0.64

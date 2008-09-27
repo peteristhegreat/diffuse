@@ -1,7 +1,7 @@
 # Python syntax file for Diffuse
 # Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
 syntax Python normal text
-syntax_files Python '\.py$'
+syntax_files Python '\.pyw?$'
 
 # whitespace/comments
 syntax_pattern normal normal text '[ \t\n]+'
@@ -54,7 +54,7 @@ syntax_pattern declaration normal text ''
 syntax_pattern normal normal python_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:,\.\/]+'
 
 # parsing optimisation
-syntax_pattern normal normal text '\b[a-z_][a-z_0-9]*\b' ignorecase
+syntax_pattern normal normal text '[a-z_][a-z_0-9]*' ignorecase
 
 # colours
 colour python_comment 0.2 0.4 0.64

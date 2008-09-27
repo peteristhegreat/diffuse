@@ -79,7 +79,7 @@ syntax_pattern expr normal ruby_punctuation '[/\|]+'
 syntax_pattern normal expr ruby_constant '\b[A-Z_][a-zA-Z_0-9]*\b[\?!]?'
 
 # parsing optimisation
-syntax_pattern normal expr text '\b[a-z_][a-z_0-9]*\b[\?!]?' ignorecase
+syntax_pattern normal expr text '[a-z_][a-z_0-9]*[\?!]?' ignorecase
 syntax_pattern expr normal ruby_regex ''
 
 # colours

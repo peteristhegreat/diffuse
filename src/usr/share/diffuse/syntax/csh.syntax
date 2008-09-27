@@ -1,0 +1,66 @@
+# C Shell syntax file for Diffuse
+# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+syntax 'C Shell' normal text
+syntax_files 'C Shell' '^(.*/)?([^/]*\.csh|\.t?cshrc)$'
+
+# whitespace/comments
+syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal comment csh_comment '#'
+syntax_pattern comment normal csh_comment '\n'
+syntax_pattern comment comment csh_fixme '\b(TODO|FIXME|XXX)\b'
+syntax_pattern comment comment csh_comment '.[^TFX\n]*'
+
+# punctuation
+syntax_pattern normal normal csh_punctuation '[\|&;\(\)<>!=~\+\-\*/%]+'
+
+# escaped character
+syntax_pattern normal normal csh_escapedchar '(\\(\n|.))+'
+
+# environment variables
+syntax_pattern normal normal csh_variable '\$([\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\}|[\*#\?\$!<])' ignorecase
+
+# keywords
+syntax_pattern normal normal csh_keyword '\b(alias|alloc|bg|bindkey|break|breaksw|bs2cmd|builtins|bye|case|cd|chdir|complete|continue|default|dirs|echo|echotc|else|end|endif|endsw|eval|exec|exit|fg|filetest|foreach|getspath|getxvers|glob|goto|hashstat|history|hup|if|inlib|jobs|kill|limit|log|login|logout|ls-F|migrate|newgrp|nice|nohup|notify|onintr|popd|printenv|pushd|rehash|repeat|rootnode|sched|set|setenv|setpath|setspath|settc|setty|setxvers|shift|source|stop|suspend|switch|telltc|termname|then|time|umask|unalias|uncomplete|unhash|universe|unlimit|unset|unsetenv|ver|wait|warp|watchlog|where)\b'
+
+# '-style strings
+syntax_pattern normal single_string csh_string "'"
+syntax_pattern single_string normal csh_string "'"
+syntax_pattern single_string single_string csh_string "[^']+"
+
+# "-style strings
+syntax_pattern normal double_string csh_string '"'
+syntax_pattern double_string normal csh_string '"'
+syntax_pattern double_string double_subshell_string csh_subshell '`'
+syntax_pattern double_string double_string csh_variable '\$([\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\}|[\*#\?\$!<])' ignorecase
+syntax_pattern double_string double_string csh_escapedchar '(\\(\n|.))+'
+syntax_pattern double_string double_string csh_string '.[^\\"\$`]*'
+
+# subshell within "-style strings
+syntax_pattern double_subshell_string double_string csh_subshell '`'
+syntax_pattern double_subshell_string double_subshell_string csh_escapedchar '(\\.)+'
+syntax_pattern double_subshell_string double_subshell_string csh_variable '\$([\*#\?\$!<]|[\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\})' ignorecase
+syntax_pattern double_subshell_string double_subshell_string csh_subshell '.[^\\`\$]*'
+
+# subshell
+syntax_pattern normal subshell_string csh_subshell '`'
+syntax_pattern subshell_string normal csh_subshell '`'
+syntax_pattern subshell_string subshell_string csh_variable '\$([\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\}|[\*#\?\$!<])' ignorecase
+syntax_pattern subshell_string subshell_string csh_escapedchar '(\\(\n|.))+'
+syntax_pattern subshell_string subshell_string csh_subshell '.[^\\`\$]*'
+
+# literal
+syntax_pattern normal normal csh_literal '\b[0-9]+\b'
+
+# parsing optimisation
+syntax_pattern normal normal text '[a-z0-9_]+' ignorecase
+
+# colours
+colour csh_comment 0.2 0.4 0.64
+colour csh_fixme 1.0 0.5 0.0
+colour csh_literal 1.0 0.2 0.8
+colour csh_string 0.8 0.0 0.0
+colour csh_subshell 0.46 0.31 0.48
+colour csh_escapedchar 0.46 0.31 0.48
+colour csh_variable 0.02 0.6 0.6
+colour csh_keyword 0.77 0.63 0.0
+colour csh_punctuation 0.5 0.5 0.5
