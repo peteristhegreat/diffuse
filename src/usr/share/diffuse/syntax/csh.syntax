@@ -3,33 +3,38 @@
 syntax 'C Shell' normal text
 syntax_files 'C Shell' '^(.*/)?([^/]*\.csh|\.t?cshrc)$'
 
-# whitespace/comments
+# whitespace
 syntax_pattern normal normal text '[ \t\n]+'
-syntax_pattern normal comment csh_comment '#'
+
+# keywords
+syntax_pattern normal expr csh_keyword '\b(alias|alloc|bg|bindkey|break|breaksw|bs2cmd|builtins|bye|case|cd|chdir|complete|continue|default|dirs|echo|echotc|else([ \t]if)?|end|endif|endsw|eval|exec|exit|fg|filetest|foreach|getspath|getxvers|glob|goto|hashstat|history|hup|if|inlib|jobs|kill|limit|log|login|logout|ls-F|migrate|newgrp|nice|nohup|notify|onintr|popd|printenv|pushd|rehash|repeat|rootnode|sched|set|setenv|setpath|setspath|settc|setty|setxvers|shift|source|stop|suspend|switch|telltc|termname|then|time|umask|unalias|uncomplete|unhash|universe|unlimit|unset|unsetenv|ver|wait|warp|watchlog|where)\b'
+syntax_pattern normal expr text ''
+
+# whitespace/comments
+syntax_pattern expr normal text '\n'
+syntax_pattern expr comment csh_comment '#'
 syntax_pattern comment normal csh_comment '\n'
 syntax_pattern comment comment csh_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern comment comment csh_comment '.[^TFX\n]*'
 
 # punctuation
-syntax_pattern normal normal csh_punctuation '[\|&;\(\)<>!=~\+\-\*/%]+'
+syntax_pattern expr normal csh_punctuation '[\|&;\(\)!]+'
+syntax_pattern expr expr csh_punctuation '[<>=~\+\-\*/%]+'
 
 # escaped character
-syntax_pattern normal normal csh_escapedchar '(\\(\n|.))+'
+syntax_pattern expr expr csh_escapedchar '(\\(\n|.))+'
 
 # environment variables
-syntax_pattern normal normal csh_variable '\$([\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\}|[\*#\?\$!<])' ignorecase
-
-# keywords
-syntax_pattern normal normal csh_keyword '\b(alias|alloc|bg|bindkey|break|breaksw|bs2cmd|builtins|bye|case|cd|chdir|complete|continue|default|dirs|echo|echotc|else|end|endif|endsw|eval|exec|exit|fg|filetest|foreach|getspath|getxvers|glob|goto|hashstat|history|hup|if|inlib|jobs|kill|limit|log|login|logout|ls-F|migrate|newgrp|nice|nohup|notify|onintr|popd|printenv|pushd|rehash|repeat|rootnode|sched|set|setenv|setpath|setspath|settc|setty|setxvers|shift|source|stop|suspend|switch|telltc|termname|then|time|umask|unalias|uncomplete|unhash|universe|unlimit|unset|unsetenv|ver|wait|warp|watchlog|where)\b'
+syntax_pattern expr expr csh_variable '\$([\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\}|[\*#\?\$!<])' ignorecase
 
 # '-style strings
-syntax_pattern normal single_string csh_string "'"
-syntax_pattern single_string normal csh_string "'"
+syntax_pattern expr single_string csh_string "'"
+syntax_pattern single_string expr csh_string "'"
 syntax_pattern single_string single_string csh_string "[^']+"
 
 # "-style strings
-syntax_pattern normal double_string csh_string '"'
-syntax_pattern double_string normal csh_string '"'
+syntax_pattern expr double_string csh_string '"'
+syntax_pattern double_string expr csh_string '"'
 syntax_pattern double_string double_subshell_string csh_subshell '`'
 syntax_pattern double_string double_string csh_variable '\$([\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\}|[\*#\?\$!<])' ignorecase
 syntax_pattern double_string double_string csh_escapedchar '(\\(\n|.))+'
@@ -42,17 +47,17 @@ syntax_pattern double_subshell_string double_subshell_string csh_variable '\$([\
 syntax_pattern double_subshell_string double_subshell_string csh_subshell '.[^\\`\$]*'
 
 # subshell
-syntax_pattern normal subshell_string csh_subshell '`'
-syntax_pattern subshell_string normal csh_subshell '`'
+syntax_pattern expr subshell_string csh_subshell '`'
+syntax_pattern subshell_string expr csh_subshell '`'
 syntax_pattern subshell_string subshell_string csh_variable '\$([\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\}|[\*#\?\$!<])' ignorecase
 syntax_pattern subshell_string subshell_string csh_escapedchar '(\\(\n|.))+'
 syntax_pattern subshell_string subshell_string csh_subshell '.[^\\`\$]*'
 
 # literal
-syntax_pattern normal normal csh_literal '\b[0-9]+\b'
+syntax_pattern expr expr csh_literal '\b[0-9]+\b'
 
 # parsing optimisation
-syntax_pattern normal normal text '[a-z0-9_]+' ignorecase
+syntax_pattern expr expr text '[a-z0-9_]+' ignorecase
 
 # colours
 colour csh_comment 0.2 0.4 0.64
