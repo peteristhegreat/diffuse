@@ -4,8 +4,8 @@ syntax CSS normal text
 syntax_files CSS '\.css$'
 
 # whitespace and comments
-syntax_pattern normal normal text '[ \t\n]+'
-syntax_pattern property property text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
+syntax_pattern property property text '[ \t\r\n]+'
 syntax_pattern normal comment css_comment '/\*'
 syntax_pattern comment normal css_comment '\*/'
 syntax_pattern comment comment css_fixme '\b(TODO|FIXME|XXX)\b'

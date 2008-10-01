@@ -4,7 +4,7 @@ syntax XML normal text
 syntax_files XML '\.(dtd|svg|xhtml|xml|xsd|xsl)$'
 
 # whitespace/comments
-syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern normal comment xml_comment '<!--'
 syntax_pattern comment normal xml_comment '-->'
 syntax_pattern comment comment xml_fixme '\b(TODO|FIXME|XXX)\b'
@@ -12,10 +12,10 @@ syntax_pattern comment comment xml_comment '.[^TFX\-]*'
 
 # processing
 syntax_pattern normal process xml_processingtag '<\?'
-syntax_pattern process process text '[ \t\n]+'
+syntax_pattern process process text '[ \t\r\n]+'
 syntax_pattern process process_attribs xml_processingtagname '\b[a-z][a-z_0-9]*([ \t]*:[ \t]*[a-z][a-z_0-9]*)?\b' ignorecase
 syntax_pattern process_attribs normal xml_processingtag '\?>'
-syntax_pattern process_attribs process_attribs text '[ \t\n]+'
+syntax_pattern process_attribs process_attribs text '[ \t\r\n]+'
 syntax_pattern process_attribs process_attribs xml_punctuation '='
 syntax_pattern process_attribs process_attribs xml_attribute '[a-z_0-9\-:\.]+' ignorecase
 syntax_pattern process_attribs process_string xml_string '"'
@@ -43,7 +43,7 @@ syntax_pattern def_attribs def_comment xml_comment '--'
 syntax_pattern def_comment def_attribs xml_comment '--'
 syntax_pattern def_comment def_comment xml_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern def_comment def_comment xml_comment '.[^TFX\-]*'
-syntax_pattern def_attribs def_attribs text '[ \t\n]+'
+syntax_pattern def_attribs def_attribs text '[ \t\r\n]+'
 syntax_pattern def_attribs def_attribs xml_punctuation '[=%\(\)\|,\?\*\+;\&]+'
 syntax_pattern def_attribs def_attribs xml_attribute '#?[a-z_0-9\-:\.]+' ignorecase
 syntax_pattern def_attribs def_string xml_string '"'
@@ -61,7 +61,7 @@ syntax_pattern doc_attribs doc_comment xml_comment '--'
 syntax_pattern doc_comment doc_attribs xml_comment '--'
 syntax_pattern doc_comment doc_comment xml_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern doc_comment doc_comment xml_comment '.[^TFX\-]*'
-syntax_pattern doc_attribs doc_attribs text '[ \t\n]+'
+syntax_pattern doc_attribs doc_attribs text '[ \t\r\n]+'
 syntax_pattern doc_attribs doc_attribs xml_punctuation '[=%\(\)\|,\?\*\+;\&]+'
 syntax_pattern doc_attribs def_normal xml_punctuation '\['
 syntax_pattern doc_attribs doc_attribs xml_attribute '#?[a-z_0-9\-:\.]+' ignorecase
@@ -84,7 +84,7 @@ syntax_pattern def2_attribs def2_comment xml_comment '--'
 syntax_pattern def2_comment def2_attribs xml_comment '--'
 syntax_pattern def2_comment def2_comment xml_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern def2_comment def2_comment xml_comment '.[^TFX\-]*'
-syntax_pattern def2_attribs def2_attribs text '[ \t\n]+'
+syntax_pattern def2_attribs def2_attribs text '[ \t\r\n]+'
 syntax_pattern def2_attribs def2_attribs xml_punctuation '[=%\(\)\|,\?\*\+;\&]+'
 syntax_pattern def2_attribs def2_attribs xml_attribute '#?[a-z_0-9\-:\.]+' ignorecase
 syntax_pattern def2_attribs def2_string xml_string '"'
@@ -98,11 +98,11 @@ syntax_pattern def2_singlestring def2_singlestring xml_string ".[^\\&']*"
 
 # tags
 syntax_pattern normal tag xml_tag '</?'
-syntax_pattern tag tag text '[ \t\n]+'
+syntax_pattern tag tag text '[ \t\r\n]+'
 syntax_pattern tag tag_attribs xml_tagname '\b[a-z][a-z_0-9]*([ \t]*:[ \t]*[a-z][a-z_0-9]*)*\b' ignorecase
 syntax_pattern tag tag_attribs text ''
 syntax_pattern tag_attribs normal xml_tag '/?>'
-syntax_pattern tag_attribs tag_attribs text '[ \t\n]+'
+syntax_pattern tag_attribs tag_attribs text '[ \t\r\n]+'
 syntax_pattern tag_attribs tag_attribs xml_punctuation '='
 syntax_pattern tag_attribs tag_attribs xml_attribute '[a-z_0-9\-:\.]+' ignorecase
 syntax_pattern tag_attribs tag_string xml_string '"'

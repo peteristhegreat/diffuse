@@ -3,6 +3,9 @@
 syntax SQL normal text
 syntax_files SQL '\.sql$'
 
+# whitespace
+syntax_pattern normal normal text '[ \t\r\n]+'
+
 # C++ style comments
 syntax_pattern normal cpp_comment sql_comment '(#|--)'
 syntax_pattern cpp_comment cpp_comment sql_fixme '\b(TODO|FIXME|XXX)\b'

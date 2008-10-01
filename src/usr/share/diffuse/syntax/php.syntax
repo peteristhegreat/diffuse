@@ -8,7 +8,7 @@ syntax_pattern normal php php_tag '<\?(php)?=?'
 syntax_pattern php normal php_tag '\?>'
 
 # whitespace and comments
-syntax_pattern php php text '[ \t\n]+'
+syntax_pattern php php text '[ \t\r\n]+'
 syntax_pattern php comment php_comment '(//|#)'
 syntax_pattern comment normal php_tag '\?>'
 syntax_pattern comment php php_comment '\n'
@@ -55,7 +55,7 @@ syntax_pattern php php php_punctuation '[/\?]'
 syntax_pattern php php text '[a-z_0-9]+' ignorecase
 
 # whitespace/comments
-syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern normal html_comment php_html_comment '<!--'
 syntax_pattern html_comment php_html_comment php_tag '<\?(php)?=?'
 syntax_pattern php_html_comment html_comment php_tag '\?>'
@@ -69,14 +69,14 @@ syntax_pattern normal html_tag php_html_tag '<[!/]?'
 syntax_pattern html_tag php_html_tag php_tag '<\?(php)?=?'
 syntax_pattern php_html_tag html_tag php_tag '\?>'
 syntax_pattern php_html_tag php_html_tag php_tag '.[^\?]*'
-syntax_pattern html_tag html_tag text '[ \t\n]+'
+syntax_pattern html_tag html_tag text '[ \t\r\n]+'
 syntax_pattern html_tag html_tag_attribs php_html_tagname '\b[a-z][a-z_0-9]*([ \t]*:[ \t]*[a-z][a-z_0-9]*)*\b' ignorecase
 syntax_pattern html_tag_attribs php_html_tag_attribs php_tag '<\?(php)?=?'
 syntax_pattern php_html_tag_attribs html_tag_attribs php_tag '\?>'
 syntax_pattern php_html_tag_attribs php_html_tag_attribs php_tag '.[^\?]*'
 syntax_pattern html_tag html_tag_attribs text ''
 syntax_pattern html_tag_attribs normal php_html_tag '/?>'
-syntax_pattern html_tag_attribs html_tag_attribs text '[ \t\n]+'
+syntax_pattern html_tag_attribs html_tag_attribs text '[ \t\r\n]+'
 syntax_pattern html_tag_attribs html_tag_attribs php_html_punctuation '='
 syntax_pattern html_tag_attribs html_tag_attribs php_html_attribute '[a-z_0-9\-:\.]+' ignorecase
 syntax_pattern html_tag_attribs html_tag_string php_html_string '"'

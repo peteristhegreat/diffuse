@@ -4,8 +4,8 @@ syntax Ruby normal text
 syntax_files Ruby '\.rb$'
 
 # whitespace/comments
-syntax_pattern normal normal text '[ \t\n]+'
-syntax_pattern expr expr text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
+syntax_pattern expr expr text '[ \t\r\n]+'
 syntax_pattern normal comment ruby_comment '#'
 syntax_pattern comment normal ruby_comment '\n'
 syntax_pattern comment comment ruby_fixme '\b(TODO|FIXME|XXX)\b'
@@ -37,7 +37,7 @@ syntax_pattern backquote backquote ruby_string '.[^\\`]*'
 # literals
 syntax_pattern normal expr ruby_literal '\b((0|[1-9][0-9]*)(\.[0-9]*)?(e[\+\-]?[0-9]+)?|0[0-7]*|0x[0-9a-f]+)\b' ignorecase
 syntax_pattern normal expr ruby_literal '\b(false|FALSE|nil|NIL|true|TRUE|__FILE__|__LINE__)\b'
-syntax_pattern normal expr ruby_literal '\?(\C-|\M-(\C-)?)?[^ \t\n]'
+syntax_pattern normal expr ruby_literal '\?(\C-|\M-(\C-)?)?[^ \t\r\n]'
 
 # variables
 syntax_pattern normal expr ruby_variable "(@@?[a-z_][a-z_0-9]*|\\$([a-z_][a-z_0-9]*|-[a-z]|[!@&`+1~=/\\\\,;\\.<>0\\*\\$\\?:\"']))\b" ignorecase

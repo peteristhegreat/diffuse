@@ -4,12 +4,12 @@ syntax Java normal text
 syntax_files Java '\.java$'
 
 # whitespace
-syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
 
 # C++ style comments
 syntax_pattern normal cpp_comment java_comment '//'
 syntax_pattern cpp_comment normal java_comment '\n'
-syntax_pattern cpp_comment cpp_comment java_comment '\\\n'
+syntax_pattern cpp_comment cpp_comment java_comment '\\\r?\n'
 syntax_pattern cpp_comment cpp_comment java_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern cpp_comment cpp_comment java_comment '.[^\\TFX\n]*'
 
@@ -35,7 +35,7 @@ syntax_pattern string string java_string '.[^\\"]*'
 syntax_pattern normal normal java_literal '\b((0|[1-9][0-9]*)(\.[0-9]*)?(e[\+\-]?[0-9]+)?|0[0-7]*|0x[0-9a-f]+)\b' ignorecase
 syntax_pattern normal normal java_literal '\b(true|false|null)\b'
 
-# typing keywords
+# import keywords
 syntax_pattern normal normal java_import '\b(import|package)\b'
 
 # typing keywords

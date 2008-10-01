@@ -4,15 +4,15 @@ syntax C++ normal text
 syntax_files C++ '\.(h|c|C|cc|cxx|c\+\+|cpp)$'
 
 # preprocessor
-syntax_pattern normal cpp c++_cppkeyword '^[ \t\n]*#[ \t\n]*(define|undef|if|ifdef|ifndef|elif|else|endif|warning|error|include|line|pragma)\b'
+syntax_pattern normal cpp c++_cppkeyword '^[ \t]*#[ \t]*(define|undef|if|ifdef|ifndef|elif|else|endif|warning|error|include|line|pragma)\b'
 syntax_pattern cpp normal c++_cppkeyword '\n'
-syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
 
 # C++ style comments
 syntax_pattern normal cpp_comment c++_comment '//'
 syntax_pattern cpp cpp_comment c++_comment '//'
 syntax_pattern cpp_comment normal c++_comment '\n'
-syntax_pattern cpp_comment cpp_comment c++_comment '\\\n'
+syntax_pattern cpp_comment cpp_comment c++_comment '\\\r?\n'
 syntax_pattern cpp_comment cpp_comment c++_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern cpp_comment cpp_comment c++_comment '.[^\\TFX\n]*'
 
@@ -28,7 +28,7 @@ syntax_pattern comment_cpp comment_cpp c++_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern comment_cpp comment_cpp c++_comment '.[^\*TFX]*'
 
 # preprocessor args
-syntax_pattern cpp cpp c++_cpp '\\\n'
+syntax_pattern cpp cpp c++_cpp '\\\r?\n'
 syntax_pattern cpp cpp c++_cpp '.[^\\/\n]*'
 
 # char

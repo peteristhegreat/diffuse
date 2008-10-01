@@ -4,7 +4,7 @@ syntax HTML normal text
 syntax_files HTML '\.html$'
 
 # whitespace/comments
-syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern normal comment html_comment '<!--'
 syntax_pattern comment normal html_comment '-->'
 syntax_pattern comment comment html_fixme '\b(TODO|FIXME|XXX)\b'
@@ -17,16 +17,16 @@ syntax_pattern normal script html_script '<script\b[^>]*>'
 syntax_pattern script normal html_script '</script>'
 
 # whitespace
-syntax_pattern script script text '[ \t\n]+'
+syntax_pattern script script text '[ \t\r\n]+'
 syntax_pattern script_expr normal html_script '</script>'
-syntax_pattern script_expr script_expr text '[ \t\n]+'
+syntax_pattern script_expr script_expr text '[ \t\r\n]+'
 
 # C++ style comments
 syntax_pattern script script_cpp_comment html_script_comment '//'
 syntax_pattern script_cpp_comment normal html_script '</script>'
 syntax_pattern script_expr script_cpp_comment html_script_comment '//'
 syntax_pattern script_cpp_comment script html_script_comment '\n'
-syntax_pattern script_cpp_comment script_cpp_comment html_script_comment '\\\n'
+syntax_pattern script_cpp_comment script_cpp_comment html_script_comment '\\\r?\n'
 syntax_pattern script_cpp_comment script_cpp_comment html_script_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern script_cpp_comment script_cpp_comment html_script_comment '.[^\\TFX\n<]*'
 
@@ -56,7 +56,7 @@ syntax_pattern script_string script_string html_script_string '.[^\\"<]*'
 syntax_pattern script script_expr html_script_literal '\b((0|[1-9][0-9]*)((\.[0-9]*)?(e[\+\-]?[0-9]+)?[fl]?|[ul]?)|0[0-7]*|0x[0-9a-f]+)\b' ignorecase
 syntax_pattern script script_expr html_script_literal '\b(true|false|Infinity|NaN|null|undefined)\b'
 
-# typing keywords
+# import keywords
 syntax_pattern script script html_script_import '\b(import|package)\b'
 
 # typing keywords
@@ -90,8 +90,8 @@ syntax_pattern normal style html_style '<style\b[^>]*>'
 syntax_pattern style normal html_style '</style>'
 
 # whitespace and comments
-syntax_pattern style style text '[ \t\n]+'
-syntax_pattern style_property style_property text '[ \t\n]+'
+syntax_pattern style style text '[ \t\r\n]+'
+syntax_pattern style_property style_property text '[ \t\r\n]+'
 syntax_pattern style_property normal html_style '</style>'
 syntax_pattern style style_comment html_style_comment '/\*'
 syntax_pattern style_comment normal html_style '</style>'
@@ -145,10 +145,10 @@ syntax_pattern style style html_style '.'
 # processing
 #
 syntax_pattern normal process html_processingtag '<\?'
-syntax_pattern process process text '[ \t\n]+'
+syntax_pattern process process text '[ \t\r\n]+'
 syntax_pattern process process_attribs html_processingtagname '\b[a-z][a-z_0-9]*([ \t]*:[ \t]*[a-z][a-z_0-9]*)?\b' ignorecase
 syntax_pattern process_attribs normal html_processingtag '\?>'
-syntax_pattern process_attribs process_attribs text '[ \t\n]+'
+syntax_pattern process_attribs process_attribs text '[ \t\r\n]+'
 syntax_pattern process_attribs process_attribs html_punctuation '='
 syntax_pattern process_attribs process_attribs html_attribute '[a-z_0-9\-:\.]+' ignorecase
 syntax_pattern process_attribs process_string html_string '"'
@@ -163,11 +163,11 @@ syntax_pattern process_singlestring process_singlestring html_string ".[^\\&']*"
 
 # tags
 syntax_pattern normal tag html_tag '<[!/]?'
-syntax_pattern tag tag text '[ \t\n]+'
+syntax_pattern tag tag text '[ \t\r\n]+'
 syntax_pattern tag tag_attribs html_tagname '\b[a-z][a-z_0-9]*([ \t]*:[ \t]*[a-z][a-z_0-9]*)*\b' ignorecase
 syntax_pattern tag tag_attribs text ''
 syntax_pattern tag_attribs normal html_tag '/?>'
-syntax_pattern tag_attribs tag_attribs text '[ \t\n]+'
+syntax_pattern tag_attribs tag_attribs text '[ \t\r\n]+'
 syntax_pattern tag_attribs tag_attribs html_punctuation '='
 syntax_pattern tag_attribs tag_attribs html_attribute '[a-z_0-9\-:\.]+' ignorecase
 syntax_pattern tag_attribs tag_string html_string '"'

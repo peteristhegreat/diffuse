@@ -4,12 +4,12 @@ syntax 'C#' normal text
 syntax_files 'C#' '\.cs$'
 
 # whitespace
-syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
 
 # C++ style comments
 syntax_pattern normal cpp_comment csharp_comment '//'
 syntax_pattern cpp_comment normal csharp_comment '\n'
-syntax_pattern cpp_comment cpp_comment csharp_comment '\\\n'
+syntax_pattern cpp_comment cpp_comment csharp_comment '\\\r?\n'
 syntax_pattern cpp_comment cpp_comment csharp_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern cpp_comment cpp_comment csharp_comment '.[^\\TFX\n]*'
 
@@ -35,7 +35,7 @@ syntax_pattern verbatim normal csharp_string '"'
 syntax_pattern normal normal csharp_literal '\b([0-9]*\.[0-9]+(e[\+\-]?[0-9]+)?[dfm]?|[0-9]+[dfm]|(0[0-7]*|[1-9][0-9]*|0x[0-9a-f]+)(u|l|ul|lu)?)\b' ignorecase
 syntax_pattern normal normal csharp_literal '\b(true|false|null)\b'
 
-# typing keywords
+# import keywords
 syntax_pattern normal normal csharp_import '\b(using)\b'
 
 # typing keywords

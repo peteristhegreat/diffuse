@@ -4,8 +4,8 @@ syntax Tcl normal text
 syntax_files Tcl '\.tcl$'
 
 # whitespace/comments
-syntax_pattern normal normal text '[ \t]+'
-syntax_pattern expr expr text '[ \t]+'
+syntax_pattern normal normal text '[ \t\r]+'
+syntax_pattern expr expr text '[ \t\r]+'
 syntax_pattern normal comment tcl_comment '#'
 syntax_pattern comment normal tcl_comment '\n'
 syntax_pattern comment comment tcl_fixme '\b(TODO|FIXME|XXX)\b'
@@ -19,7 +19,7 @@ syntax_pattern string string tcl_escapedchar '\\([0-7]{1,3}|x[0-9a-fA-F]{1,2}|u[
 syntax_pattern string string tcl_string '.[^\\"\$]*'
 
 # escaped characters outside of strings
-syntax_pattern expr expr tcl_escapedchar '\\([0-7]{1,3}|x[0-9a-fA-F]{1,2}|u[0-9a-fA-F]{1,4}|\n|.)'
+syntax_pattern expr expr tcl_escapedchar '\\([0-7]{1,3}|x[0-9a-fA-F]{1,2}|u[0-9a-fA-F]{1,4}|\r?\n|.)'
 
 # keywords
 syntax_pattern normal expr tcl_keyword '\b(after|append|array|bgerror|binary|break|case|catch|cd|chan|clock|close|concat|continue|dict|encoding|eof|error|eval|exec|exit|fblocked|fconfigure|fcopy|file|fileevent|flush|for|foreach|format|gets|glob|global|history|if|incr|info|interp|join|lappend|lassign|lindex|linsert|list|llength|load|lrange|lrepeat|lreplace|lreverse|lsearch|lset|lsort|memory|namespace|open|package|pid|pkg_mkIndex|puts|pwd|read|regexp|regsub|rename|return|scan|seek|set|socket|source|split|string|subst|switch|tell|time|trace|unknown|unload|unset|update|uplevel|upvar|variable|vwait|while)\b'

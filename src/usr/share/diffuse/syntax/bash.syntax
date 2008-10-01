@@ -19,7 +19,7 @@ syntax_pattern comment normal bash_comment '\n'
 syntax_pattern comment comment bash_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern comment comment bash_comment '.[^TFX\n]*'
 syntax_pattern normal expr bash_comment ''
-syntax_pattern expr normal text '[ \t\n]+'
+syntax_pattern expr normal text '[ \t\r\n]+'
 
 # '-style strings
 syntax_pattern expr single_string bash_string "'"
@@ -31,7 +31,7 @@ syntax_pattern expr double_string bash_string '"'
 syntax_pattern double_string expr bash_string '"'
 syntax_pattern double_string double_subshell_string bash_subshell '`'
 syntax_pattern double_string double_string bash_variable '\$([\*@#\?\-\$!]|[a-z_0-9]+|\{[a-z_0-9]+\})' ignorecase
-syntax_pattern double_string double_string bash_escapedchar '(\\(\n|.))+'
+syntax_pattern double_string double_string bash_escapedchar '(\\(\r?\n|.))+'
 syntax_pattern double_string double_string bash_string '.[^\\"\$`]*'
 
 # subshell within "-style strings
@@ -44,11 +44,11 @@ syntax_pattern double_subshell_string double_subshell_string bash_subshell '.[^\
 syntax_pattern expr subshell_string bash_subshell '`'
 syntax_pattern subshell_string expr bash_subshell '`'
 syntax_pattern subshell_string subshell_string bash_variable '\$([\*@#\?\-\$!]|[a-z_0-9]*|{[a-z_0-9]*})' ignorecase
-syntax_pattern subshell_string subshell_string bash_escapedchar '(\\(\n|.))+'
+syntax_pattern subshell_string subshell_string bash_escapedchar '(\\(\r?\n|.))+'
 syntax_pattern subshell_string subshell_string bash_subshell '.[^\\`\$]*'
 
 # escaped character
-syntax_pattern expr expr bash_escapedchar '(\\(\n|.))+'
+syntax_pattern expr expr bash_escapedchar '(\\(\r?\n|.))+'
 
 # punctuation
 syntax_pattern expr normal bash_punctuation '[!\|&;\(\)<>]+'

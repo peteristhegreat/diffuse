@@ -4,8 +4,8 @@ syntax Perl normal text
 syntax_files Perl '\.p[hlm]$'
 
 # whitespace/comments
-syntax_pattern normal normal text '[ \t\n]+'
-syntax_pattern expr expr text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
+syntax_pattern expr expr text '[ \t\r\n]+'
 syntax_pattern normal comment perl_comment '#'
 syntax_pattern comment normal perl_comment '\n'
 syntax_pattern comment comment perl_fixme '\b(TODO|FIXME|XXX)\b'

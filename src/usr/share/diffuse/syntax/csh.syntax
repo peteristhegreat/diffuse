@@ -4,7 +4,7 @@ syntax 'C Shell' normal text
 syntax_files 'C Shell' '^(.*/)?([^/]*\.csh|\.t?cshrc)$'
 
 # whitespace
-syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
 
 # keywords
 syntax_pattern normal expr csh_keyword '\b(alias|alloc|bg|bindkey|break|breaksw|bs2cmd|builtins|bye|case|cd|chdir|complete|continue|default|dirs|echo|echotc|else([ \t]if)?|end|endif|endsw|eval|exec|exit|fg|filetest|foreach|getspath|getxvers|glob|goto|hashstat|history|hup|if|inlib|jobs|kill|limit|log|login|logout|ls-F|migrate|newgrp|nice|nohup|notify|onintr|popd|printenv|pushd|rehash|repeat|rootnode|sched|set|setenv|setpath|setspath|settc|setty|setxvers|shift|source|stop|suspend|switch|telltc|termname|then|time|umask|unalias|uncomplete|unhash|universe|unlimit|unset|unsetenv|ver|wait|warp|watchlog|where)\b'
@@ -22,7 +22,7 @@ syntax_pattern expr normal csh_punctuation '[\|&;\(\)!]+'
 syntax_pattern expr expr csh_punctuation '[<>=~\+\-\*/%]+'
 
 # escaped character
-syntax_pattern expr expr csh_escapedchar '(\\(\n|.))+'
+syntax_pattern expr expr csh_escapedchar '(\\(\r?\n|.))+'
 
 # environment variables
 syntax_pattern expr expr csh_variable '\$([\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\}|[\*#\?\$!<])' ignorecase
@@ -37,7 +37,7 @@ syntax_pattern expr double_string csh_string '"'
 syntax_pattern double_string expr csh_string '"'
 syntax_pattern double_string double_subshell_string csh_subshell '`'
 syntax_pattern double_string double_string csh_variable '\$([\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\}|[\*#\?\$!<])' ignorecase
-syntax_pattern double_string double_string csh_escapedchar '(\\(\n|.))+'
+syntax_pattern double_string double_string csh_escapedchar '(\\(\r?\n|.))+'
 syntax_pattern double_string double_string csh_string '.[^\\"\$`]*'
 
 # subshell within "-style strings
@@ -50,7 +50,7 @@ syntax_pattern double_subshell_string double_subshell_string csh_subshell '.[^\\
 syntax_pattern expr subshell_string csh_subshell '`'
 syntax_pattern subshell_string expr csh_subshell '`'
 syntax_pattern subshell_string subshell_string csh_variable '\$([\?#%]?[a-z_0-9]+|\{[\?#%]?[a-z_0-9]+\}|[\*#\?\$!<])' ignorecase
-syntax_pattern subshell_string subshell_string csh_escapedchar '(\\(\n|.))+'
+syntax_pattern subshell_string subshell_string csh_escapedchar '(\\(\r?\n|.))+'
 syntax_pattern subshell_string subshell_string csh_subshell '.[^\\`\$]*'
 
 # literal

@@ -4,14 +4,14 @@ syntax JavaScript normal text
 syntax_files JavaScript '\.js$'
 
 # whitespace
-syntax_pattern normal normal text '[ \t\n]+'
-syntax_pattern expr expr text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
+syntax_pattern expr expr text '[ \t\r\n]+'
 
 # C++ style comments
 syntax_pattern normal cpp_comment javascript_comment '//'
 syntax_pattern expr cpp_comment javascript_comment '//'
 syntax_pattern cpp_comment normal javascript_comment '\n'
-syntax_pattern cpp_comment cpp_comment javascript_comment '\\\n'
+syntax_pattern cpp_comment cpp_comment javascript_comment '\\\r?\n'
 syntax_pattern cpp_comment cpp_comment javascript_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern cpp_comment cpp_comment javascript_comment '.[^\\TFX\n]*'
 
@@ -38,7 +38,7 @@ syntax_pattern string string javascript_string '.[^\\"]*'
 syntax_pattern normal expr javascript_literal '\b((0|[1-9][0-9]*)((\.[0-9]*)?(e[\+\-]?[0-9]+)?[fl]?|[ul]?)|0[0-7]*|0x[0-9a-f]+)\b' ignorecase
 syntax_pattern normal expr javascript_literal '\b(true|false|Infinity|NaN|null|undefined)\b'
 
-# typing keywords
+# import keywords
 syntax_pattern normal normal javascript_import '\b(import|package)\b'
 
 # typing keywords

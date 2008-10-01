@@ -4,7 +4,7 @@ syntax Python normal text
 syntax_files Python '\.pyw?$'
 
 # whitespace/comments
-syntax_pattern normal normal text '[ \t\n]+'
+syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern normal comment python_comment '#'
 syntax_pattern comment normal python_comment '\n'
 syntax_pattern comment comment python_fixme '\b(TODO|FIXME|XXX)\b'
