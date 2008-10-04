@@ -180,6 +180,8 @@ class Resources:
         self.setKeyBinding('menu', 'find', 'Ctrl+f')
         self.setKeyBinding('menu', 'find_next', 'Ctrl+g')
         self.setKeyBinding('menu', 'find_previous', 'Shift+Ctrl+G')
+        self.setKeyBinding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
+        self.setKeyBinding('menu', 'convert_to_unix', 'Ctrl+e')
         self.setKeyBinding('menu', 'previous_tab', 'Ctrl+Page_Up')
         self.setKeyBinding('menu', 'next_tab', 'Ctrl+Page_Down')
         self.setKeyBinding('menu', 'close_tab', 'Ctrl+w')
@@ -487,8 +489,7 @@ class Preferences:
         self.viewer_ignore_whitespace_changes = False
         self.viewer_ignore_blanklines = False
         self.viewer_ignore_case = False
-        self.viewer_hide_carriagereturn = False
-        self.viewer_hide_newline = True
+        self.viewer_hide_endofline = True
         self.viewer_tab_width = 8
         self.align_ignore_whitespace = True
         self.align_ignore_whitespace_changes = False
@@ -513,10 +514,8 @@ class Preferences:
                                 self.viewer_ignore_blanklines = (a[1] == 'True')
                             elif len(a) == 2 and a[0] == 'viewer_ignore_case':
                                 self.viewer_ignore_case = (a[1] == 'True')
-                            elif len(a) == 2 and a[0] == 'viewer_hide_carriagereturn':
-                                self.viewer_hide_carriagereturn = (a[1] == 'True')
-                            elif len(a) == 2 and a[0] == 'viewer_hide_newline':
-                                self.viewer_hide_newline = (a[1] == 'True')
+                            elif len(a) == 2 and a[0] == 'viewer_hide_endofline':
+                                self.viewer_hide_endofline = (a[1] == 'True')
                             elif len(a) == 2 and a[0] == 'viewer_tab_width':
                                 self.viewer_tab_width = int(a[1])
                             elif len(a) == 2 and a[0] == 'align_ignore_whitespace':
@@ -563,15 +562,10 @@ class Preferences:
         vbox.pack_start(viewer_ignore_case_button, False, False, 0)
         viewer_ignore_case_button.show()
 
-        viewer_hide_carriagereturn_button = gtk.CheckButton(_('Hide Carriage Return (^M) Characters'))
-        viewer_hide_carriagereturn_button.set_active(self.viewer_hide_carriagereturn)
-        vbox.pack_start(viewer_hide_carriagereturn_button, False, False, 0)
-        viewer_hide_carriagereturn_button.show()
-
-        viewer_hide_newline_button = gtk.CheckButton(_('Hide New Line (^J) Characters'))
-        viewer_hide_newline_button.set_active(self.viewer_hide_newline)
-        vbox.pack_start(viewer_hide_newline_button, False, False, 0)
-        viewer_hide_newline_button.show()
+        viewer_hide_endofline_button = gtk.CheckButton(_('Hide End of Line Characters'))
+        viewer_hide_endofline_button.set_active(self.viewer_hide_endofline)
+        vbox.pack_start(viewer_hide_endofline_button, False, False, 0)
+        viewer_hide_endofline_button.show()
 
         hbox = gtk.HBox()
         label = gtk.Label(_('Tab Width: '))
@@ -634,8 +628,7 @@ class Preferences:
                 f.write('viewer_ignore_whitespace_changes %s\n' % (viewer_ignore_whitespace_changes_button.get_active(), ))
                 f.write('viewer_ignore_blanklines %s\n' % (viewer_ignore_blanklines_button.get_active(), ))
                 f.write('viewer_ignore_case %s\n' % (viewer_ignore_case_button.get_active(), ))
-                f.write('viewer_hide_carriagereturn %s\n' % (viewer_hide_carriagereturn_button.get_active(), ))
-                f.write('viewer_hide_newline %s\n' % (viewer_hide_newline_button.get_active(), ))
+                f.write('viewer_hide_endofline %s\n' % (viewer_hide_endofline_button.get_active(), ))
                 f.write('viewer_tab_width %d\n' % (viewer_tab_width_spin.get_value_as_int(), ))
                 f.write('align_ignore_whitespace %s\n' % (align_ignore_whitespace_button.get_active(), ))
                 f.write('align_ignore_whitespace_changes %s\n' % (align_ignore_whitespace_changes_button.get_active(), ))
@@ -650,8 +643,7 @@ class Preferences:
             self.viewer_ignore_whitespace_changes = viewer_ignore_whitespace_changes_button.get_active()
             self.viewer_ignore_blanklines = viewer_ignore_blanklines_button.get_active()
             self.viewer_ignore_case = viewer_ignore_case_button.get_active()
-            self.viewer_hide_carriagereturn = viewer_hide_carriagereturn_button.get_active()
-            self.viewer_hide_newline = viewer_hide_newline_button.get_active()
+            self.viewer_hide_endofline = viewer_hide_endofline_button.get_active()
             self.viewer_tab_width = viewer_tab_width_spin.get_value_as_int()
             self.align_ignore_whitespace = align_ignore_whitespace_button.get_active()
             self.align_ignore_whitespace_changes = align_ignore_whitespace_changes_button.get_active()
@@ -827,6 +819,58 @@ def getLocalisedDir(s):
             return path
     return os.path.join(s, 'C')
 
+def has_dos_line_ending(s):
+    return s is not None and len(s) > 1 and s[-2:] == '\r\n'
+
+def has_unix_line_ending(s):
+    if s is not None and len(s) > 0 and s[-1] == '\n':
+        return len(s) == 1 or s[-2] != '\r'
+    return False
+
+DOS_FORMAT = 1
+UNIX_FORMAT = 2
+
+def getFormat(ss):
+    flags = 0
+    for s in ss:
+        if has_dos_line_ending(s):
+            flags |= DOS_FORMAT
+        elif has_unix_line_ending(s):
+            flags |= UNIX_FORMAT
+    return flags
+
+def len_minus_line_ending(format, s):
+    if s is None:
+        return 0
+    n = len(s)
+    if n > 0 and s[-1] == '\n':
+        if format == DOS_FORMAT and n > 1 and s[-2] == '\r':
+            n -= 2
+        else:
+            n -= 1
+    return n
+
+def strip_line_ending(format, s):
+    if s is not None:
+        return s[:len_minus_line_ending(format, s)]
+
+def convert_to_dos(s):
+    if has_unix_line_ending(s):
+        s = s[:-1] + '\r\n'
+    return s
+
+def convert_to_unix(s):
+    if has_dos_line_ending(s):
+        s = s[:-2] + '\n'
+    return s
+
+def convert_to_format(s, format):
+   if format == DOS_FORMAT:
+       s = convert_to_dos(s)
+   elif format == UNIX_FORMAT:
+       s = convert_to_unix(s)
+   return s
+
 def shellEscape(s):
     # FIXME: what should be done on non-POSIX systems?
     if len(s) == 0:
@@ -985,7 +1029,7 @@ theVCSs = VCSs()
 
 class FileChooserDialog(gtk.FileChooserDialog):
     def __init__(self, title, parent, action, accept):
-        gtk.FileChooserDialog.__init__(self, title, parent, action, ((gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, accept, gtk.RESPONSE_OK)))
+        gtk.FileChooserDialog.__init__(self, title, parent, action, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, accept, gtk.RESPONSE_OK))
         hbox = gtk.HBox()
         label = gtk.Label(_('Encoding: '))
         hbox.pack_start(label, False, False, 0)
@@ -1049,6 +1093,7 @@ class FileDiffViewer(gtk.VBox):
             self.max_line_number = 0
             self.syntax_cache = []
             self.diff_cache = []
+            self.format = 0
 
         def hasEdits(self):
             for line in self.lines:
@@ -1241,14 +1286,16 @@ class FileDiffViewer(gtk.VBox):
         # scroll to first difference when realised
         self.connect_after('realize', self._realise_cb)
 
-    def getStringColumnWidth(self, s):
+    def getStringColumnWidth(self, f, s):
+        if self.prefs.viewer_hide_endofline:
+            s = strip_line_ending(self.files[f].format, s)
         col = 0
         for c in s:
             v = ord(c)
             if v < 32:
                 if c == '\t':
                     col += self.prefs.viewer_tab_width - col % self.prefs.viewer_tab_width
-                elif not((c == '\n' and self.prefs.viewer_hide_newline) or (c == '\r' and self.prefs.viewer_hide_carriagereturn)):
+                else:
                     col += 2
             elif v >= 0x1100 and (v <= 0x115f
                 or v == 0x2329
@@ -1270,8 +1317,6 @@ class FileDiffViewer(gtk.VBox):
         if v < 32:
             if c == '\t':
                 return self.prefs.viewer_tab_width - i % self.prefs.viewer_tab_width
-            if (c == '\n' and self.prefs.viewer_hide_newline) or (c == '\r' and self.prefs.viewer_hide_carriagereturn):
-                return 0
             return 2
         if v >= 0x1100 and (v <= 0x115f
             or v == 0x2329 or v == 0x232a
@@ -1285,7 +1330,17 @@ class FileDiffViewer(gtk.VBox):
             return 2
         return 1
 
-    def expand(self, s):
+    def stringWidth(self, f, s):
+        if self.prefs.viewer_hide_endofline:
+            s = strip_line_ending(self.files[f].format, s)
+        w = 0
+        for c in s:
+            w += self.characterWidth(w, c)
+        return w
+
+    def expand(self, f, s):
+        if self.prefs.viewer_hide_endofline:
+            s = strip_line_ending(self.files[f].format, s)
         col = 0
         result = []
         for c in s:
@@ -1295,10 +1350,7 @@ class FileDiffViewer(gtk.VBox):
                     width = self.prefs.viewer_tab_width - col % self.prefs.viewer_tab_width
                     result.append(width * ' ')
                 else:
-                    if (c == '\n' and self.prefs.viewer_hide_newline) or (c == '\r' and self.prefs.viewer_hide_carriagereturn):
-                        result.append('')
-                    else:
-                        result.append('^' + chr(v + 64))
+                    result.append('^' + chr(v + 64))
             else:
                 result.append(c)
             col += self.characterWidth(col, c)
@@ -1395,7 +1447,7 @@ class FileDiffViewer(gtk.VBox):
                 files = self.files
             else:
                 files = [ self.files[f] ]
-            for file in files:
+            for f, file in enumerate(files):
                 del file.syntax_cache[:]
                 del file.diff_cache[:]
                 file.line_lengths = 0
@@ -1407,7 +1459,7 @@ class FileDiffViewer(gtk.VBox):
                             text.append(line.modified_text)
                         for s in text:
                             if s is not None:
-                                file.line_lengths = max(file.line_lengths, self.digit_width * self.getStringColumnWidth(s))
+                                file.line_lengths = max(file.line_lengths, self.digit_width * self.getStringColumnWidth(f, s))
         num_lines = 0
         line_lengths = 0
         for file in self.files:
@@ -1429,6 +1481,24 @@ class FileDiffViewer(gtk.VBox):
         line = self.getLine(f, i)
         if line is not None:
             return line.getText()
+
+    class SetFormatUndo:
+        def __init__(self, f, format, old_format):
+            self.data = (f, format, old_format)
+
+        def undo(self, viewer):
+            f, format, old_format = self.data
+            viewer.setFormat(f, old_format)
+
+        def redo(self, viewer):
+            f, format, old_format = self.data
+            viewer.setFormat(f, format)
+
+    def setFormat(self, f, format):
+        file = self.files[f]
+        if self.undoblock is not None:
+            self.addUndo(FileDiffViewer.SetFormatUndo(f, format, file.format))
+        file.format = format
 
     class InstanceLineUndo:
         def __init__(self, f, i, reverse):
@@ -1487,7 +1557,7 @@ class FileDiffViewer(gtk.VBox):
         line.compare_string = None
 
         if text is not None:
-            file.line_lengths = max(file.line_lengths, self.digit_width * self.getStringColumnWidth(text))
+            file.line_lengths = max(file.line_lengths, self.digit_width * self.getStringColumnWidth(f, text))
         self.updateSize(False)
 
         h = self.font_height
@@ -1726,6 +1796,7 @@ class FileDiffViewer(gtk.VBox):
             i += 1
 
     def updateFile(self, f, ss):
+        self.setFormat(f, getFormat(ss))
         # align
         blocks = []
         n = len(ss)
@@ -1774,9 +1845,9 @@ class FileDiffViewer(gtk.VBox):
                         raise IOError('Not under revision control.')
                     cmd = spec.vcs.getRevisionCommand(name, rev)
                     label = '%s (%s)' % (name, rev)
-                    fd = os.popen(cmd, 'r')
+                    fd = os.popen(cmd, 'rb')
                 else:
-                    fd = open(name, 'r')
+                    fd = open(name, 'rb')
                     label = name
                 ss = fd.readlines()
                 fd.close()
@@ -1837,6 +1908,9 @@ class FileDiffViewer(gtk.VBox):
         last = ss.pop()
         ss = [ s + '\n' for s in ss ]
         ss.append(last)
+        if file.format == 0:
+            self.setFormat(f, getFormat(ss))
+        ss = [ convert_to_format(s, file.format) for s in ss ]
         if col0 > 0:
             pre = self.getLineText(f, line0)[:col0]
             ss[0] = pre + ss[0]
@@ -2011,9 +2085,7 @@ class FileDiffViewer(gtk.VBox):
             j = self.current_char
             if j > 0:
                 text = self.getLineText(self.current_file, self.current_line)[:j]
-                j = 0
-                for c in text:
-                    j += self.characterWidth(j, c)
+                j = self.stringWidth(self.current_file, text)
             self.setStatus(_('Column %d') % j)
         else:
             self.setStatus('')
@@ -2044,7 +2116,7 @@ class FileDiffViewer(gtk.VBox):
         # scroll horizontally to current position
         # but try to keep the line numbers visible
         if j > 0:
-            text = ''.join(self.expand(self.getLineText(f, i)[:j]))
+            text = ''.join(self.expand(f, self.getLineText(f, i)[:j]))
             lower = self.getTextWidth(text)
         else:
             lower = 0
@@ -2097,15 +2169,12 @@ class FileDiffViewer(gtk.VBox):
                 self.current_char = 0
             self.dareas[f].queue_draw()
 
-    def getPickedCharacter(self, text, x, partial):
+    def getPickedCharacter(self, f, text, x, partial):
         if text is None:
             return 0
         n = len(text)
-        if n > 0 and text[n - 1] == '\n':
-            n -= 1
-        ss = self.expand(text[:n])
         w = self.getLineNumberWidth()
-        for i, s in enumerate(ss):
+        for i, s in enumerate(self.expand(f, text)):
             width = self.getTextWidth(s)
             tmp = w
             if partial:
@@ -2121,8 +2190,8 @@ class FileDiffViewer(gtk.VBox):
         i = min(int(y // self.font_height), len(self.files[f].lines))
         if self.mode == CHAR_MODE and f == self.current_file:
             self.current_file = f
-            text = self.getLineText(f, i)
-            j = self.getPickedCharacter(text, x, True)
+            text = strip_line_ending(self.files[f].format, self.getLineText(f, i))
+            j = self.getPickedCharacter(f, text, x, True)
             self.setCurrentChar(i, j, extend)
         else:
             self.setLineMode()
@@ -2138,14 +2207,12 @@ class FileDiffViewer(gtk.VBox):
                     self.setCharMode()
                     self.button_press(f, event.x, event.y, False)
                 elif self.mode == CHAR_MODE and self.current_file == f:
-                    text = self.getLineText(f, i)
+                    text = strip_line_ending(self.files[f].format, self.getLineText(f, i))
                     if text is not None:
                         n = len(text)
-                        if n > 0 and text[-1] == '\n':
-                            n -= 1
-                        j = self.getPickedCharacter(text, event.x, False)
+                        j = self.getPickedCharacter(f, text, event.x, False)
                         if j < n:
-                            ss = self.expand(text[:n])
+                            ss = self.expand(f, text[:n])
                             c = theResources.getCharacterClass(text[j])
                             k = j
                             while k > 0 and theResources.getCharacterClass(text[k - 1]) == c:
@@ -2348,7 +2415,7 @@ class FileDiffViewer(gtk.VBox):
                     chardiff = []
                     if text is not None:
                         if ss is None:
-                            ss = self.expand(text)
+                            ss = self.expand(f, text)
 
                         # draw char diffs
                         old_end = 0
@@ -2424,7 +2491,7 @@ class FileDiffViewer(gtk.VBox):
                                 end_char = len(text)
                             if start_char < end_char:
                                 if ss is None:
-                                    ss = self.expand(text)
+                                    ss = self.expand(f, text)
                                 layout = self.create_pango_layout(''.join(ss[:start_char]))
                                 layout.set_font_description(self.font)
                                 x_temp = layout.get_size()[0]
@@ -2487,7 +2554,7 @@ class FileDiffViewer(gtk.VBox):
                     blocks = file.syntax_cache[i][3]
                     if blocks is None:
                         if ss is None:
-                            ss = self.expand(text)
+                            ss = self.expand(f, text)
                         x_temp = 0
                         blocks = []
                         for start, end, tag in file.syntax_cache[i][2]:
@@ -2513,7 +2580,7 @@ class FileDiffViewer(gtk.VBox):
                     if self.mode == CHAR_MODE:
                         if text is not None:
                             if ss is None:
-                                ss = self.expand(text)
+                                ss = self.expand(f, text)
                             layout = self.create_pango_layout(''.join(ss[:self.current_char]))
                             layout.set_font_description(self.font)
                             x_temp = layout.get_size()[0]
@@ -2647,14 +2714,11 @@ class FileDiffViewer(gtk.VBox):
         widget.window.draw_drawable(gc, pixmap, 0, 0, x, y, width, height)
 
     def getMaxCharPosition(self, i):
-        text = self.getLineText(self.current_file, i)
+        f = self.current_file
+        text = self.getLineText(f, i)
         if text is None:
            return 0
-        n = len(text)
-        if n > 0 and text[n - 1] == '\n':
-            n -= 1
-        return n
-
+        return len_minus_line_ending(self.files[f].format, text)
 
     def _line_mode_enter_align_mode(self):
         self.mode = ALIGN_MODE
@@ -2924,7 +2988,7 @@ class FileDiffViewer(gtk.VBox):
                         encoded.append(codecs.encode(s, spec.encoding))
 
                 # write file
-                fd = open(spec.name, 'w')
+                fd = open(spec.name, 'wb')
                 for s in encoded:
                     fd.write(s)
                 fd.close()
@@ -3040,6 +3104,34 @@ class FileDiffViewer(gtk.VBox):
             more = (dialog.run() == gtk.RESPONSE_OK)
             dialog.destroy()
 
+    def convert_to_dos_cb(self, widget, data):
+        self.setLineMode()
+        self.openUndoBlock()
+        self.recordEditMode()
+        f = self.current_file
+        for i in range(len(self.files[f].lines)):
+            text = self.getLineText(f, i)
+            s = convert_to_dos(text)
+            if s != text:
+                self.updateLineText(f, i, True, s)
+        self.setFormat(f, DOS_FORMAT)
+        self.recordEditMode()
+        self.closeUndoBlock()
+
+    def convert_to_unix_cb(self, widget, data):
+        self.setLineMode()
+        self.openUndoBlock()
+        self.recordEditMode()
+        f = self.current_file
+        for i in range(len(self.files[f].lines)):
+            text = self.getLineText(f, i)
+            s = convert_to_unix(text)
+            if s != text:
+                self.updateLineText(f, i, True, s)
+        self.setFormat(f, UNIX_FORMAT)
+        self.recordEditMode()
+        self.closeUndoBlock()
+
     def prefsUpdated(self):
         self.updateSize(True)
         for file in self.files:
@@ -3071,13 +3163,17 @@ class FileDiffViewer(gtk.VBox):
 
     def merge_lines(self, f_dst, f_src):
         self.setLineMode()
+        file = self.files[f_dst]
         start = self.selection_line
         end = self.current_line
         if end < start:
             start, end = end, start
-        end = min(end + 1, len(self.files[0].lines))
-        for i in range(start, end):
-            self.updateText(f_dst, i, self.getLineText(f_src, i))
+        end = min(end + 1, len(file.lines))
+        ss = [ self.getLineText(f_src, i) for i in range(start, end) ]
+        if file.format == 0:
+            self.setFormat(f_dst, getFormat(ss))
+        for i, s in enumerate(ss):
+            self.updateText(f_dst, start + i, convert_to_format(s, file.format))
 
     def merge_lines_cb(self, widget, data):
         self.openUndoBlock()
@@ -3372,7 +3468,10 @@ class Diffuse(gtk.Window):
                      [],
                      [_('_Find...'), self.find_cb, None, gtk.STOCK_FIND, 'find'],
                      [_('Find _Next'), self.find_next_cb, None, None, 'find_next'],
-                     [_('Find Pre_vious'), self.find_previous_cb, None, None, 'find_previous'] ] ])
+                     [_('Find Pre_vious'), self.find_previous_cb, None, None, 'find_previous'],
+                     [],
+                     [_('Convert to _DOS Format'), self.convert_to_dos_cb, None, None, 'convert_to_dos'],
+                     [_('Convert to UNI_X Format'), self.convert_to_unix_cb, None, None, 'convert_to_unix'] ] ])
 
         submenudef = [ [_('None'), self.syntax_cb, None, None, 'no_syntax_highlighting'] ]
         names = theResources.getSyntaxNames()
@@ -3572,6 +3671,12 @@ class Diffuse(gtk.Window):
     def find_previous_cb(self, widget, data):
         self.find(False, True)
 
+    def convert_to_dos_cb(self, widget, data):
+        self.getCurrentViewer().convert_to_dos_cb(widget, data)
+
+    def convert_to_unix_cb(self, widget, data):
+        self.getCurrentViewer().convert_to_unix_cb(widget, data)
+
     def syntax_cb(self, widget, data):
         self.getCurrentViewer().setSyntax(theResources.getSyntax(data))
 
@@ -3661,11 +3766,20 @@ You should have received a copy of the GNU General Public License along with thi
 
 window_width = 1024
 window_height = 768
+window_maximized = 0
 
 def configure_cb(window, event):
     global window_width, window_height
     window_width = event.width
     window_height = event.height
+
+def window_state_cb(window, event):
+    global window_maximized
+    if event.changed_mask & gtk.gdk.WINDOW_STATE_MAXIMIZED:
+        if (event.new_window_state & gtk.gdk.WINDOW_STATE_MAXIMIZED) != 0:
+            window_maximized = 1
+        else:
+            window_maximized = 0
 
 if __name__ == '__main__':
     # load resource files
@@ -3703,6 +3817,8 @@ if __name__ == '__main__':
                     try:
                         if len(a) == 3 and a[0] == 'size':
                             window_width, window_height = int(a[1]), int(a[2])
+                        elif len(a) == 2 and a[0] == 'maximized':
+                            window_maximized = int(a[1])
                         else:
                             raise ValueError()
                     except ValueError:
@@ -3710,6 +3826,7 @@ if __name__ == '__main__':
         except IOError:
             print _('Error reading %s.') % (repr(configpath), )
     diff.connect('configure_event', configure_cb)
+    diff.connect('window_state_event', window_state_cb)
     # process remaining command line arguments
     tab_label = None
     encoding = None
@@ -3796,6 +3913,8 @@ if __name__ == '__main__':
         nb.set_show_tabs(n > 1)
         nb.get_nth_page(0).grab_focus()
         diff.resize(window_width, window_height)
+        if window_maximized:
+            diff.maximize()
         diff.show()
         gtk.main()
         # save state
@@ -3803,6 +3922,7 @@ if __name__ == '__main__':
             f = open(configpath, 'w')
             f.write('# This config file was generated by %s %s.\n\n' % (APP_NAME, VERSION))
             f.write('size %s %s\n' % (window_width, window_height))
+            f.write('maximized %s\n' % (window_maximized, ))
             f.close()
         except IOError:
             print _('Error writing %s.') % (repr(configpath), )

@@ -491,6 +491,20 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>convert_to_dos</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert to DOS Format</guimenuitem></menuchoice> menu item</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>convert_to_unix</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert to UNIX Format</guimenuitem></menuchoice> menu item</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>no_syntax_highlighting</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Syntax Highlighting</guimenuitem><guimenuitem>None</guimenuitem></menuchoice> menu item</para>
