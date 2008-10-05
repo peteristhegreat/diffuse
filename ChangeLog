@@ -1,6 +1,9 @@
 - command line display options
 - man page
-- syntax files for SQL and INI
+- syntax files for more file types
+- DOS / UNIX file formats line endings now respected in edit operations
+- file revisions can now be specified in the open file dialogue
+- improved difference map
 - minor bug fixes
 
 Diffuse 0.2.13 - 2008-05-16

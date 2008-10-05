@@ -234,6 +234,7 @@ class Resources:
             'line_number' : Colour(0.0, 0.0, 0.0),
             'line_number_background' : Colour(0.75, 0.75, 0.75),
             'line_selection' : Colour(0.7, 0.7, 1.0),
+            'map_background' : Colour(0.6, 0.6, 0.6),
             'modified' : Colour(0.5, 1.0, 0.5),
             'text' : Colour(0.0, 0.0, 0.0),
             'text_background' : Colour(1.0, 1.0, 1.0) }
@@ -652,6 +653,15 @@ class Preferences:
         dialog.destroy()
         return accept
 
+class MessageDialog(gtk.MessageDialog):
+    def __init__(self, parent, type, msg):
+        if type == gtk.MESSAGE_QUESTION:
+           buttons = gtk.BUTTONS_OK_CANCEL
+        else:
+           buttons = gtk.BUTTONS_OK
+        gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, type, buttons, msg)
+        self.set_title(APP_NAME)
+
 def cutBlocks(i, blocks):
     pre = []
     post = []
@@ -798,7 +808,7 @@ def appendButtons(box, size, specs):
             separator.show()
 
 def confirmDiscardEdits(parent):
-    dialog = gtk.MessageDialog(parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, _('Discard unsaved changes?'))
+    dialog = MessageDialog(parent, gtk.MESSAGE_QUESTION, _('Discard unsaved changes?'))
     end = (dialog.run() == gtk.RESPONSE_OK)
     dialog.destroy()
     return end
@@ -1861,7 +1871,7 @@ class FileDiffViewer(gtk.VBox):
                     msg = 'Error reading revision %(rev)s of "%(file)s".' % { 'rev': rev, 'file': name }
                 else:
                     msg = 'Error reading %s.' % (repr(name), )
-                dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, msg)
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, msg)
                 dialog.run()
                 dialog.destroy()
                 return
@@ -2641,9 +2651,16 @@ class FileDiffViewer(gtk.VBox):
                 for f in range(n):
                     flag = nextflag
                     nextflag = 0
-                    if f + 1 < n and self.getCompareString(f, i) != self.getCompareString(f + 1, i):
-                        flag |= 2
-                        nextflag |= 1
+                    if f + 1 < n:
+                        s0 = self.getCompareString(f, i)
+                        if s0 is not None:
+                            flag |= 8
+                        s1 = self.getCompareString(f + 1, i)
+                        if s1 is not None:
+                            nextflag |= 8
+                        if s0 != s1:
+                            flag |= 2
+                            nextflag |= 1
                     line = self.getLine(f, i)
                     if line is not None and line.is_modified:
                         flag |= 4
@@ -2662,9 +2679,11 @@ class FileDiffViewer(gtk.VBox):
         cr.translate(-x, -y)
 
         # clear
-        colour = theResources.getColour('text_background')
+        colour = theResources.getColour('map_background')
         cr.set_source_rgb(colour.red, colour.green, colour.blue)
         cr.paint()
+        bg_colour = theResources.getColour('text_background')
+        modified_colour = theResources.getColour('modified')
 
         # get scroll position and total size
         h = widget.get_allocation().height
@@ -2674,26 +2693,37 @@ class FileDiffViewer(gtk.VBox):
 
         # draw diff blocks
         wn = w / n
+        pad = 1
         for f in range(n):
             diffcolours = [ theResources.getDifferenceColour(f), theResources.getDifferenceColour(f + 1) ]
             diffcolours.append((diffcolours[0] + diffcolours[1]) * 0.5)
             wx = f * wn
-            for start, end, flag in self.map_cache[f]:
-                # ensure the line is visible in the map
-                ymin = h * self.font_height * start // hmax
-                if ymin >= y + height:
-                    break
-                yh = max(h * self.font_height * end // hmax - ymin, 1)
-                if ymin + yh <= y:
-                    continue
+            # draw in two passes, more important stuff in the second pass
+            # this ensures less important stuff does not obscure more important
+            # data
+            for p in range(2):
+                for start, end, flag in self.map_cache[f]:
+                    if p == 0 and flag & 8:
+                        colour = bg_colour
+                    elif p == 1 and flag & 7:
+                        if flag & 4:
+                            colour = modified_colour
+                        else:
+                            colour = diffcolours[(flag & 3) - 1]
+                    else:
+                        continue
 
-                if flag & 4:
-                    colour = theResources.getColour('modified')
-                else:
-                    colour = diffcolours[flag - 1]
-                cr.set_source_rgb(colour.red, colour.green, colour.blue)
-                cr.rectangle(wx, ymin, wn, yh)
-                cr.fill()
+                    # ensure the line is visible in the map
+                    ymin = h * self.font_height * start // hmax
+                    if ymin >= y + height:
+                        break
+                    yh = max(h * self.font_height * end // hmax - ymin, 1)
+                    if ymin + yh <= y:
+                        continue
+
+                    cr.set_source_rgb(colour.red, colour.green, colour.blue)
+                    cr.rectangle(wx + pad, ymin, wn - 2 * pad, yh)
+                    cr.fill()
 
         # draw cursor
         vmin = int(vadj.get_value())
@@ -2969,7 +2999,7 @@ class FileDiffViewer(gtk.VBox):
             dialog.destroy()
         if spec.name is not None:
             if save_as and os.path.exists(spec.name):
-                dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, _('Overwrite existing file?'))
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, _('Overwrite existing file?'))
                 end = (dialog.run() != gtk.RESPONSE_OK)
                 dialog.destroy()
                 if end:
@@ -3003,11 +3033,11 @@ class FileDiffViewer(gtk.VBox):
                 if syntax is not None:
                     self.setSyntax(syntax)
             except UnicodeEncodeError:
-                dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, _('Error ecoding to %s.') % (repr(spec.encoding), ))
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error ecoding to %s.') % (repr(spec.encoding), ))
                 dialog.run()
                 dialog.destroy()
             except IOError:
-                dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, _('Error writing %s.') % (repr(spec.name), ))
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(spec.name), ))
                 dialog.run()
                 dialog.destroy()
 
@@ -3099,7 +3129,7 @@ class FileDiffViewer(gtk.VBox):
             else:
                 msg = _('Phrase not found.  Continue from the start of the file?')
                 i = 0
-            dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_QUESTION, gtk.BUTTONS_OK_CANCEL, msg)
+            dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
             dialog.set_default_response(gtk.RESPONSE_OK)
             more = (dialog.run() == gtk.RESPONSE_OK)
             dialog.destroy()

@@ -1,7 +1,7 @@
 # INI syntax file for Diffuse
 # (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
 syntax INI normal text
-syntax_files INI '\.(ini|cfg|conf|properties)$'
+syntax_files INI '\.(ini|cfg|conf|properties|url)$'
 
 # comments
 syntax_pattern normal comment ini_comment '^[#;]'

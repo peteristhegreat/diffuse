@@ -1148,7 +1148,7 @@
           <varlistentry>
             <term><userinput>line_number_background</userinput></term>
             <listitem>
-              <para>colour of background in line number area</para>
+              <para>background colour for the line number area</para>
             </listitem>
           </varlistentry>
 
@@ -1156,6 +1156,13 @@
             <term><userinput>line_selection</userinput></term>
             <listitem>
               <para>colour used to indicate selected lines</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>map_background</userinput></term>
+            <listitem>
+              <para>background colour for the map area</para>
             </listitem>
           </varlistentry>
 
@@ -1176,7 +1183,7 @@
           <varlistentry>
             <term><userinput>text_background</userinput></term>
             <listitem>
-              <para>colour of background in text area</para>
+              <para>background colour for the text area</para>
             </listitem>
           </varlistentry>
 
