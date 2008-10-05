@@ -2708,8 +2708,10 @@ class FileDiffViewer(gtk.VBox):
                     elif p == 1 and flag & 7:
                         if flag & 4:
                             colour = modified_colour
-                        else:
+                        elif flag & 8:
                             colour = diffcolours[(flag & 3) - 1]
+                        else:
+                            continue
                     else:
                         continue
 
