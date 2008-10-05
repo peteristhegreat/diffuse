@@ -882,10 +882,12 @@ def convert_to_format(s, format):
    return s
 
 def shellEscape(s):
-    # FIXME: what should be done on non-POSIX systems?
-    if len(s) == 0:
-        return "''"
-    return s.replace('', '\\')[:-1]
+    if os.name == 'posix':
+        if len(s) == 0:
+            return "''"
+        return s.replace('', '\\')[:-1]
+    else:
+        return '"' + s + '"'
 
 def shellEscapeFile(s):
     # prevent oldly named files from being mistaken as options for
@@ -2930,7 +2932,7 @@ class FileDiffViewer(gtk.VBox):
                     self.current_char = j
                 self.replaceText('')
             elif event.keyval == gtk.keysyms.Return:
-                self.replaceText(u'\n')
+                self.replaceText(unicode(os.linesep))
             elif event.keyval == gtk.keysyms.Tab:
                 self.replaceText(u'\t')
             elif len(event.string) > 0:
