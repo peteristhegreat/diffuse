@@ -2651,19 +2651,21 @@ class FileDiffViewer(gtk.VBox):
                 for f in range(n):
                     flag = nextflag
                     nextflag = 0
+                    s0 = self.getCompareString(f, i)
                     if f + 1 < n:
-                        s0 = self.getCompareString(f, i)
-                        if s0 is not None:
-                            flag |= 8
-                        s1 = self.getCompareString(f + 1, i)
-                        if s1 is not None:
-                            nextflag |= 8
-                        if s0 != s1:
+                        if s0 != self.getCompareString(f + 1, i):
                             flag |= 2
                             nextflag |= 1
                     line = self.getLine(f, i)
                     if line is not None and line.is_modified:
-                        flag |= 4
+                        # modified line
+                        flag = 4
+                    elif s0 is None:
+                        # empty line
+                        flag = 0
+                    elif flag == 0:
+                        # regular line
+                        flag = 8
                     if flags[f] != flag:
                         if flags[f] != 0:
                             self.map_cache[f].append([start[f], i, flags[f]])
@@ -2703,15 +2705,13 @@ class FileDiffViewer(gtk.VBox):
             # data
             for p in range(2):
                 for start, end, flag in self.map_cache[f]:
-                    if p == 0 and flag & 8:
+                    if p == 0 and flag == 8:
                         colour = bg_colour
                     elif p == 1 and flag & 7:
                         if flag & 4:
                             colour = modified_colour
-                        elif flag & 8:
-                            colour = diffcolours[(flag & 3) - 1]
                         else:
-                            continue
+                            colour = diffcolours[(flag & 3) - 1]
                     else:
                         continue
 
@@ -2736,6 +2736,12 @@ class FileDiffViewer(gtk.VBox):
             if yh > 1:
                 yh -= 1
             if ymin + yh > y:
+                colour = theResources.getColour('line_selection')
+                alpha = theResources.getFloat('line_selection_alpha')
+                cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
+                cr.rectangle(0.5, ymin + 0.5, w - 1, yh - 1)
+                cr.fill()
+
                 colour = theResources.getColour('cursor')
                 cr.set_source_rgb(colour.red, colour.green, colour.blue)
                 cr.set_line_width(1)
