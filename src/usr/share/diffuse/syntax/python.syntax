@@ -30,7 +30,8 @@ syntax_pattern single_string single_string python_string "[^\\\\']+"
 syntax_pattern single_string single_string python_escapedchar '(\\([0-7]{1,3}|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}U[0-9a-fA-F]{8}|N\{[^\}]*\}|.))+'
 
 # literals
-syntax_pattern normal normal python_literal '\b((0|[1-9][0-9]*)(\.[0-9]*)?(e[\+\-]?[0-9]+)?|0[0-7]*|0x[0-9a-f]+)\b' ignorecase
+syntax_pattern normal normal python_literal '(([0-9]+\.[0-9]*|\.[0-9]+)(e[\+\-]?[0-9]+)?|[0-9]+e[\+\-]?[0-9]+|0[0-7]*|[1-9][0-9]*|0x[0-9a-f]+)' ignorecase
+syntax_pattern normal normal python_literal '\b(None|True|False)\b'
 
 # types
 syntax_pattern normal normal python_type '\b(bool|buffer|builtin_function_or_method|classobj|code|complex|dict|dictproxy|ellipsis|file|float|frame|function|generator|instance|instancemethod|int|list|long|module|object|slice|str|traceback|tuple|type|unicode|xrange|NoneType|NotImplementedType)\b'
@@ -40,9 +41,6 @@ syntax_pattern normal normal python_keyword '\b(and|as|assert|break|continue|del
 
 # special kewords
 syntax_pattern normal normal python_import '\b(from|import)\b'
-
-# special words
-syntax_pattern normal normal python_reserved '\b(None|True|False)\b'
 
 # function/class definitions
 syntax_pattern normal declaration python_keyword '\b(class|def)\b'
@@ -62,7 +60,6 @@ colour python_fixme 1.0 0.5 0.0
 colour python_keyword 0.77 0.63 0.0
 colour python_type 0.3 0.6 0.02
 colour python_import 0.46 0.31 0.48
-colour python_reserved 0.64 0.56 0.25
 colour python_literal 1.0 0.2 0.8
 colour python_string 0.8 0.0 0.0
 colour python_escapedchar 0.46 0.31 0.48

@@ -37,7 +37,8 @@ syntax_pattern string string pascal_string ".[^']*"
 syntax_pattern normal normal pascal_escapedchar '#[0-9]+'
 
 # literals
-syntax_pattern normal normal pascal_literal '(([0-9]*\.)?[0-9]+(e[\+\-]?[0-9]+)?|\$[0-9a-f]+|%[01]+|false|true|nil)\b' ignorecase
+syntax_pattern normal normal pascal_literal '([0-9]+(\.[0-9]*)?(e[\+\-]?[0-9]+)?|\$[0-9a-f]+|%[01]+)' ignorecase
+syntax_pattern normal normal pascal_literal '\b(false|true|nil)\b' ignorecase
 
 # import keywords
 syntax_pattern normal normal pascal_import '\b(program|unit|uses)\b' ignorecase

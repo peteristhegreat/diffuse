@@ -53,7 +53,7 @@ syntax_pattern script_string script_expr html_script_string '"'
 syntax_pattern script_string script_string html_script_string '.[^\\"<]*'
 
 # literals
-syntax_pattern script script_expr html_script_literal '\b((0|[1-9][0-9]*)((\.[0-9]*)?(e[\+\-]?[0-9]+)?[fl]?|[ul]?)|0[0-7]*|0x[0-9a-f]+)\b' ignorecase
+syntax_pattern script script_expr html_script_literal '(((0|[1-9][0-9]*)(\.[0-9]*)?|\.[0-9]+)(e[\+\-]?[0-9]+)?|0[0-7]*|0x[0-9a-f]+)' ignorecase
 syntax_pattern script script_expr html_script_literal '\b(true|false|Infinity|NaN|null|undefined)\b'
 
 # import keywords
@@ -123,7 +123,7 @@ syntax_pattern style_singlestring style_singlestring html_style_string ".[^'<]*"
 
 # property
 syntax_pattern style_property style html_style_block '\}'
-syntax_pattern style_property style_property html_style_literal '([\+\-]?([0-9]+|[0-9]*\.[0-9]*)(em|pt|px|%)?|#[0-9a-f]+)' ignorecase
+syntax_pattern style_property style_property html_style_literal '([\+\-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)(em|pt|px|%)?|#[0-9a-f]+)' ignorecase
 syntax_pattern style_property style_property html_style_important '![ \t]*important\b'
 syntax_pattern style_property style_property html_style_property '[a-z0-9_\-]+' ignorecase
 syntax_pattern style_property style_property html_style_punctuation '[,\(\)=:;]+'

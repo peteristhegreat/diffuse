@@ -33,7 +33,7 @@ syntax_pattern singlestring singlestring css_string ".[^']*"
 
 # property
 syntax_pattern property normal css_block '\}'
-syntax_pattern property property css_literal '([\+\-]?([0-9]+|[0-9]*\.[0-9]*)(em|pt|px|%)?|#[0-9a-f]+)' ignorecase
+syntax_pattern property property css_literal '([\+\-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)(em|pt|px|%)?|#[0-9a-f]+)' ignorecase
 syntax_pattern property property css_important '![ \t]*important\b'
 syntax_pattern property property css_property '[a-z0-9_\-]+' ignorecase
 syntax_pattern property property css_punctuation '[,\(\)=:;]+'

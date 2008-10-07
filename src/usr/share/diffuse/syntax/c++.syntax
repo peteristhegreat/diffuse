@@ -44,7 +44,7 @@ syntax_pattern string string c++_escapedchar '(\\([0-7]{1,3}|x[0-9a-f]{1,2}|.))+
 syntax_pattern string string c++_string '.[^\\"]*'
 
 # literals
-syntax_pattern normal normal c++_literal '\b([0-9]*\.[0-9]+(e[\+\-]?[0-9]+)?[fl]?|(0|[1-9][0-9]*)[fl]|(0[0-7]*|[1-9][0-9]*|0x[0-9a-f]+)(u|l|ul|lu)?)\b' ignorecase
+syntax_pattern normal normal c++_literal '((([0-9]+\.[0-9]*|\.[0-9]+)(e[\+\-]?[0-9]+)?|[0-9]+e[\+\-]?[0-9]+)[fl]?|(0|[1-9][0-9]*)f|(0[0-7]*|[1-9][0-9]*|0x[0-9a-f]+)(ul?|lu?)?)' ignorecase
 syntax_pattern normal normal c++_literal '\b(true|false)\b'
 
 # typing keywords

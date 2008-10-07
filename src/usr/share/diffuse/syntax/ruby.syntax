@@ -35,7 +35,7 @@ syntax_pattern backquote backquote ruby_escapedchar '\\([0-7]{1,3}|x[0-9a-fA-F]{
 syntax_pattern backquote backquote ruby_string '.[^\\`]*'
 
 # literals
-syntax_pattern normal expr ruby_literal '\b((0|[1-9][0-9]*)(\.[0-9]*)?(e[\+\-]?[0-9]+)?|0[0-7]*|0x[0-9a-f]+)\b' ignorecase
+syntax_pattern normal expr ruby_literal '(((0|[1-9][0-9])*\.[0-9]*|\.[0-9]+)(e[\+\-]?[0-9]+)?|(0|[1-9][0-9]*)e[\+\-]?[0-9]+|0[0-7]*|[1-9][0-9]*|0x[0-9a-f]+)' ignorecase
 syntax_pattern normal expr ruby_literal '\b(false|FALSE|nil|NIL|true|TRUE|__FILE__|__LINE__)\b'
 syntax_pattern normal expr ruby_literal '\?(\C-|\M-(\C-)?)?[^ \t\r\n]'
 

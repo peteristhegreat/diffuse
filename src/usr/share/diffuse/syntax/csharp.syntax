@@ -32,7 +32,7 @@ syntax_pattern verbatim verbatim csharp_escapedchar '""'
 syntax_pattern verbatim normal csharp_string '"'
 
 # literals
-syntax_pattern normal normal csharp_literal '\b([0-9]*\.[0-9]+(e[\+\-]?[0-9]+)?[dfm]?|[0-9]+[dfm]|(0[0-7]*|[1-9][0-9]*|0x[0-9a-f]+)(u|l|ul|lu)?)\b' ignorecase
+syntax_pattern normal normal csharp_literal '((([0-9]+\.[0-9]*|\.[0-9]+)(e[\+\-]?[0-9]+)?|[0-9]+e[\+\-]?[0-9]+)[dfm]?|[0-9]+[dfm]|(0[0-7]*|[1-9][0-9]*|0x[0-9a-f]+)(ul?|lu?)?)' ignorecase
 syntax_pattern normal normal csharp_literal '\b(true|false|null)\b'
 
 # import keywords

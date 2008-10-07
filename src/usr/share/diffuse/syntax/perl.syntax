@@ -35,7 +35,7 @@ syntax_pattern backquote backquote perl_variable '(@|\$#?|%)[a-z_][a-z_0-9]*\b' 
 syntax_pattern backquote backquote perl_string '.[^\\`@\$%]*'
 
 # literals
-syntax_pattern normal expr perl_literal '\b((0|[1-9][0-9]*)(\.[0-9]*)?(e[\+\-]?[0-9]+)?|0[0-7]*|0x[0-9a-f]+)\b' ignorecase
+syntax_pattern normal expr perl_literal '(((0|[1-9][0-9])*\.[0-9]*|\.[0-9]+)(e[\+\-]?[0-9]+)?|(0|[1-9][0-9]*)e[\+\-]?[0-9]+|0[0-7]*|[1-9][0-9]*|0x[0-9a-f]+)' ignorecase
 
 # variable
 syntax_pattern normal expr perl_variable "(@(\\+|-|[A-Za-z_][A-Za-z0-9_]*)?|%(\\+|-|!|^H|[A-Za-z_][A-Za-z0-9_]*)?|\\$([\\?&`'\\+\\./\\|,\\\\\\\";%=\\-~^:!\\$<>\\(\\)\\[\\]]|^[ACDEFHIMNOPRSTVWX]|#?[A-Za-z0-9_]+)?)"
