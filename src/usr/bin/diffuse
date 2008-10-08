@@ -95,6 +95,7 @@ import os
 import re
 import shlex
 import string
+import webbrowser
 
 class Colour:
     def __init__(self, r, g, b, a=1.0):
@@ -158,6 +159,18 @@ class SyntaxParser:
             for transition in transitions:
                 symbols[transition[1]] = None
         return symbols.keys()
+
+def getLocalisedDir(s):
+    lang = locale.getdefaultlocale()[0]
+    path = os.path.join(s, lang)
+    if os.path.exists(path):
+        return path
+    postfix = lang.index('_')
+    if postfix > 0:
+        path = os.path.join(s, lang[:postfix])
+        if os.path.exists(path):
+            return path
+    return os.path.join(s, 'C')
 
 class Resources:
     def __init__(self):
@@ -256,14 +269,17 @@ class Resources:
            'darcs_default_revision': '',
            'git_bin': 'git',
            'git_default_revision': 'HEAD',
-           'help_browser': 'gnome-help',
-           'help_dir': '/usr/share/gnome/help/diffuse',
+           'help_browser': '',
+           'help_file': 'http://diffuse.sourceforge.net/manual.html',
            'hg_bin': 'hg',
            'hg_default_revision': 'tip',
            'mtn_bin': 'mtn',
            'mtn_default_revision': 'h:',
            'svn_bin': 'svn',
            'svn_default_revision': 'BASE' }
+        if sys.platform == 'linux2':
+           self.strings['help_browser'] = 'gnome-help'
+           self.strings['help_file'] = os.path.join(getLocalisedDir('/usr/share/gnome/help/diffuse'), 'diffuse.xml')
         self.unknown_strings = {}
         self.default_colour = Colour(0.0, 0.0, 0.0)
         self.char_classes = {}
@@ -399,7 +415,6 @@ class Resources:
         if not self.unknown_strings.has_key(symbol):
             print _('Warning: unknown string %s') % (repr(symbol), )
             self.unknown_strings[symbol] = None
-        return None
 
     # attempt to string to unicode from unknown encoding
     def convertToUnicode(self, ss):
@@ -816,18 +831,6 @@ def confirmDiscardEdits(parent):
 LINE_MODE = 0
 CHAR_MODE = 1
 ALIGN_MODE = 2
-
-def getLocalisedDir(s):
-    lang = locale.getdefaultlocale()[0]
-    path = os.path.join(s, lang)
-    if os.path.exists(path):
-        return path
-    postfix = lang.index('_')
-    if postfix > 0:
-        path = os.path.join(s, lang[:postfix])
-        if os.path.exists(path):
-            return path
-    return os.path.join(s, 'C')
 
 def has_dos_line_ending(s):
     return s is not None and len(s) > 1 and s[-2:] == '\r\n'
@@ -3773,11 +3776,13 @@ class Diffuse(gtk.Window):
         self.getCurrentViewer().isolate_cb(widget, data)
 
     def help_contents_cb(self, widget, data):
-        args = shlex.split(theResources.getString('help_browser'), True)
-        if len(args) > 0:
-            help_dir = theResources.getString('help_dir')
-            path = os.path.join(getLocalisedDir(help_dir), 'diffuse.xml')
-            args.append(path)
+        args = [ theResources.getString('help_browser'), theResources.getString('help_file') ]
+        if args[0] == '':
+            webbrowser.open(args[1])
+        elif os.name == 'nt':
+            # spawnvp does not exist on nt
+            os.spawnv(os.P_NOWAIT, args[0], args)
+        else:
             os.spawnvp(os.P_NOWAIT, args[0], args)
 
     def about_cb(self, widget, data):

@@ -1014,9 +1014,9 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>help_dir</userinput></term>
+            <term><userinput>help_file</userinput></term>
             <listitem>
-              <para>directory containing the localised help documents</para>
+              <para>path to the help document</para>
             </listitem>
           </varlistentry>
 
