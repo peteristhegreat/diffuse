@@ -160,6 +160,13 @@ class SyntaxParser:
                 symbols[transition[1]] = None
         return symbols.keys()
 
+def getExePath(s):
+    if os.environ.has_key('PATH'):
+        for p in os.environ['PATH'].split(os.pathsep):
+            fp = os.path.join(p, s)
+            if os.path.isfile(fp):
+                return fp
+
 def getLocalisedDir(s):
     lang = locale.getdefaultlocale()[0]
     path = os.path.join(s, lang)
@@ -270,15 +277,17 @@ class Resources:
            'git_bin': 'git',
            'git_default_revision': 'HEAD',
            'help_browser': '',
-           'help_file': 'http://diffuse.sourceforge.net/manual.html',
+           'help_file': '',
+           'help_url': 'http://diffuse.sourceforge.net/manual.html',
            'hg_bin': 'hg',
            'hg_default_revision': 'tip',
            'mtn_bin': 'mtn',
            'mtn_default_revision': 'h:',
            'svn_bin': 'svn',
            'svn_default_revision': 'BASE' }
-        if sys.platform == 'linux2':
-           self.strings['help_browser'] = 'gnome-help'
+        help_browser = getExePath('gnome-help')
+        if help_browser is not None:
+           self.strings['help_browser'] = help_browser
            self.strings['help_file'] = os.path.join(getLocalisedDir('/usr/share/gnome/help/diffuse'), 'diffuse.xml')
         self.unknown_strings = {}
         self.default_colour = Colour(0.0, 0.0, 0.0)
@@ -2204,7 +2213,6 @@ class FileDiffViewer(gtk.VBox):
     def button_press(self, f, x, y, extend):
         i = min(int(y // self.font_height), len(self.files[f].lines))
         if self.mode == CHAR_MODE and f == self.current_file:
-            self.current_file = f
             text = strip_line_ending(self.files[f].format, self.getLineText(f, i))
             j = self.getPickedCharacter(f, text, x, True)
             self.setCurrentChar(i, j, extend)
@@ -2219,7 +2227,9 @@ class FileDiffViewer(gtk.VBox):
         if event.button == 1:
             if event.type == gtk.gdk._2BUTTON_PRESS:
                 if self.mode == LINE_MODE:
-                    self.setCharMode()
+                    self.setCurrentLine(f, i)
+                    # silently switch mode so the viewer does not scroll yet.
+                    self.mode = CHAR_MODE
                     self.button_press(f, event.x, event.y, False)
                 elif self.mode == CHAR_MODE and self.current_file == f:
                     text = strip_line_ending(self.files[f].format, self.getLineText(f, i))
@@ -3776,14 +3786,13 @@ class Diffuse(gtk.Window):
         self.getCurrentViewer().isolate_cb(widget, data)
 
     def help_contents_cb(self, widget, data):
-        args = [ theResources.getString('help_browser'), theResources.getString('help_file') ]
-        if args[0] == '':
-            webbrowser.open(args[1])
-        elif os.name == 'nt':
-            # spawnvp does not exist on nt
-            os.spawnv(os.P_NOWAIT, args[0], args)
+        browser = theResources.getString('help_browser')
+        if browser == '':
+            webbrowser.open(theResources.getString('help_url'))
         else:
-            os.spawnvp(os.P_NOWAIT, args[0], args)
+            args = [ browser, theResources.getString('help_file') ]
+            # spawnvp is not available on some systems, use spawnv instead
+            os.spawnv(os.P_NOWAIT, args[0], args)
 
     def about_cb(self, widget, data):
         dialog = gtk.AboutDialog()

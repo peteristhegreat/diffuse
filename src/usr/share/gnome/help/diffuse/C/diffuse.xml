@@ -1021,6 +1021,13 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>help_url</userinput></term>
+            <listitem>
+              <para>URL of the on-line help document</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>hg_bin</userinput></term>
             <listitem>
               <para>executable used to query mercurial repositories</para>

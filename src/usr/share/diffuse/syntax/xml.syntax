@@ -1,7 +1,7 @@
 # XML syntax file for Diffuse
 # Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
 syntax XML normal text
-syntax_files XML '\.(dtd|svg|xhtml|xml|xsd|xsl)$'
+syntax_files XML '\.(dtd|omf|svg|xhtml|xml|xsd|xsl)$'
 
 # whitespace/comments
 syntax_pattern normal normal text '[ \t\r\n]+'
