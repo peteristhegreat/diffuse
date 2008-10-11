@@ -913,13 +913,6 @@
         <variablelist>
 
           <varlistentry>
-            <term><userinput>auto_detect_encodings</userinput></term>
-            <listitem>
-              <para>a list of encodings to try when attempting to identify a file's encoding</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><userinput>character_classes</userinput></term>
             <listitem>
               <para>describes mapping used to identify characters of a similar class for selection when double clicking</para>
@@ -940,13 +933,6 @@
             <term><userinput>difference_colours</userinput></term>
             <listitem>
               <para>a list of colour resources used to indicate differences</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>font</userinput></term>
-            <listitem>
-              <para>font used to render text</para>
             </listitem>
           </varlistentry>
 

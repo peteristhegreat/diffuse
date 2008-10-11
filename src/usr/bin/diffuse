@@ -284,16 +284,8 @@ class Resources:
 
         self.resource_files = {}
 
-        encs = {}
-        for e in encodings.aliases.aliases.values():
-            encs[e] = None
-        self.encodings = encs.keys()
-        self.encodings.sort()
-
-        self.setFont('monospace 10')
         self.setDifferenceColours('difference_1 difference_2 difference_3')
         self.setCharacterClasses('48-57:48 65-90:48 97-122:48 95:48 9:32')
-        self.setAutoDetectEncodings('utf_8 latin_1')
 
     # keyboard action processing
     def setKeyBinding(self, ctx, s, v):
@@ -339,13 +331,6 @@ class Resources:
             return [ t for c, t in self.keybindings[tuple].keys() ]
         return []
 
-    # display font
-    def setFont(self, s):
-        self.font = pango.FontDescription(s)
-
-    def getFont(self):
-        return self.font
-
     # colours used for indicating differences
     def setDifferenceColours(self, s):
         colours = s.split()
@@ -373,18 +358,6 @@ class Resources:
             return self.char_classes[c]
         return c
 
-    # default codecs used for reading reading and writing files
-    def setAutoDetectEncodings(self, s):
-        self.auto_detect_encodings = s.split()
-
-    def getDefaultEncoding(self):
-        if len(self.auto_detect_encodings) > 1:
-            return self.auto_detect_encodings[0]
-        return 'utf_8'
-
-    def getEncodings(self):
-        return self.encodings
-
     # colour resources
     def getColour(self, symbol):
         if self.colours.has_key(symbol):
@@ -410,15 +383,6 @@ class Resources:
         if not self.unknown_strings.has_key(symbol):
             print _('Warning: unknown string %s') % (repr(symbol), )
             self.unknown_strings[symbol] = None
-
-    # attempt to string to unicode from unknown encoding
-    def convertToUnicode(self, ss):
-        for encoding in self.auto_detect_encodings:
-            try:
-                return ([ unicode(s, encoding) for s in ss ], encoding)
-            except (UnicodeDecodeError, LookupError):
-                pass
-        return ([ ''.join([unichr(ord(c)) for c in s]) for s in ss ], None)
 
     # syntax highlighting
     def getSyntaxNames(self):
@@ -466,14 +430,10 @@ class Resources:
                            self.floats[args[1]] = float(args[2])
                        elif args[0] == 'string' and len(args) == 3:
                            self.strings[args[1]] = args[2]
-                           if args[1] == 'font':
-                               self.setFont(args[2])
-                           elif args[1] == 'difference_colours':
+                           if args[1] == 'difference_colours':
                                self.setDifferenceColours(args[2])
                            elif args[1] == 'character_classes':
                                self.setCharacterClasses(args[2])
-                           elif args[1] == 'auto_detect_encodings':
-                               self.setAutoDetectEncodings(args[2])
                        elif args[0] == 'syntax' and len(args) == 4:
                            self.current_syntax = SyntaxParser(args[2], args[3])
                            self.syntaxes[args[1]] = self.current_syntax
@@ -525,27 +485,46 @@ class FileEntry(gtk.HBox):
     def get_text(self):
         return self.entry.get_text()
 
+class FontButton(gtk.FontButton):
+    def __init__(self):
+        gtk.FontButton.__init__(self)
+
+    def get_text(self):
+        return self.get_font_name()
+
 class Preferences:
     def __init__(self):
         self.bool_prefs = {}
         self.int_prefs = {}
         self.string_prefs = {}
+
+        encs = {}
+        for e in encodings.aliases.aliases.values():
+            encs[e] = None
+        self.encodings = encs.keys()
+        self.encodings.sort()
+
         self.template = [ 'FolderSet',
-            _('Viewer'),
+            _('Display'),
             [ 'List',
-              [ 'Boolean', 'viewer_ignore_whitespace', False, _('Ignore White Space') ],
-              [ 'Boolean', 'viewer_ignore_whitespace_changes', False, _('Ignore Changes to White Space') ],
-              [ 'Boolean', 'viewer_ignore_blanklines', False, _('Ignore Blank Lines') ],
-              [ 'Boolean', 'viewer_ignore_case', False, _('Ignore Case') ],
-              [ 'Boolean', 'viewer_hide_endofline', True, _('Hide End of Line Characters') ],
-              [ 'Integer', 'viewer_tab_width', 8, _('Tab Width') ]
+              [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore White Space') ],
+              [ 'Boolean', 'display_ignore_whitespace_changes', False, _('Ignore Changes to White Space') ],
+              [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore Blank Lines') ],
+              [ 'Boolean', 'display_ignore_case', False, _('Ignore Case') ],
+              [ 'Boolean', 'display_hide_endofline', True, _('Hide End of Line Characters') ],
+              [ 'Font', 'display_font', 'Monospace 10', _('Font') ],
+              [ 'Integer', 'display_tab_width', 8, _('Tab Width') ]
             ],
             _('Alignment'),
             [ 'List',
-              [ 'Boolean', 'align_ignore_whitespace', False, _('Ignore White Space') ],
+              [ 'Boolean', 'align_ignore_whitespace', True, _('Ignore White Space') ],
               [ 'Boolean', 'align_ignore_whitespace_changes', False, _('Ignore Changes to White Space') ],
               [ 'Boolean', 'align_ignore_blanklines', False, _('Ignore Blank Lines') ],
               [ 'Boolean', 'align_ignore_case', False, _('Ignore Case') ]
+            ],
+            _('Encoding'),
+            [ 'List',
+              [ 'String', 'encoding_auto_detect', 'utf_8 latin_1', _('Auto Detect') ]
             ],
             _('Version Control'),
             [ 'FolderSet',
@@ -622,7 +601,7 @@ class Preferences:
             self.bool_prefs[template[1]] = template[2]
         elif template[0] == 'Integer':
             self.int_prefs[template[1]] = template[2]
-        elif template[0] == 'String' or template[0] == 'File':
+        elif template[0] in [ 'String', 'File', 'Font' ]:
             self.string_prefs[template[1]] = template[2]
 
     def runDialog(self, parent):
@@ -688,7 +667,7 @@ class Preferences:
             i = 1
             while i < len(template):
                 n = 0
-                while i + n < len(template) and template[i + n][0] in [ 'String', 'File' ]:
+                while i + n < len(template) and template[i + n][0] in [ 'String', 'File', 'Font', 'Integer' ]:
                     n += 1
                 if n > 0:
                     w = gtk.Table(2, n)
@@ -698,12 +677,26 @@ class Preferences:
                         label.set_alignment(1.0, 0.5)
                         w.attach(label, 0, 1, j, j + 1, gtk.FILL, gtk.FILL)
                         label.show()
-                        if tpl[0] == 'File':
-                            entry = FileEntry(parent, tpl[3])
+                        if tpl[0] in [ 'Font', 'Integer' ]:
+                            entry = gtk.HBox()
+                            if tpl[0] == 'Font':
+                                button = FontButton()
+                                button.set_font_name(self.string_prefs[tpl[1]])
+                            else:
+                                button = gtk.SpinButton()
+                                button.set_range(1, 128)
+                                button.set_value(self.int_prefs[tpl[1]])
+                                button.set_increments(1, 1)
+                            widgets[tpl[1]] = button
+                            entry.pack_start(button, False, False, 0)
+                            button.show()
                         else:
-                            entry = gtk.Entry()
-                        widgets[tpl[1]] = entry
-                        entry.set_text(self.string_prefs[tpl[1]])
+                            if tpl[0] == 'File':
+                                entry = FileEntry(parent, tpl[3])
+                            else:
+                                entry = gtk.Entry()
+                            widgets[tpl[1]] = entry
+                            entry.set_text(self.string_prefs[tpl[1]])
                         w.attach(entry, 1, 2, j, j + 1, gtk.EXPAND|gtk.FILL, gtk.FILL)
                         entry.show()
                     i += n
@@ -718,19 +711,6 @@ class Preferences:
             widgets[template[1]] = button
             button.set_active(self.bool_prefs[template[1]])
             return button
-        elif type == 'Integer':
-            hbox = gtk.HBox()
-            label = gtk.Label(template[3] + ': ')
-            hbox.pack_start(label, False, False, 0)
-            label.show()
-            button = gtk.SpinButton()
-            widgets[template[1]] = button
-            button.set_range(1, 128)
-            button.set_value(self.int_prefs[template[1]])
-            button.set_increments(1, 1)
-            hbox.pack_start(button, False, False, 0)
-            button.show()
-            return hbox
 
     def getBool(self, name):
         return self.bool_prefs[name]
@@ -743,6 +723,27 @@ class Preferences:
 
     def getString(self, name):
         return self.string_prefs[name]
+
+    def getEncodings(self):
+        return self.encodings
+
+    def _getDefaultEncodings(self):
+        return self.string_prefs['encoding_auto_detect'].split()
+
+    def getDefaultEncoding(self):
+        encodings = self._getDefaultEncodings()
+        if len(encodings) > 0:
+            return encodings[0]
+        return 'utf_8'
+
+    # attempt to string to unicode from unknown encoding
+    def convertToUnicode(self, ss):
+        for encoding in self._getDefaultEncodings():
+            try:
+                return ([ unicode(s, encoding) for s in ss ], encoding)
+            except (UnicodeDecodeError, LookupError):
+                pass
+        return ([ ''.join([unichr(ord(c)) for c in s]) for s in ss ], None)
 
 class MessageDialog(gtk.MessageDialog):
     def __init__(self, parent, type, msg):
@@ -1116,15 +1117,16 @@ class VCSs:
 theVCSs = VCSs()
 
 class FileChooserDialog(gtk.FileChooserDialog):
-    def __init__(self, title, parent, action, accept):
+    def __init__(self, title, parent, prefs, action, accept):
         gtk.FileChooserDialog.__init__(self, title, parent, action, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, accept, gtk.RESPONSE_OK))
+        self.prefs = prefs
         hbox = gtk.HBox()
         label = gtk.Label(_('Encoding: '))
         hbox.pack_start(label, False, False, 0)
         label.show()
         combobox = gtk.combo_box_new_text()
         self.combobox = combobox
-        self.encodings = theResources.getEncodings()
+        self.encodings = prefs.getEncodings()
         for e in self.encodings:
             combobox.append_text(e)
         if action == gtk.FILE_CHOOSER_ACTION_OPEN:
@@ -1149,7 +1151,7 @@ class FileChooserDialog(gtk.FileChooserDialog):
 
     def set_encoding(self, encoding):
         if encoding not in self.encodings:
-            encoding = theResources.getDefaultEncoding()
+            encoding = self.prefs.getDefaultEncoding()
         if encoding in self.encodings:
             self.combobox.set_active(self.encodings.index(encoding))
 
@@ -1365,20 +1367,24 @@ class FileDiffViewer(gtk.VBox):
         statusbar.show()
 
         # font
-        self.font = theResources.getFont()
-        metrics = self.get_pango_context().get_metrics(self.font)
-        self.font_height = max(pango.PIXELS(metrics.get_ascent() + metrics.get_descent()), 1)
-        self.digit_width = metrics.get_approximate_digit_width()
-        self.updateSize(True)
+        self.setFont(pango.FontDescription(prefs.getString('display_font')))
 
         # scroll to first difference when realised
         self.connect_after('realize', self._realise_cb)
 
+    def setFont(self, font):
+        self.font = font
+        metrics = self.get_pango_context().get_metrics(self.font)
+        self.font_height = max(pango.PIXELS(metrics.get_ascent() + metrics.get_descent()), 1)
+        self.digit_width = metrics.get_approximate_digit_width()
+        self.updateSize(True)
+        self.map.queue_draw()
+
     def getStringColumnWidth(self, f, s):
-        if self.prefs.getBool('viewer_hide_endofline'):
+        if self.prefs.getBool('display_hide_endofline'):
             s = strip_line_ending(self.files[f].format, s)
         col = 0
-        tab_width = self.prefs.getInt('viewer_tab_width')
+        tab_width = self.prefs.getInt('display_tab_width')
         for c in s:
             v = ord(c)
             if v < 32:
@@ -1405,7 +1411,7 @@ class FileDiffViewer(gtk.VBox):
         v = ord(c)
         if v < 32:
             if c == '\t':
-                tab_width = self.prefs.getInt('viewer_tab_width')
+                tab_width = self.prefs.getInt('display_tab_width')
                 return tab_width - i % tab_width
             return 2
         if v >= 0x1100 and (v <= 0x115f
@@ -1421,7 +1427,7 @@ class FileDiffViewer(gtk.VBox):
         return 1
 
     def stringWidth(self, f, s):
-        if self.prefs.getBool('viewer_hide_endofline'):
+        if self.prefs.getBool('display_hide_endofline'):
             s = strip_line_ending(self.files[f].format, s)
         w = 0
         for c in s:
@@ -1429,9 +1435,9 @@ class FileDiffViewer(gtk.VBox):
         return w
 
     def expand(self, f, s):
-        if self.prefs.getBool('viewer_hide_endofline'):
+        if self.prefs.getBool('display_hide_endofline'):
             s = strip_line_ending(self.files[f].format, s)
-        tab_width = self.prefs.getInt('viewer_tab_width')
+        tab_width = self.prefs.getInt('display_tab_width')
         col = 0
         result = []
         for c in s:
@@ -1943,7 +1949,7 @@ class FileDiffViewer(gtk.VBox):
                 ss = fd.readlines()
                 fd.close()
                 if spec.encoding is None:
-                    ss, spec.encoding = theResources.convertToUnicode(ss)
+                    ss, spec.encoding = self.prefs.convertToUnicode(ss)
                 else:
                     ss = [ unicode(s, spec.encoding) for s in ss ]
             except (IOError, UnicodeDecodeError):
@@ -2356,17 +2362,17 @@ class FileDiffViewer(gtk.VBox):
         s1 = nullToEmpty(self.getLineText(f, i))
         s2 = nullToEmpty(self.getLineText(f + 1, i))
 
-        if self.prefs.getBool('viewer_ignore_blanklines') and isBlank(s1) and isBlank(s2):
+        if self.prefs.getBool('display_ignore_blanklines') and isBlank(s1) and isBlank(s2):
             return result
 
-        if self.prefs.getBool('viewer_ignore_whitespace') or self.prefs.getBool('viewer_ignore_whitespace_changes'):
+        if self.prefs.getBool('display_ignore_whitespace') or self.prefs.getBool('display_ignore_whitespace_changes'):
             if idx == 0:
                 s = s1
             else:
                 s = s2
             v = 0
             lookup = []
-            if self.prefs.getBool('viewer_ignore_whitespace'):
+            if self.prefs.getBool('display_ignore_whitespace'):
                 for c in s:
                     if c not in string.whitespace:
                         lookup.append(v)
@@ -2388,7 +2394,7 @@ class FileDiffViewer(gtk.VBox):
         else:
             lookup = None
 
-        ignore_whitespace = self.prefs.getBool('viewer_ignore_whitespace')
+        ignore_whitespace = self.prefs.getBool('display_ignore_whitespace')
         start = 0
         for block in difflib.SequenceMatcher(None, s1, s2).get_matching_blocks():
             end = block[idx]
@@ -2415,12 +2421,12 @@ class FileDiffViewer(gtk.VBox):
             if s is None:
                 s = line.getText()
                 if s is not None:
-                    if self.prefs.getBool('viewer_ignore_blanklines') and isBlank(s):
+                    if self.prefs.getBool('display_ignore_blanklines') and isBlank(s):
                         return None
-                    if self.prefs.getBool('viewer_ignore_whitespace'):
+                    if self.prefs.getBool('display_ignore_whitespace'):
                         for c in string.whitespace:
                             s = s.replace(c, '')
-                    elif self.prefs.getBool('viewer_ignore_whitespace_changes'):
+                    elif self.prefs.getBool('display_ignore_whitespace_changes'):
                         pc = True
                         r = []
                         for c in s:
@@ -2432,7 +2438,7 @@ class FileDiffViewer(gtk.VBox):
                                 r.append(c)
                                 pc = True
                         s = ''.join(r)
-                    if self.prefs.getBool('viewer_ignore_case'):
+                    if self.prefs.getBool('display_ignore_case'):
                         s = s.upper()
                 line.compare_string = s
             return s
@@ -3032,7 +3038,7 @@ class FileDiffViewer(gtk.VBox):
         if file.hasEdits() and not confirmDiscardEdits(self.get_toplevel()):
            return
         if not reload:
-            dialog = FileChooserDialog(_('Open File'), self.get_toplevel(), gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN)
+            dialog = FileChooserDialog(_('Open File'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN)
             if spec.name is not None:
                 dialog.set_filename(os.path.realpath(spec.name))
             dialog.set_encoding(spec.encoding)
@@ -3078,7 +3084,7 @@ class FileDiffViewer(gtk.VBox):
         if name is not None:
             spec.name = name
         if save_as:
-            dialog = FileChooserDialog(_('Save File'), self.get_toplevel(), gtk.FILE_CHOOSER_ACTION_SAVE, gtk.STOCK_SAVE)
+            dialog = FileChooserDialog(_('Save File'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_SAVE, gtk.STOCK_SAVE)
             if spec.name is not None:
                 dialog.set_filename(os.path.abspath(spec.name))
             dialog.set_encoding(spec.encoding)
@@ -3158,7 +3164,7 @@ class FileDiffViewer(gtk.VBox):
     def receiveClipboardText(self, clipboard, text, data):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             self.openUndoBlock()
-            self.replaceText(theResources.convertToUnicode([ text ])[0][0])
+            self.replaceText(self.prefs.convertToUnicode([ text ])[0][0])
             self.closeUndoBlock()
 
     def paste_cb(self, widget, data):
@@ -3254,7 +3260,7 @@ class FileDiffViewer(gtk.VBox):
         self.closeUndoBlock()
 
     def prefsUpdated(self):
-        self.updateSize(True)
+        self.setFont(pango.FontDescription(self.prefs.getString('display_font')))
         for file in self.files:
             del file.diff_cache[:]
         for darea in self.dareas:
@@ -3985,19 +3991,19 @@ if __name__ == '__main__':
                 if encodings.aliases.aliases.has_key(encoding):
                     encoding = encodings.aliases.aliases[encoding]
             elif arg in [ '-b', '--ignore-space-change' ]:
-                diff.prefs.setBool('viewer_ignore_whitespace_changes', True)
+                diff.prefs.setBool('display_ignore_whitespace_changes', True)
                 diff.prefs.setBool('align_ignore_whitespace_changes', True)
                 diff.preferences_updated()
             elif arg in [ '-B', '--ignore-blank-lines' ]:
-                diff.prefs.setBool('viewer_ignore_blanklines', True)
+                diff.prefs.setBool('display_ignore_blanklines', True)
                 diff.prefs.setBool('align_ignore_blanklines', True)
                 diff.preferences_updated()
             elif arg in [ '-i', '--ignore-case' ]:
-                diff.prefs.setBool('viewer_ignore_case', True)
+                diff.prefs.setBool('display_ignore_case', True)
                 diff.prefs.setBool('align_ignore_case', True)
                 diff.preferences_updated()
             elif arg in [ '-w', '--ignore-all-space' ]:
-                diff.prefs.setBool('viewer_ignore_whitespace', True)
+                diff.prefs.setBool('display_ignore_whitespace', True)
                 diff.prefs.setBool('align_ignore_whitespace', True)
                 diff.preferences_updated()
             elif arg in [ '-D', '--close-if-same' ]:
