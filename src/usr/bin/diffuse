@@ -507,13 +507,13 @@ class Preferences:
         self.template = [ 'FolderSet',
             _('Display'),
             [ 'List',
+              [ 'Font', 'display_font', 'Monospace 10', _('Font') ],
+              [ 'Integer', 'display_tab_width', 8, _('Tab Width') ],
               [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore White Space') ],
               [ 'Boolean', 'display_ignore_whitespace_changes', False, _('Ignore Changes to White Space') ],
               [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore Blank Lines') ],
               [ 'Boolean', 'display_ignore_case', False, _('Ignore Case') ],
-              [ 'Boolean', 'display_hide_endofline', True, _('Hide End of Line Characters') ],
-              [ 'Font', 'display_font', 'Monospace 10', _('Font') ],
-              [ 'Integer', 'display_tab_width', 8, _('Tab Width') ]
+              [ 'Boolean', 'display_hide_endofline', True, _('Hide End of Line Characters') ]
             ],
             _('Alignment'),
             [ 'List',
@@ -661,56 +661,51 @@ class Preferences:
                 w.show()
                 label.show()
             return notebook
-        elif type == 'List':
-            vbox = gtk.VBox()
-            vbox.set_border_width(10)
-            i = 1
-            while i < len(template):
-                n = 0
-                while i + n < len(template) and template[i + n][0] in [ 'String', 'File', 'Font', 'Integer' ]:
-                    n += 1
-                if n > 0:
-                    w = gtk.Table(2, n)
-                    for j in range(n):
-                        tpl = template[i + j]
-                        label = gtk.Label(tpl[3] + ': ')
-                        label.set_alignment(1.0, 0.5)
-                        w.attach(label, 0, 1, j, j + 1, gtk.FILL, gtk.FILL)
-                        label.show()
-                        if tpl[0] in [ 'Font', 'Integer' ]:
-                            entry = gtk.HBox()
-                            if tpl[0] == 'Font':
-                                button = FontButton()
-                                button.set_font_name(self.string_prefs[tpl[1]])
-                            else:
-                                button = gtk.SpinButton()
-                                button.set_range(1, 128)
-                                button.set_value(self.int_prefs[tpl[1]])
-                                button.set_increments(1, 1)
-                            widgets[tpl[1]] = button
-                            entry.pack_start(button, False, False, 0)
-                            button.show()
-                        else:
-                            if tpl[0] == 'File':
-                                entry = FileEntry(parent, tpl[3])
-                            else:
-                                entry = gtk.Entry()
-                            widgets[tpl[1]] = entry
-                            entry.set_text(self.string_prefs[tpl[1]])
-                        w.attach(entry, 1, 2, j, j + 1, gtk.EXPAND|gtk.FILL, gtk.FILL)
-                        entry.show()
-                    i += n
+        else:
+            n = len(template) - 1
+            table = gtk.Table(2, n)
+            table.set_border_width(10)
+            for i, tpl in enumerate(template[1:]):
+                type = tpl[0]
+                if type == 'FolderSet':
+                    w = self._buildPrefsDialog(parent, widgets, tpl)
+                    table.attach(w, 0, 2, i, i + 1, gtk.FILL, gtk.FILL)
+                    w.show()
+                elif type == 'Boolean':
+                    button = gtk.CheckButton(tpl[3])
+                    widgets[tpl[1]] = button
+                    button.set_active(self.bool_prefs[tpl[1]])
+                    table.attach(button, 1, 2, i, i + 1, gtk.FILL, gtk.FILL)
+                    button.show()
                 else:
-                    w = self._buildPrefsDialog(parent, widgets, template[i])
-                    i += 1
-                vbox.pack_start(w, False, False, 0)
-                w.show()
-            return vbox
-        elif type == 'Boolean':
-            button = gtk.CheckButton(template[3])
-            widgets[template[1]] = button
-            button.set_active(self.bool_prefs[template[1]])
-            return button
+                    label = gtk.Label(tpl[3] + ': ')
+                    label.set_alignment(1.0, 0.5)
+                    table.attach(label, 0, 1, i, i + 1, gtk.FILL, gtk.FILL)
+                    label.show()
+                    if tpl[0] in [ 'Font', 'Integer' ]:
+                        entry = gtk.HBox()
+                        if tpl[0] == 'Font':
+                            button = FontButton()
+                            button.set_font_name(self.string_prefs[tpl[1]])
+                        else:
+                            button = gtk.SpinButton()
+                            button.set_range(1, 128)
+                            button.set_value(self.int_prefs[tpl[1]])
+                            button.set_increments(1, 1)
+                        widgets[tpl[1]] = button
+                        entry.pack_start(button, False, False, 0)
+                        button.show()
+                    else:
+                        if tpl[0] == 'File':
+                            entry = FileEntry(parent, tpl[3])
+                        else:
+                            entry = gtk.Entry()
+                        widgets[tpl[1]] = entry
+                        entry.set_text(self.string_prefs[tpl[1]])
+                    table.attach(entry, 1, 2, i, i + 1, gtk.EXPAND|gtk.FILL, gtk.FILL)
+                    entry.show()
+                table.show()
+            return table
 
     def getBool(self, name):
         return self.bool_prefs[name]
@@ -984,20 +979,16 @@ class FileSpec:
 class VCSs:
     # Bazaar support
     class Bzr:
-        def __init__(self, dir_name):
-            self.dir_name = dir_name
+        def __init__(self, proj_dir):
+            self.proj_dir = proj_dir
 
         def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
             return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            name = os.path.abspath(name)
-            i = len(self.dir_name)
-            while i < len(name) and name[i] == os.path.sep:
-                i += 1
-            name = name[i:]
-            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(self.dir_name), prefs.getString('bzr_bin'), shellEscape(rev), shellEscapeFile(name))
+            d, b = os.path.split(name)
+            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('bzr_bin')), shellEscape(rev), shellEscapeFile(b))
 
     # CVS support
     class Cvs:
@@ -1005,75 +996,64 @@ class VCSs:
             return [ (name, prefs.getString('cvs_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return '%s -Q update -p -r %s %s' % (prefs.getString('cvs_bin'), shellEscape(rev), shellEscapeFile(name))
+            d, b = os.path.split(name)
+            return 'cd %s; %s -Q update -p -r %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('cvs_bin')), shellEscape(rev), shellEscapeFile(b))
 
     # Darcs support
     class Darcs:
-        def __init__(self, dir_name):
-            self.dir_name = dir_name
+        def __init__(self, proj_dir):
+            self.proj_dir = proj_dir
 
         def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
             return [ (name, prefs.getString('darcs_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            name = os.path.abspath(name)
-            i = len(self.dir_name)
-            while i < len(name) and name[i] == os.path.sep:
-                i += 1
-            name = name[i:]
-            return 'cd %s; %s show contents -p %s %s' % (shellEscapeFile(self.dir_name), prefs.getString('darcs_bin'), shellEscape(rev), shellEscapeFile(name))
+            d, b = os.path.split(name)
+            return 'cd %s; %s show contents -p %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('darcs_bin')), shellEscape(rev), shellEscapeFile(b))
 
     # Git support
     class Git:
-        def __init__(self, dir_name):
-            self.dir_name = dir_name
+        def __init__(self, proj_dir):
+            self.proj_dir = proj_dir
 
         def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
             return [ (name, prefs.getString('git_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            name = os.path.abspath(name)
-            i = len(self.dir_name)
-            while i < len(name) and name[i] == os.path.sep:
-                i += 1
-            name = name[i:]
-            return 'cd %s; %s show %s:%s' % (shellEscapeFile(self.dir_name), prefs.getString('git_bin'), shellEscape(rev), shellEscape(name))
+            if name.startswith(self.proj_dir):
+                i = len(self.proj_dir)
+                while i < len(name) and name[i] == os.path.sep:
+                    i += 1
+                name = name[i:]
+            return 'cd %s; %s show %s:%s' % (shellEscapeFile(self.proj_dir), shellEscape(prefs.getString('git_bin')), shellEscape(rev), shellEscape(name))
 
     # Mercurial support
     class Hg:
-        def __init__(self, dir_name):
-            self.dir_name = dir_name
+        def __init__(self, proj_dir):
+            self.proj_dir = proj_dir
 
         def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
             return [ (name, prefs.getString('hg_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            name = os.path.abspath(name)
-            i = len(self.dir_name)
-            while i < len(name) and name[i] == os.path.sep:
-                i += 1
-            name = name[i:]
-            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(self.dir_name), prefs.getString('hg_bin'), shellEscape(rev), shellEscapeFile(name))
+            d, b = os.path.split(name)
+            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('hg_bin')), shellEscape(rev), shellEscapeFile(b))
 
     # Monotone support
     class Mtn:
-        def __init__(self, dir_name):
-            self.dir_name = dir_name
+        def __init__(self, proj_dir):
+            self.proj_dir = proj_dir
 
         def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
             return [ (name, prefs.getString('mtn_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            name = os.path.abspath(name)
-            i = len(self.dir_name)
-            while i < len(name) and name[i] == os.path.sep:
-                i += 1
-            name = name[i:]
-            return 'cd %s; %s cat --quiet -r %s %s' % (shellEscapeFile(self.dir_name), prefs.getString('mtn_bin'), shellEscape(rev), shellEscapeFile(name))
+            d, b = os.path.split(name)
+            return 'cd %s; %s cat --quiet -r %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('mtn_bin')), shellEscape(rev), shellEscapeFile(b))
 
     # Subversion support
     class Svn:
@@ -1094,7 +1074,8 @@ class VCSs:
             return [ (name, prefs.getString('svn_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return '%s cat -r %s %s' % (prefs.getString('svn_bin'), shellEscape(rev), shellEscapeFile(name))
+            d, b = os.path.split(name)
+            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('svn_bin')), shellEscape(rev), shellEscapeFile(b))
 
     def __init__(self):
         self.leaf_dir_repos = [('.svn', VCSs.Svn), ('CVS', VCSs.Cvs)]
@@ -1108,7 +1089,7 @@ class VCSs:
         while True:
             newname = os.path.dirname(name)
             if newname == name:
-                return None
+                break
             name = newname
             for dir_name, repo in self.common_dir_repos:
                 if os.path.isdir(os.path.join(name, dir_name)):
@@ -1940,7 +1921,7 @@ class FileDiffViewer(gtk.VBox):
                 if rev is not None:
                     if spec.vcs is None:
                         raise IOError('Not under revision control.')
-                    cmd = spec.vcs.getRevisionCommand(self.prefs, name, rev)
+                    cmd = spec.vcs.getRevisionCommand(self.prefs, os.path.abspath(name), rev)
                     label = '%s (%s)' % (name, rev)
                     fd = os.popen(cmd, 'rb')
                 else:
