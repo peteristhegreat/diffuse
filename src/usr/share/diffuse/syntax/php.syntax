@@ -33,7 +33,7 @@ syntax_pattern string string php_escapedchar '(\\([0-7]{1,3}|x[0-9a-f]{1,2}|.))+
 syntax_pattern string string php_string '.[^\\"]*'
 
 # literals
-syntax_pattern php php php_literal '(([0-9]+\.[0-9]*|\.[0-9]+)(e[\+\-]?[0-9]+)?|[0-9]+e[\+\-]?[0-9]+|0[0-7]*|[1-9][0-9]*|0x[0-9a-f]+)' ignorecase
+syntax_pattern php php php_literal '(([0-9]+\.[0-9]*|\.[0-9]+)(e[\+\-]?[0-9]+)?|[0-9]+e[\+\-]?[0-9]+|0x[0-9a-f]+|0[0-7]*|[1-9][0-9]*)' ignorecase
 syntax_pattern php php php_literal '\b(true|false|null)\b' ignorecase
 
 # keywords

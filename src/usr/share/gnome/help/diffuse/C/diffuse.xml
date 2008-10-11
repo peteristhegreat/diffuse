@@ -937,48 +937,6 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>bzr_bin</userinput></term>
-            <listitem>
-              <para>executable used to query bazaar repositories</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>bzr_default_revision</userinput></term>
-            <listitem>
-              <para>default revision to retrieve from bazaar repositories for comparison</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>cvs_bin</userinput></term>
-            <listitem>
-              <para>executable used to query CVS repositories</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>cvs_default_revision</userinput></term>
-            <listitem>
-              <para>default revision to retrieve from CVS repositories for comparison</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>darcs_bin</userinput></term>
-            <listitem>
-              <para>executable used to query darcs repositories</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>darcs_default_revision</userinput></term>
-            <listitem>
-              <para>default revision to retrieve from darcs repositories for comparison</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><userinput>difference_colours</userinput></term>
             <listitem>
               <para>a list of colour resources used to indicate differences</para>
@@ -989,20 +947,6 @@
             <term><userinput>font</userinput></term>
             <listitem>
               <para>font used to render text</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>git_bin</userinput></term>
-            <listitem>
-              <para>executable used to query git repositories</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>git_default_revision</userinput></term>
-            <listitem>
-              <para>default revision to retrieve from git repositories for comparison</para>
             </listitem>
           </varlistentry>
 
@@ -1024,48 +968,6 @@
             <term><userinput>help_url</userinput></term>
             <listitem>
               <para>URL of the on-line help document</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>hg_bin</userinput></term>
-            <listitem>
-              <para>executable used to query mercurial repositories</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>hg_default_revision</userinput></term>
-            <listitem>
-              <para>default revision to retrieve from mercurial repositories for comparison</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>mtn_bin</userinput></term>
-            <listitem>
-              <para>executable used to query monotone repositories</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>mtn_default_revision</userinput></term>
-            <listitem>
-              <para>default revision to retrieve from monotone repositories for comparison</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>svn_bin</userinput></term>
-            <listitem>
-              <para>executable used to query subversion repositories</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>svn_default_revision</userinput></term>
-            <listitem>
-              <para>default revision to retrieve from subversion repositories for comparison</para>
             </listitem>
           </varlistentry>
 

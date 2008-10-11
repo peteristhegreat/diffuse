@@ -1,7 +1,7 @@
 # Bourne Shell syntax file for Diffuse
 # Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
 syntax 'Bourne Shell' normal text
-syntax_files 'Bourne Shell' '^(.*/)?([^/]*\.sh|\.bashrc)$'
+syntax_files 'Bourne Shell' '^(.*\.sh|\.bashrc)$'
 
 # keywords
 syntax_pattern normal expr bash_keyword '\b(alias|bg|bind|break|builtin|caller|case|cd|command|compgen|complete|continue|declare|dirs|disown|do|done|echo|elif|else|enable|esac|eval|exec|exit|export|fc|fg|fi|for|getopts|hash|help|history|if|in|jobs|kill|let|local|logout|popd|printf|pushd|pwd|read|readonly|return|select|set|shift|shopt|source|suspend|test|then|time|times|trap|type|typeset|ulimit|umask|unalias|unset|until|wait|while)\b'

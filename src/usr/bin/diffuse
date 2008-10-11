@@ -268,23 +268,9 @@ class Resources:
            'modified_alpha' : 0.4 }
         self.unknown_floats = {}
         self.strings = {
-           'bzr_bin': 'bzr',
-           'bzr_default_revision': '-1',
-           'cvs_bin': 'cvs',
-           'cvs_default_revision': 'BASE',
-           'darcs_bin': 'darcs',
-           'darcs_default_revision': '',
-           'git_bin': 'git',
-           'git_default_revision': 'HEAD',
            'help_browser': '',
            'help_file': '',
-           'help_url': 'http://diffuse.sourceforge.net/manual.html',
-           'hg_bin': 'hg',
-           'hg_default_revision': 'tip',
-           'mtn_bin': 'mtn',
-           'mtn_default_revision': 'h:',
-           'svn_bin': 'svn',
-           'svn_default_revision': 'BASE' }
+           'help_url': 'http://diffuse.sourceforge.net/manual.html' }
         help_browser = getExePath('gnome-help')
         if help_browser is not None:
            self.strings['help_browser'] = help_browser
@@ -443,6 +429,7 @@ class Resources:
             return self.syntaxes[name]
 
     def getSyntaxByFilename(self, name):
+        name = os.path.basename(name)
         for key in self.syntax_file_patterns.keys():
             if self.syntax_file_patterns[key].search(name):
                 return self.getSyntax(key)
@@ -508,19 +495,98 @@ class Resources:
 
 theResources = Resources()
 
+class FileEntry(gtk.HBox):
+    def __init__(self, parent, title):
+        gtk.HBox.__init__(self)
+        self.toplevel = parent
+        self.title = title
+        entry = gtk.Entry()
+        self.entry = entry
+        self.pack_start(entry, True, True, 0)
+        entry.show()
+        button = gtk.Button()
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_OPEN, gtk.ICON_SIZE_MENU)
+        button.add(image)
+        image.show()
+        button.connect('clicked', self.chooseFile)
+        self.pack_start(button, False, False, 0)
+        button.show()
+
+    def chooseFile(self, widget):
+        dialog = gtk.FileChooserDialog(self.title, self.toplevel, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        if dialog.run() == gtk.RESPONSE_OK:
+            self.entry.set_text(dialog.get_filename())
+        dialog.destroy()
+
+    def set_text(self, s):
+        self.entry.set_text(s)
+
+    def get_text(self):
+        return self.entry.get_text()
+
 class Preferences:
     def __init__(self):
-        self.viewer_ignore_whitespace = False
-        self.viewer_ignore_whitespace_changes = False
-        self.viewer_ignore_blanklines = False
-        self.viewer_ignore_case = False
-        self.viewer_hide_endofline = True
-        self.viewer_tab_width = 8
-        self.align_ignore_whitespace = True
-        self.align_ignore_whitespace_changes = False
-        self.align_ignore_blanklines = False
-        self.align_ignore_case = False
-
+        self.bool_prefs = {}
+        self.int_prefs = {}
+        self.string_prefs = {}
+        self.template = [ 'FolderSet',
+            _('Viewer'),
+            [ 'List',
+              [ 'Boolean', 'viewer_ignore_whitespace', False, _('Ignore White Space') ],
+              [ 'Boolean', 'viewer_ignore_whitespace_changes', False, _('Ignore Changes to White Space') ],
+              [ 'Boolean', 'viewer_ignore_blanklines', False, _('Ignore Blank Lines') ],
+              [ 'Boolean', 'viewer_ignore_case', False, _('Ignore Case') ],
+              [ 'Boolean', 'viewer_hide_endofline', True, _('Hide End of Line Characters') ],
+              [ 'Integer', 'viewer_tab_width', 8, _('Tab Width') ]
+            ],
+            _('Alignment'),
+            [ 'List',
+              [ 'Boolean', 'align_ignore_whitespace', False, _('Ignore White Space') ],
+              [ 'Boolean', 'align_ignore_whitespace_changes', False, _('Ignore Changes to White Space') ],
+              [ 'Boolean', 'align_ignore_blanklines', False, _('Ignore Blank Lines') ],
+              [ 'Boolean', 'align_ignore_case', False, _('Ignore Case') ]
+            ],
+            _('Version Control'),
+            [ 'FolderSet',
+              'Bazaar',
+              [ 'List',
+                [ 'File', 'bzr_bin', 'bzr', _('Command') ],
+                [ 'String', 'bzr_default_revision', '-1', _('Default Revision') ]
+              ],
+              'CVS',
+              [ 'List',
+                [ 'File', 'cvs_bin', 'cvs', _('Command') ],
+                [ 'String', 'cvs_default_revision', 'BASE', _('Default Revision') ]
+              ],
+              'Darcs',
+              [ 'List',
+                [ 'File', 'darcs_bin', 'darcs', _('Command') ],
+                [ 'String', 'darcs_default_revision', '', _('Default Revision') ]
+              ],
+              'Git',
+              [ 'List',
+                [ 'File', 'git_bin', 'git', _('Command') ],
+                [ 'String', 'git_default_revision', 'HEAD', _('Default Revision') ]
+              ],
+              'Mercurial',
+              [ 'List',
+                [ 'File', 'hg_bin', 'hg', _('Command') ],
+                [ 'String', 'hg_default_revision', 'tip', _('Default Revision') ]
+              ],
+              'Monotone',
+              [ 'List',
+                [ 'File', 'mtn_bin', 'mtn', _('Command') ],
+                [ 'String', 'mtn_default_revision', 'h:', _('Default Revision') ]
+              ],
+              'Subversion',
+              [ 'List',
+                [ 'File', 'svn_bin', 'svn', _('Command') ],
+                [ 'String', 'svn_default_revision', 'BASE', _('Default Revision') ]
+              ]
+            ]
+          ]
+        self._initFromTemplate(self.template)
         self.path = os.path.expanduser('~/.diffuse/prefs')
         if os.path.isfile(self.path):
             try:
@@ -531,26 +597,12 @@ class Preferences:
                     try:
                         a = shlex.split(s, True)
                         if len(a) > 0:
-                            if len(a) == 2 and a[0] == 'viewer_ignore_whitespace':
-                                self.viewer_ignore_whitespace = (a[1] == 'True')
-                            elif len(a) == 2 and a[0] == 'viewer_ignore_whitespace_changes':
-                                self.viewer_ignore_whitespace_changes = (a[1] == 'True')
-                            elif len(a) == 2 and a[0] == 'viewer_ignore_blanklines':
-                                self.viewer_ignore_blanklines = (a[1] == 'True')
-                            elif len(a) == 2 and a[0] == 'viewer_ignore_case':
-                                self.viewer_ignore_case = (a[1] == 'True')
-                            elif len(a) == 2 and a[0] == 'viewer_hide_endofline':
-                                self.viewer_hide_endofline = (a[1] == 'True')
-                            elif len(a) == 2 and a[0] == 'viewer_tab_width':
-                                self.viewer_tab_width = int(a[1])
-                            elif len(a) == 2 and a[0] == 'align_ignore_whitespace':
-                                self.align_ignore_whitespace = (a[1] == 'True')
-                            elif len(a) == 2 and a[0] == 'align_ignore_whitespace_changes':
-                                self.align_ignore_whitespace_changes = (a[1] == 'True')
-                            elif len(a) == 2 and a[0] == 'align_ignore_blanklines':
-                                self.align_ignore_blanklines = (a[1] == 'True')
-                            elif len(a) == 2 and a[0] == 'align_ignore_case':
-                                self.align_ignore_case = (a[1] == 'True')
+                            if len(a) == 2 and self.bool_prefs.has_key(a[0]):
+                                self.bool_prefs[a[0]] = (a[1] == 'True')
+                            elif len(a) == 2 and self.int_prefs.has_key(a[0]):
+                                self.int_prefs[a[0]] = int(a[1])
+                            elif len(a) == 2 and self.string_prefs.has_key(a[0]):
+                                self.string_prefs[a[0]] = a[1]
                             else:
                                 raise ValueError()
                     except ValueError:
@@ -558,124 +610,139 @@ class Preferences:
             except IOError:
                 print _('Error reading %s.') % (repr(self.path), )
 
+    def _initFromTemplate(self, template):
+        if template[0] == 'FolderSet' or template[0] == 'List':
+            i = 1
+            while i < len(template):
+                if template[0] == 'FolderSet':
+                    i += 1
+                self._initFromTemplate(template[i])
+                i += 1
+        elif template[0] == 'Boolean':
+            self.bool_prefs[template[1]] = template[2]
+        elif template[0] == 'Integer':
+            self.int_prefs[template[1]] = template[2]
+        elif template[0] == 'String' or template[0] == 'File':
+            self.string_prefs[template[1]] = template[2]
+
     def runDialog(self, parent):
         dialog = gtk.Dialog(_('Preferences'), parent, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_SAVE, gtk.RESPONSE_APPLY, gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_OK))
 
-        notebook = gtk.Notebook()
-        notebook.set_border_width(10)
-
-        vbox = gtk.VBox()
-        vbox.set_border_width(10)
-
-        viewer_ignore_whitespace_button = gtk.CheckButton(_('Ignore White Space'))
-        viewer_ignore_whitespace_button.set_active(self.viewer_ignore_whitespace)
-        vbox.pack_start(viewer_ignore_whitespace_button, False, False, 0)
-        viewer_ignore_whitespace_button.show()
-
-        viewer_ignore_whitespace_changes_button = gtk.CheckButton(_('Ignore Changes to White Space'))
-        viewer_ignore_whitespace_changes_button.set_active(self.viewer_ignore_whitespace_changes)
-        vbox.pack_start(viewer_ignore_whitespace_changes_button, False, False, 0)
-        viewer_ignore_whitespace_changes_button.show()
-
-        viewer_ignore_blanklines_button = gtk.CheckButton(_('Ignore Blank Lines'))
-        viewer_ignore_blanklines_button.set_active(self.viewer_ignore_blanklines)
-        vbox.pack_start(viewer_ignore_blanklines_button, False, False, 0)
-        viewer_ignore_blanklines_button.show()
-
-        viewer_ignore_case_button = gtk.CheckButton(_('Ignore Case'))
-        viewer_ignore_case_button.set_active(self.viewer_ignore_case)
-        vbox.pack_start(viewer_ignore_case_button, False, False, 0)
-        viewer_ignore_case_button.show()
-
-        viewer_hide_endofline_button = gtk.CheckButton(_('Hide End of Line Characters'))
-        viewer_hide_endofline_button.set_active(self.viewer_hide_endofline)
-        vbox.pack_start(viewer_hide_endofline_button, False, False, 0)
-        viewer_hide_endofline_button.show()
-
-        hbox = gtk.HBox()
-        label = gtk.Label(_('Tab Width: '))
-        hbox.pack_start(label, False, False, 0)
-        label.show()
-        viewer_tab_width_spin = gtk.SpinButton()
-        viewer_tab_width_spin.set_range(1, 128)
-        viewer_tab_width_spin.set_value(self.viewer_tab_width)
-        viewer_tab_width_spin.set_increments(1, 1)
-        hbox.pack_start(viewer_tab_width_spin, False, False, 0)
-        viewer_tab_width_spin.show()
-
-        vbox.pack_start(hbox, False, False, 0)
-        hbox.show()
-
-        label = gtk.Label('Viewer')
-        notebook.append_page(vbox, label)
-        vbox.show()
-        label.show()
-
-        vbox = gtk.VBox()
-        vbox.set_border_width(10)
-
-        align_ignore_whitespace_button = gtk.CheckButton(_('Ignore White Space'))
-        align_ignore_whitespace_button.set_active(self.align_ignore_whitespace)
-        vbox.pack_start(align_ignore_whitespace_button, False, False, 0)
-        align_ignore_whitespace_button.show()
-
-        align_ignore_whitespace_changes_button = gtk.CheckButton(_('Ignore Changes to White Space'))
-        align_ignore_whitespace_changes_button.set_active(self.align_ignore_whitespace_changes)
-        vbox.pack_start(align_ignore_whitespace_changes_button, False, False, 0)
-        align_ignore_whitespace_changes_button.show()
-
-        align_ignore_blanklines_button = gtk.CheckButton(_('Ignore Blank Lines'))
-        align_ignore_blanklines_button.set_active(self.align_ignore_blanklines)
-        vbox.pack_start(align_ignore_blanklines_button, False, False, 0)
-        align_ignore_blanklines_button.show()
-
-        align_ignore_case_button = gtk.CheckButton(_('Ignore Case'))
-        align_ignore_case_button.set_active(self.align_ignore_case)
-        vbox.pack_start(align_ignore_case_button, False, False, 0)
-        align_ignore_case_button.show()
-
-        label = gtk.Label('Alignment')
-        notebook.append_page(vbox, label)
-        vbox.show()
-        label.show()
-
-        dialog.vbox.add(notebook)
-        notebook.show()
+        widgets = {}
+        w = self._buildPrefsDialog(parent, widgets, self.template)
+        dialog.vbox.add(w)
+        w.show()
 
         while True:
             response = dialog.run()
             if response != gtk.RESPONSE_APPLY:
                 break
             try:
+                ss = []
+                for k in self.bool_prefs.keys():
+                    ss.append('%s %s\n' % (k, widgets[k].get_active()))
+                for k in self.int_prefs.keys():
+                    ss.append('%s %s\n' % (k, widgets[k].get_value_as_int()))
+                for k in self.string_prefs.keys():
+                    ss.append('%s "%s"\n' % (k, widgets[k].get_text().replace('\\', '\\\\').replace('"', '\\"')))
+                ss.sort()
                 f = open(self.path, 'w')
                 f.write('# This prefs file was generated by %s %s.\n\n' % (APP_NAME, VERSION))
-                f.write('viewer_ignore_whitespace %s\n' % (viewer_ignore_whitespace_button.get_active(), ))
-                f.write('viewer_ignore_whitespace_changes %s\n' % (viewer_ignore_whitespace_changes_button.get_active(), ))
-                f.write('viewer_ignore_blanklines %s\n' % (viewer_ignore_blanklines_button.get_active(), ))
-                f.write('viewer_ignore_case %s\n' % (viewer_ignore_case_button.get_active(), ))
-                f.write('viewer_hide_endofline %s\n' % (viewer_hide_endofline_button.get_active(), ))
-                f.write('viewer_tab_width %d\n' % (viewer_tab_width_spin.get_value_as_int(), ))
-                f.write('align_ignore_whitespace %s\n' % (align_ignore_whitespace_button.get_active(), ))
-                f.write('align_ignore_whitespace_changes %s\n' % (align_ignore_whitespace_changes_button.get_active(), ))
-                f.write('align_ignore_blanklines %s\n' % (align_ignore_blanklines_button.get_active(), ))
-                f.write('align_ignore_case %s\n' % (align_ignore_case_button.get_active(), ))
+                for s in ss:
+                    f.write(s)
                 f.close()
             except IOError:
                 print _('Error writing %s.') % (repr(self.path), )
+                m = MessageDialog(parent, gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(self.path), ))
+                m.run()
+                m.destroy()
         accept = (response == gtk.RESPONSE_OK)
         if accept:
-            self.viewer_ignore_whitespace = viewer_ignore_whitespace_button.get_active()
-            self.viewer_ignore_whitespace_changes = viewer_ignore_whitespace_changes_button.get_active()
-            self.viewer_ignore_blanklines = viewer_ignore_blanklines_button.get_active()
-            self.viewer_ignore_case = viewer_ignore_case_button.get_active()
-            self.viewer_hide_endofline = viewer_hide_endofline_button.get_active()
-            self.viewer_tab_width = viewer_tab_width_spin.get_value_as_int()
-            self.align_ignore_whitespace = align_ignore_whitespace_button.get_active()
-            self.align_ignore_whitespace_changes = align_ignore_whitespace_changes_button.get_active()
-            self.align_ignore_blanklines = align_ignore_blanklines_button.get_active()
-            self.align_ignore_case = align_ignore_case_button.get_active()
+            for k in self.bool_prefs.keys():
+                self.bool_prefs[k] = widgets[k].get_active()
+            for k in self.int_prefs.keys():
+                self.int_prefs[k] = widgets[k].get_value_as_int()
+            for k in self.string_prefs.keys():
+                self.string_prefs[k] = widgets[k].get_text()
         dialog.destroy()
         return accept
+
+    def _buildPrefsDialog(self, parent, widgets, template):
+        type = template[0]
+        if type == 'FolderSet':
+            notebook = gtk.Notebook()
+            notebook.set_border_width(10)
+            i = 1
+            while i < len(template):
+                label = gtk.Label(template[i])
+                i += 1
+                w = self._buildPrefsDialog(parent, widgets, template[i])
+                i += 1
+                notebook.append_page(w, label)
+                w.show()
+                label.show()
+            return notebook
+        elif type == 'List':
+            vbox = gtk.VBox()
+            vbox.set_border_width(10)
+            i = 1
+            while i < len(template):
+                n = 0
+                while i + n < len(template) and template[i + n][0] in [ 'String', 'File' ]:
+                    n += 1
+                if n > 0:
+                    w = gtk.Table(2, n)
+                    for j in range(n):
+                        tpl = template[i + j]
+                        label = gtk.Label(tpl[3] + ': ')
+                        label.set_alignment(1.0, 0.5)
+                        w.attach(label, 0, 1, j, j + 1, gtk.FILL, gtk.FILL)
+                        label.show()
+                        if tpl[0] == 'File':
+                            entry = FileEntry(parent, tpl[3])
+                        else:
+                            entry = gtk.Entry()
+                        widgets[tpl[1]] = entry
+                        entry.set_text(self.string_prefs[tpl[1]])
+                        w.attach(entry, 1, 2, j, j + 1, gtk.EXPAND|gtk.FILL, gtk.FILL)
+                        entry.show()
+                    i += n
+                else:
+                    w = self._buildPrefsDialog(parent, widgets, template[i])
+                    i += 1
+                vbox.pack_start(w, False, False, 0)
+                w.show()
+            return vbox
+        elif type == 'Boolean':
+            button = gtk.CheckButton(template[3])
+            widgets[template[1]] = button
+            button.set_active(self.bool_prefs[template[1]])
+            return button
+        elif type == 'Integer':
+            hbox = gtk.HBox()
+            label = gtk.Label(template[3] + ': ')
+            hbox.pack_start(label, False, False, 0)
+            label.show()
+            button = gtk.SpinButton()
+            widgets[template[1]] = button
+            button.set_range(1, 128)
+            button.set_value(self.int_prefs[template[1]])
+            button.set_increments(1, 1)
+            hbox.pack_start(button, False, False, 0)
+            button.show()
+            return hbox
+
+    def getBool(self, name):
+        return self.bool_prefs[name]
+
+    def setBool(self, name, value):
+        self.bool_prefs[name] = value
+
+    def getInt(self, name):
+        return self.int_prefs[name]
+
+    def getString(self, name):
+        return self.string_prefs[name]
 
 class MessageDialog(gtk.MessageDialog):
     def __init__(self, parent, type, msg):
@@ -894,12 +961,9 @@ def convert_to_format(s, format):
    return s
 
 def shellEscape(s):
-    if os.name == 'posix':
-        if len(s) == 0:
-            return "''"
-        return s.replace('', '\\')[:-1]
-    else:
-        return '"' + s + '"'
+    if len(s) == 0:
+        return "''"
+    return s.replace('', '\\')[:-1]
 
 def shellEscapeFile(s):
     # prevent oldly named files from being mistaken as options for
@@ -922,97 +986,97 @@ class VCSs:
         def __init__(self, dir_name):
             self.dir_name = dir_name
 
-        def getSingleFileSpecs(self, name):
+        def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
-            return [ (name, theResources.getString('bzr_default_revision')), (name, None) ]
+            return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, name, rev):
+        def getRevisionCommand(self, prefs, name, rev):
             name = os.path.abspath(name)
             i = len(self.dir_name)
             while i < len(name) and name[i] == os.path.sep:
                 i += 1
             name = name[i:]
-            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(self.dir_name), theResources.getString('bzr_bin'), shellEscape(rev), shellEscapeFile(name))
+            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(self.dir_name), prefs.getString('bzr_bin'), shellEscape(rev), shellEscapeFile(name))
 
     # CVS support
     class Cvs:
-        def getSingleFileSpecs(self, name):
-            return [ (name, theResources.getString('cvs_default_revision')), (name, None) ]
+        def getSingleFileSpecs(self, prefs, name):
+            return [ (name, prefs.getString('cvs_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, name, rev):
-            return '%s -Q update -p -r %s %s' % (theResources.getString('cvs_bin'), shellEscape(rev), shellEscapeFile(name))
+        def getRevisionCommand(self, prefs, name, rev):
+            return '%s -Q update -p -r %s %s' % (prefs.getString('cvs_bin'), shellEscape(rev), shellEscapeFile(name))
 
     # Darcs support
     class Darcs:
         def __init__(self, dir_name):
             self.dir_name = dir_name
 
-        def getSingleFileSpecs(self, name):
+        def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
-            return [ (name, theResources.getString('darcs_default_revision')), (name, None) ]
+            return [ (name, prefs.getString('darcs_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, name, rev):
+        def getRevisionCommand(self, prefs, name, rev):
             name = os.path.abspath(name)
             i = len(self.dir_name)
             while i < len(name) and name[i] == os.path.sep:
                 i += 1
             name = name[i:]
-            return 'cd %s; %s show contents -p %s %s' % (shellEscapeFile(self.dir_name), theResources.getString('darcs_bin'), shellEscape(rev), shellEscapeFile(name))
+            return 'cd %s; %s show contents -p %s %s' % (shellEscapeFile(self.dir_name), prefs.getString('darcs_bin'), shellEscape(rev), shellEscapeFile(name))
 
     # Git support
     class Git:
         def __init__(self, dir_name):
             self.dir_name = dir_name
 
-        def getSingleFileSpecs(self, name):
+        def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
-            return [ (name, theResources.getString('git_default_revision')), (name, None) ]
+            return [ (name, prefs.getString('git_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, name, rev):
+        def getRevisionCommand(self, prefs, name, rev):
             name = os.path.abspath(name)
             i = len(self.dir_name)
             while i < len(name) and name[i] == os.path.sep:
                 i += 1
             name = name[i:]
-            return 'cd %s; %s show %s:%s' % (shellEscapeFile(self.dir_name), theResources.getString('git_bin'), shellEscape(rev), shellEscape(name))
+            return 'cd %s; %s show %s:%s' % (shellEscapeFile(self.dir_name), prefs.getString('git_bin'), shellEscape(rev), shellEscape(name))
 
     # Mercurial support
     class Hg:
         def __init__(self, dir_name):
             self.dir_name = dir_name
 
-        def getSingleFileSpecs(self, name):
+        def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
-            return [ (name, theResources.getString('hg_default_revision')), (name, None) ]
+            return [ (name, prefs.getString('hg_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, name, rev):
+        def getRevisionCommand(self, prefs, name, rev):
             name = os.path.abspath(name)
             i = len(self.dir_name)
             while i < len(name) and name[i] == os.path.sep:
                 i += 1
             name = name[i:]
-            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(self.dir_name), theResources.getString('hg_bin'), shellEscape(rev), shellEscapeFile(name))
+            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(self.dir_name), prefs.getString('hg_bin'), shellEscape(rev), shellEscapeFile(name))
 
     # Monotone support
     class Mtn:
         def __init__(self, dir_name):
             self.dir_name = dir_name
 
-        def getSingleFileSpecs(self, name):
+        def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
-            return [ (name, theResources.getString('mtn_default_revision')), (name, None) ]
+            return [ (name, prefs.getString('mtn_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, name, rev):
+        def getRevisionCommand(self, prefs, name, rev):
             name = os.path.abspath(name)
             i = len(self.dir_name)
             while i < len(name) and name[i] == os.path.sep:
                 i += 1
             name = name[i:]
-            return 'cd %s; %s cat --quiet -r %s %s' % (shellEscapeFile(self.dir_name), theResources.getString('mtn_bin'), shellEscape(rev), shellEscapeFile(name))
+            return 'cd %s; %s cat --quiet -r %s %s' % (shellEscapeFile(self.dir_name), prefs.getString('mtn_bin'), shellEscape(rev), shellEscapeFile(name))
 
     # Subversion support
     class Svn:
-        def getSingleFileSpecs(self, name):
+        def getSingleFileSpecs(self, prefs, name):
             # merge conflict
             left = glob.glob(name + '.merge-left.r*')
             right = glob.glob(name + '.merge-right.r*')
@@ -1026,10 +1090,10 @@ class VCSs:
             if len(left) > 0 and len(right) > 0:
                 return [ (left[-1], None), (name, None), (right[0], None) ]
             # default case
-            return [ (name, theResources.getString('svn_default_revision')), (name, None) ]
+            return [ (name, prefs.getString('svn_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, name, rev):
-            return '%s cat -r %s %s' % (theResources.getString('svn_bin'), shellEscape(rev), shellEscapeFile(name))
+        def getRevisionCommand(self, prefs, name, rev):
+            return '%s cat -r %s %s' % (prefs.getString('svn_bin'), shellEscape(rev), shellEscapeFile(name))
 
     def __init__(self):
         self.leaf_dir_repos = [('.svn', VCSs.Svn), ('CVS', VCSs.Cvs)]
@@ -1311,14 +1375,15 @@ class FileDiffViewer(gtk.VBox):
         self.connect_after('realize', self._realise_cb)
 
     def getStringColumnWidth(self, f, s):
-        if self.prefs.viewer_hide_endofline:
+        if self.prefs.getBool('viewer_hide_endofline'):
             s = strip_line_ending(self.files[f].format, s)
         col = 0
+        tab_width = self.prefs.getInt('viewer_tab_width')
         for c in s:
             v = ord(c)
             if v < 32:
                 if c == '\t':
-                    col += self.prefs.viewer_tab_width - col % self.prefs.viewer_tab_width
+                    col += tab_width - col % tab_width
                 else:
                     col += 2
             elif v >= 0x1100 and (v <= 0x115f
@@ -1340,7 +1405,8 @@ class FileDiffViewer(gtk.VBox):
         v = ord(c)
         if v < 32:
             if c == '\t':
-                return self.prefs.viewer_tab_width - i % self.prefs.viewer_tab_width
+                tab_width = self.prefs.getInt('viewer_tab_width')
+                return tab_width - i % tab_width
             return 2
         if v >= 0x1100 and (v <= 0x115f
             or v == 0x2329 or v == 0x232a
@@ -1355,7 +1421,7 @@ class FileDiffViewer(gtk.VBox):
         return 1
 
     def stringWidth(self, f, s):
-        if self.prefs.viewer_hide_endofline:
+        if self.prefs.getBool('viewer_hide_endofline'):
             s = strip_line_ending(self.files[f].format, s)
         w = 0
         for c in s:
@@ -1363,15 +1429,16 @@ class FileDiffViewer(gtk.VBox):
         return w
 
     def expand(self, f, s):
-        if self.prefs.viewer_hide_endofline:
+        if self.prefs.getBool('viewer_hide_endofline'):
             s = strip_line_ending(self.files[f].format, s)
+        tab_width = self.prefs.getInt('viewer_tab_width')
         col = 0
         result = []
         for c in s:
             v = ord(c)
             if v < 32:
                 if c == '\t':
-                    width = self.prefs.viewer_tab_width - col % self.prefs.viewer_tab_width
+                    width = tab_width - col % tab_width
                     result.append(width * ' ')
                 else:
                     result.append('^' + chr(v + 64))
@@ -1738,12 +1805,12 @@ class FileDiffViewer(gtk.VBox):
         text = line.getText()
         if text is None:
             return ''
-        if self.prefs.align_ignore_blanklines and isBlank(text):
+        if self.prefs.getBool('align_ignore_blanklines') and isBlank(text):
             return '+'
-        if self.prefs.align_ignore_whitespace:
+        if self.prefs.getBool('align_ignore_whitespace'):
             for c in string.whitespace:
                 text = text.replace(c, '')
-        elif self.prefs.align_ignore_whitespace_changes:
+        elif self.prefs.getBool('align_ignore_whitespace_changes'):
             pc = True
             r = []
             for c in text:
@@ -1755,7 +1822,7 @@ class FileDiffViewer(gtk.VBox):
                     r.append(c)
                     pc = True
             text = ''.join(r)
-        if self.prefs.align_ignore_case:
+        if self.prefs.getBool('align_ignore_case'):
             text = text.upper()
         return '+' + text
 
@@ -1867,7 +1934,7 @@ class FileDiffViewer(gtk.VBox):
                 if rev is not None:
                     if spec.vcs is None:
                         raise IOError('Not under revision control.')
-                    cmd = spec.vcs.getRevisionCommand(name, rev)
+                    cmd = spec.vcs.getRevisionCommand(self.prefs, name, rev)
                     label = '%s (%s)' % (name, rev)
                     fd = os.popen(cmd, 'rb')
                 else:
@@ -2289,17 +2356,17 @@ class FileDiffViewer(gtk.VBox):
         s1 = nullToEmpty(self.getLineText(f, i))
         s2 = nullToEmpty(self.getLineText(f + 1, i))
 
-        if self.prefs.viewer_ignore_blanklines and isBlank(s1) and isBlank(s2):
+        if self.prefs.getBool('viewer_ignore_blanklines') and isBlank(s1) and isBlank(s2):
             return result
 
-        if self.prefs.viewer_ignore_whitespace or self.prefs.viewer_ignore_whitespace_changes:
+        if self.prefs.getBool('viewer_ignore_whitespace') or self.prefs.getBool('viewer_ignore_whitespace_changes'):
             if idx == 0:
                 s = s1
             else:
                 s = s2
             v = 0
             lookup = []
-            if self.prefs.viewer_ignore_whitespace:
+            if self.prefs.getBool('viewer_ignore_whitespace'):
                 for c in s:
                     if c not in string.whitespace:
                         lookup.append(v)
@@ -2321,6 +2388,7 @@ class FileDiffViewer(gtk.VBox):
         else:
             lookup = None
 
+        ignore_whitespace = self.prefs.getBool('viewer_ignore_whitespace')
         start = 0
         for block in difflib.SequenceMatcher(None, s1, s2).get_matching_blocks():
             end = block[idx]
@@ -2329,7 +2397,7 @@ class FileDiffViewer(gtk.VBox):
                     lookup_start = lookup[start]
                     lookup_end = lookup[end]
                     for j in range(lookup_start, lookup_end):
-                        if self.prefs.viewer_ignore_whitespace and s[j] in string.whitespace:
+                        if ignore_whitespace and s[j] in string.whitespace:
                             if lookup_start != j:
                                 result.append((lookup_start, j, flag))
                             lookup_start = j + 1
@@ -2347,12 +2415,12 @@ class FileDiffViewer(gtk.VBox):
             if s is None:
                 s = line.getText()
                 if s is not None:
-                    if self.prefs.viewer_ignore_blanklines and isBlank(s):
+                    if self.prefs.getBool('viewer_ignore_blanklines') and isBlank(s):
                         return None
-                    if self.prefs.viewer_ignore_whitespace:
+                    if self.prefs.getBool('viewer_ignore_whitespace'):
                         for c in string.whitespace:
                             s = s.replace(c, '')
-                    elif self.prefs.viewer_ignore_whitespace_changes:
+                    elif self.prefs.getBool('viewer_ignore_whitespace_changes'):
                         pc = True
                         r = []
                         for c in s:
@@ -2364,7 +2432,7 @@ class FileDiffViewer(gtk.VBox):
                                 r.append(c)
                                 pc = True
                         s = ''.join(r)
-                    if self.prefs.viewer_ignore_case:
+                    if self.prefs.getBool('viewer_ignore_case'):
                         s = s.upper()
                 line.compare_string = s
             return s
@@ -3618,7 +3686,7 @@ class Diffuse(gtk.Window):
             vcs = theVCSs.findByFilename(name)
             if vcs is not None:
                 specs = []
-                for name, rev in vcs.getSingleFileSpecs(name):
+                for name, rev in vcs.getSingleFileSpecs(self.prefs, name):
                     specs.append(FileSpec(name, rev, vcs, encoding))
             else:
                 specs.insert(0, FileSpec())
@@ -3917,20 +3985,20 @@ if __name__ == '__main__':
                 if encodings.aliases.aliases.has_key(encoding):
                     encoding = encodings.aliases.aliases[encoding]
             elif arg in [ '-b', '--ignore-space-change' ]:
-                diff.prefs.viewer_ignore_whitespace_changes = True
-                diff.prefs.align_ignore_whitespace_changes = True
+                diff.prefs.setBool('viewer_ignore_whitespace_changes', True)
+                diff.prefs.setBool('align_ignore_whitespace_changes', True)
                 diff.preferences_updated()
             elif arg in [ '-B', '--ignore-blank-lines' ]:
-                diff.prefs.viewer_ignore_blanklines = True
-                diff.prefs.align_ignore_blanklines = True
+                diff.prefs.setBool('viewer_ignore_blanklines', True)
+                diff.prefs.setBool('align_ignore_blanklines', True)
                 diff.preferences_updated()
             elif arg in [ '-i', '--ignore-case' ]:
-                diff.prefs.viewer_ignore_case = True
-                diff.prefs.align_ignore_case = True
+                diff.prefs.setBool('viewer_ignore_case', True)
+                diff.prefs.setBool('align_ignore_case', True)
                 diff.preferences_updated()
             elif arg in [ '-w', '--ignore-all-space' ]:
-                diff.prefs.viewer_ignore_whitespace = True
-                diff.prefs.align_ignore_whitespace = True
+                diff.prefs.setBool('viewer_ignore_whitespace', True)
+                diff.prefs.setBool('align_ignore_whitespace', True)
                 diff.preferences_updated()
             elif arg in [ '-D', '--close-if-same' ]:
                 close_on_same = True

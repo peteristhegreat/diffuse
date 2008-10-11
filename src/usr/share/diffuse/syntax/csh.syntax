@@ -1,7 +1,7 @@
 # C Shell syntax file for Diffuse
 # Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
 syntax 'C Shell' normal text
-syntax_files 'C Shell' '^(.*/)?([^/]*\.csh|\.t?cshrc)$'
+syntax_files 'C Shell' '^(.*\.csh|\.t?cshrc)$'
 
 # whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'

@@ -1,7 +1,7 @@
 # Makefile syntax file for Diffuse
 # (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
 syntax Makefile normal text
-syntax_files Makefile '^(.*/)?(GNUmakefile|[Mm]akefile)$'
+syntax_files Makefile '^(GNUmakefile|[Mm]akefile)$'
 
 syntax_pattern normal normal makefile_continue '\\\r?\n'
 
