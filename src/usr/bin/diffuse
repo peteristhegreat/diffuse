@@ -90,11 +90,12 @@ import encodings
 import glob
 import gobject
 import locale
-import pango
 import os
+import pango
 import re
 import shlex
 import string
+import subprocess
 import webbrowser
 
 class Colour:
@@ -273,8 +274,10 @@ class Resources:
            'help_url': 'http://diffuse.sourceforge.net/manual.html' }
         help_browser = getExePath('gnome-help')
         if help_browser is not None:
-           self.strings['help_browser'] = help_browser
-           self.strings['help_file'] = os.path.join(getLocalisedDir('/usr/share/gnome/help/diffuse'), 'diffuse.xml')
+           help_file = os.path.join(getLocalisedDir('/usr/share/gnome/help/diffuse'), 'diffuse.xml')
+           if os.path.isfile(help_file):
+               self.strings['help_browser'] = help_browser
+               self.strings['help_file'] = help_file
         self.unknown_strings = {}
         self.default_colour = Colour(0.0, 0.0, 0.0)
         self.char_classes = {}
@@ -956,18 +959,6 @@ def convert_to_format(s, format):
        s = convert_to_unix(s)
    return s
 
-def shellEscape(s):
-    if len(s) == 0:
-        return "''"
-    return s.replace('', '\\')[:-1]
-
-def shellEscapeFile(s):
-    # prevent oldly named files from being mistaken as options for
-    # command line tools
-    if len(s) > 0 and s[0] != os.path.sep:
-        s = os.path.join(os.path.curdir, s)
-    return shellEscape(s)
-
 # contains information about a file
 class FileSpec:
     def __init__(self, name=None, revision=None, vcs=None, encoding=None):
@@ -987,8 +978,7 @@ class VCSs:
             return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            d, b = os.path.split(name)
-            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('bzr_bin')), shellEscape(rev), shellEscapeFile(b))
+            return [ prefs.getString('bzr_bin'), 'cat', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
 
     # CVS support
     class Cvs:
@@ -996,8 +986,7 @@ class VCSs:
             return [ (name, prefs.getString('cvs_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            d, b = os.path.split(name)
-            return 'cd %s; %s -Q update -p -r %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('cvs_bin')), shellEscape(rev), shellEscapeFile(b))
+            return [ prefs.getString('cvs_bin'), '-Q', 'update', '-p', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
 
     # Darcs support
     class Darcs:
@@ -1009,8 +998,7 @@ class VCSs:
             return [ (name, prefs.getString('darcs_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            d, b = os.path.split(name)
-            return 'cd %s; %s show contents -p %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('darcs_bin')), shellEscape(rev), shellEscapeFile(b))
+            return [ prefs.getString('darcs_bin'), 'show', 'contents', '-p', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
 
     # Git support
     class Git:
@@ -1022,12 +1010,13 @@ class VCSs:
             return [ (name, prefs.getString('git_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
+            name = os.path.abspath(name)
             if name.startswith(self.proj_dir):
                 i = len(self.proj_dir)
                 while i < len(name) and name[i] == os.path.sep:
                     i += 1
                 name = name[i:]
-            return 'cd %s; %s show %s:%s' % (shellEscapeFile(self.proj_dir), shellEscape(prefs.getString('git_bin')), shellEscape(rev), shellEscape(name))
+            return [ prefs.getString('git_bin'), 'show', '%s:%s' % (rev, name) ]
 
     # Mercurial support
     class Hg:
@@ -1039,8 +1028,7 @@ class VCSs:
             return [ (name, prefs.getString('hg_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            d, b = os.path.split(name)
-            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('hg_bin')), shellEscape(rev), shellEscapeFile(b))
+            return [ prefs.getString('hg_bin'), 'cat', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
 
     # Monotone support
     class Mtn:
@@ -1052,8 +1040,7 @@ class VCSs:
             return [ (name, prefs.getString('mtn_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            d, b = os.path.split(name)
-            return 'cd %s; %s cat --quiet -r %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('mtn_bin')), shellEscape(rev), shellEscapeFile(b))
+            return [ prefs.getString('mtn_bin'), 'cat', '--quiet', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
 
     # Subversion support
     class Svn:
@@ -1074,8 +1061,7 @@ class VCSs:
             return [ (name, prefs.getString('svn_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            d, b = os.path.split(name)
-            return 'cd %s; %s cat -r %s %s' % (shellEscapeFile(d), shellEscape(prefs.getString('svn_bin')), shellEscape(rev), shellEscapeFile(b))
+            return [ prefs.getString('svn_bin'), 'cat', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
 
     def __init__(self):
         self.leaf_dir_repos = [('.svn', VCSs.Svn), ('CVS', VCSs.Cvs)]
@@ -1921,9 +1907,12 @@ class FileDiffViewer(gtk.VBox):
                 if rev is not None:
                     if spec.vcs is None:
                         raise IOError('Not under revision control.')
-                    cmd = spec.vcs.getRevisionCommand(self.prefs, os.path.abspath(name), rev)
+                    cmd = spec.vcs.getRevisionCommand(self.prefs, name, rev)
                     label = '%s (%s)' % (name, rev)
-                    fd = os.popen(cmd, 'rb')
+                    dn = os.path.dirname(name)
+                    if dn == '':
+                        dn = None
+                    fd = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd=dn).stdout
                 else:
                     fd = open(name, 'rb')
                     label = name
