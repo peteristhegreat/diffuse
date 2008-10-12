@@ -271,7 +271,8 @@ class Resources:
         self.strings = {
            'help_browser': '',
            'help_file': '',
-           'help_url': 'http://diffuse.sourceforge.net/manual.html' }
+           'help_url': 'http://diffuse.sourceforge.net/manual.html',
+           'icon': '/usr/share/pixmaps/diffuse.png' }
         help_browser = getExePath('gnome-help')
         if help_browser is not None:
            help_file = os.path.join(getLocalisedDir('/usr/share/gnome/help/diffuse'), 'diffuse.xml')
@@ -525,9 +526,9 @@ class Preferences:
               [ 'Boolean', 'align_ignore_blanklines', False, _('Ignore Blank Lines') ],
               [ 'Boolean', 'align_ignore_case', False, _('Ignore Case') ]
             ],
-            _('Encoding'),
+            _('Regional Settings'),
             [ 'List',
-              [ 'String', 'encoding_auto_detect', 'utf_8 latin_1', _('Auto Detect') ]
+              [ 'String', 'encoding_auto_detect_codecs', 'utf_8 latin_1', _('Order of codecs used to identify encoding') ]
             ],
             _('Version Control'),
             [ 'FolderSet',
@@ -726,7 +727,7 @@ class Preferences:
         return self.encodings
 
     def _getDefaultEncodings(self):
-        return self.string_prefs['encoding_auto_detect'].split()
+        return self.string_prefs['encoding_auto_detect_codecs'].split()
 
     def getDefaultEncoding(self):
         encodings = self._getDefaultEncodings()
@@ -3844,7 +3845,6 @@ class Diffuse(gtk.Window):
             # only available in pygtk >= 2.12
             dialog.set_program_name(APP_NAME)
         dialog.set_version(VERSION)
-        dialog.set_logo_icon_name('diffuse')
         dialog.set_authors([ 'Derrick Moser <derrick_moser@yahoo.com>' ])
         dialog.set_copyright(COPYRIGHT)
         dialog.set_comments(_('A file comparison and merge tool.'))
@@ -3894,6 +3894,7 @@ if __name__ == '__main__':
             if os.path.isfile(rc_file):
                 theResources.parse(rc_file)
 
+    gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(theResources.getString('icon')))
     path = os.path.expanduser('~/.diffuse')
     if not os.path.exists(path):
         try:
