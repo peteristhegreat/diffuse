@@ -31,8 +31,8 @@
       &app; is a graphical tool for merging and comparing text files.  &app;
       is able to compare an arbitrary number of files side-by-side and gives
       users the ability to manually adjust line-matching and directly edit
-      files.  &app; can also retrieve revisions of files from bazaar, CVS,
-      darcs, git, mercurial, monotone, and subversion repositories for
+      files.  &app; can also retrieve revisions of files from Bazaar, CVS,
+      Darcs, Git, Mercurial, Monotone, Subversion, SVK repositories for
       comparison and merging.
     </para>
 
@@ -500,7 +500,7 @@
           <varlistentry>
             <term><userinput>convert_to_unix</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert to UNIX Format</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert to Unix Format</guimenuitem></menuchoice> menu item</para>
             </listitem>
           </varlistentry>
 

@@ -45,8 +45,8 @@ if __name__ == '__main__':
 Diffuse is a graphical tool for merging and comparing text files.  Diffuse is
 able to compare an arbitrary number of files side-by-side and gives users the
 ability to manually adjust line-matching and directly edit files.  Diffuse can
-also retrieve revisions of files from bazaar, CVS, darcs, git, mercurial,
-monotone, and subversion repositories for comparison and merging.
+also retrieve revisions of files from Bazaar, CVS, Darcs, Git, Mercurial,
+Monotone, Subversion, and SVK repositories for comparison and merging.
 
 Help Options:
   ( -h | -? | --help )             Display this usage information
@@ -566,6 +566,11 @@ class Preferences:
               [ 'List',
                 [ 'File', 'svn_bin', 'svn', _('Command') ],
                 [ 'String', 'svn_default_revision', 'BASE', _('Default Revision') ]
+              ],
+              'SVK',
+              [ 'List',
+                [ 'File', 'svk_bin', 'svk', _('Command') ],
+                [ 'String', 'svk_default_revision', 'HEAD', _('Default Revision') ]
               ]
             ]
           ]
@@ -972,7 +977,7 @@ class VCSs:
     # Bazaar support
     class Bzr:
         def __init__(self, proj_dir):
-            self.proj_dir = proj_dir
+            pass
 
         def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
@@ -992,7 +997,7 @@ class VCSs:
     # Darcs support
     class Darcs:
         def __init__(self, proj_dir):
-            self.proj_dir = proj_dir
+            pass
 
         def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
@@ -1022,7 +1027,7 @@ class VCSs:
     # Mercurial support
     class Hg:
         def __init__(self, proj_dir):
-            self.proj_dir = proj_dir
+            pass
 
         def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
@@ -1034,7 +1039,7 @@ class VCSs:
     # Monotone support
     class Mtn:
         def __init__(self, proj_dir):
-            self.proj_dir = proj_dir
+            pass
 
         def getSingleFileSpecs(self, prefs, name):
             # FIXME: merge conflicts?
@@ -1064,7 +1069,73 @@ class VCSs:
         def getRevisionCommand(self, prefs, name, rev):
             return [ prefs.getString('svn_bin'), 'cat', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
 
+    # SVK support
+    def isSvkManaged(self, name):
+        if os.path.isfile(self.svkconfig):
+            try:
+                # find working copies by parsing the config file
+                f = open(self.svkconfig, 'r')
+                ss = f.readlines()
+                f.close()
+                projs = {}
+                hash = False
+                sep = os.sep
+                for s in ss:
+                    if s.startswith('  sep: ') and len(s) > 7:
+                        sep = s[7]
+                for s in ss:
+                    if hash:
+                        if not s.startswith('    '):
+                            break
+                        n = len(s)
+                        if n > 4 and s[4] != ' ':
+                            if s.endswith(': \n'):
+                                n -= 3
+                            tt = []
+                            i = 4
+                            while i < n: 
+                                if s[i] == '"':
+                                    i += 1
+                                    while i < n:
+                                        if s[i] == '"':
+                                            i += 1
+                                            break
+                                        elif s[i] == '\\':
+                                            i += 1
+                                        if i < n:
+                                            tt.append(s[i])
+                                            i += 1
+                                else:
+                                    tt.append(s[i])
+                                    i += 1
+                            projs[''.join(tt).replace(sep, os.sep)] = None
+                    elif s.startswith('  hash:'):
+                        hash = True
+                while True:
+                    newname = os.path.dirname(name)
+                    if newname == name:
+                        break
+                    if projs.has_key(newname):
+                        return True
+                    name = newname
+            except IOError:
+                print 'Error parsing %s.' % (config, )
+        return False
+
+    class Svk:
+        def getSingleFileSpecs(self, prefs, name):
+            # FIXME: merge conflicts?
+            return [ (name, prefs.getString('svk_default_revision')), (name, None) ]
+
+        def getRevisionCommand(self, prefs, name, rev):
+            return [ prefs.getString('svk_bin'), 'cat', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
+
     def __init__(self):
+        if os.environ.has_key('SVKROOT'):
+            svkroot = os.environ['SVKROOT']
+        else:
+            svkroot = os.path.expanduser('~/.svk')
+        self.svkconfig = os.path.join(svkroot, 'config')
         self.leaf_dir_repos = [('.svn', VCSs.Svn), ('CVS', VCSs.Cvs)]
         self.common_dir_repos = [('.git', VCSs.Git), ('.hg', VCSs.Hg), ('.bzr', VCSs.Bzr), ('_darcs', VCSs.Darcs), ('_MTN', VCSs.Mtn)]
 
@@ -1073,6 +1144,8 @@ class VCSs:
             if os.path.isdir(os.path.join(os.path.dirname(name), dir_name)):
                 return repo()
         name = os.path.abspath(name)
+        if self.isSvkManaged(name):
+            return VCSs.Svk()
         while True:
             newname = os.path.dirname(name)
             if newname == name:
@@ -3569,7 +3642,7 @@ class Diffuse(gtk.Window):
                      [_('Find Pre_vious'), self.find_previous_cb, None, None, 'find_previous'],
                      [],
                      [_('Convert to _DOS Format'), self.convert_to_dos_cb, None, None, 'convert_to_dos'],
-                     [_('Convert to UNI_X Format'), self.convert_to_unix_cb, None, None, 'convert_to_unix'] ] ])
+                     [_('Convert to Uni_x Format'), self.convert_to_unix_cb, None, None, 'convert_to_unix'] ] ])
 
         submenudef = [ [_('None'), self.syntax_cb, None, None, 'no_syntax_highlighting'] ]
         names = theResources.getSyntaxNames()
@@ -3622,10 +3695,12 @@ class Diffuse(gtk.Window):
         vbox.show()
 
     def remove_tab_cb(self, widget, data):
-        if data.hasEdits() and not confirmDiscardEdits(self.get_toplevel()):
-           return
-        self.notebook.remove(data)
-        self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
+        if self.notebook.get_n_pages() > 1:
+            if not data.hasEdits() or confirmDiscardEdits(self.get_toplevel()):
+                self.notebook.remove(data)
+                self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
+        else:
+            self.quit_cb(widget, data)
 
     def newFileDiffViewer(self, name, n):
         viewer = FileDiffViewer(n, self.prefs)
@@ -3792,8 +3867,7 @@ class Diffuse(gtk.Window):
         self.notebook.set_current_page(i)
 
     def close_tab_cb(self, widget, data):
-        if self.notebook.get_n_pages() > 1:
-            self.remove_tab_cb(widget, self.notebook.get_nth_page(self.notebook.get_current_page()))
+        self.remove_tab_cb(widget, self.notebook.get_nth_page(self.notebook.get_current_page()))
 
     def preferences_cb(self, widget, data):
         if self.prefs.runDialog(self.get_toplevel()):
