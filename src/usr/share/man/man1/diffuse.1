@@ -119,10 +119,12 @@ Press the enter key or double click on a text area to enter text editing mode\. 
 Use the difference buttons to navigate blocks of differences within a file\. Use the merge buttons to copy blocks of text into the selected range of lines\. The revert tool will undo all changes to the selected lines regardless of the order they were made\.
 .SH "RESOURCES"
 .PP
-Diffuse reads commands from the system wide initialisation file
-\fI/etc/diffuserc\fR
-and personal initialisation file
-\fI~/\.diffuse/diffuserc\fR\. A Bourne shell\-like lexical analyser is used to parse initialisation commands\. Comments and special characters can be embedded using the same method manner used in Bourne shell scripts\.
+Diffuse will search for an initialisation file if no resource file related
+command line options are specified\. Diffuse will read commands from the
+personal initialisation
+\fI~/\.diffuse/diffuserc\fR
+if present, or the system wide initialisation file
+\fI/etc/diffuserc\fR\. A Bourne shell\-like lexical analyser is used to parse initialisation commands\. Comments and special characters can be embedded using the same method manner used in Bourne shell scripts\.
 .SS "General"
 .PP
 \fBimport \fR\fB\fIfile\fR\fR

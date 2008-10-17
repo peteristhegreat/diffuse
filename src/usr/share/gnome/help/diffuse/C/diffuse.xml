@@ -133,7 +133,7 @@
             <listitem>
               <para>
                 Do not read the system wide initialisation file
-                <filename>/etc/diffuserc</filename> and personal
+                <filename>/etc/diffuserc</filename> or the personal
                 initialisation file <filename>~/.diffuse/diffuserc</filename>.
               </para>
             </listitem>
@@ -315,12 +315,14 @@
     <title>Resources</title>
 
     <para>
-      Diffuse reads commands from the system wide initialisation file
-      <filename>/etc/diffuserc</filename> and personal initialisation file
-      <filename>~/.diffuse/diffuserc</filename>.  A Bourne shell-like lexical
-      analyser is used to parse initialisation commands.  Comments and
-      special characters can be embedded using the same method manner used in
-      Bourne shell scripts.
+      Diffuse will search for an initialisation file if no resource file
+      related command line options are specified.  Diffuse will read commands
+      from the personal initialisation
+      <filename>~/.diffuse/diffuserc</filename> if present, or the system wide
+      initialisation file <filename>/etc/diffuserc</filename>.  A Bourne
+      shell-like lexical analyser is used to parse initialisation commands.
+      Comments and special characters can be embedded using the same method
+      manner used in Bourne shell scripts.
     </para>
 
     <sect1 id="resources-general">

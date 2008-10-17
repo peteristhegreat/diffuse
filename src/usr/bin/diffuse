@@ -496,6 +496,31 @@ class FontButton(gtk.FontButton):
     def get_text(self):
         return self.get_font_name()
 
+class RadioButton(gtk.VBox):
+    def __init__(self, items):
+        gtk.VBox.__init__(self)
+        self.buttons = []
+        prev = None
+        for item in items:
+            button = gtk.RadioButton(prev, item)
+            self.buttons.append(button)
+            self.pack_start(button, False, False, 0)
+            button.show()
+            prev = button
+
+    def set_value(self, i):
+        n = len(self.buttons)
+        if n > 0:
+            if i < 0 or i >= n:
+                i = 0
+            self.buttons[i].set_active(True)
+
+    def get_value_as_int(self):
+        for i, button in enumerate(self.buttons):
+            if button.get_active():
+                return i
+        return 0
+
 class Preferences:
     def __init__(self):
         self.bool_prefs = {}
@@ -608,23 +633,21 @@ class Preferences:
                 i += 1
         elif template[0] == 'Boolean':
             self.bool_prefs[template[1]] = template[2]
-        elif template[0] == 'Integer':
+        elif template[0] in [ 'Integer', 'Radio' ]:
             self.int_prefs[template[1]] = template[2]
         elif template[0] in [ 'String', 'File', 'Font' ]:
             self.string_prefs[template[1]] = template[2]
 
     def runDialog(self, parent):
-        dialog = gtk.Dialog(_('Preferences'), parent, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_SAVE, gtk.RESPONSE_APPLY, gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_OK))
+        dialog = gtk.Dialog(_('Preferences'), parent, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_OK))
 
         widgets = {}
         w = self._buildPrefsDialog(parent, widgets, self.template)
         dialog.vbox.add(w)
         w.show()
 
-        while True:
-            response = dialog.run()
-            if response != gtk.RESPONSE_APPLY:
-                break
+        accept = (dialog.run() == gtk.RESPONSE_OK)
+        if accept:
             try:
                 ss = []
                 for k in self.bool_prefs.keys():
@@ -644,8 +667,6 @@ class Preferences:
                 m = MessageDialog(parent, gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(self.path), ))
                 m.run()
                 m.destroy()
-        accept = (response == gtk.RESPONSE_OK)
-        if accept:
             for k in self.bool_prefs.keys():
                 self.bool_prefs[k] = widgets[k].get_active()
             for k in self.int_prefs.keys():
@@ -680,10 +701,14 @@ class Preferences:
                     w = self._buildPrefsDialog(parent, widgets, tpl)
                     table.attach(w, 0, 2, i, i + 1, gtk.FILL, gtk.FILL)
                     w.show()
-                elif type == 'Boolean':
-                    button = gtk.CheckButton(tpl[3])
+                elif type in [ 'Boolean', 'Radio' ]:
+                    if type == 'Boolean':
+                        button = gtk.CheckButton(tpl[3])
+                        button.set_active(self.bool_prefs[tpl[1]])
+                    else:
+                        button = RadioButton(tpl[3:])
+                        button.set_value(self.int_prefs[tpl[1]])
                     widgets[tpl[1]] = button
-                    button.set_active(self.bool_prefs[tpl[1]])
                     table.attach(button, 1, 2, i, i + 1, gtk.FILL, gtk.FILL)
                     button.show()
                 else:
@@ -1981,17 +2006,19 @@ class FileDiffViewer(gtk.VBox):
                 if rev is not None:
                     if spec.vcs is None:
                         raise IOError('Not under revision control.')
-                    cmd = spec.vcs.getRevisionCommand(self.prefs, name, rev)
                     label = '%s (%s)' % (name, rev)
-                    dn = os.path.dirname(name)
-                    if dn == '':
-                        dn = None
-                    fd = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd=dn).stdout
+                    fullname = os.path.abspath(name)
+                    cmd = spec.vcs.getRevisionCommand(self.prefs, fullname, rev)
+                    dn = os.path.dirname(fullname)
+                    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd=dn)
+                    fd = proc.stdout
                 else:
-                    fd = open(name, 'rb')
                     label = name
+                    fd = open(name, 'rb')
                 ss = fd.readlines()
                 fd.close()
+		if rev is not None and proc.wait() != 0:
+                    raise IOError('Command failed.')
                 if spec.encoding is None:
                     ss, spec.encoding = self.prefs.convertToUnicode(ss)
                 else:
@@ -3699,8 +3726,6 @@ class Diffuse(gtk.Window):
             if not data.hasEdits() or confirmDiscardEdits(self.get_toplevel()):
                 self.notebook.remove(data)
                 self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
-        else:
-            self.quit_cb(widget, data)
 
     def newFileDiffViewer(self, name, n):
         viewer = FileDiffViewer(n, self.prefs)
@@ -3855,16 +3880,14 @@ class Diffuse(gtk.Window):
 
     def previous_tab_cb(self, widget, data):
         i = self.notebook.get_current_page() - 1
-        if i < 0:
-            i = self.notebook.get_n_pages() - 1
-        self.notebook.set_current_page(i)
+        if i >= 0:
+            self.notebook.set_current_page(i)
 
     def next_tab_cb(self, widget, data):
         i = self.notebook.get_current_page() + 1
         n = self.notebook.get_n_pages()
-        if i >= n:
-            i = 0
-        self.notebook.set_current_page(i)
+        if i < n:
+            self.notebook.set_current_page(i)
 
     def close_tab_cb(self, widget, data):
         self.remove_tab_cb(widget, self.notebook.get_nth_page(self.notebook.get_current_page()))
@@ -3963,12 +3986,15 @@ if __name__ == '__main__':
         theResources.parse(args[i])
         i += 1
     else:
-        for rc_file in [ '/etc/diffuserc', '~/.diffuse/diffuserc' ]:
+        for rc_file in [ '~/.diffuse/diffuserc', '/etc/diffuserc' ]:
             rc_file = os.path.expanduser(rc_file)
             if os.path.isfile(rc_file):
                 theResources.parse(rc_file)
+                break
 
-    gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(theResources.getString('icon')))
+    icon = theResources.getString('icon')
+    if os.path.isfile(icon):
+        gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(icon))
     path = os.path.expanduser('~/.diffuse')
     if not os.path.exists(path):
         try:
