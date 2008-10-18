@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
 Diffuse is a graphical tool for merging and comparing text files.  Diffuse is
 able to compare an arbitrary number of files side-by-side and gives users the
-ability to manually adjust line-matching and directly edit files.  Diffuse can
+ability to manually adjust line matching and directly edit files.  Diffuse can
 also retrieve revisions of files from Bazaar, CVS, Darcs, Git, Mercurial,
 Monotone, Subversion, and SVK repositories for comparison and merging.
 
@@ -530,8 +530,7 @@ class Preferences:
         encs = {}
         for e in encodings.aliases.aliases.values():
             encs[e] = None
-        self.encodings = encs.keys()
-        self.encodings.sort()
+        self.encodings = sorted(encs.keys())
 
         self.template = [ 'FolderSet',
             _('Display'),
@@ -1082,8 +1081,7 @@ class VCSs:
             if len(left) > 0 and len(right) > 0:
                 return [ (left[-1], None), (name, None), (right[-1], None) ]
             # update conflict
-            left = glob.glob(name + '.r*')
-            left.sort()
+            left = sorted(glob.glob(name + '.r*'))
             right = glob.glob(name + '.mine')
             right.extend(glob.glob(name + '.working'))
             if len(left) > 0 and len(right) > 0:
@@ -3675,7 +3673,7 @@ class Diffuse(gtk.Window):
         names = theResources.getSyntaxNames()
         if len(names) > 0:
             submenudef.append([])
-            names.sort()
+            names.sort(key=str.lower)
             for name in names:
                 submenudef.append([name, self.syntax_cb, name, None, 'syntax_highlighting_' + name])
 

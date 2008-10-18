@@ -12,7 +12,7 @@ BuildRoot: %{_tmppath}/%{name}-root
 %description
 Diffuse is a graphical tool for merging and comparing text files.  Diffuse is
 able to compare an arbitrary number of files side-by-side and gives users the
-ability to manually adjust line-matching and directly edit files.  Diffuse can
+ability to manually adjust line matching and directly edit files.  Diffuse can
 also retrieve revisions of files from Bazaar, CVS, Darcs, Git, Mercurial,
 Monotone, Subversion, and SVK repositories for comparison and merging.
 

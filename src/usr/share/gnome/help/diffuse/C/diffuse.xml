@@ -30,9 +30,9 @@
     <para>
       &app; is a graphical tool for merging and comparing text files.  &app;
       is able to compare an arbitrary number of files side-by-side and gives
-      users the ability to manually adjust line-matching and directly edit
+      users the ability to manually adjust line matching and directly edit
       files.  &app; can also retrieve revisions of files from Bazaar, CVS,
-      Darcs, Git, Mercurial, Monotone, Subversion, SVK repositories for
+      Darcs, Git, Mercurial, Monotone, Subversion, and SVK repositories for
       comparison and merging.
     </para>
 
@@ -268,22 +268,60 @@
       for comparing text files.
     </para>
 
-    <sect1 id="file-comparison-comparing">
-      <title>Comparing</title>
+    <para>
+      &app; displays files side-by-side inserting gaps to align similar lines
+      of text.  Differences are highlighted with a different background
+      colour.
+    </para>
+
+    <sect1 id="file-comparison-summary">
+      <title>Comparison Summary</title>
 
       <para>
-        &app; displays files side-by-side inserting gaps to align similar lines
-        of text.  Differences are highlighted with a different background
-        colour.  The mouse pointer or keyboard can be used to manually align
-        lines of text from neighbouring files.  To aligning lines of text using
-        the mouse pointer, select a line of text with the left mouse button,
-        right click on a line of text from a neighbouring file, and choose
-        "Align to Selection".  To align lines of text using the keyboard, move
-        the selection with the cursor keys, press the space bar to pick the
-        current line of text, move the selection with the cursor keys to a line
-        of text in a neighbouring file, and press the space bar to pick the
-        target line of text.  Pressing the escape key will cancel the
-        operation.
+        A summary of the compared files is located in the far right margin.
+        The summary illustrates where gaps have been inserted to align
+        matching lines of text and highlights differences using colour.  Manual
+        edits are also highlighted in green.  A blue cursor identifies the
+        region currently being viewed.  The viewed region can be changed by
+        clicking anywhere on the summary.
+      </para>
+    </sect1>
+
+    <sect1 id="file-comparison-selecting">
+      <title>Selecting</title>
+
+      <para>
+        Lines of text can be selected using the mouse pointer or keyboard.
+        Select lines of text with the mouse pointer by clicking on a line.
+        Click and drag to select multiple lines.  Holding down the shift key
+        when clicking will extend the current selection.  Select lines using
+        the keyboard by pressing the page up/down or arrow keys.  Extend the
+        current selection by holding down the shift key and pressing the page
+        up/down or arrow keys.  Move the selection to an adjacent file using
+        the left and right arrow keys.
+      </para>
+    </sect1>
+
+    <sect1 id="file-comparison-alignment">
+      <title>Matching Lines</title>
+
+      <para>
+        The mouse pointer or keyboard can be used to manually align lines of
+        text with adjacent files.  To aligning lines of text using the mouse
+        pointer, select a line of text with the left mouse button, right click
+        on a line of text from an adjacent file, and choose
+        <menuchoice><guimenu>Align to Selection</guimenu></menuchoice>.  To
+        align lines of text using the keyboard, move the selection with the
+        cursor keys, press the space bar to pick the current line of text, move
+        the selection with the cursor keys to a line of text in an adjacent
+        file, and press the space bar to pick the target line of text.
+        Pressing the escape key will cancel the operation.
+      </para>
+
+      <para>
+        Use the <menuchoice><guimenu>Isolate</guimenu></menuchoice> menu item
+        to prevent the selected lines from being matched with any lines from
+        the adjacent files.
       </para>
     </sect1>
 
@@ -291,11 +329,33 @@
       <title>Editing</title>
 
       <para>
-        Press the enter key or double click on a text area to enter text
-        editing mode.  &app; will identify differences in neighbouring files
-        during editing and highlight modified lines.  Press the escape key or
-        click on another file's text area using the left mouse button to leave
-        editing mode.
+        Press the enter key or double-click on a text area to enter text
+        editing mode.  The cursor will change to indicate text editing mode
+        and the status bar at the bottom of the window will display the
+        cursor's column position.
+      </para>
+
+      <para>
+        In text editing mode, text can be selected with the mouse pointer by
+        click and dragging.  The current selection can be extended by holding
+        down the shift key and moving the cursor by clicking with the mouse
+        pointer or pressing any of the arrow, home, end or page up/down keys.
+        Individual words can be selected by double-clicking on them with the
+        mouse pointer.  Whole lines can be selected by triple-clicking on them
+        with the mouse pointer.
+      </para>
+
+      <para>
+        Modify text by typing on the keyword.  Modified lines will be
+        highlighted in green.  Use the
+        <menuchoice><guimenu>Undo</guimenu></menuchoice> and
+        <menuchoice><guimenu>Redo</guimenu></menuchoice> menu items to
+        undo and redo the previously preformed operations.
+      </para>
+
+      <para>
+        Press the escape key or click on another file's text area using the
+        left mouse button to leave editing mode.
       </para>
     </sect1>
 
@@ -303,10 +363,21 @@
       <title>Merging</title>
 
       <para>
-        Use the difference buttons to navigate blocks of differences within a
-        file.  Use the merge buttons to copy blocks of text into the selected
-        range of lines.  The revert tool will undo all changes to the selected
-        lines regardless of the order they were made.
+        Use the difference buttons or menu items to navigate between blocks
+        of differences within a file.  When navigating, &app; will move the
+        selection to the next continuous set of lines with differences or
+        edits.
+      </para>
+
+      <para>
+        Use the merge buttons or menu items to copy blocks of text into the
+        selected range of lines.  The
+        <menuchoice><guimenu>Undo</guimenu></menuchoice> and
+        <menuchoice><guimenu>Redo</guimenu></menuchoice> menu items can be used
+        to undo and redo the previously preformed operations.  All changes to a
+        set of lines can be reverted using the
+        <menuchoice><guimenu>Revert</guimenu></menuchoice> menu item
+        regardless of the order the edits were performed.
       </para>
     </sect1>
   </chapter>
@@ -315,8 +386,8 @@
     <title>Resources</title>
 
     <para>
-      Diffuse will search for an initialisation file if no resource file
-      related command line options are specified.  Diffuse will read commands
+      &app; will search for an initialisation file if no resource file
+      related command line options are specified.  &app; will read commands
       from the personal initialisation
       <filename>~/.diffuse/diffuserc</filename> if present, or the system wide
       initialisation file <filename>/etc/diffuserc</filename>.  A Bourne
@@ -917,7 +988,7 @@
           <varlistentry>
             <term><userinput>character_classes</userinput></term>
             <listitem>
-              <para>describes mapping used to identify characters of a similar class for selection when double clicking</para>
+              <para>describes mapping used to identify characters of a similar class for selection when double-clicking</para>
               <para>
                 This resource is a series of
                 <replaceable>range</replaceable>:<replaceable>value</replaceable>
@@ -926,7 +997,7 @@
                 corresponding to the code for the character or characters to be
                 set.  Neighbouring characters that map to the same
                 <replaceable>value</replaceable> will be selected as a group
-                when double clicking on a word.
+                when double-clicking on a word.
               </para>
             </listitem>
           </varlistentry>
