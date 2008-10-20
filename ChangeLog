@@ -1,12 +1,13 @@
-- moved some resources to preferences
-- more robust launching of help browsers
+Diffuse 0.2.14 - 2008-10-20
 - svk support
-- command line display options
-- man page
 - syntax files for more file types
 - DOS / Unix line endings now respected in edit operations
-- file revisions can now be specified in the open file dialogue
 - improved difference map
+- more robust launching of help browsers
+- man page
+- command line display options
+- moved some resources to the preferences dialogue
+- file revisions can now be specified in the open file dialogue
 - minor bug fixes
 
 Diffuse 0.2.13 - 2008-05-16
