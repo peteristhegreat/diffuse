@@ -30,6 +30,7 @@ _ = gettext.gettext
 APP_NAME = 'Diffuse'
 VERSION = '0.2.14'
 COPYRIGHT = _('Copyright © 2006-2008 Derrick Moser')
+RESOURCES = '/etc/diffuserc'
 
 if __name__ == '__main__':
     args = sys.argv
@@ -57,6 +58,7 @@ Configuration Options:
   --rcfile <file>                  Specify explicit resource file
 
 General Options:
+  ( -c | --commit ) <rev>          Commit resulting in file revision <rev>
   ( -D | --close-if-same )         Close all tabs with no differences
   ( -e | --encoding ) <codec>      Use <codec> to read and write files
   ( -r | --revision ) <rev>        File revision <rev> from a repository
@@ -233,6 +235,12 @@ class Resources:
         self.setKeyBinding('line_mode', 'extend_page_down', 'Shift+Page_Down')
         self.setKeyBinding('line_mode', 'delete_text', 'BackSpace')
         self.setKeyBinding('line_mode', 'delete_text', 'Delete')
+        self.setKeyBinding('line_mode', 'first_line', 'Home')
+        self.setKeyBinding('line_mode', 'extend_first_line', 'Shift+Home')
+        self.setKeyBinding('line_mode', 'last_line', 'End')
+        self.setKeyBinding('line_mode', 'extend_last_line', 'Shift+End')
+        self.setKeyBinding('line_mode', 'first_difference', 'Ctrl+Home')
+        self.setKeyBinding('line_mode', 'last_difference', 'Ctrl+End')
         self.setKeyBinding('align_mode', 'enter_line_mode', 'Escape')
         self.setKeyBinding('align_mode', 'enter_character_mode', 'Return')
         self.setKeyBinding('align_mode', 'up', 'Up')
@@ -312,17 +320,29 @@ class Resources:
         if key is None:
            raise ValueError()
         key_tuple = (ctx, (key, modifiers))
+
+        # remove any existing binding
         if self.keybindings_lookup.has_key(key_tuple):
-            del self.keybindings[self.keybindings_lookup[key_tuple]]
-            del self.keybindings_lookup[key_tuple]
+            self._removeKeyBinding(key_tuple)
+
+        # ensure we have a set to hold this action
+        if not self.keybindings.has_key(action_tuple):
+            self.keybindings[action_tuple] = {}
+        bindings = self.keybindings[action_tuple]
+
         # menu items can only have one binding
-        if ctx != 'menu' and self.keybindings.has_key(action_tuple):
-            bindings = self.keybindings[action_tuple]
-        else:
-            bindings = {}
-            self.keybindings[action_tuple] = bindings
+        if ctx == 'menu':
+            for k in bindings.keys():
+                self._removeKeyBinding(k)
+
+        # add the binding
         bindings[key_tuple] = None
         self.keybindings_lookup[key_tuple] = action_tuple
+
+    def _removeKeyBinding(self, key_tuple):
+        action_tuple = self.keybindings_lookup[key_tuple]
+        del self.keybindings_lookup[key_tuple]
+        del self.keybindings[action_tuple][key_tuple]
 
     def getActionForKey(self, ctx, key, modifiers):
         tuple = (ctx, (key, modifiers))
@@ -549,6 +569,11 @@ class Preferences:
               [ 'Boolean', 'align_ignore_whitespace_changes', False, _('Ignore Changes to White Space') ],
               [ 'Boolean', 'align_ignore_blanklines', False, _('Ignore Blank Lines') ],
               [ 'Boolean', 'align_ignore_case', False, _('Ignore Case') ]
+            ],
+            _('Editor'),
+            [ 'List',
+              [ 'Integer', 'editor_soft_tab_width', 8, _('Soft Tab Width') ],
+              [ 'Boolean', 'editor_expand_tabs', False, _('Expand Tabs to Spaces') ]
             ],
             _('Regional Settings'),
             [ 'List',
@@ -1299,6 +1324,10 @@ class FileDiffViewer(gtk.VBox):
         self._line_mode_actions = {
                 'enter_align_mode': self._line_mode_enter_align_mode,
                 'enter_character_mode': self.setCharMode,
+                'first_line': self._first_line,
+                'extend_first_line': self._extend_first_line,
+                'last_line': self._last_line,
+                'extend_last_line': self._extend_last_line,
                 'up': self._line_mode_up,
                 'extend_up': self._line_mode_extend_up,
                 'down': self._line_mode_down,
@@ -1322,6 +1351,8 @@ class FileDiffViewer(gtk.VBox):
         self._align_mode_actions = {
                 'enter_line_mode': self._align_mode_enter_line_mode,
                 'enter_character_mode': self.setCharMode,
+                'first_line': self._first_line,
+                'last_line': self._last_line,
                 'up': self._line_mode_up,
                 'down': self._line_mode_down,
                 'left': self._line_mode_left,
@@ -2015,7 +2046,7 @@ class FileDiffViewer(gtk.VBox):
                     fd = open(name, 'rb')
                 ss = fd.readlines()
                 fd.close()
-		if rev is not None and proc.wait() != 0:
+                if rev is not None and proc.wait() != 0:
                     raise IOError('Command failed.')
                 if spec.encoding is None:
                     ss, spec.encoding = self.prefs.convertToUnicode(ss)
@@ -2923,6 +2954,20 @@ class FileDiffViewer(gtk.VBox):
         self.align_line = self.current_line
         self.dareas[self.align_file].queue_draw()
 
+    def _first_line(self):
+        self.setCurrentLine(self.current_file, 0)
+
+    def _extend_first_line(self):
+        self.setCurrentLine(self.current_file, 0, True)
+
+    def _last_line(self):
+        f = self.current_file
+        self.setCurrentLine(f, len(self.files[f].lines))
+
+    def _extend_last_line(self):
+        f = self.current_file
+        self.setCurrentLine(f, len(self.files[f].lines), True)
+
     def _line_mode_up(self, extend=False):
         self.setCurrentLine(self.current_file, self.current_line - 1, extend)
 
@@ -2993,6 +3038,7 @@ class FileDiffViewer(gtk.VBox):
         elif self.mode == CHAR_MODE:
             f = self.current_file
             is_shifted = event.state & gtk.gdk.SHIFT_MASK
+            is_ctrl = event.state & gtk.gdk.CONTROL_MASK
             retval = True
             action = theResources.getActionForKey('character_mode', event.keyval, mask)
             if self._character_mode_actions.has_key(action):
@@ -3030,10 +3076,18 @@ class FileDiffViewer(gtk.VBox):
                 j = min(self.current_char, self.getMaxCharPosition(i))
                 self.setCurrentChar(i, j, is_shifted)
             elif event.keyval == gtk.keysyms.Home:
-                self.setCurrentChar(self.current_line, 0, is_shifted)
+                if is_ctrl:
+                    i = 0
+                else:
+                    i = self.current_line
+                self.setCurrentChar(i, 0, is_shifted)
             elif event.keyval == gtk.keysyms.End:
-                i = self.current_line
-                j = self.getMaxCharPosition(i)
+                if is_ctrl:
+                    i = len(self.files[f].lines)
+                    j = 0
+                else:
+                    i = self.current_line
+                    j = self.getMaxCharPosition(i)
                 self.setCurrentChar(i, j, is_shifted)
             elif event.keyval == gtk.keysyms.Left:
                 i = self.current_line
@@ -3054,11 +3108,26 @@ class FileDiffViewer(gtk.VBox):
                     j = 0
                 self.setCurrentChar(i, j, is_shifted)
             elif event.keyval == gtk.keysyms.BackSpace:
+                s = ''
                 i = self.current_line
                 j = self.current_char
                 if self.selection_line == i and self.selection_char == j:
                     if j > 0:
-                        j -= 1
+                        text = self.getLineText(f, i)[:j]
+                        for c in text:
+                            if c not in ' \t':
+                                j -= 1
+                                break
+                        else:
+                            w = self.stringWidth(f, text)
+                            width = self.prefs.getInt('editor_soft_tab_width')
+                            w = (w - 1) // width * width
+                            if self.prefs.getBool('editor_expand_tabs'):
+                                s = u' ' * w
+                            else:
+                                width = self.prefs.getInt('display_tab_width')
+                                s = u'\t' * (w // width) + u' ' * (w % width)
+                            j = 0
                     else:
                         while i > 0:
                             i -= 1
@@ -3068,7 +3137,7 @@ class FileDiffViewer(gtk.VBox):
                                 break
                     self.current_line = i
                     self.current_char = j
-                self.replaceText('')
+                self.replaceText(s)
             elif event.keyval == gtk.keysyms.Delete:
                 i = self.current_line
                 j = self.current_char
@@ -3090,7 +3159,42 @@ class FileDiffViewer(gtk.VBox):
             elif event.keyval == gtk.keysyms.Return:
                 self.replaceText(unicode(os.linesep))
             elif event.keyval == gtk.keysyms.Tab:
-                self.replaceText(u'\t')
+                start_i, start_j = self.selection_line, self.selection_char
+                end_i, end_j = self.current_line, self.current_char
+                if end_i < start_i or (end_i == start_i and end_j < start_j):
+                    start_i, start_j, end_i, end_j = end_i, end_j, start_i, start_j
+                width = self.prefs.getInt('editor_soft_tab_width')
+                if start_j > 0:
+                    text = self.getLineText(f, start_i)[:start_j]
+                    w = self.stringWidth(f, text)
+                    ws = width - w % width
+                else:
+                    ws = width
+                if self.prefs.getBool('editor_expand_tabs'):
+                    s = u' ' * ws
+                else:
+                    width = self.prefs.getInt('display_tab_width')
+                    if start_j > 0:
+                        while start_j > 0 and text[start_j - 1] in ' \t':
+                            start_j -= 1
+                        self.selection_line = start_i
+                        self.selection_char = start_j
+                        self.current_line = end_i
+                        self.current_char = end_j
+                        ws = w + ws
+                        w = self.stringWidth(f, text[:start_j])
+                    else:
+                        w = 0
+                    ss = []
+                    while True:
+                        w2 = width - w % width
+                        if w + w2 > ws:
+                            break
+                        ss.append(u'\t')
+                        w += w2
+                    ss.append(u' ' * (ws - w))
+                    s = ''.join(ss)
+                self.replaceText(s)
             elif len(event.string) > 0:
                 self.replaceText(event.string)
         elif self.mode == ALIGN_MODE:
@@ -3479,37 +3583,26 @@ class FileDiffViewer(gtk.VBox):
                     return True
         return False
 
-    def goto_difference(self, i, delta, until_end):
-        start = None
-        end = None
+    def goto_difference(self, i, delta):
         f = self.current_file
         nlines = len(self.files[f].lines)
-        found = True
-        while found:
-            found = False
-            while i >= 0 and i < nlines:
-                if self.hasEditsOrDifference(f, i):
-                    start = i
-                    while i >= 0 and i < nlines and self.hasEditsOrDifference(f, i):
-                        i += delta
-                    found = True
-                    end = i
-                    break
+        # step over non-difference
+        while i >= 0 and i <= nlines and not self.hasEditsOrDifference(f, i):
+            i += delta
+        # find extent of difference
+        if i >= 0 and i <= nlines:
+            start = i
+            while i >= 0 and i <= nlines and self.hasEditsOrDifference(f, i):
                 i += delta
-            if not found or not until_end:
-                break
-        if start is not None:
-            end -= delta
-            if end < start:
-                start, end = end, start
+            i -= delta
+            if i < start:
+                start, i = i, start
             # centre the view on the selection
             vadj = self.vadj
-            old_pos = vadj.get_value()
-            pos = ((start + end) * self.font_height - vadj.page_size) // 2
+            pos = ((start + i) * self.font_height - vadj.page_size) // 2
             pos = min(max(0, pos), vadj.upper - vadj.page_size)
-            if (delta < 0 and pos < old_pos) or (delta > 0 and pos > old_pos):
-                vadj.set_value(pos)
-            self.selection_line = end
+            vadj.set_value(pos)
+            self.selection_line = i
             self.setCurrentLine(f, start, True)
 
     def realign_all_cb(self, widget, data):
@@ -3539,8 +3632,7 @@ class FileDiffViewer(gtk.VBox):
 
     def _first_difference(self):
         self.setLineMode()
-        i = min(self.current_line, self.selection_line) - 1
-        self.goto_difference(i, -1, True)
+        self.goto_difference(0, 1)
 
     def first_difference_cb(self, widget, data):
         self._first_difference()
@@ -3548,7 +3640,7 @@ class FileDiffViewer(gtk.VBox):
     def _previous_difference(self):
         self.setLineMode()
         i = min(self.current_line, self.selection_line) - 1
-        self.goto_difference(i, -1, False)
+        self.goto_difference(i, -1)
 
     def previous_difference_cb(self, widget, data):
         self._previous_difference()
@@ -3556,22 +3648,22 @@ class FileDiffViewer(gtk.VBox):
     def _next_difference(self):
         self.setLineMode()
         i = max(self.current_line, self.selection_line) + 1
-        self.goto_difference(i, 1, False)
+        self.goto_difference(i, 1)
 
     def next_difference_cb(self, widget, data):
         self._next_difference()
 
     def _last_difference(self):
         self.setLineMode()
-        i = max(self.current_line, self.selection_line) + 1
-        self.goto_difference(i, 1, True)
+        f = self.current_file
+        i = len(self.files[f].lines)
+        self.goto_difference(i, -1)
 
     def last_difference_cb(self, widget, data):
         self._last_difference()
 
     def _realise_cb(self, widget):
-        self.setLineMode()
-        self.goto_difference(0, 1, False)
+        self._first_difference()
 
 class SearchDialog(gtk.Dialog):
     def __init__(self, parent, pattern=None, history=None):
@@ -3975,6 +4067,13 @@ def window_state_cb(window, event):
             window_maximized = 0
 
 if __name__ == '__main__':
+    path = os.path.expanduser('~/.diffuse')
+    if not os.path.exists(path):
+        try:
+            os.mkdir(path)
+        except IOError:
+            pass
+
     # load resource files
     i = 1
     if argc == 2 and args[1] == '--no-rcfile':
@@ -3984,22 +4083,22 @@ if __name__ == '__main__':
         theResources.parse(args[i])
         i += 1
     else:
-        for rc_file in [ '~/.diffuse/diffuserc', '/etc/diffuserc' ]:
-            rc_file = os.path.expanduser(rc_file)
-            if os.path.isfile(rc_file):
-                theResources.parse(rc_file)
-                break
+        rc_file = os.path.expanduser('~/.diffuse/diffuserc')
+        if not os.path.exists(rc_file):
+	    try:
+		f = open(rc_file, 'w')
+		f.write("""# personal initialisation file for %s
+import %s
+""" % (APP_NAME, RESOURCES))
+		f.close()
+	    except:
+		pass
+        if os.path.isfile(rc_file):
+            theResources.parse(rc_file)
 
     icon = theResources.getString('icon')
     if os.path.isfile(icon):
         gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(icon))
-    path = os.path.expanduser('~/.diffuse')
-    if not os.path.exists(path):
-        try:
-            os.mkdir(path)
-        except IOError:
-            pass
-
     diff = Diffuse()
     # load state
     configpath = os.path.join(path, 'config')
@@ -4039,6 +4138,17 @@ if __name__ == '__main__':
                 # specified revision
                 i += 1
                 revs.append(args[i])
+            elif i + 1 < argc and arg in [ '-c', '--commit' ]:
+                # specified revision
+                i += 1
+                rev = args[i]
+                prev = ''
+                try:
+                    prev = str(int(rev) - 1)
+                except:
+                    print _('Error parsing revision %s.') % (repr(rev), )
+                revs.append(prev)
+                revs.append(rev)
             elif arg in [ '-s', '--separate' ]:
                 # open items in separate tabs
                 n = len(specs)
@@ -4117,9 +4227,10 @@ if __name__ == '__main__':
         # save state
         try:
             f = open(configpath, 'w')
-            f.write('# This config file was generated by %s %s.\n\n' % (APP_NAME, VERSION))
-            f.write('size %s %s\n' % (window_width, window_height))
-            f.write('maximized %s\n' % (window_maximized, ))
+            f.write("""# This config file was generated by %s %s.
+size %s %s
+maximized %s
+""" % (APP_NAME, VERSION, window_width, window_height, window_maximized))
             f.close()
         except IOError:
             print _('Error writing %s.') % (repr(configpath), )

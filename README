@@ -34,8 +34,9 @@ Diffuse is implemented entirely in Python and should run on any platform with
 Python and PyGTK.  If you need to manually install PyGTK, please be aware its
 dependencies should be installed prior to installing PyGTK.
 
-Diffuse can be installed on most Linux distributions by simply copying the
-files and directories in the 'src' directory to the root of the host system.
+Diffuse can be installed from source on most Linux distributions by simply
+copying the files and directories in the 'src' directory to the root of the
+host system.
 
 If you wish to install Diffuse (or portions of Diffuse) to other locations, the
 paths used to locate configuration files, icons, and help documentation in

@@ -31,9 +31,7 @@ If a configuration option is specified, it must be the first argument specified 
 .PP
 \fB\-\-no\-rcfile\fR
 .RS 4
-Do not read the system wide initialisation file
-\fI/etc/diffuserc\fR
-or the personal initialisation file
+Do not read the personal initialisation file
 \fI~/\.diffuse/diffuserc\fR\.
 .RE
 .PP
@@ -41,12 +39,19 @@ or the personal initialisation file
 .RS 4
 Read initialisation commands from file
 \fIfile\fR
-instead of the system wide initialisation file
-\fI/etc/diffuserc\fR
-and personal initialisation file
+instead of the personal initialisation file
 \fI~/\.diffuse/diffuserc\fR\.
 .RE
 .SS "General Options"
+.PP
+\fB\-c\fR, \fB\-\-commit\fR \fIrev\fR
+.RS 4
+Include revision
+\fIrev \- 1\fR
+and
+\fIrev\fR
+of the next file named in the command line arguments in a file comparison tab\.
+.RE
 .PP
 \fB\-D\fR, \fB\-\-close\-if\-same\fR
 .RS 4
@@ -107,7 +112,7 @@ Use the
 File → New 2\-Way File Merge
 and
 File → New 3\-Way File Merge
-menu items to create additional tabs for comparing text files\.
+menu items to create additional tabs for comparing text files\. File names and revisions can be specified either in the command line arguments used to invoke Diffuse or in fields on the Open File dialogue\.
 .PP
 Diffuse displays files side\-by\-side inserting gaps to align similar lines of text\. Differences are highlighted with a different background colour\.
 .SS "Comparison Summary"
@@ -150,10 +155,8 @@ Revert
 menu item regardless of the order the edits were performed\.
 .SH "RESOURCES"
 .PP
-Diffuse will search for an initialisation file if no resource file related command line options are specified\. Diffuse will read commands from the personal initialisation
-\fI~/\.diffuse/diffuserc\fR
-if present, or the system wide initialisation file
-\fI/etc/diffuserc\fR\. A Bourne shell\-like lexical analyser is used to parse initialisation commands\. Comments and special characters can be embedded using the same method manner used in Bourne shell scripts\.
+When Diffuse is started, it will read commands from the personal initialisation file
+\fI~/\.diffuse/diffuserc\fR\. Diffuse will create a default personal initialisation file if one did not exist\. A Bourne shell\-like lexical analyser is used to parse initialisation commands\. Comments and special characters can be embedded using the same style of escaping used in Bourne shell scripts\.
 .SS "General"
 .PP
 \fBimport \fR\fB\fIfile\fR\fR
@@ -444,6 +447,26 @@ enter alignment editing mode
 enter character editing mode
 .RE
 .PP
+\fBfirst_line\fR
+.RS 4
+move cursor to the first line
+.RE
+.PP
+\fBextend_first_line\fR
+.RS 4
+move cursor to the first line, extending the selection
+.RE
+.PP
+\fBlast_line\fR
+.RS 4
+move cursor to the last line
+.RE
+.PP
+\fBextend_last_line\fR
+.RS 4
+move cursor to the last line, extending the selection
+.RE
+.PP
 \fBup\fR
 .RS 4
 move cursor up one line
@@ -567,6 +590,16 @@ enter line editing mode
 \fBenter_character_mode\fR
 .RS 4
 enter character editing mode
+.RE
+.PP
+\fBfirst_line\fR
+.RS 4
+move cursor to the first line
+.RE
+.PP
+\fBlast_line\fR
+.RS 4
+move cursor to the last line
 .RE
 .PP
 \fBup\fR

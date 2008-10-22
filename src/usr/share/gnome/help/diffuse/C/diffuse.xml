@@ -132,9 +132,8 @@
             <term><userinput>--no-rcfile</userinput></term>
             <listitem>
               <para>
-                Do not read the system wide initialisation file
-                <filename>/etc/diffuserc</filename> or the personal
-                initialisation file <filename>~/.diffuse/diffuserc</filename>.
+                Do not read the personal initialisation file
+                <filename>~/.diffuse/diffuserc</filename>.
               </para>
             </listitem>
           </varlistentry>
@@ -144,9 +143,8 @@
             <listitem>
               <para>
                 Read initialisation commands from file
-                <replaceable>file</replaceable> instead of the system wide
-                initialisation file <filename>/etc/diffuserc</filename> and
-                personal initialisation file <filename>~/.diffuse/diffuserc</filename>.
+                <replaceable>file</replaceable> instead of the personal
+                initialisation file <filename>~/.diffuse/diffuserc</filename>.
               </para>
             </listitem>
           </varlistentry>
@@ -156,6 +154,17 @@
       <sect2 id="introduction-options-general">
         <title>General Options</title>
         <variablelist>
+
+          <varlistentry>
+            <term><userinput>-c</userinput>, <userinput>--commit</userinput> <replaceable>rev</replaceable></term>
+            <listitem>
+              <para>
+                Include revision <replaceable>rev - 1</replaceable> and
+                <replaceable>rev</replaceable> of the next file named in the
+                command line arguments in a file comparison tab.
+              </para>
+            </listitem>
+          </varlistentry>
 
           <varlistentry>
             <term><userinput>-D</userinput>, <userinput>--close-if-same</userinput></term>
@@ -265,7 +274,9 @@
       Merge</guimenuitem></menuchoice> and
       <menuchoice><guimenu>File</guimenu><guimenuitem>New 3-Way File
       Merge</guimenuitem></menuchoice> menu items to create additional tabs
-      for comparing text files.
+      for comparing text files.  File names and revisions can be specified
+      either in the command line arguments used to invoke &app; or in fields
+      on the Open File dialogue.
     </para>
 
     <para>
@@ -386,14 +397,12 @@
     <title>Resources</title>
 
     <para>
-      &app; will search for an initialisation file if no resource file
-      related command line options are specified.  &app; will read commands
-      from the personal initialisation
-      <filename>~/.diffuse/diffuserc</filename> if present, or the system wide
-      initialisation file <filename>/etc/diffuserc</filename>.  A Bourne
-      shell-like lexical analyser is used to parse initialisation commands.
-      Comments and special characters can be embedded using the same method
-      manner used in Bourne shell scripts.
+      When &app; is started, it will read commands from the personal
+      initialisation file <filename>~/.diffuse/diffuserc</filename>.  &app;
+      will create a default personal initialisation file if one did not exist.
+      A Bourne shell-like lexical analyser is used to parse initialisation
+      commands.  Comments and special characters can be embedded using the same
+      style of escaping used in Bourne shell scripts.
     </para>
 
     <sect1 id="resources-general">
@@ -724,6 +733,34 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>first_line</userinput></term>
+            <listitem>
+              <para>move cursor to the first line</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>extend_first_line</userinput></term>
+            <listitem>
+              <para>move cursor to the first line, extending the selection</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>last_line</userinput></term>
+            <listitem>
+              <para>move cursor to the last line</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>extend_last_line</userinput></term>
+            <listitem>
+              <para>move cursor to the last line, extending the selection</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>up</userinput></term>
             <listitem>
               <para>move cursor up one line</para>
@@ -887,6 +924,20 @@
             <term><userinput>enter_character_mode</userinput></term>
             <listitem>
               <para>enter character editing mode</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>first_line</userinput></term>
+            <listitem>
+              <para>move cursor to the first line</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>last_line</userinput></term>
+            <listitem>
+              <para>move cursor to the last line</para>
             </listitem>
           </varlistentry>
 
