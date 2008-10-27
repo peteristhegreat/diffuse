@@ -78,7 +78,7 @@ Interactive Mode Navigation:
   Character Editing Mode
     <escape>  - Return to line editing mode
   Alignment Editing Mode
-    <space>   - Align and return line editing mode
+    <space>   - Align and return to line editing mode
     <escape>  - Return to line editing mode""")
         sys.exit(0)
 
@@ -208,6 +208,8 @@ class Resources:
         self.setKeyBinding('menu', 'previous_tab', 'Ctrl+Page_Up')
         self.setKeyBinding('menu', 'next_tab', 'Ctrl+Page_Down')
         self.setKeyBinding('menu', 'close_tab', 'Ctrl+w')
+        self.setKeyBinding('menu', 'shift_pane_left', 'Shift+Ctrl+Left')
+        self.setKeyBinding('menu', 'shift_pane_right', 'Shift+Ctrl+Right')
         self.setKeyBinding('menu', 'preferences', 'Ctrl+p')
         self.setKeyBinding('menu', 'realign_all', 'Ctrl+l')
         self.setKeyBinding('menu', 'first_difference', 'Shift+Ctrl+Up')
@@ -1267,7 +1269,7 @@ class FileDiffViewer(gtk.VBox):
         def __init__(self):
             self.lines = []
             self.spec = FileSpec()
-            self.label = None
+            self.label = ''
             self.line_lengths = 0
             self.max_line_number = 0
             self.syntax_cache = []
@@ -1300,6 +1302,7 @@ class FileDiffViewer(gtk.VBox):
 
         # diff blocks
         self.blocks = []
+	self.labels = []
 
         # undos
         self.undos = []
@@ -1410,7 +1413,7 @@ class FileDiffViewer(gtk.VBox):
                [ gtk.STOCK_SAVE, self.save_file_button_cb, i, _('Save File') ],
                [ gtk.STOCK_SAVE_AS, self.save_file_as_button_cb, i, _('Save File As...') ] ])
             label = gtk.Label()
-            file.label = label
+            self.labels.append(label)
             label.set_size_request(0, label.get_size_request()[1])
             hbox.pack_start(label, True, True, 0)
             label.show()
@@ -2027,6 +2030,10 @@ class FileDiffViewer(gtk.VBox):
         self.invalidateLineMatching(0, old_n, new_n)
         self.updateBlocks(blocks)
 
+    def setLabel(self, f, s):
+        self.files[f].label = s
+        self.labels[f].set_text(s)
+
     def load(self, f, spec):
         name = spec.name
         if name is not None:
@@ -2066,9 +2073,8 @@ class FileDiffViewer(gtk.VBox):
             label = ''
             ss = []
         self.updateFile(f, ss)
-        file = self.files[f]
-        file.spec = spec
-        file.label.set_text(label)
+        self.files[f].spec = spec
+        self.setLabel(f, label)
         if name is not None:
             syntax = theResources.getSyntaxByFilename(name)
             if syntax is not None:
@@ -2437,6 +2443,7 @@ class FileDiffViewer(gtk.VBox):
             can_align = (flag or self.mode == ALIGN_MODE)
             can_isolate = (self.mode == LINE_MODE and f == self.current_file)
             can_merge = (self.mode == LINE_MODE and f != self.current_file)
+            can_swap = (f != self.current_file)
             can_select = ((self.mode == LINE_MODE or self.mode == CHAR_MODE) and f == self.current_file)
 
             menu = createMenu(
@@ -2444,6 +2451,7 @@ class FileDiffViewer(gtk.VBox):
                       [_('Isolate'), self.isolate_cb, None, None, None, can_isolate ],
                       [_('Revert'), self.revert_cb, None, gtk.STOCK_REVERT_TO_SAVED, None, can_isolate],
                       [_('Merge'), self.merge_lines_cb, f, None, None, can_merge],
+                      [_('Swap with Selected Pane'), self.swap_panes_cb, f, None, None, can_swap],
                       [],
                       [_('Cut'), self.cut_cb, None, gtk.STOCK_CUT, None, can_select],
                       [_('Copy'), self.copy_cb, None, gtk.STOCK_COPY, None, can_select],
@@ -3298,7 +3306,7 @@ class FileDiffViewer(gtk.VBox):
                 self.replaceLines(f, file.lines, lines, file.max_line_number, len(encoded))
                 self.closeUndoBlock()
                 file.spec = spec
-                file.label.set_text(spec.name)
+                self.setLabel(f, spec.name)
                 syntax = theResources.getSyntaxByFilename(spec.name)
                 if syntax is not None:
                     self.setSyntax(syntax)
@@ -3431,6 +3439,57 @@ class FileDiffViewer(gtk.VBox):
         self.setFormat(f, UNIX_FORMAT)
         self.recordEditMode()
         self.closeUndoBlock()
+
+    class SwapPanesUndo:
+        def __init__(self, f_dst, f_src):
+            self.data = (f_dst, f_src)
+
+        def undo(self, viewer):
+            f_dst, f_src = self.data
+            viewer.swapPanes(f_src, f_dst)
+
+        def redo(self, viewer):
+            f_dst, f_src = self.data
+            viewer.swapPanes(f_dst, f_src)
+
+    def swapPanes(self, f_dst, f_src):
+        if self.undoblock is not None:
+            self.addUndo(FileDiffViewer.SwapPanesUndo(f_dst, f_src))
+	self.current_file = f_dst
+	f0 = self.files[f_dst]
+	f1 = self.files[f_src]
+	self.files[f_dst], self.files[f_src] = f1, f0
+	self.setLabel(f_dst, f1.label)
+	self.setLabel(f_src, f0.label)
+        nfiles = len(self.files)
+	for f_idx in [ f_dst, f_src ]:
+            for f in range(f_idx - 1, f_idx + 2):
+                if f >= 0 and f < nfiles:
+                    del self.files[f].diff_cache[:]
+                    self.dareas[f].queue_draw()
+        self.map_cache = None
+        self.map.queue_draw()
+
+    def swap_panes(self, f_dst, f_src):
+        if f_dst >= 0 and f_dst < len(self.files):
+            if self.mode == ALIGN_MODE:
+                self.setLineMode()
+            self.openUndoBlock()
+            self.recordEditMode()
+            self.swapPanes(f_dst, f_src)
+            self.recordEditMode()
+            self.closeUndoBlock()
+
+    def swap_panes_cb(self, widget, data):
+        self.swap_panes(data, self.current_file)
+
+    def shift_pane_left_cb(self, widget, data):
+        f = self.current_file
+        self.swap_panes(f - 1, f)
+
+    def shift_pane_right_cb(self, widget, data):
+        f = self.current_file
+        self.swap_panes(f + 1, f)
 
     def prefsUpdated(self):
         self.setFont(pango.FontDescription(self.prefs.getString('display_font')))
@@ -3776,6 +3835,9 @@ class Diffuse(gtk.Window):
                      [_('_Next Tab'), self.next_tab_cb, None, None, 'next_tab'],
                      [_('_Close Tab'), self.close_tab_cb, None, None, 'close_tab'],
                      [],
+                     [_('Shift Pane _Left'), self.shift_pane_left_cb, None, None, 'shift_pane_left'],
+                     [_('Shift Pane _Right'), self.shift_pane_right_cb, None, None, 'shift_pane_right'],
+                     [],
                      [_('_Preferences...'), self.preferences_cb, None, gtk.STOCK_PREFERENCES, 'preferences'] ] ])
 
         menuspecs.append([ _('_Merge'), [
@@ -3981,6 +4043,12 @@ class Diffuse(gtk.Window):
 
     def close_tab_cb(self, widget, data):
         self.remove_tab_cb(widget, self.notebook.get_nth_page(self.notebook.get_current_page()))
+
+    def shift_pane_left_cb(self, widget, data):
+        self.getCurrentViewer().shift_pane_left_cb(widget, data)
+
+    def shift_pane_right_cb(self, widget, data):
+        self.getCurrentViewer().shift_pane_right_cb(widget, data)
 
     def preferences_cb(self, widget, data):
         if self.prefs.runDialog(self.get_toplevel()):

@@ -622,6 +622,20 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>shift_pane_left</userinput></term>
+            <listitem>
+              <para>shift the currently selected pane to the left</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>shift_pane_right</userinput></term>
+            <listitem>
+              <para>shift the currently selected pane to the right</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>preferences</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Preferences</guimenuitem></menuchoice> menu item</para>
