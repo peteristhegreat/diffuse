@@ -1302,7 +1302,7 @@ class FileDiffViewer(gtk.VBox):
 
         # diff blocks
         self.blocks = []
-	self.labels = []
+        self.labels = []
 
         # undos
         self.undos = []
@@ -1322,6 +1322,7 @@ class FileDiffViewer(gtk.VBox):
         self.selection_char = 0
         self.align_file = 0
         self.align_line = 0
+        self.cursor_column = -1
 
         # keybindings
         self._line_mode_actions = {
@@ -1566,10 +1567,11 @@ class FileDiffViewer(gtk.VBox):
 
     def setCharMode(self):
         if self.mode == LINE_MODE:
-            self.mode = CHAR_MODE
+            self.cursor_column = -1
             self.setCurrentChar(self.current_line, 0)
         elif self.mode == ALIGN_MODE:
             self.dareas[self.align_file].queue_draw()
+            self.cursor_column = -1
             self.align_file = 0
             self.align_line = 0
             self.setCurrentChar(self.current_line, 0)
@@ -2229,20 +2231,20 @@ class FileDiffViewer(gtk.VBox):
         self.recordEditMode()
 
     class EditModeUndo:
-        def __init__(self, mode, current_file, current_line, current_char, selection_line, selection_char):
-            self.data = (mode, current_file, current_line, current_char, selection_line, selection_char)
+        def __init__(self, mode, current_file, current_line, current_char, selection_line, selection_char, cursor_column):
+            self.data = (mode, current_file, current_line, current_char, selection_line, selection_char, cursor_column)
 
         def undo(self, viewer):
-            mode, current_file, current_line, current_char, selection_line, selection_char = self.data
-            viewer.setEditMode(mode, current_file, current_line, current_char, selection_line, selection_char)
+            mode, current_file, current_line, current_char, selection_line, selection_char, cursor_column = self.data
+            viewer.setEditMode(mode, current_file, current_line, current_char, selection_line, selection_char, cursor_column)
 
         def redo(self, viewer):
             self.undo(viewer)
 
     def recordEditMode(self):
-        self.addUndo(FileDiffViewer.EditModeUndo(self.mode, self.current_file, self.current_line, self.current_char, self.selection_line, self.selection_char))
+        self.addUndo(FileDiffViewer.EditModeUndo(self.mode, self.current_file, self.current_line, self.current_char, self.selection_line, self.selection_char, self.cursor_column))
 
-    def setEditMode(self, mode, f, current_line, current_char, selection_line, selection_char):
+    def setEditMode(self, mode, f, current_line, current_char, selection_line, selection_char, cursor_column):
         # FIXME: this should also record the scroll spot
         old_f = self.current_file
         self.mode = mode
@@ -2251,6 +2253,7 @@ class FileDiffViewer(gtk.VBox):
         self.current_char = current_char
         self.selection_line = selection_line
         self.selection_char = selection_char
+        self.cursor_column = cursor_column
         if mode == CHAR_MODE:
             self.setCurrentChar(self.current_line, self.current_char, True)
         else:
@@ -2295,6 +2298,7 @@ class FileDiffViewer(gtk.VBox):
 
     def setCurrentChar(self, i, j, extend=False):
         f = self.current_file
+        self.cursor_column = -1
         self.current_line = i
         self.current_char = j
         if extend:
@@ -3054,35 +3058,38 @@ class FileDiffViewer(gtk.VBox):
             elif event.keyval == gtk.keysyms.Tab and event.state & gtk.gdk.CONTROL_MASK:
                 # allow CTRL-Tab for widget navigation
                 retval = False
-            elif event.keyval == gtk.keysyms.Up:
+            elif event.keyval in [ gtk.keysyms.Up, gtk.keysyms.Down, gtk.keysyms.Page_Up, gtk.keysyms.Page_Down ]:
                 i = self.current_line
-                if i > 0:
-                    i -= 1
-                    j = min(self.current_char, self.getMaxCharPosition(i))
+                col = self.cursor_column
+                if col < 0:
+                    s = nullToEmpty(self.getLineText(f, i))[:self.current_char]
+                    col = self.getStringColumnWidth(f, s)
+                if event.keyval in [ gtk.keysyms.Up, gtk.keysyms.Down ]:
+                    delta = 1
                 else:
-                    j = 0
-                self.setCurrentChar(i, j, is_shifted)
-            elif event.keyval == gtk.keysyms.Down:
-                j = self.current_char
-                i = self.current_line
-                if i < len(self.files[f].lines):
-                    i += 1
-                    j = min(j, self.getMaxCharPosition(i))
-                self.setCurrentChar(i, j, is_shifted)
-            elif event.keyval == gtk.keysyms.Page_Up:
-                delta = int(self.vadj.page_size // self.font_height)
-                i = self.current_line - delta
+                    delta = int(self.vadj.page_size // self.font_height)
+                if event.keyval in [ gtk.keysyms.Up, gtk.keysyms.Page_Up ]:
+                    delta = -delta
+                i += delta
+                j = 0
+                nlines = len(self.files[f].lines)
                 if i < 0:
                     i = 0
-                    j = 0
+                elif i > nlines:
+                    i = nlines
                 else:
-                    j = min(self.current_char, self.getMaxCharPosition(i))
+                    s = self.getLineText(f, i)
+                    if s is not None:
+                        s = strip_line_ending(self.files[f].format, s)
+                        idx = 0
+                        for c in s:
+                            w = self.characterWidth(idx, c)
+                            if idx + w > col:
+                                break
+                            idx += w
+                            j += 1
                 self.setCurrentChar(i, j, is_shifted)
-            elif event.keyval == gtk.keysyms.Page_Down:
-                delta = int(self.vadj.page_size // self.font_height)
-                i = min(self.current_line + delta, len(self.files[f].lines))
-                j = min(self.current_char, self.getMaxCharPosition(i))
-                self.setCurrentChar(i, j, is_shifted)
+                self.cursor_column = col
             elif event.keyval == gtk.keysyms.Home:
                 if is_ctrl:
                     i = 0
@@ -3455,14 +3462,14 @@ class FileDiffViewer(gtk.VBox):
     def swapPanes(self, f_dst, f_src):
         if self.undoblock is not None:
             self.addUndo(FileDiffViewer.SwapPanesUndo(f_dst, f_src))
-	self.current_file = f_dst
-	f0 = self.files[f_dst]
-	f1 = self.files[f_src]
-	self.files[f_dst], self.files[f_src] = f1, f0
-	self.setLabel(f_dst, f1.label)
-	self.setLabel(f_src, f0.label)
+        self.current_file = f_dst
+        f0 = self.files[f_dst]
+        f1 = self.files[f_src]
+        self.files[f_dst], self.files[f_src] = f1, f0
+        self.setLabel(f_dst, f1.label)
+        self.setLabel(f_src, f0.label)
         nfiles = len(self.files)
-	for f_idx in [ f_dst, f_src ]:
+        for f_idx in [ f_dst, f_src ]:
             for f in range(f_idx - 1, f_idx + 2):
                 if f >= 0 and f < nfiles:
                     del self.files[f].diff_cache[:]
@@ -3645,6 +3652,12 @@ class FileDiffViewer(gtk.VBox):
     def goto_difference(self, i, delta):
         f = self.current_file
         nlines = len(self.files[f].lines)
+        # back up to beginning of difference
+        while self.hasEditsOrDifference(f, i):
+            i2 = i - delta
+            if i2 < 0 or i2 > nlines:
+                break
+            i = i2
         # step over non-difference
         while i >= 0 and i <= nlines and not self.hasEditsOrDifference(f, i):
             i += delta
@@ -4153,14 +4166,14 @@ if __name__ == '__main__':
     else:
         rc_file = os.path.expanduser('~/.diffuse/diffuserc')
         if not os.path.exists(rc_file):
-	    try:
-		f = open(rc_file, 'w')
-		f.write("""# personal initialisation file for %s
+            try:
+                f = open(rc_file, 'w')
+                f.write("""# personal initialisation file for %s
 import %s
 """ % (APP_NAME, RESOURCES))
-		f.close()
-	    except:
-		pass
+                f.close()
+            except:
+                pass
         if os.path.isfile(rc_file):
             theResources.parse(rc_file)
 
