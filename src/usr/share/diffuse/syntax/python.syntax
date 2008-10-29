@@ -49,7 +49,7 @@ syntax_pattern declaration normal python_function '\b[a-z_][a-z_0-9]*\b' ignorec
 syntax_pattern declaration normal text ''
 
 # punctuation
-syntax_pattern normal normal python_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:,\.\/]+'
+syntax_pattern normal normal python_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\.\/]+'
 
 # parsing optimisation
 syntax_pattern normal normal text '[a-z_][a-z_0-9]*' ignorecase
