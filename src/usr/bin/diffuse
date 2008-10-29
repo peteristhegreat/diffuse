@@ -96,6 +96,7 @@ import os
 import pango
 import re
 import shlex
+import stat
 import string
 import subprocess
 import webbrowser
@@ -481,6 +482,15 @@ class Resources:
 
 theResources = Resources()
 
+class MessageDialog(gtk.MessageDialog):
+    def __init__(self, parent, type, msg):
+        if type == gtk.MESSAGE_QUESTION:
+           buttons = gtk.BUTTONS_OK_CANCEL
+        else:
+           buttons = gtk.BUTTONS_OK
+        gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, type, buttons, msg)
+        self.set_title(APP_NAME)
+
 class FileEntry(gtk.HBox):
     def __init__(self, parent, title):
         gtk.HBox.__init__(self)
@@ -799,15 +809,6 @@ class Preferences:
             except (UnicodeDecodeError, LookupError):
                 pass
         return ([ ''.join([unichr(ord(c)) for c in s]) for s in ss ], None)
-
-class MessageDialog(gtk.MessageDialog):
-    def __init__(self, parent, type, msg):
-        if type == gtk.MESSAGE_QUESTION:
-           buttons = gtk.BUTTONS_OK_CANCEL
-        else:
-           buttons = gtk.BUTTONS_OK
-        gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, type, buttons, msg)
-        self.set_title(APP_NAME)
 
 def cutBlocks(i, blocks):
     pre = []
@@ -1275,6 +1276,7 @@ class FileDiffViewer(gtk.VBox):
             self.syntax_cache = []
             self.diff_cache = []
             self.format = 0
+            self.stat = None
 
         def hasEdits(self):
             for line in self.lines:
@@ -2038,6 +2040,7 @@ class FileDiffViewer(gtk.VBox):
 
     def load(self, f, spec):
         name = spec.name
+        stat = None
         if name is not None:
             rev = spec.revision
             try:
@@ -2053,6 +2056,7 @@ class FileDiffViewer(gtk.VBox):
                 else:
                     label = name
                     fd = open(name, 'rb')
+                    stat = os.stat(name)
                 ss = fd.readlines()
                 fd.close()
                 if rev is not None and proc.wait() != 0:
@@ -2076,6 +2080,7 @@ class FileDiffViewer(gtk.VBox):
             ss = []
         self.updateFile(f, ss)
         self.files[f].spec = spec
+        self.files[f].stat = stat
         self.setLabel(f, label)
         if name is not None:
             syntax = theResources.getSyntaxByFilename(name)
@@ -3282,49 +3287,61 @@ class FileDiffViewer(gtk.VBox):
                 spec.name = dialog.get_filename()
                 spec.encoding = dialog.get_encoding()
             dialog.destroy()
-        if spec.name is not None:
-            if save_as and os.path.exists(spec.name):
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, _('Overwrite existing file?'))
+        if spec.name is None:
+            return
+        try:
+            msg = None
+            if save_as:
+                if os.path.exists(spec.name):
+                    msg = _('A file named "%s" already exists.  Do you want to overwrite it?') % (spec.name, )
+            elif file.stat is not None:
+                if file.stat[stat.ST_MTIME] < os.stat(spec.name)[stat.ST_MTIME]:
+                    msg = _('The file "%s" has been modified by another process since reading it.  If you save, all the external changes could be lost.  Save anyways?') % (spec.name, )
+            if msg is not None:
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
                 end = (dialog.run() != gtk.RESPONSE_OK)
                 dialog.destroy()
                 if end:
                     return
-            try:
-                ss = [ self.getLineText(f, i) for i in range(len(file.lines)) ]
-                encoded = []
-                lines = []
-                i = 0
-                for s in ss:
-                    if s is None:
-                        lines.append(None)
-                    else:
-                        i += 1
-                        lines.append(FileDiffViewer.Line(i, s))
-                        encoded.append(codecs.encode(s, spec.encoding))
+        except IOError:
+            pass
+        try:
+            ss = [ self.getLineText(f, i) for i in range(len(file.lines)) ]
+            encoded = []
+            lines = []
+            i = 0
+            for s in ss:
+                if s is None:
+                    lines.append(None)
+                else:
+                    i += 1
+                    lines.append(FileDiffViewer.Line(i, s))
+                    encoded.append(codecs.encode(s, spec.encoding))
 
-                # write file
-                fd = open(spec.name, 'wb')
-                for s in encoded:
-                    fd.write(s)
-                fd.close()
+            # write file
+            fd = open(spec.name, 'wb')
+            for s in encoded:
+                fd.write(s)
+            fd.close()
+            file.stat = os.stat(spec.name)
 
-                # update loaded file
-                self.openUndoBlock()
-                self.replaceLines(f, file.lines, lines, file.max_line_number, len(encoded))
-                self.closeUndoBlock()
-                file.spec = spec
-                self.setLabel(f, spec.name)
-                syntax = theResources.getSyntaxByFilename(spec.name)
-                if syntax is not None:
-                    self.setSyntax(syntax)
-            except UnicodeEncodeError:
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error ecoding to %s.') % (repr(spec.encoding), ))
-                dialog.run()
-                dialog.destroy()
-            except IOError:
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(spec.name), ))
-                dialog.run()
-                dialog.destroy()
+            # update loaded file
+            self.openUndoBlock()
+            self.replaceLines(f, file.lines, lines, file.max_line_number, len(encoded))
+            self.closeUndoBlock()
+            file.spec = spec
+            self.setLabel(f, spec.name)
+            syntax = theResources.getSyntaxByFilename(spec.name)
+            if syntax is not None:
+                self.setSyntax(syntax)
+        except UnicodeEncodeError:
+            dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error ecoding to %s.') % (repr(spec.encoding), ))
+            dialog.run()
+            dialog.destroy()
+        except IOError:
+            dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(spec.name), ))
+            dialog.run()
+            dialog.destroy()
 
     def save_file_cb(self, widget, data):
         self.save_file(self.current_file)
