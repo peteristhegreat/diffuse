@@ -387,7 +387,7 @@
         <menuchoice><guimenu>Redo</guimenu></menuchoice> menu items can be used
         to undo and redo the previously preformed operations.  All changes to a
         set of lines can be reverted using the
-        <menuchoice><guimenu>Revert</guimenu></menuchoice> menu item
+        <menuchoice><guimenu>Clear Edits</guimenu></menuchoice> menu item
         regardless of the order the edits were performed.
       </para>
     </sect1>
@@ -678,9 +678,9 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>revent</userinput></term>
+            <term><userinput>clear_edits</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Revert</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Clear Edits</guimenuitem></menuchoice> menu item</para>
             </listitem>
           </varlistentry>
 

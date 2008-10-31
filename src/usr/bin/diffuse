@@ -217,7 +217,7 @@ class Resources:
         self.setKeyBinding('menu', 'previous_difference', 'Ctrl+Up')
         self.setKeyBinding('menu', 'next_difference', 'Ctrl+Down')
         self.setKeyBinding('menu', 'last_difference', 'Shift+Ctrl+Down')
-        self.setKeyBinding('menu', 'revert', 'Ctrl+r')
+        self.setKeyBinding('menu', 'clear_edits', 'Ctrl+r')
         self.setKeyBinding('menu', 'merge_from_left', 'Ctrl+Left')
         self.setKeyBinding('menu', 'merge_from_right', 'Ctrl+Right')
         self.setKeyBinding('menu', 'isolate', 'Ctrl+i')
@@ -1379,7 +1379,7 @@ class FileDiffViewer(gtk.VBox):
            [ gtk.STOCK_GO_DOWN, self.next_difference_cb, None, _('Next Difference') ],
            [ gtk.STOCK_GOTO_BOTTOM, self.last_difference_cb, None, _('Last Difference') ],
            [],
-           [ gtk.STOCK_REVERT_TO_SAVED, self.revert_cb, None, _('Revert') ],
+           [ gtk.STOCK_CLEAR, self.clear_edits_cb, None, _('Clear Edits') ],
            [ gtk.STOCK_GO_FORWARD, self.merge_from_left_cb, None, _('Merge From Left') ],
            [ gtk.STOCK_GO_BACK, self.merge_from_right_cb, None, _('Merge From Right') ],
            [],
@@ -2458,7 +2458,7 @@ class FileDiffViewer(gtk.VBox):
             menu = createMenu(
                       [ [_('Align to Selection'), self.align_to_selection_cb, [f, i], gtk.STOCK_EXECUTE, None, can_align],
                       [_('Isolate'), self.isolate_cb, None, None, None, can_isolate ],
-                      [_('Revert'), self.revert_cb, None, gtk.STOCK_REVERT_TO_SAVED, None, can_isolate],
+                      [_('Clear Edits'), self.clear_edits_cb, None, gtk.STOCK_CLEAR, None, can_isolate],
                       [_('Merge'), self.merge_lines_cb, f, None, None, can_merge],
                       [_('Swap with Selected Pane'), self.swap_panes_cb, f, None, None, can_swap],
                       [],
@@ -3525,7 +3525,7 @@ class FileDiffViewer(gtk.VBox):
         self.map.queue_draw()
         self.updatePrompt()
 
-    def revert_cb(self, widget, data):
+    def clear_edits_cb(self, widget, data):
         self.setLineMode()
         self.openUndoBlock()
         self.recordEditMode()
@@ -3824,7 +3824,7 @@ class Diffuse(gtk.Window):
         menuspecs = []
         menuspecs.append([ _('_File'), [
                      [_('_Open File...'), self.open_file_cb, None, gtk.STOCK_OPEN, 'open_file'],
-                     [_('_Reload File'), self.reload_file_cb, None, gtk.STOCK_REVERT_TO_SAVED, 'reload_file'],
+                     [_('_Reload File'), self.reload_file_cb, None, gtk.STOCK_REFRESH, 'reload_file'],
                      [_('_Save File'), self.save_file_cb, None, gtk.STOCK_SAVE, 'save_file'],
                      [_('Save File _As...'), self.save_file_as_cb, None, gtk.STOCK_SAVE_AS, 'save_file_as'],
                      [],
@@ -3878,16 +3878,16 @@ class Diffuse(gtk.Window):
                      [_('_Next Difference'), self.next_difference_cb, None, gtk.STOCK_GO_DOWN, 'next_difference'],
                      [_('_Last Difference'), self.last_difference_cb, None, gtk.STOCK_GOTO_BOTTOM, 'last_difference'],
                      [],
-                     [_('_Revert'), self.revert_cb, None, gtk.STOCK_REVERT_TO_SAVED, 'revert'],
+                     [_('_Clear Edits'), self.clear_edits_cb, None, gtk.STOCK_CLEAR, 'clear_edits'],
                      [_('Merge From Le_ft'), self.merge_from_left_cb, None, gtk.STOCK_GO_FORWARD, 'merge_from_left'],
                      [_('Merge From Ri_ght'), self.merge_from_right_cb, None, gtk.STOCK_GO_BACK, 'merge_from_right'],
                      [],
                      [_('_Isolate'), self.isolate_cb, None, None, 'isolate'] ] ])
 
         menuspecs.append([ _('_Help'), [
-                     [_('_Help Contents'), self.help_contents_cb, None, gtk.STOCK_HELP, 'help_contents'],
+                     [_('_Help Contents...'), self.help_contents_cb, None, gtk.STOCK_HELP, 'help_contents'],
                      [],
-                     [_('_About...'), self.about_cb, None, gtk.STOCK_ABOUT, 'about'] ] ])
+                     [_('_About %s...') % (APP_NAME, ), self.about_cb, None, gtk.STOCK_ABOUT, 'about'] ] ])
 
         menu_bar = createMenuBar(menuspecs, accel_group)
         vbox.pack_start(menu_bar, False, False, 0)
@@ -4103,8 +4103,8 @@ class Diffuse(gtk.Window):
     def last_difference_cb(self, widget, data):
         self.getCurrentViewer().last_difference_cb(widget, data)
 
-    def revert_cb(self, widget, data):
-        self.getCurrentViewer().revert_cb(widget, data)
+    def clear_edits_cb(self, widget, data):
+        self.getCurrentViewer().clear_edits_cb(widget, data)
 
     def merge_from_left_cb(self, widget, data):
         self.getCurrentViewer().merge_from_left_cb(widget, data)
