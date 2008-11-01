@@ -1255,6 +1255,89 @@ class FileChooserDialog(gtk.FileChooserDialog):
     def get_revision(self):
         return self.revision.get_text()
 
+# This is a replacement for gtk.ScrolledWindow as it forced expose events to be
+# handled immediately after changing the viewport position.  This could cause
+# the application to become unresponsive for a while as it processed a large
+# queue of keypress and expose event pairs.
+class ScrolledWindow(gtk.Table):
+    def __init__(self):
+        gtk.Table.__init__(self, 2, 2)
+        self.position = (0, 0)
+
+        vport = gtk.Viewport()
+        darea = gtk.DrawingArea()
+        self.darea = darea
+        vport.add(darea)
+        darea.show()
+        self.attach(vport, 0, 1, 0, 1)
+        vport.show()
+
+        bar = gtk.VScrollbar()
+        self.attach(bar, 1, 2, 0, 1, gtk.FILL, gtk.EXPAND|gtk.FILL)
+        bar.show()
+        self.vhandle = bar.get_adjustment().connect('value_changed', self.scrolled_cb)
+        self.vbar = bar
+
+        bar = gtk.HScrollbar()
+        self.attach(bar, 0, 1, 1, 2, gtk.EXPAND|gtk.FILL, gtk.FILL)
+        bar.show()
+        self.hhandle = bar.get_adjustment().connect('value_changed', self.scrolled_cb)
+        self.hbar = bar
+
+        darea.connect('configure_event', self.configure_cb)
+        darea.connect('scroll_event', self.scroll_cb)
+
+    def set_vadjustment(self, adj):
+        self.get_vadjustment().disconnect(self.vhandle)
+        self.vhandle = adj.connect('value_changed', self.scrolled_cb)
+        self.vbar.set_adjustment(adj)
+
+    def get_vadjustment(self):
+        return self.vbar.get_adjustment()
+
+    def set_hadjustment(self, adj):
+        self.get_hadjustment().disconnect(self.hhandle)
+        self.hbar.set_adjustment(adj)
+        self.hhandle = adj.connect('value_changed', self.scrolled_cb)
+
+    def get_hadjustment(self):
+        return self.hbar.get_adjustment()
+
+    def configure_cb(self, widget, event):
+        w, h = event.width, event.height
+
+        adj = self.get_hadjustment()
+        v = adj.get_value()
+        if v + w > adj.upper:
+            adj.set_value(max(0, adj.upper - w))
+        adj.page_size = w
+        adj.page_increment = w
+
+        adj = self.get_vadjustment()
+        v = adj.get_value()
+        if v + h > adj.upper:
+            adj.set_value(max(0, adj.upper - h))
+        adj.page_size = h
+        adj.page_increment = h
+
+    def scroll_cb(self, widget, event):
+        vadj = self.get_vadjustment()
+        v = vadj.get_value()
+        delta = 100
+        if event.direction == gtk.gdk.SCROLL_UP:
+            delta = -delta
+        v = max(v + delta, int(vadj.lower))
+        v = min(v, int(vadj.upper - vadj.page_size))
+        vadj.set_value(v)
+
+    def scrolled_cb(self, widget):
+        old_x, old_y = self.position
+        pos_x = int(self.get_hadjustment().get_value())
+        pos_y = int(self.get_vadjustment().get_value())
+        self.position = (pos_x, pos_y)
+        if self.darea.window is not None:
+            self.darea.window.scroll(old_x - pos_x, old_y - pos_y)
+
 def nullToEmpty(s):
     if s is None:
         s = ''
@@ -1264,6 +1347,10 @@ def isBlank(s):
     for c in string.whitespace:
         s = s.replace(c, '')
     return len(s) == 0
+
+# use pango.SCALE instead of pango.PIXELS to avoid overflow exception
+def pixels(size):
+    return int(size / pango.SCALE + 0.5)
 
 class FileDiffViewer(gtk.VBox):
     class File:
@@ -1424,15 +1511,12 @@ class FileDiffViewer(gtk.VBox):
             hbox.show()
 
             # file contents
-            sw = gtk.ScrolledWindow()
-            sw.set_policy(gtk.POLICY_ALWAYS, gtk.POLICY_ALWAYS)
-            darea = gtk.DrawingArea()
+            sw = ScrolledWindow()
+            darea = sw.darea
             darea.add_events(gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON1_MOTION_MASK)
             darea.connect('button_press_event', self.darea_button_press_cb)
             darea.connect('motion_notify_event', self.darea_motion_notify_cb)
             darea.connect('expose_event', self.darea_expose_cb)
-            sw.add_with_viewport(darea)
-            darea.show()
             self.dareas.append(darea)
             if self.hadj is None:
                 self.hadj = sw.get_hadjustment()
@@ -1471,12 +1555,12 @@ class FileDiffViewer(gtk.VBox):
         self.setFont(pango.FontDescription(prefs.getString('display_font')))
 
         # scroll to first difference when realised
-        self.connect_after('realize', self._realise_cb)
+        darea.connect_after('realize', self._realise_cb)
 
     def setFont(self, font):
         self.font = font
         metrics = self.get_pango_context().get_metrics(self.font)
-        self.font_height = max(pango.PIXELS(metrics.get_ascent() + metrics.get_descent()), 1)
+        self.font_height = max(pixels(metrics.get_ascent() + metrics.get_descent()), 1)
         self.digit_width = metrics.get_approximate_digit_width()
         self.updateSize(True)
         self.map.queue_draw()
@@ -1666,10 +1750,12 @@ class FileDiffViewer(gtk.VBox):
             line_lengths = max(line_lengths, file.line_lengths)
         num_lines += 1
         width = self.getLineNumberWidth() + self.digit_width + line_lengths
-        width = pango.PIXELS(width)
+        width = pixels(width)
         height = self.font_height * num_lines
-        for darea in self.dareas:
-            darea.set_size_request(width, height)
+        self.hadj.upper = width
+        self.hadj.step_increment = self.font_height
+        self.vadj.upper = height
+        self.vadj.step_increment = self.font_height
 
     def getLine(self, f, i):
         lines = self.files[f].lines
@@ -2333,8 +2419,8 @@ class FileDiffViewer(gtk.VBox):
         else:
             lower = 0
         upper = lower + self.getLineNumberWidth() + self.digit_width
-        lower = pango.PIXELS(lower)
-        upper = pango.PIXELS(upper)
+        lower = pixels(lower)
+        upper = pixels(upper)
         hadj = self.hadj
         v = hadj.get_value()
         ps = hadj.page_size
@@ -2393,13 +2479,13 @@ class FileDiffViewer(gtk.VBox):
                 tmp += width // 2
             else:
                 tmp += width
-            if x < pango.PIXELS(tmp):
+            if x < pixels(tmp):
                 return i
             w += width
         return n
 
     def button_press(self, f, x, y, extend):
-        i = min(int(y // self.font_height), len(self.files[f].lines))
+        i = min(y // self.font_height, len(self.files[f].lines))
         if self.mode == CHAR_MODE and f == self.current_file:
             text = strip_line_ending(self.files[f].format, self.getLineText(f, i))
             j = self.getPickedCharacter(f, text, x, True)
@@ -2409,21 +2495,23 @@ class FileDiffViewer(gtk.VBox):
             self.setCurrentLine(f, i, extend and f == self.current_file)
 
     def darea_button_press_cb(self, widget, event):
+        x = int(event.x + self.hadj.get_value())
+        y = int(event.y + self.vadj.get_value())
         f = self.dareas.index(widget)
         nlines = len(self.files[f].lines)
-        i = min(int(event.y // self.font_height), nlines)
+        i = min(y // self.font_height, nlines)
         if event.button == 1:
             if event.type == gtk.gdk._2BUTTON_PRESS:
                 if self.mode == LINE_MODE:
                     self.setCurrentLine(f, i)
                     # silently switch mode so the viewer does not scroll yet.
                     self.mode = CHAR_MODE
-                    self.button_press(f, event.x, event.y, False)
+                    self.button_press(f, x, y, False)
                 elif self.mode == CHAR_MODE and self.current_file == f:
                     text = strip_line_ending(self.files[f].format, self.getLineText(f, i))
                     if text is not None:
                         n = len(text)
-                        j = self.getPickedCharacter(f, text, event.x, False)
+                        j = self.getPickedCharacter(f, text, x, False)
                         if j < n:
                             ss = self.expand(f, text[:n])
                             c = theResources.getCharacterClass(text[j])
@@ -2442,10 +2530,10 @@ class FileDiffViewer(gtk.VBox):
             else:
                 is_shifted = event.state & gtk.gdk.SHIFT_MASK
                 extend = (is_shifted and f == self.current_file)
-                self.button_press(f, event.x, event.y, extend)
+                self.button_press(f, x, y, extend)
         elif event.button == 2:
             if self.mode == CHAR_MODE and f == self.current_file:
-                self.button_press(f, event.x, event.y, False)
+                self.button_press(f, x, y, False)
                 gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).request_text(self.receiveClipboardText)
         elif event.button == 3:
             flag = (self.mode == LINE_MODE and (f == self.current_file + 1 or f == self.current_file - 1))
@@ -2472,7 +2560,9 @@ class FileDiffViewer(gtk.VBox):
         if event.state & gtk.gdk.BUTTON1_MASK:
             f = self.dareas.index(widget)
             extend = (f == self.current_file)
-            self.button_press(f, event.x, event.y, extend)
+            x = int(event.x + self.hadj.get_value())
+            y = int(event.y + self.vadj.get_value())
+            self.button_press(f, x, y, extend)
 
     def getDiffRanges(self, f, i, idx, flag):
         result = []
@@ -2565,7 +2655,10 @@ class FileDiffViewer(gtk.VBox):
         file = self.files[f]
         syntax = self.syntax
 
-        x, y, width, height = event.area
+        offset_x, offset_y, width, height = event.area
+        x = offset_x + int(self.hadj.get_value())
+        y = offset_y + int(self.vadj.get_value())
+
         pixmap = gtk.gdk.Pixmap(widget.window, width, height)
 
         cr = pixmap.cairo_create()
@@ -2573,7 +2666,7 @@ class FileDiffViewer(gtk.VBox):
 
         maxx = x + width
         maxy = y + height
-        line_number_width = pango.PIXELS(self.getLineNumberWidth())
+        line_number_width = pixels(self.getLineNumberWidth())
         h = self.font_height
 
         diffcolours = [ theResources.getDifferenceColour(f), theResources.getDifferenceColour(f + 1) ]
@@ -2599,7 +2692,7 @@ class FileDiffViewer(gtk.VBox):
                     cr.set_source_rgb(colour.red, colour.green, colour.blue)
                     layout = self.create_pango_layout(str(line.line_number))
                     layout.set_font_description(self.font)
-                    w = pango.PIXELS(layout.get_size()[0] + self.digit_width)
+                    w = pixels(layout.get_size()[0] + self.digit_width)
                     cr.move_to(line_number_width - w, y_start)
                     cr.show_layout(layout)
                 cr.restore()
@@ -2663,7 +2756,7 @@ class FileDiffViewer(gtk.VBox):
                     alpha = theResources.getFloat('char_difference_alpha')
                     for start, w, colour in chardiff:
                         cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
-                        cr.rectangle(x_start + pango.PIXELS(start), y_start, pango.PIXELS(w), h)
+                        cr.rectangle(x_start + pixels(start), y_start, pixels(w), h)
                         cr.fill()
 
                 if line is not None and line.is_modified:
@@ -2717,7 +2810,7 @@ class FileDiffViewer(gtk.VBox):
                                 colour = theResources.getColour('char_selection')
                                 alpha = theResources.getFloat('char_selection_alpha')
                                 cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
-                                cr.rectangle(x_start + pango.PIXELS(x_temp), y_start, pango.PIXELS(w), h)
+                                cr.rectangle(x_start + pixels(x_temp), y_start, pixels(w), h)
                                 cr.fill()
 
                 if text is None:
@@ -2784,7 +2877,7 @@ class FileDiffViewer(gtk.VBox):
                     # draw text
                     for start, layout, colour in blocks:
                         cr.set_source_rgb(colour.red, colour.green, colour.blue)
-                        cr.move_to(x_start + pango.PIXELS(start), y_start)
+                        cr.move_to(x_start + pixels(start), y_start)
                         cr.show_layout(layout)
 
                 if self.current_file == f and self.current_line == i:
@@ -2802,7 +2895,7 @@ class FileDiffViewer(gtk.VBox):
                             x_temp = layout.get_size()[0]
                         else:
                             x_temp = 0
-                        cr.move_to(x_start + pango.PIXELS(x_temp) + 0.5, y_start)
+                        cr.move_to(x_start + pixels(x_temp) + 0.5, y_start)
                         cr.rel_line_to(0, h)
                         cr.stroke()
                     elif self.mode == LINE_MODE or self.mode == ALIGN_MODE:
@@ -2816,7 +2909,7 @@ class FileDiffViewer(gtk.VBox):
             y_start += h
 
         gc = pixmap.new_gc()
-        widget.window.draw_drawable(gc, pixmap, 0, 0, x, y, width, height)
+        widget.window.draw_drawable(gc, pixmap, 0, 0, offset_x, offset_y, width, height)
 
     def map_vadj_changed(self, vadj):
         self.map.queue_draw()
@@ -2836,7 +2929,7 @@ class FileDiffViewer(gtk.VBox):
     def map_scroll_cb(self, widget, event):
         vadj = self.vadj
         v = vadj.get_value()
-        delta = int(vadj.step_increment)
+        delta = 100
         if event.direction == gtk.gdk.SCROLL_UP:
             delta = -delta
         v = max(v + delta, int(vadj.lower))
