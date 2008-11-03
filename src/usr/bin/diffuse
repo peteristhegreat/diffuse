@@ -32,6 +32,7 @@ VERSION = '0.2.14'
 COPYRIGHT = _('Copyright © 2006-2008 Derrick Moser')
 RESOURCES = '/etc/diffuserc'
 
+# process help options
 if __name__ == '__main__':
     args = sys.argv
     argc = len(args)
@@ -123,18 +124,27 @@ class Colour:
         c.alpha = 1 - (1 - a) * (1 - other.alpha)
         return c
 
+# class to build and run a finite state machine for identifying syntax tokens
 class SyntaxParser:
+    # create a new state machine that begins in initial_state and classifies
+    # all characters not matched by the patterns as default_token_type
     def __init__(self, initial_state, default_token_type):
         self.initial_state = initial_state
         self.default_token_type = default_token_type
         self.transitions_lookup = { initial_state : [] }
 
+    # Adds a new edge to the finite state machine from prev_state to
+    # next_state.  Characters will be identified as token_type when pattern is
+    # matched.  Any newly referenced state will be added.  Patterns for edges
+    # leaving a state will be tested in the order they were added to the finite
+    # state machine.
     def addPattern(self, prev_state, next_state, token_type, pattern):
         for state in [ prev_state, next_state ]:
             if not self.transitions_lookup.has_key(state):
                 self.transitions_lookup[state] = []
         self.transitions_lookup[prev_state].append([pattern, token_type, next_state])
 
+    # given a string and an initial state, idenitify the final state and tokens
     def parse(self, state_name, s):
         transitions = self.transitions_lookup[state_name]
         blocks = []
@@ -157,13 +167,7 @@ class SyntaxParser:
             start = end
         return (state_name, blocks)
 
-    def getSymbols(self):
-        symbols = { self.default_token_type : None }
-        for transitions in self.transitions_lookup.values():
-            for transition in transitions:
-                symbols[transition[1]] = None
-        return symbols.keys()
-
+# find the full path of an executable
 def getExePath(s):
     if os.environ.has_key('PATH'):
         for p in os.environ['PATH'].split(os.pathsep):
@@ -171,6 +175,7 @@ def getExePath(s):
             if os.path.isfile(fp):
                 return fp
 
+# find the help directory for the current locale
 def getLocalisedDir(s):
     lang = locale.getdefaultlocale()[0]
     path = os.path.join(s, lang)
@@ -482,6 +487,7 @@ class Resources:
 
 theResources = Resources()
 
+# convenience class for displaying a message dialogue
 class MessageDialog(gtk.MessageDialog):
     def __init__(self, parent, type, msg):
         if type == gtk.MESSAGE_QUESTION:
@@ -491,6 +497,7 @@ class MessageDialog(gtk.MessageDialog):
         gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, type, buttons, msg)
         self.set_title(APP_NAME)
 
+# text entry widget with a button to help pick file names
 class FileEntry(gtk.HBox):
     def __init__(self, parent, title):
         gtk.HBox.__init__(self)
@@ -521,6 +528,7 @@ class FileEntry(gtk.HBox):
     def get_text(self):
         return self.entry.get_text()
 
+# adaptor class to allow a gtk.FontButton to be read like a gtk.Entry
 class FontButton(gtk.FontButton):
     def __init__(self):
         gtk.FontButton.__init__(self)
@@ -528,6 +536,7 @@ class FontButton(gtk.FontButton):
     def get_text(self):
         return self.get_font_name()
 
+# convenience class for radio button preferences
 class RadioButton(gtk.VBox):
     def __init__(self, items):
         gtk.VBox.__init__(self)
@@ -553,12 +562,14 @@ class RadioButton(gtk.VBox):
                 return i
         return 0
 
+# class to store preferences and construct a dialogue for manipulating them
 class Preferences:
     def __init__(self):
         self.bool_prefs = {}
         self.int_prefs = {}
         self.string_prefs = {}
 
+        # find available encodings
         encs = {}
         for e in encodings.aliases.aliases.values():
             encs[e] = None
@@ -636,6 +647,7 @@ class Preferences:
             ]
           ]
         self._initFromTemplate(self.template)
+        # load the user's preferences
         self.path = os.path.expanduser('~/.diffuse/prefs')
         if os.path.isfile(self.path):
             try:
@@ -801,7 +813,7 @@ class Preferences:
             return encodings[0]
         return 'utf_8'
 
-    # attempt to string to unicode from unknown encoding
+    # attempt to convert a string to unicode from an unknown encoding
     def convertToUnicode(self, ss):
         for encoding in self._getDefaultEncodings():
             try:
@@ -1208,6 +1220,7 @@ class VCSs:
 
 theVCSs = VCSs()
 
+# custom dialogue for picking files
 class FileChooserDialog(gtk.FileChooserDialog):
     def __init__(self, title, parent, prefs, action, accept):
         gtk.FileChooserDialog.__init__(self, title, parent, action, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, accept, gtk.RESPONSE_OK))
@@ -3364,7 +3377,7 @@ class FileDiffViewer(gtk.VBox):
     def save_file(self, f, save_as=False, name=None):
         file = self.files[f]
         spec = file.spec
-        if spec.revision is not None:
+        if spec.name is None or spec.revision is not None:
             save_as = True
         spec = FileSpec(spec.name, None, None, spec.encoding)
         if name is not None:
@@ -3847,6 +3860,7 @@ class FileDiffViewer(gtk.VBox):
     def _realise_cb(self, widget):
         self._first_difference()
 
+# dialogue used to search for text
 class SearchDialog(gtk.Dialog):
     def __init__(self, parent, pattern=None, history=None):
         gtk.Dialog.__init__(self, _('Find...'), parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
@@ -3896,6 +3910,9 @@ class SearchDialog(gtk.Dialog):
     def entry_cb(self, widget):
         self.response(gtk.RESPONSE_ACCEPT)
 
+# the main application class containing a set of file viewers
+# this class displays tab for switching between viewers and dispatches menu
+# commands to the current viewer
 class Diffuse(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
@@ -4240,6 +4257,9 @@ You should have received a copy of the GNU General Public License along with thi
         dialog.run()
         dialog.destroy()
 
+# variables to record the window size and maximised state so we can save the
+# data when quiting the application (we use globals as the main widget may be
+# destroyed before we are attempt to save the data)
 window_width = 1024
 window_height = 768
 window_maximized = 0
@@ -4257,6 +4277,7 @@ def window_state_cb(window, event):
         else:
             window_maximized = 0
 
+# process the command line arguments
 if __name__ == '__main__':
     path = os.path.expanduser('~/.diffuse')
     if not os.path.exists(path):
