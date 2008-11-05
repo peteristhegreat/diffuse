@@ -536,32 +536,6 @@ class FontButton(gtk.FontButton):
     def get_text(self):
         return self.get_font_name()
 
-# convenience class for radio button preferences
-class RadioButton(gtk.VBox):
-    def __init__(self, items):
-        gtk.VBox.__init__(self)
-        self.buttons = []
-        prev = None
-        for item in items:
-            button = gtk.RadioButton(prev, item)
-            self.buttons.append(button)
-            self.pack_start(button, False, False, 0)
-            button.show()
-            prev = button
-
-    def set_value(self, i):
-        n = len(self.buttons)
-        if n > 0:
-            if i < 0 or i >= n:
-                i = 0
-            self.buttons[i].set_active(True)
-
-    def get_value_as_int(self):
-        for i, button in enumerate(self.buttons):
-            if button.get_active():
-                return i
-        return 0
-
 # class to store preferences and construct a dialogue for manipulating them
 class Preferences:
     def __init__(self):
@@ -681,7 +655,7 @@ class Preferences:
                 i += 1
         elif template[0] == 'Boolean':
             self.bool_prefs[template[1]] = template[2]
-        elif template[0] in [ 'Integer', 'Radio' ]:
+        elif template[0] == 'Integer':
             self.int_prefs[template[1]] = template[2]
         elif template[0] in [ 'String', 'File', 'Font' ]:
             self.string_prefs[template[1]] = template[2]
@@ -749,13 +723,9 @@ class Preferences:
                     w = self._buildPrefsDialog(parent, widgets, tpl)
                     table.attach(w, 0, 2, i, i + 1, gtk.FILL, gtk.FILL)
                     w.show()
-                elif type in [ 'Boolean', 'Radio' ]:
-                    if type == 'Boolean':
-                        button = gtk.CheckButton(tpl[3])
-                        button.set_active(self.bool_prefs[tpl[1]])
-                    else:
-                        button = RadioButton(tpl[3:])
-                        button.set_value(self.int_prefs[tpl[1]])
+                elif type == 'Boolean':
+                    button = gtk.CheckButton(tpl[3])
+                    button.set_active(self.bool_prefs[tpl[1]])
                     widgets[tpl[1]] = button
                     table.attach(button, 1, 2, i, i + 1, gtk.FILL, gtk.FILL)
                     button.show()
@@ -908,6 +878,7 @@ def removeNullLines(blocks, lines_set):
             bn += blocks[bi]
             bi += 1
 
+# convenience method for creating a menu according to a template
 def createMenu(specs, accel_group=None):
     menu = gtk.Menu()
     for spec in specs:
@@ -936,6 +907,7 @@ def createMenu(specs, accel_group=None):
         item.show()
     return menu
 
+# convenience method for creating a menu bar according to a template
 def createMenuBar(specs, accel_group):
     menu_bar = gtk.MenuBar()
     for label, spec in specs:
@@ -945,6 +917,8 @@ def createMenuBar(specs, accel_group):
         menu.show()
     return menu_bar
 
+# convenience method for packing buttons into a container according to a
+# template
 def appendButtons(box, size, specs):
     for spec in specs:
         if len(spec) > 0:
@@ -967,24 +941,26 @@ def appendButtons(box, size, specs):
             box.pack_start(separator, False, False, 5)
             separator.show()
 
+# convenience method to request confirmation before doing an operation that
+# will cause edits to be lost
 def confirmDiscardEdits(parent):
     dialog = MessageDialog(parent, gtk.MESSAGE_QUESTION, _('Discard unsaved changes?'))
     end = (dialog.run() == gtk.RESPONSE_OK)
     dialog.destroy()
     return end
 
-LINE_MODE = 0
-CHAR_MODE = 1
-ALIGN_MODE = 2
-
+# True if the string ends with '\r\n'
 def has_dos_line_ending(s):
     return s is not None and len(s) > 1 and s[-2:] == '\r\n'
 
+# True if the string ends with '\n' but not '\r\n'
 def has_unix_line_ending(s):
     if s is not None and len(s) > 0 and s[-1] == '\n':
         return len(s) == 1 or s[-2] != '\r'
     return False
 
+# masks used to indicate the presence of DOS line endings and Unix line endings
+# 0 indicates no line endings, while 3 indicates mixed line endings
 DOS_FORMAT = 1
 UNIX_FORMAT = 2
 
@@ -997,6 +973,8 @@ def getFormat(ss):
             flags |= UNIX_FORMAT
     return flags
 
+# returns the number of characters in the string excluding any line ending
+# characters
 def len_minus_line_ending(format, s):
     if s is None:
         return 0
@@ -1012,6 +990,7 @@ def strip_line_ending(format, s):
     if s is not None:
         return s[:len_minus_line_ending(format, s)]
 
+# the following are convenience methods to change the line ending of a string
 def convert_to_dos(s):
     if has_unix_line_ending(s):
         s = s[:-1] + '\r\n'
@@ -1365,7 +1344,13 @@ def isBlank(s):
 def pixels(size):
     return int(size / pango.SCALE + 0.5)
 
+LINE_MODE = 0
+CHAR_MODE = 1
+ALIGN_MODE = 2
+
+# widget used to compare and merge text files
 class FileDiffViewer(gtk.VBox):
+    # class describing a text file
     class File:
         def __init__(self):
             self.lines = []
@@ -1384,6 +1369,7 @@ class FileDiffViewer(gtk.VBox):
                     return True
             return False
 
+    # class describing a single line of a file
     class Line:
         def __init__(self, line_number = None, text = None):
             self.line_number = line_number
