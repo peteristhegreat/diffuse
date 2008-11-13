@@ -1844,6 +1844,7 @@ class FileDiffViewer(gtk.VBox):
             file.line_lengths = max(file.line_lengths, self.digit_width * self.getStringColumnWidth(f, text))
         self.updateSize(False)
 
+        y = int(self.vadj.get_value())
         h = self.font_height
         fs = []
         if f > 0:
@@ -1855,7 +1856,7 @@ class FileDiffViewer(gtk.VBox):
             if i < len(otherfile.diff_cache):
                 otherfile.diff_cache[i] = None
             darea = self.dareas[fn]
-            darea.queue_draw_area(0, i * h, darea.get_allocation().width, h)
+            darea.queue_draw_area(0, i * h - y, darea.get_allocation().width, h)
         if i < len(file.syntax_cache):
             del file.syntax_cache[i:]
         if i < len(file.diff_cache):
@@ -2547,11 +2548,13 @@ class FileDiffViewer(gtk.VBox):
                       [_('Isolate'), self.isolate_cb, None, None, None, can_isolate ],
                       [_('Clear Edits'), self.clear_edits_cb, None, gtk.STOCK_CLEAR, None, can_isolate],
                       [_('Merge'), self.merge_lines_cb, f, None, None, can_merge],
+                      [],
                       [_('Swap with Selected Pane'), self.swap_panes_cb, f, None, None, can_swap],
                       [],
                       [_('Cut'), self.cut_cb, None, gtk.STOCK_CUT, None, can_select],
                       [_('Copy'), self.copy_cb, None, gtk.STOCK_COPY, None, can_select],
                       [_('Paste'), self.paste_cb, None, gtk.STOCK_PASTE, None, can_select],
+                      [],
                       [_('Select All'), self.select_all_cb, None, None, None, can_select] ])
             menu.popup(None, None, None, event.button, event.time)
 
