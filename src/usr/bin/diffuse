@@ -1255,6 +1255,7 @@ class ScrolledWindow(gtk.Table):
     def __init__(self):
         gtk.Table.__init__(self, 2, 2)
         self.position = (0, 0)
+	self.scroll_count = 0
 
         vport = gtk.Viewport()
         darea = gtk.DrawingArea()
@@ -1267,21 +1268,22 @@ class ScrolledWindow(gtk.Table):
         bar = gtk.VScrollbar()
         self.attach(bar, 1, 2, 0, 1, gtk.FILL, gtk.EXPAND|gtk.FILL)
         bar.show()
-        self.vhandle = bar.get_adjustment().connect('value_changed', self.scrolled_cb)
+        self.vhandle = bar.get_adjustment().connect('value_changed', self.value_changed_cb)
         self.vbar = bar
 
         bar = gtk.HScrollbar()
         self.attach(bar, 0, 1, 1, 2, gtk.EXPAND|gtk.FILL, gtk.FILL)
         bar.show()
-        self.hhandle = bar.get_adjustment().connect('value_changed', self.scrolled_cb)
+        self.hhandle = bar.get_adjustment().connect('value_changed', self.value_changed_cb)
         self.hbar = bar
 
         darea.connect('configure_event', self.configure_cb)
         darea.connect('scroll_event', self.scroll_cb)
+        darea.connect('expose_event', self.expose_cb)
 
     def set_vadjustment(self, adj):
         self.get_vadjustment().disconnect(self.vhandle)
-        self.vhandle = adj.connect('value_changed', self.scrolled_cb)
+        self.vhandle = adj.connect('value_changed', self.value_changed_cb)
         self.vbar.set_adjustment(adj)
 
     def get_vadjustment(self):
@@ -1290,7 +1292,7 @@ class ScrolledWindow(gtk.Table):
     def set_hadjustment(self, adj):
         self.get_hadjustment().disconnect(self.hhandle)
         self.hbar.set_adjustment(adj)
-        self.hhandle = adj.connect('value_changed', self.scrolled_cb)
+        self.hhandle = adj.connect('value_changed', self.value_changed_cb)
 
     def get_hadjustment(self):
         return self.hbar.get_adjustment()
@@ -1322,13 +1324,20 @@ class ScrolledWindow(gtk.Table):
         v = min(v, int(vadj.upper - vadj.page_size))
         vadj.set_value(v)
 
-    def scrolled_cb(self, widget):
+    def value_changed_cb(self, widget):
         old_x, old_y = self.position
         pos_x = int(self.get_hadjustment().get_value())
         pos_y = int(self.get_vadjustment().get_value())
         self.position = (pos_x, pos_y)
         if self.darea.window is not None:
-            self.darea.window.scroll(old_x - pos_x, old_y - pos_y)
+            if self.scroll_count < 2:
+                self.scroll_count += 1
+                self.darea.window.scroll(old_x - pos_x, old_y - pos_y)
+            else:
+                self.darea.queue_draw()
+
+    def expose_cb(self, widget, event):
+	self.scroll_count = 0
 
 def nullToEmpty(s):
     if s is None:
