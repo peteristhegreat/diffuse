@@ -44,10 +44,10 @@ syntax_pattern normal normal python_literal '\b(None|True|False)\b'
 syntax_pattern normal normal python_type '\b(bool|buffer|builtin_function_or_method|classobj|code|complex|dict|dictproxy|ellipsis|file|float|frame|function|generator|instance|instancemethod|int|list|long|module|object|slice|str|traceback|tuple|type|unicode|xrange|NoneType|NotImplementedType)\b'
 
 # keywords
-syntax_pattern normal normal python_keyword '\b(and|as|assert|break|continue|del|elif|else|except|exec|finally|for|global|if|in|is|lambda|not|or|pass|print|raise|return|try|while|with|yield)\b'
+syntax_pattern normal normal python_keyword '\b(and|assert|break|continue|del|elif|else|except|exec|finally|for|global|if|in|is|lambda|not|or|pass|print|raise|return|try|while|with|yield)\b'
 
 # special kewords
-syntax_pattern normal normal python_import '\b(from|import)\b'
+syntax_pattern normal normal python_import '\b(as|from|import)\b'
 
 # function/class definitions
 syntax_pattern normal declaration python_keyword '\b(class|def)\b'
