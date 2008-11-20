@@ -573,6 +573,13 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>go_to_line</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Go To Line...</guimenuitem></menuchoice> menu item</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>convert_to_dos</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert to DOS Format</guimenuitem></menuchoice> menu item</para>

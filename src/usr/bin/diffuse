@@ -139,27 +139,25 @@ class SyntaxParser:
     # leaving a state will be tested in the order they were added to the finite
     # state machine.
     def addPattern(self, prev_state, next_state, token_type, pattern):
+        lookup = self.transitions_lookup
         for state in [ prev_state, next_state ]:
-            if not self.transitions_lookup.has_key(state):
-                self.transitions_lookup[state] = []
-        self.transitions_lookup[prev_state].append([pattern, token_type, next_state])
+            if not lookup.has_key(state):
+                lookup[state] = []
+        lookup[prev_state].append([pattern, token_type, next_state])
 
     # given a string and an initial state, idenitify the final state and tokens
     def parse(self, state_name, s):
-        transitions = self.transitions_lookup[state_name]
-        blocks = []
-        start = 0
+        lookup = self.transitions_lookup
+        transitions, blocks, start = lookup[state_name], [], 0
         while start < len(s):
             for pattern, token_type, next_state in transitions:
                 m = pattern.match(s, start)
                 if m is not None:
-                     end = m.span()[1]
-                     state_name = next_state
-                     transitions = self.transitions_lookup[state_name]
+                     end, state_name = m.span()[1], next_state
+                     transitions = lookup[state_name]
                      break
             else:
-                end = start + 1
-                token_type = self.default_token_type
+                end, token_type = start + 1, self.default_token_type
             if len(blocks) > 0 and blocks[-1][2] == token_type:
                 blocks[-1][1] = end
             else:
@@ -193,72 +191,74 @@ class Resources:
         # initialise defaults
         self.keybindings = {}
         self.keybindings_lookup = {}
-        self.setKeyBinding('menu', 'open_file', 'Ctrl+o')
-        self.setKeyBinding('menu', 'reload_file', 'Shift+Ctrl+R')
-        self.setKeyBinding('menu', 'save_file', 'Ctrl+s')
-        self.setKeyBinding('menu', 'save_file_as', 'Shift+Ctrl+S')
-        self.setKeyBinding('menu', 'new_2_way_file_merge', 'Ctrl+2')
-        self.setKeyBinding('menu', 'new_3_way_file_merge', 'Ctrl+3')
-        self.setKeyBinding('menu', 'quit', 'Ctrl+q')
-        self.setKeyBinding('menu', 'undo', 'Ctrl+z')
-        self.setKeyBinding('menu', 'redo', 'Shift+Ctrl+Z')
-        self.setKeyBinding('menu', 'cut', 'Ctrl+x')
-        self.setKeyBinding('menu', 'copy', 'Ctrl+c')
-        self.setKeyBinding('menu', 'paste', 'Ctrl+v')
-        self.setKeyBinding('menu', 'select_all', 'Ctrl+a')
-        self.setKeyBinding('menu', 'find', 'Ctrl+f')
-        self.setKeyBinding('menu', 'find_next', 'Ctrl+g')
-        self.setKeyBinding('menu', 'find_previous', 'Shift+Ctrl+G')
-        self.setKeyBinding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
-        self.setKeyBinding('menu', 'convert_to_unix', 'Ctrl+e')
-        self.setKeyBinding('menu', 'previous_tab', 'Ctrl+Page_Up')
-        self.setKeyBinding('menu', 'next_tab', 'Ctrl+Page_Down')
-        self.setKeyBinding('menu', 'close_tab', 'Ctrl+w')
-        self.setKeyBinding('menu', 'shift_pane_left', 'Shift+Ctrl+Left')
-        self.setKeyBinding('menu', 'shift_pane_right', 'Shift+Ctrl+Right')
-        self.setKeyBinding('menu', 'preferences', 'Ctrl+p')
-        self.setKeyBinding('menu', 'realign_all', 'Ctrl+l')
-        self.setKeyBinding('menu', 'first_difference', 'Shift+Ctrl+Up')
-        self.setKeyBinding('menu', 'previous_difference', 'Ctrl+Up')
-        self.setKeyBinding('menu', 'next_difference', 'Ctrl+Down')
-        self.setKeyBinding('menu', 'last_difference', 'Shift+Ctrl+Down')
-        self.setKeyBinding('menu', 'clear_edits', 'Ctrl+r')
-        self.setKeyBinding('menu', 'merge_from_left', 'Ctrl+Left')
-        self.setKeyBinding('menu', 'merge_from_right', 'Ctrl+Right')
-        self.setKeyBinding('menu', 'isolate', 'Ctrl+i')
-        self.setKeyBinding('menu', 'help_contents', 'F1')
-        self.setKeyBinding('line_mode', 'enter_align_mode', 'space')
-        self.setKeyBinding('line_mode', 'enter_character_mode', 'Return')
-        self.setKeyBinding('line_mode', 'up', 'Up')
-        self.setKeyBinding('line_mode', 'extend_up', 'Shift+Up')
-        self.setKeyBinding('line_mode', 'down', 'Down')
-        self.setKeyBinding('line_mode', 'extend_down', 'Shift+Down')
-        self.setKeyBinding('line_mode', 'left', 'Left')
-        self.setKeyBinding('line_mode', 'extend_left', 'Shift+Left')
-        self.setKeyBinding('line_mode', 'right', 'Right')
-        self.setKeyBinding('line_mode', 'extend_right', 'Shift+Right')
-        self.setKeyBinding('line_mode', 'page_up', 'Page_Up')
-        self.setKeyBinding('line_mode', 'extend_page_up', 'Shift+Page_Up')
-        self.setKeyBinding('line_mode', 'page_down', 'Page_Down')
-        self.setKeyBinding('line_mode', 'extend_page_down', 'Shift+Page_Down')
-        self.setKeyBinding('line_mode', 'delete_text', 'BackSpace')
-        self.setKeyBinding('line_mode', 'delete_text', 'Delete')
-        self.setKeyBinding('line_mode', 'first_line', 'Home')
-        self.setKeyBinding('line_mode', 'extend_first_line', 'Shift+Home')
-        self.setKeyBinding('line_mode', 'last_line', 'End')
-        self.setKeyBinding('line_mode', 'extend_last_line', 'Shift+End')
-        self.setKeyBinding('line_mode', 'first_difference', 'Ctrl+Home')
-        self.setKeyBinding('line_mode', 'last_difference', 'Ctrl+End')
-        self.setKeyBinding('align_mode', 'enter_line_mode', 'Escape')
-        self.setKeyBinding('align_mode', 'enter_character_mode', 'Return')
-        self.setKeyBinding('align_mode', 'up', 'Up')
-        self.setKeyBinding('align_mode', 'down', 'Down')
-        self.setKeyBinding('align_mode', 'left', 'Left')
-        self.setKeyBinding('align_mode', 'right', 'Right')
-        self.setKeyBinding('align_mode', 'page_up', 'Page_Up')
-        self.setKeyBinding('align_mode', 'page_down', 'Page_Down')
-        self.setKeyBinding('align_mode', 'align', 'space')
-        self.setKeyBinding('character_mode', 'enter_line_mode', 'Escape')
+        set_binding = self.setKeyBinding
+        set_binding('menu', 'open_file', 'Ctrl+o')
+        set_binding('menu', 'reload_file', 'Shift+Ctrl+R')
+        set_binding('menu', 'save_file', 'Ctrl+s')
+        set_binding('menu', 'save_file_as', 'Shift+Ctrl+S')
+        set_binding('menu', 'new_2_way_file_merge', 'Ctrl+2')
+        set_binding('menu', 'new_3_way_file_merge', 'Ctrl+3')
+        set_binding('menu', 'quit', 'Ctrl+q')
+        set_binding('menu', 'undo', 'Ctrl+z')
+        set_binding('menu', 'redo', 'Shift+Ctrl+Z')
+        set_binding('menu', 'cut', 'Ctrl+x')
+        set_binding('menu', 'copy', 'Ctrl+c')
+        set_binding('menu', 'paste', 'Ctrl+v')
+        set_binding('menu', 'select_all', 'Ctrl+a')
+        set_binding('menu', 'find', 'Ctrl+f')
+        set_binding('menu', 'find_next', 'Ctrl+g')
+        set_binding('menu', 'find_previous', 'Shift+Ctrl+G')
+        set_binding('menu', 'go_to_line', 'Ctrl+l')
+        set_binding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
+        set_binding('menu', 'convert_to_unix', 'Ctrl+e')
+        set_binding('menu', 'previous_tab', 'Ctrl+Page_Up')
+        set_binding('menu', 'next_tab', 'Ctrl+Page_Down')
+        set_binding('menu', 'close_tab', 'Ctrl+w')
+        set_binding('menu', 'shift_pane_left', 'Shift+Ctrl+Left')
+        set_binding('menu', 'shift_pane_right', 'Shift+Ctrl+Right')
+        set_binding('menu', 'preferences', 'Ctrl+p')
+        set_binding('menu', 'realign_all', 'Ctrl+m')
+        set_binding('menu', 'first_difference', 'Shift+Ctrl+Up')
+        set_binding('menu', 'previous_difference', 'Ctrl+Up')
+        set_binding('menu', 'next_difference', 'Ctrl+Down')
+        set_binding('menu', 'last_difference', 'Shift+Ctrl+Down')
+        set_binding('menu', 'clear_edits', 'Ctrl+r')
+        set_binding('menu', 'merge_from_left', 'Ctrl+Left')
+        set_binding('menu', 'merge_from_right', 'Ctrl+Right')
+        set_binding('menu', 'isolate', 'Ctrl+i')
+        set_binding('menu', 'help_contents', 'F1')
+        set_binding('line_mode', 'enter_align_mode', 'space')
+        set_binding('line_mode', 'enter_character_mode', 'Return')
+        set_binding('line_mode', 'up', 'Up')
+        set_binding('line_mode', 'extend_up', 'Shift+Up')
+        set_binding('line_mode', 'down', 'Down')
+        set_binding('line_mode', 'extend_down', 'Shift+Down')
+        set_binding('line_mode', 'left', 'Left')
+        set_binding('line_mode', 'extend_left', 'Shift+Left')
+        set_binding('line_mode', 'right', 'Right')
+        set_binding('line_mode', 'extend_right', 'Shift+Right')
+        set_binding('line_mode', 'page_up', 'Page_Up')
+        set_binding('line_mode', 'extend_page_up', 'Shift+Page_Up')
+        set_binding('line_mode', 'page_down', 'Page_Down')
+        set_binding('line_mode', 'extend_page_down', 'Shift+Page_Down')
+        set_binding('line_mode', 'delete_text', 'BackSpace')
+        set_binding('line_mode', 'delete_text', 'Delete')
+        set_binding('line_mode', 'first_line', 'Home')
+        set_binding('line_mode', 'extend_first_line', 'Shift+Home')
+        set_binding('line_mode', 'last_line', 'End')
+        set_binding('line_mode', 'extend_last_line', 'Shift+End')
+        set_binding('line_mode', 'first_difference', 'Ctrl+Home')
+        set_binding('line_mode', 'last_difference', 'Ctrl+End')
+        set_binding('align_mode', 'enter_line_mode', 'Escape')
+        set_binding('align_mode', 'enter_character_mode', 'Return')
+        set_binding('align_mode', 'up', 'Up')
+        set_binding('align_mode', 'down', 'Down')
+        set_binding('align_mode', 'left', 'Left')
+        set_binding('align_mode', 'right', 'Right')
+        set_binding('align_mode', 'page_up', 'Page_Up')
+        set_binding('align_mode', 'page_down', 'Page_Down')
+        set_binding('align_mode', 'align', 'space')
+        set_binding('character_mode', 'enter_line_mode', 'Escape')
 
         self.colours = {
             'align' : Colour(1.0, 1.0, 0.0),
@@ -503,8 +503,7 @@ class FileEntry(gtk.HBox):
         gtk.HBox.__init__(self)
         self.toplevel = parent
         self.title = title
-        entry = gtk.Entry()
-        self.entry = entry
+        self.entry = entry = gtk.Entry()
         self.pack_start(entry, True, True, 0)
         entry.show()
         button = gtk.Button()
@@ -793,9 +792,7 @@ class Preferences:
         return ([ ''.join([unichr(ord(c)) for c in s]) for s in ss ], None)
 
 def cutBlocks(i, blocks):
-    pre = []
-    post = []
-    nlines = 0
+    pre, post, nlines = [], [], 0
     for b in blocks:
         if nlines >= i:
             post.append(b)
@@ -809,12 +806,9 @@ def cutBlocks(i, blocks):
     return (pre, post)
 
 def mergeBlocks(leftblocks, rightblocks):
-    leftblocks = leftblocks[:]
-    rightblocks = rightblocks[:]
-    b = []
+    leftblocks, rightblocks, b = leftblocks[:], rightblocks[:], []
     while len(leftblocks) > 0:
-        nleft = leftblocks[0]
-        nright = rightblocks[0]
+        nleft, nright = leftblocks[0], rightblocks[0]
         n = min(nleft, nright)
         if n < nleft:
             leftblocks[0] -= n
@@ -828,14 +822,10 @@ def mergeBlocks(leftblocks, rightblocks):
     return b
 
 def mergeRanges(r1, r2):
-    r1 = r1[:]
-    r2 = r2[:]
-    result = []
-    start = 0
+    r1, r2, result, start = r1[:], r2[:], [], 0
     rs = [ r1, r2 ]
     while len(r1) > 0 and len(r2) > 0:
-        flags = 0
-        start = min(r1[0][0], r2[0][0])
+        flags, start = 0, min(r1[0][0], r2[0][0])
         if start == r1[0][0]:
             r1end = r1[0][1]
             flags |= r1[0][2]
@@ -859,9 +849,7 @@ def mergeRanges(r1, r2):
     return result
 
 def removeNullLines(blocks, lines_set):
-    bi = 0
-    bn = 0
-    i = 0
+    bi, bn, i = 0, 0, 0
     while bi < len(blocks):
         while i < bn + blocks[bi]:
             for lines in lines_set:
@@ -1119,9 +1107,7 @@ class VCSs:
                 f = open(self.svkconfig, 'r')
                 ss = f.readlines()
                 f.close()
-                projs = {}
-                hash = False
-                sep = os.sep
+                projs, hash, sep = {}, False, os.sep
                 for s in ss:
                     if s.startswith('  sep: ') and len(s) > 7:
                         sep = s[7]
@@ -1208,8 +1194,7 @@ class FileChooserDialog(gtk.FileChooserDialog):
         label = gtk.Label(_('Encoding: '))
         hbox.pack_start(label, False, False, 0)
         label.show()
-        combobox = gtk.combo_box_new_text()
-        self.combobox = combobox
+        self.combobox = combobox = gtk.combo_box_new_text()
         self.encodings = prefs.getEncodings()
         for e in self.encodings:
             combobox.append_text(e)
@@ -1221,8 +1206,7 @@ class FileChooserDialog(gtk.FileChooserDialog):
         hbox.pack_start(combobox, False, False, 5)
         combobox.show()
         if action == gtk.FILE_CHOOSER_ACTION_OPEN:
-            entry = gtk.Entry()
-            self.revision = entry
+            self.revision = entry = gtk.Entry()
             hbox.pack_end(entry, False, False, 0)
             entry.show()
             label = gtk.Label(_('Revision: '))
@@ -1265,17 +1249,15 @@ class ScrolledWindow(gtk.Table):
         self.attach(vport, 0, 1, 0, 1)
         vport.show()
 
-        bar = gtk.VScrollbar()
+        self.vbar = bar = gtk.VScrollbar()
         self.attach(bar, 1, 2, 0, 1, gtk.FILL, gtk.EXPAND|gtk.FILL)
         bar.show()
         self.vhandle = bar.get_adjustment().connect('value_changed', self.value_changed_cb)
-        self.vbar = bar
 
-        bar = gtk.HScrollbar()
+        self.hbar = bar = gtk.HScrollbar()
         self.attach(bar, 0, 1, 1, 2, gtk.EXPAND|gtk.FILL, gtk.FILL)
         bar.show()
         self.hhandle = bar.get_adjustment().connect('value_changed', self.value_changed_cb)
-        self.hbar = bar
 
         darea.connect('configure_event', self.configure_cb)
         darea.connect('scroll_event', self.scroll_cb)
@@ -1338,6 +1320,32 @@ class ScrolledWindow(gtk.Table):
 
     def expose_cb(self, widget, event):
 	self.scroll_count = 0
+
+# dialogue used to search for text
+class GoToLineDialog(gtk.Dialog):
+    def __init__(self, parent):
+        gtk.Dialog.__init__(self, _('Go To Line...'), parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+
+        vbox = gtk.VBox()
+        vbox.set_border_width(10)
+
+        hbox = gtk.HBox()
+        label = gtk.Label(_('Line Number: '))
+        hbox.pack_start(label, False, False, 0)
+        label.show()
+        self.entry = entry = gtk.Entry()
+        entry.connect('activate', self.entry_cb)
+        hbox.pack_start(entry, True, True, 0)
+        entry.show()
+
+        vbox.pack_start(hbox, True, True, 0)
+        hbox.show()
+
+        self.vbox.pack_start(vbox, False, False, 0)
+        vbox.show()
+
+    def entry_cb(self, widget):
+        self.response(gtk.RESPONSE_ACCEPT)
 
 def nullToEmpty(s):
     if s is None:
@@ -1539,8 +1547,7 @@ class FileDiffViewer(gtk.VBox):
         table.show()
 
         # add diff map
-        map = gtk.DrawingArea()
-        self.map = map
+        self.map = map = gtk.DrawingArea()
         map.add_events(gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON1_MOTION_MASK)
         map.connect('button_press_event', self.map_button_press_cb)
         map.connect('motion_notify_event', self.map_button_press_cb)
@@ -1553,8 +1560,7 @@ class FileDiffViewer(gtk.VBox):
         self.connect('key_press_event', self.key_press_cb)
 
         # Add a status bar to the botton
-        statusbar = gtk.Statusbar()
-        self.statusbar = statusbar
+        self.statusbar = statusbar = gtk.Statusbar()
         self.status_context = statusbar.get_context_id('Message')
         table.attach(statusbar, 0, n + 1, 2, 3, gtk.FILL, gtk.FILL)
         statusbar.show()
@@ -1622,9 +1628,9 @@ class FileDiffViewer(gtk.VBox):
     def stringWidth(self, f, s):
         if self.prefs.getBool('display_hide_endofline'):
             s = strip_line_ending(self.files[f].format, s)
-        w = 0
+        w, width = 0, self.characterWidth
         for c in s:
-            w += self.characterWidth(w, c)
+            w += width(w, c)
         return w
 
     def expand(self, f, s):
@@ -1751,8 +1757,7 @@ class FileDiffViewer(gtk.VBox):
                         for s in text:
                             if s is not None:
                                 file.line_lengths = max(file.line_lengths, self.digit_width * self.getStringColumnWidth(f, s))
-        num_lines = 0
-        line_lengths = 0
+        num_lines, line_lengths = 0, 0
         for file in self.files:
             num_lines = max(num_lines, len(file.lines))
             line_lengths = max(line_lengths, file.line_lengths)
@@ -2016,13 +2021,14 @@ class FileDiffViewer(gtk.VBox):
         elif self.prefs.getBool('align_ignore_whitespace_changes'):
             pc = True
             r = []
+            append = r.append
             for c in text:
                 if c in string.whitespace:
                     if pc:
-                       r.append(' ')
+                       append(' ')
                        pc = False
                 else:
-                    r.append(c)
+                    append(c)
                     pc = True
             text = ''.join(r)
         if self.prefs.getBool('align_ignore_case'):
@@ -3540,6 +3546,29 @@ class FileDiffViewer(gtk.VBox):
             more = (dialog.run() == gtk.RESPONSE_OK)
             dialog.destroy()
 
+    def go_to_line_cb(self, widget, data):
+        parent = self.get_toplevel()
+        dialog = GoToLineDialog(parent)
+        okay = (dialog.run() == gtk.RESPONSE_ACCEPT)
+        i = dialog.entry.get_text().strip()
+        dialog.destroy()
+        if okay:
+            try:
+                i = int(i)
+                f = self.current_file
+                for j, line in enumerate(self.files[f].lines):
+                    if line is not None and line.line_number == i:
+                        self.setLineMode()
+                        self.centre_view_about_y((j + 0.5) * self.font_height)
+                        self.setCurrentLine(f, j)
+                        return
+                msg = _('Line not found.')
+            except ValueError:
+                msg = _('Error parsing line number.')
+            m = MessageDialog(parent, gtk.MESSAGE_ERROR, msg)
+            m.run()
+            m.destroy()
+
     def convert_to_dos_cb(self, widget, data):
         self.setLineMode()
         self.openUndoBlock()
@@ -3770,6 +3799,11 @@ class FileDiffViewer(gtk.VBox):
                     return True
         return False
 
+    def centre_view_about_y(self, y):
+        vadj = self.vadj
+        y = min(max(0, y - vadj.page_size / 2), vadj.upper - vadj.page_size)
+        vadj.set_value(y)
+
     def goto_difference(self, i, delta):
         f = self.current_file
         nlines = len(self.files[f].lines)
@@ -3791,10 +3825,7 @@ class FileDiffViewer(gtk.VBox):
             if i < start:
                 start, i = i, start
             # centre the view on the selection
-            vadj = self.vadj
-            pos = ((start + i) * self.font_height - vadj.page_size) // 2
-            pos = min(max(0, pos), vadj.upper - vadj.page_size)
-            vadj.set_value(pos)
+            self.centre_view_about_y((start + i) * self.font_height / 2)
             self.selection_line = i
             self.setCurrentLine(f, start, True)
 
@@ -3954,6 +3985,7 @@ class Diffuse(gtk.Window):
                      [_('_Find...'), self.find_cb, None, gtk.STOCK_FIND, 'find'],
                      [_('Find _Next'), self.find_next_cb, None, None, 'find_next'],
                      [_('Find Pre_vious'), self.find_previous_cb, None, None, 'find_previous'],
+                     [_('Go To _Line...'), self.go_to_line_cb, None, None, 'go_to_line'],
                      [],
                      [_('Convert to _DOS Format'), self.convert_to_dos_cb, None, None, 'convert_to_dos'],
                      [_('Convert to Uni_x Format'), self.convert_to_unix_cb, None, None, 'convert_to_unix'] ] ])
@@ -4001,8 +4033,7 @@ class Diffuse(gtk.Window):
         vbox.pack_start(menu_bar, False, False, 0)
         menu_bar.show()
 
-        notebook = gtk.Notebook()
-        self.notebook = notebook
+        self.notebook = notebook = gtk.Notebook()
         notebook.set_scrollable(True)
         vbox.pack_start(notebook, True, True, 0)
         notebook.show()
@@ -4158,6 +4189,9 @@ class Diffuse(gtk.Window):
 
     def find_previous_cb(self, widget, data):
         self.find(False, True)
+
+    def go_to_line_cb(self, widget, data):
+        self.getCurrentViewer().go_to_line_cb(widget, data)
 
     def convert_to_dos_cb(self, widget, data):
         self.getCurrentViewer().convert_to_dos_cb(widget, data)
