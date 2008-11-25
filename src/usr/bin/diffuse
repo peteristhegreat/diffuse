@@ -4300,12 +4300,12 @@ window_width = 1024
 window_height = 768
 window_maximized = 0
 
-def configure_cb(window, event):
+def configure_cb(widget, event):
     global window_x, window_y, window_width, window_height
-    window_x, window_y = event.x, event.y
+    window_x, window_y = widget.window.get_root_origin()
     window_width, window_height = event.width, event.height
 
-def window_state_cb(window, event):
+def window_state_cb(widget, event):
     global window_maximized
     if event.changed_mask & gtk.gdk.WINDOW_STATE_MAXIMIZED:
         if (event.new_window_state & gtk.gdk.WINDOW_STATE_MAXIMIZED) != 0:
