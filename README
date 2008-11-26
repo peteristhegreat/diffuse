@@ -46,3 +46,7 @@ Diffuse's help documentation is written in the DocBook format and can be easily
 converted into other formats using XSLT stylesheets.  If the local help
 documentation or its browser are unavailable, Diffuse will attempt to display
 the on-line help documentation using a web browser.
+
+Some platforms specific post-install steps may be required to index the
+documentation and mime-type handling.  A sample RPM SPEC file is included for
+reference.
