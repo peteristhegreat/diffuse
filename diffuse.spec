@@ -31,11 +31,11 @@ rm -rf %{buildroot}
 
 %post
 scrollkeeper-update -q
-upate-desktop-database
+update-desktop-database
 
 %postun
 scrollkeeper-update -q
-upate-desktop-database
+update-desktop-database
 
 %files
 %defattr(-,root,root)
