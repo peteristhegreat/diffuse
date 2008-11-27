@@ -1239,7 +1239,7 @@ class ScrolledWindow(gtk.Table):
     def __init__(self):
         gtk.Table.__init__(self, 2, 2)
         self.position = (0, 0)
-	self.scroll_count = 0
+        self.scroll_count = 0
 
         vport = gtk.Viewport()
         darea = gtk.DrawingArea()
@@ -1319,7 +1319,7 @@ class ScrolledWindow(gtk.Table):
                 self.darea.queue_draw()
 
     def expose_cb(self, widget, event):
-	self.scroll_count = 0
+        self.scroll_count = 0
 
 # dialogue used to search for text
 class GoToLineDialog(gtk.Dialog):
@@ -4073,6 +4073,7 @@ class Diffuse(gtk.Window):
         hbox.pack_start(button, False, False, 0)
         button.show()
         self.notebook.append_page(viewer, hbox)
+        self.notebook.set_tab_reorderable(viewer, True)
         hbox.show()
         viewer.show()
         self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
@@ -4298,20 +4299,14 @@ window_x = 0
 window_y = 0
 window_width = 1024
 window_height = 768
-window_maximized = 0
+window_maximized = False
 
 def configure_cb(widget, event):
-    global window_x, window_y, window_width, window_height
-    window_x, window_y = widget.window.get_root_origin()
-    window_width, window_height = event.width, event.height
-
-def window_state_cb(widget, event):
-    global window_maximized
-    if event.changed_mask & gtk.gdk.WINDOW_STATE_MAXIMIZED:
-        if (event.new_window_state & gtk.gdk.WINDOW_STATE_MAXIMIZED) != 0:
-            window_maximized = 1
-        else:
-            window_maximized = 0
+    global window_x, window_y, window_width, window_height, window_maximized
+    window_maximized = ((widget.window.get_state() & gtk.gdk.WINDOW_STATE_MAXIMIZED) != 0)
+    if not window_maximized:
+        window_x, window_y = widget.window.get_root_origin()
+        window_width, window_height = event.width, event.height
 
 # process the command line arguments
 if __name__ == '__main__':
@@ -4364,7 +4359,7 @@ import %s
                         elif len(a) == 3 and a[0] == 'size':
                             window_width, window_height = int(a[1]), int(a[2])
                         elif len(a) == 2 and a[0] == 'maximized':
-                            window_maximized = int(a[1])
+                            window_maximized = (a[1] == '1')
                         else:
                             raise ValueError()
                     except ValueError:
@@ -4372,7 +4367,6 @@ import %s
         except IOError:
             print _('Error reading %s.') % (repr(configpath), )
     diff.connect('configure_event', configure_cb)
-    diff.connect('window_state_event', window_state_cb)
     # process remaining command line arguments
     tab_label = None
     encoding = None
