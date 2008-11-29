@@ -140,7 +140,7 @@ class SyntaxParser:
     # state machine.
     def addPattern(self, prev_state, next_state, token_type, pattern):
         lookup = self.transitions_lookup
-        for state in [ prev_state, next_state ]:
+        for state in prev_state, next_state:
             if not lookup.has_key(state):
                 lookup[state] = []
         lookup[prev_state].append([pattern, token_type, next_state])
@@ -163,7 +163,7 @@ class SyntaxParser:
             else:
                 blocks.append([start, end, token_type])
             start = end
-        return (state_name, blocks)
+        return state_name, blocks
 
 # find the full path of an executable
 def getExePath(s):
@@ -786,10 +786,20 @@ class Preferences:
     def convertToUnicode(self, ss):
         for encoding in self._getDefaultEncodings():
             try:
-                return ([ unicode(s, encoding) for s in ss ], encoding)
+                result = []
+                for s in ss:
+                    if s is not None:
+                        s = unicode(s, encoding)
+                    result.append(s)
+                return result, encoding
             except (UnicodeDecodeError, LookupError):
                 pass
-        return ([ ''.join([unichr(ord(c)) for c in s]) for s in ss ], None)
+        result = []
+        for s in ss:
+            if s is not None:
+                s = ''.join([unichr(ord(c)) for c in s])
+            result.append(s)
+        return result, None
 
 def cutBlocks(i, blocks):
     pre, post, nlines = [], [], 0
@@ -803,7 +813,7 @@ def cutBlocks(i, blocks):
             pre.append(n)
             post.append(b - n)
         nlines += b
-    return (pre, post)
+    return pre, post
 
 def mergeBlocks(leftblocks, rightblocks):
     leftblocks, rightblocks, b = leftblocks[:], rightblocks[:], []
@@ -1366,7 +1376,7 @@ CHAR_MODE = 1
 ALIGN_MODE = 2
 
 # widget used to compare and merge text files
-class FileDiffViewer(gtk.VBox):
+class FileDiffViewer(gtk.Table):
     # class describing a text file
     class File:
         def __init__(self):
@@ -1401,7 +1411,11 @@ class FileDiffViewer(gtk.VBox):
             return self.text
 
     def __init__(self, n, prefs):
-        gtk.VBox.__init__(self)
+        # figure out how many file panes we should have
+        if n < 2:
+            n = 2
+
+        gtk.Table.__init__(self, 3, n + 1)
         self.set_flags(gtk.CAN_FOCUS)
         self.prefs = prefs
 
@@ -1472,37 +1486,7 @@ class FileDiffViewer(gtk.VBox):
         self._character_mode_actions = {
                 'enter_line_mode': self.setLineMode }
 
-        # create button bar
-        hbox = gtk.HBox()
-        appendButtons(hbox, gtk.ICON_SIZE_LARGE_TOOLBAR, [
-           [ gtk.STOCK_EXECUTE, self.realign_all_cb, None, _('Realign All') ],
-           [],
-           [ gtk.STOCK_GOTO_TOP, self.first_difference_cb, None, _('First Difference') ],
-           [ gtk.STOCK_GO_UP, self.previous_difference_cb, None, _('Previous Difference') ],
-           [ gtk.STOCK_GO_DOWN, self.next_difference_cb, None, _('Next Difference') ],
-           [ gtk.STOCK_GOTO_BOTTOM, self.last_difference_cb, None, _('Last Difference') ],
-           [],
-           [ gtk.STOCK_CLEAR, self.clear_edits_cb, None, _('Clear Edits') ],
-           [ gtk.STOCK_GO_FORWARD, self.merge_from_left_cb, None, _('Merge From Left') ],
-           [ gtk.STOCK_GO_BACK, self.merge_from_right_cb, None, _('Merge From Right') ],
-           [],
-           [ gtk.STOCK_CUT, self.cut_cb, None, _('Cut') ],
-           [ gtk.STOCK_COPY, self.copy_cb, None, _('Copy') ],
-           [ gtk.STOCK_PASTE, self.paste_cb, None, _('Paste') ] ])
-        self.pack_start(hbox, False, False, 0)
-        hbox.show()
-
-        # visual separator
-        separator = gtk.HSeparator()
-        self.pack_start(separator, False, False, 2)
-        separator.show()
-
-        # figure out how many file panes we should have
-        if n < 2:
-            n = 2
-
         # create file panes
-        table = gtk.Table(3, n + 1)
         self.dareas = []
         self.files = []
         self.hadj = None
@@ -1523,7 +1507,7 @@ class FileDiffViewer(gtk.VBox):
             label.set_size_request(0, label.get_size_request()[1])
             hbox.pack_start(label, True, True, 0)
             label.show()
-            table.attach(hbox, i, i + 1, 0, 1, gtk.FILL, gtk.FILL)
+            self.attach(hbox, i, i + 1, 0, 1, gtk.FILL, gtk.FILL)
             hbox.show()
 
             # file contents
@@ -1540,11 +1524,9 @@ class FileDiffViewer(gtk.VBox):
             else:
                 sw.set_hadjustment(self.hadj)
                 sw.set_vadjustment(self.vadj)
-            table.attach(sw, i, i + 1, 1, 2)
+            self.attach(sw, i, i + 1, 1, 2)
             sw.show()
         self.vadj.connect('value_changed', self.map_vadj_changed)
-        self.pack_start(table, True, True, 0)
-        table.show()
 
         # add diff map
         self.map = map = gtk.DrawingArea()
@@ -1553,7 +1535,7 @@ class FileDiffViewer(gtk.VBox):
         map.connect('motion_notify_event', self.map_button_press_cb)
         map.connect('scroll_event', self.map_scroll_cb)
         map.connect('expose_event', self.map_expose_cb)
-        table.attach(map, n, n + 1, 1, 2, gtk.FILL, gtk.FILL)
+        self.attach(map, n, n + 1, 1, 2, gtk.FILL, gtk.FILL)
         map.show()
         map.set_size_request(16 * n, 0)
         self.add_events(gtk.gdk.KEY_PRESS_MASK)
@@ -1562,7 +1544,7 @@ class FileDiffViewer(gtk.VBox):
         # Add a status bar to the botton
         self.statusbar = statusbar = gtk.Statusbar()
         self.status_context = statusbar.get_context_id('Message')
-        table.attach(statusbar, 0, n + 1, 2, 3, gtk.FILL, gtk.FILL)
+        self.attach(statusbar, 0, n + 1, 2, 3, gtk.FILL, gtk.FILL)
         statusbar.show()
 
         # font
@@ -2510,6 +2492,7 @@ class FileDiffViewer(gtk.VBox):
             self.setCurrentLine(f, i, extend and f == self.current_file)
 
     def darea_button_press_cb(self, widget, event):
+        self.get_toplevel().set_focus(self)
         x = int(event.x + self.hadj.get_value())
         y = int(event.y + self.vadj.get_value())
         f = self.dareas.index(widget)
@@ -3621,7 +3604,7 @@ class FileDiffViewer(gtk.VBox):
         self.setLabel(f_dst, f1.label)
         self.setLabel(f_src, f0.label)
         nfiles = len(self.files)
-        for f_idx in [ f_dst, f_src ]:
+        for f_idx in f_dst, f_src:
             for f in range(f_idx - 1, f_idx + 2):
                 if f >= 0 and f < nfiles:
                     del self.files[f].diff_cache[:]
@@ -4034,6 +4017,26 @@ class Diffuse(gtk.Window):
         menu_bar = createMenuBar(menuspecs, accel_group)
         vbox.pack_start(menu_bar, False, False, 0)
         menu_bar.show()
+
+        # create button bar
+        hbox = gtk.HBox()
+        appendButtons(hbox, gtk.ICON_SIZE_LARGE_TOOLBAR, [
+           [ gtk.STOCK_EXECUTE, self.realign_all_cb, None, _('Realign All') ],
+           [],
+           [ gtk.STOCK_GOTO_TOP, self.first_difference_cb, None, _('First Difference') ],
+           [ gtk.STOCK_GO_UP, self.previous_difference_cb, None, _('Previous Difference') ],
+           [ gtk.STOCK_GO_DOWN, self.next_difference_cb, None, _('Next Difference') ],
+           [ gtk.STOCK_GOTO_BOTTOM, self.last_difference_cb, None, _('Last Difference') ],
+           [],
+           [ gtk.STOCK_CLEAR, self.clear_edits_cb, None, _('Clear Edits') ],
+           [ gtk.STOCK_GO_FORWARD, self.merge_from_left_cb, None, _('Merge From Left') ],
+           [ gtk.STOCK_GO_BACK, self.merge_from_right_cb, None, _('Merge From Right') ],
+           [],
+           [ gtk.STOCK_CUT, self.cut_cb, None, _('Cut') ],
+           [ gtk.STOCK_COPY, self.copy_cb, None, _('Copy') ],
+           [ gtk.STOCK_PASTE, self.paste_cb, None, _('Paste') ] ])
+        vbox.pack_start(hbox, False, False, 0)
+        hbox.show()
 
         self.notebook = notebook = gtk.Notebook()
         notebook.set_scrollable(True)
