@@ -31,6 +31,7 @@ APP_NAME = 'Diffuse'
 VERSION = '0.2.14'
 COPYRIGHT = _('Copyright © 2006-2008 Derrick Moser')
 RESOURCES = '/etc/diffuserc'
+WEBSITE = 'http://diffuse.sourceforge.net/'
 
 # process help options
 if __name__ == '__main__':
@@ -59,10 +60,10 @@ Configuration Options:
   --rcfile <file>                  Specify explicit resource file
 
 General Options:
-  ( -c | --commit ) <rev>          Commit resulting in file revision <rev>
+  ( -c | --commit ) <rev>          File revisions <rev-1> and <rev>
   ( -D | --close-if-same )         Close all tabs with no differences
   ( -e | --encoding ) <codec>      Use <codec> to read and write files
-  ( -r | --revision ) <rev>        File revision <rev> from a repository
+  ( -r | --revision ) <rev>        File revision <rev>
   ( -s | --separate )              Create a separate tab for each file
   ( -t | --tab ) <label>           Create a new tab called <label>
 
@@ -287,7 +288,7 @@ class Resources:
         self.strings = {
            'help_browser': '',
            'help_file': '',
-           'help_url': 'http://diffuse.sourceforge.net/manual.html',
+           'help_url': WEBSITE + 'manual.html',
            'icon': '/usr/share/pixmaps/diffuse.png' }
         help_browser = getExePath('gnome-help')
         if help_browser is not None:
@@ -442,7 +443,7 @@ class Resources:
                 print _('Error reading %s.') % (repr(file_name), )
                 return
 
-            # FIXME: do some better validation
+            # FIXME: improve validation
             for i, s in enumerate(ss):
                 args = shlex.split(s, True)
                 if len(args) > 0:
@@ -1356,6 +1357,35 @@ class GoToLineDialog(gtk.Dialog):
 
     def entry_cb(self, widget):
         self.response(gtk.RESPONSE_ACCEPT)
+
+# establish callback for the about dialog's link to Diffuse's web site
+def url_hook(dialog, link, userdata):
+    webbrowser.open(link)
+
+gtk.about_dialog_set_url_hook(url_hook, None)
+
+class AboutDialog(gtk.AboutDialog):
+    def __init__(self):
+        gtk.AboutDialog.__init__(self)
+        if hasattr(self, 'set_program_name'):
+            # only available in pygtk >= 2.12
+            self.set_program_name(APP_NAME)
+        self.set_version(VERSION)
+        self.set_comments(_('A file comparison and merge tool.'))
+        self.set_copyright(COPYRIGHT)
+        self.set_website(WEBSITE)
+        self.set_authors([ 'Derrick Moser <derrick_moser@yahoo.com>' ])
+        ss = [ APP_NAME + ' ' + VERSION + '\n',
+               self.get_comments() + '\n',
+               COPYRIGHT + '\n\n',
+               _("""This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the licence, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  You may also obtain a copy of the GNU General Public License from the Free Software Foundation by visiting their web site (http://www.fsf.org/) or by writing to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+""") ]
+        self.set_license(''.join(ss))
+        self.set_wrap_license(True)
 
 def nullToEmpty(s):
     if s is None:
@@ -4273,25 +4303,7 @@ class Diffuse(gtk.Window):
             os.spawnv(os.P_NOWAIT, args[0], args)
 
     def about_cb(self, widget, data):
-        dialog = gtk.AboutDialog()
-        if hasattr(dialog, 'set_program_name'):
-            # only available in pygtk >= 2.12
-            dialog.set_program_name(APP_NAME)
-        dialog.set_version(VERSION)
-        dialog.set_authors([ 'Derrick Moser <derrick_moser@yahoo.com>' ])
-        dialog.set_copyright(COPYRIGHT)
-        dialog.set_comments(_('A file comparison and merge tool.'))
-        ss = [ APP_NAME + ' ' + VERSION + '\n',
-               dialog.get_comments() + '\n',
-               COPYRIGHT + '\n\n',
-               _("""This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the licence, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program.  You may also obtain a copy of the GNU General Public License from the Free Software Foundation by visiting their web site (http://www.fsf.org/) or by writing to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-""") ]
-        dialog.set_license(''.join(ss))
-        dialog.set_wrap_license(True)
+        dialog = AboutDialog()
         dialog.run()
         dialog.destroy()
 
@@ -4305,11 +4317,16 @@ window_height = 768
 window_maximized = False
 
 def configure_cb(widget, event):
-    global window_x, window_y, window_width, window_height, window_maximized
-    window_maximized = ((widget.window.get_state() & gtk.gdk.WINDOW_STATE_MAXIMIZED) != 0)
-    if not window_maximized:
+    global window_x, window_y, window_width, window_height
+    # read the state directly instead of using window_maximized as the order
+    # of configure/window_state events is undefined
+    if (widget.window.get_state() & gtk.gdk.WINDOW_STATE_MAXIMIZED) == 0:
         window_x, window_y = widget.window.get_root_origin()
         window_width, window_height = event.width, event.height
+
+def window_state_cb(window, event):
+    global window_maximized
+    window_maximized = ((event.new_window_state & gtk.gdk.WINDOW_STATE_MAXIMIZED) != 0)
 
 # process the command line arguments
 if __name__ == '__main__':
@@ -4370,6 +4387,7 @@ import %s
         except IOError:
             print _('Error reading %s.') % (repr(configpath), )
     diff.connect('configure_event', configure_cb)
+    diff.connect('window_state_event', window_state_cb)
     # process remaining command line arguments
     tab_label = None
     encoding = None
