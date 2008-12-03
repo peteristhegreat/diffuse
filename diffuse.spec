@@ -1,6 +1,6 @@
 Summary: graphical tool for comparing and merging text files
 Name: diffuse
-Version: 0.2.14
+Version: 0.2.15
 Release: 1
 License: GPL
 Group: Development/Tools/Version Control

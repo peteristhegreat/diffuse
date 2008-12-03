@@ -28,7 +28,7 @@ gettext.textdomain('diffuse')
 _ = gettext.gettext
 
 APP_NAME = 'Diffuse'
-VERSION = '0.2.14'
+VERSION = '0.2.15'
 COPYRIGHT = _('Copyright © 2006-2008 Derrick Moser')
 RESOURCES = '/etc/diffuserc'
 WEBSITE = 'http://diffuse.sourceforge.net/'

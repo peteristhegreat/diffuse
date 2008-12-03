@@ -1,3 +1,16 @@
+Diffuse 0.2.15 - 2008-12-03
+- smoother scrolling
+- panes and tabs can now be manually re-organised
+- preferences for tab key behaviour
+- 'go to line' menu item
+- '-c' option for viewing the changes of a particular commit
+- home/end keys can now be used in line mode
+- confirmation requested before overriding changed files
+- position of window now saved
+- syntax files for more file types
+- reading /etc/diffuserc now optional when using a personal configuration file
+- minor bug fixes
+
 Diffuse 0.2.14 - 2008-10-20
 - svk support
 - syntax files for more file types
