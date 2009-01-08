@@ -177,14 +177,15 @@ def getExePath(s):
 # find the help directory for the current locale
 def getLocalisedDir(s):
     lang = locale.getdefaultlocale()[0]
-    path = os.path.join(s, lang)
-    if os.path.exists(path):
-        return path
-    postfix = lang.index('_')
-    if postfix > 0:
-        path = os.path.join(s, lang[:postfix])
+    if lang is not None:
+        path = os.path.join(s, lang)
         if os.path.exists(path):
             return path
+        postfix = lang.index('_')
+        if postfix > 0:
+            path = os.path.join(s, lang[:postfix])
+            if os.path.exists(path):
+                return path
     return os.path.join(s, 'C')
 
 class Resources:
