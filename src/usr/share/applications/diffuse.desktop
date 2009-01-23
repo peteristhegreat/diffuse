@@ -5,5 +5,5 @@ Exec=diffuse -s %F
 Icon=diffuse
 Terminal=false
 Type=Application
-MimeType=text/plain;text/x-csrc;text/x-chdr
-Categories=Development;GTK;TextEditor;TextTools
+MimeType=text/plain;text/x-csrc;text/x-chdr;
+Categories=Development;GTK;TextEditor;TextTools;
