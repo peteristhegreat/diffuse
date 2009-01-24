@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2006-2009 Derrick Moser <derrick_moser@yahoo.com>
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -29,7 +29,7 @@ _ = gettext.gettext
 
 APP_NAME = 'Diffuse'
 VERSION = '0.2.15'
-COPYRIGHT = _('Copyright © 2006-2008 Derrick Moser')
+COPYRIGHT = _('Copyright © 2006-2009 Derrick Moser')
 RESOURCES = '/etc/diffuserc'
 WEBSITE = 'http://diffuse.sourceforge.net/'
 
@@ -3307,37 +3307,30 @@ class FileDiffViewer(gtk.Table):
                 end_i, end_j = self.current_line, self.current_char
                 if end_i < start_i or (end_i == start_i and end_j < start_j):
                     start_i, start_j, end_i, end_j = end_i, end_j, start_i, start_j
-                width = self.prefs.getInt('editor_soft_tab_width')
-                if start_j > 0:
+                temp = start_j
+                if temp > 0:
                     text = self.getLineText(f, start_i)[:start_j]
                     w = self.stringWidth(f, text)
-                    ws = width - w % width
+                    while temp > 0 and text[temp - 1] in ' \t':
+                        temp -= 1
                 else:
-                    ws = width
+                    w = 0
+                tab_width = self.prefs.getInt('display_tab_width')
+                if temp > 0:
+                    ws = tab_width - w % tab_width
+                else:
+                    self.selection_line = start_i
+                    self.selection_char = 0
+                    self.current_line = end_i
+                    self.current_char = end_j
+                    width = self.prefs.getInt('editor_soft_tab_width')
+                    ws = w + width - w % width
+                    w = 0
                 if self.prefs.getBool('editor_expand_tabs'):
                     s = u' ' * ws
                 else:
-                    width = self.prefs.getInt('display_tab_width')
-                    if start_j > 0:
-                        while start_j > 0 and text[start_j - 1] in ' \t':
-                            start_j -= 1
-                        self.selection_line = start_i
-                        self.selection_char = start_j
-                        self.current_line = end_i
-                        self.current_char = end_j
-                        ws = w + ws
-                        w = self.stringWidth(f, text[:start_j])
-                    else:
-                        w = 0
-                    ss = []
-                    while True:
-                        w2 = width - w % width
-                        if w + w2 > ws:
-                            break
-                        ss.append(u'\t')
-                        w += w2
-                    ss.append(u' ' * (ws - w))
-                    s = ''.join(ss)
+                    s = u'\t' * ((w + ws) // tab_width - w // tab_width)
+                    s += u' ' * ((w + ws) % tab_width)
                 self.replaceText(s)
             elif len(event.string) > 0:
                 self.replaceText(event.string)
