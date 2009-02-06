@@ -133,7 +133,8 @@
             <listitem>
               <para>
                 Do not read the personal initialisation file
-                <filename>~/.diffuse/diffuserc</filename>.
+                <filename>~/.diffuse/diffuserc</filename> or the system wide
+                initialisation file <filename>/etc/diffuserc</filename>.
               </para>
             </listitem>
           </varlistentry>
@@ -144,7 +145,9 @@
               <para>
                 Read initialisation commands from file
                 <replaceable>file</replaceable> instead of the personal
-                initialisation file <filename>~/.diffuse/diffuserc</filename>.
+                initialisation file <filename>~/.diffuse/diffuserc</filename>
+                or the system wide initialisation file
+                <filename>/etc/diffuserc</filename>.
               </para>
             </listitem>
           </varlistentry>
@@ -399,10 +402,11 @@
     <para>
       When &app; is started, it will read commands from the personal
       initialisation file <filename>~/.diffuse/diffuserc</filename>.  &app;
-      will create a default personal initialisation file if one did not exist.
-      A Bourne shell-like lexical analyser is used to parse initialisation
-      commands.  Comments and special characters can be embedded using the same
-      style of escaping used in Bourne shell scripts.
+      will use the system wide initialisation file
+      <filename>/etc/diffuserc</filename> when no personal initialisation file
+      is present.  A Bourne shell-like lexical analyser is used to parse
+      initialisation commands.  Comments and special characters can be embedded
+      using the same style of escaping used in Bourne shell scripts.
     </para>
 
     <sect1 id="resources-general">

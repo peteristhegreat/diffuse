@@ -32,7 +32,8 @@ If a configuration option is specified, it must be the first argument specified 
 \fB\-\-no\-rcfile\fR
 .RS 4
 Do not read the personal initialisation file
-\fI~/\.diffuse/diffuserc\fR\.
+\fI~/\.diffuse/diffuserc\fR or the system wide initialisation file
+\fI/etc/diffuserc\fR\.
 .RE
 .PP
 \fB\-\-rcfile \fR\fB\fIfile\fR\fR
@@ -40,7 +41,8 @@ Do not read the personal initialisation file
 Read initialisation commands from file
 \fIfile\fR
 instead of the personal initialisation file
-\fI~/\.diffuse/diffuserc\fR\.
+\fI~/\.diffuse/diffuserc\fR or the system wide initialisation file
+\fI/etc/diffuserc\fR\.
 .RE
 .SS "General Options"
 .PP
@@ -156,7 +158,8 @@ menu item regardless of the order the edits were performed\.
 .SH "RESOURCES"
 .PP
 When Diffuse is started, it will read commands from the personal initialisation file
-\fI~/\.diffuse/diffuserc\fR\. Diffuse will create a default personal initialisation file if one did not exist\. A Bourne shell\-like lexical analyser is used to parse initialisation commands\. Comments and special characters can be embedded using the same style of escaping used in Bourne shell scripts\.
+\fI~/\.diffuse/diffuserc\fR\. Diffuse will use the system wide initialisation file
+\fI/etc/diffuserc\fR\ when no personal initialisation file is present\. A Bourne shell\-like lexical analyser is used to parse initialisation commands\. Comments and special characters can be embedded using the same style of escaping used in Bourne shell scripts\.
 .SS "General"
 .PP
 \fBimport \fR\fB\fIfile\fR\fR

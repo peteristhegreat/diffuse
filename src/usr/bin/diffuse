@@ -30,7 +30,6 @@ _ = gettext.gettext
 APP_NAME = 'Diffuse'
 VERSION = '0.2.15'
 COPYRIGHT = _('Copyright © 2006-2009 Derrick Moser')
-RESOURCES = '/etc/diffuserc'
 WEBSITE = 'http://diffuse.sourceforge.net/'
 
 # process help options
@@ -103,6 +102,18 @@ import string
 import subprocess
 import webbrowser
 
+# platform tests
+def isWindows():
+    return os.name == 'nt'
+
+def isCygwin():
+    return sys.platform == 'cygwin'
+
+if not hasattr(__builtins__, 'WindowsError'):
+    # define 'WindowsError' so 'except' statements will work on all platforms
+    WindowsError = IOError
+
+# colour resources
 class Colour:
     def __init__(self, r, g, b, a=1.0):
         self.red = r
@@ -165,28 +176,6 @@ class SyntaxParser:
                 blocks.append([start, end, token_type])
             start = end
         return state_name, blocks
-
-# find the full path of an executable
-def getExePath(s):
-    if os.environ.has_key('PATH'):
-        for p in os.environ['PATH'].split(os.pathsep):
-            fp = os.path.join(p, s)
-            if os.path.isfile(fp):
-                return fp
-
-# find the help directory for the current locale
-def getLocalisedDir(s):
-    lang = locale.getdefaultlocale()[0]
-    if lang is not None:
-        path = os.path.join(s, lang)
-        if os.path.exists(path):
-            return path
-        postfix = lang.index('_')
-        if postfix > 0:
-            path = os.path.join(s, lang[:postfix])
-            if os.path.exists(path):
-                return path
-    return os.path.join(s, 'C')
 
 class Resources:
     def __init__(self):
@@ -286,17 +275,49 @@ class Resources:
            'line_selection_alpha' : 0.4,
            'modified_alpha' : 0.4 }
         self.unknown_floats = {}
+
+        help_browser = None
+        help_file = None
+        if isWindows():
+            if hasattr(sys, 'frozen'):
+                root = os.path.dirname(sys.executable)
+            else:
+                root = os.path.dirname(sys.argv[0])
+            iconpath = os.path.join(root, 'diffuse.ico')
+            help_file = os.path.join(os.path.join(root, 'help'), 'index.html')
+        else:
+            iconpath = '/usr/share/pixmaps/diffuse.png'
+            if os.environ.has_key('PATH'):
+                s = 'gnome-help'
+                for p in os.environ['PATH'].split(os.pathsep):
+                    fp = os.path.join(p, s)
+                    if os.path.isfile(fp):
+                        help_browser = s
+                        break
+            s = '/usr/share/gnome/help/diffuse'
+            # find the help directory for the current locale
+            d = os.path.join(s, 'C')
+            lang = locale.getdefaultlocale()[0]
+            if lang is not None:
+                path = os.path.join(s, lang)
+                if os.path.exists(path):
+                    d = path
+                else:
+                    postfix = lang.index('_')
+                    if postfix > 0:
+                        path = os.path.join(s, lang[:postfix])
+                        if os.path.exists(path):
+                           d = path
+            help_file = os.path.join(d, 'diffuse.xml')
+
         self.strings = {
            'help_browser': '',
            'help_file': '',
            'help_url': WEBSITE + 'manual.html',
-           'icon': '/usr/share/pixmaps/diffuse.png' }
-        help_browser = getExePath('gnome-help')
-        if help_browser is not None:
-           help_file = os.path.join(getLocalisedDir('/usr/share/gnome/help/diffuse'), 'diffuse.xml')
-           if os.path.isfile(help_file):
-               self.strings['help_browser'] = help_browser
-               self.strings['help_file'] = help_file
+           'icon': iconpath }
+        if help_browser is not None and help_file is not None and os.path.isfile(help_file):
+           self.strings['help_browser'] = help_browser
+           self.strings['help_file'] = help_file
         self.unknown_strings = {}
         self.default_colour = Colour(0.0, 0.0, 0.0)
         self.char_classes = {}
@@ -480,7 +501,10 @@ class Resources:
                                    raise ValueError()
                            self.current_syntax.addPattern(args[1], args[2], args[3], re.compile(args[4], flags))
                        elif args[0] == 'syntax_files' and len(args) == 3:
-                           self.syntax_file_patterns[args[1]] = re.compile(args[2])
+                           flags = 0
+                           if isWindows():
+                               flags |= re.IGNORECASE
+                           self.syntax_file_patterns[args[1]] = re.compile(args[2], flags)
                        else:
                            raise ValueError()
                    except: # Grr... the 're' module throws weird errors
@@ -537,8 +561,34 @@ class FontButton(gtk.FontButton):
     def get_text(self):
         return self.get_font_name()
 
+# escape arguments for use with bash
+def shellEscape(s):
+    return "'" + s.replace("'", "'\\''") + "'"
+
 # class to store preferences and construct a dialogue for manipulating them
 class Preferences:
+    def convertToNativePath(self, s):
+        if isWindows() or isCygwin():
+            prefix = self.getString('cygwin_cygdrive_prefix')
+            prefix = ''.join([ '/' + p for p in prefix.split('/') if p != '' ])
+            if isCygwin():
+                p = s.replace('\\', '/').split('/')
+                if p[0].endswith(':'):
+                    p[0] = prefix + '/' + p[0][:-1]
+                s = '/'.join(p)
+	    else:
+                p = s.replace('/', '\\').split('\\')
+                if p[0] == '':
+                    pr = prefix.split('/')
+                    n = len(pr)
+                    if len(p) > n and p[:n] == pr and len(p[n]) == 1:
+                        p[:n + 1] = [ p[n] + ':' ]
+                    elif len(p) > 1:
+                        if p[1] != '':
+                            p[0] = self.getString('cygwin_root')
+                s = '\\'.join(p)
+        return s
+
     def __init__(self):
         self.bool_prefs = {}
         self.int_prefs = {}
@@ -550,10 +600,19 @@ class Preferences:
             encs[e] = None
         self.encodings = sorted(encs.keys())
 
-        self.template = [ 'FolderSet',
+        if isWindows():
+	    font = 'Courier 10'
+            git_bin = 'git.cmd'
+	    svk_bin = 'svk.bat'
+	else:
+	    font = 'Monospace 10'
+            git_bin = 'git'
+            svk_bin = 'svk'
+
+	self.template = [ 'FolderSet',
             _('Display'),
             [ 'List',
-              [ 'Font', 'display_font', 'Monospace 10', _('Font') ],
+              [ 'Font', 'display_font', font, _('Font') ],
               [ 'Integer', 'display_tab_width', 8, _('Tab Width') ],
               [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore White Space') ],
               [ 'Boolean', 'display_ignore_whitespace_changes', False, _('Ignore Changes to White Space') ],
@@ -577,50 +636,43 @@ class Preferences:
             [ 'List',
               [ 'String', 'encoding_auto_detect_codecs', 'utf_8 latin_1', _('Order of codecs used to identify encoding') ]
             ],
-            _('Version Control'),
-            [ 'FolderSet',
-              'Bazaar',
-              [ 'List',
-                [ 'File', 'bzr_bin', 'bzr', _('Command') ],
-                [ 'String', 'bzr_default_revision', '-1', _('Default Revision') ]
-              ],
-              'CVS',
-              [ 'List',
-                [ 'File', 'cvs_bin', 'cvs', _('Command') ],
-                [ 'String', 'cvs_default_revision', 'BASE', _('Default Revision') ]
-              ],
-              'Darcs',
-              [ 'List',
-                [ 'File', 'darcs_bin', 'darcs', _('Command') ],
-                [ 'String', 'darcs_default_revision', '', _('Default Revision') ]
-              ],
-              'Git',
-              [ 'List',
-                [ 'File', 'git_bin', 'git', _('Command') ],
-                [ 'String', 'git_default_revision', 'HEAD', _('Default Revision') ]
-              ],
-              'Mercurial',
-              [ 'List',
-                [ 'File', 'hg_bin', 'hg', _('Command') ],
-                [ 'String', 'hg_default_revision', 'tip', _('Default Revision') ]
-              ],
-              'Monotone',
-              [ 'List',
-                [ 'File', 'mtn_bin', 'mtn', _('Command') ],
-                [ 'String', 'mtn_default_revision', 'h:', _('Default Revision') ]
-              ],
-              'Subversion',
-              [ 'List',
-                [ 'File', 'svn_bin', 'svn', _('Command') ],
-                [ 'String', 'svn_default_revision', 'BASE', _('Default Revision') ]
-              ],
-              'SVK',
-              [ 'List',
-                [ 'File', 'svk_bin', 'svk', _('Command') ],
-                [ 'String', 'svk_default_revision', 'HEAD', _('Default Revision') ]
-              ]
-            ]
-          ]
+	]
+	if isWindows() or isCygwin():
+            if os.environ.has_key('SYSTEMDRIVE'):
+                root = os.environ['SYSTEMDRIVE']
+            else:
+                root = 'C:\\'
+            self.template.extend([
+		    _('Cygwin'),
+		    [ 'List',
+		      [ 'File', 'cygwin_root', os.path.join(root, 'cygwin'), _('Root Directory') ],
+		      [ 'String', 'cygwin_cygdrive_prefix', '/cygdrive', _('Cygdrive Prefix') ]
+		    ]
+		])
+
+        # create template for Version Control options
+        vcs = [ ('bzr', 'Bazaar', 'bzr', '-1'),
+                ('cvs', 'CVS', 'cvs', 'BASE'),
+                ('darcs', 'Darcs', 'darcs', ''),
+                ('git', 'Git', git_bin, 'HEAD'),
+                ('hg', 'Mercurial', 'hg', 'tip'),
+                ('mtn', 'Monotone', 'mtn', 'h:'),
+                ('svn', 'Subversion', 'svn', 'BASE'),
+                ('svk', 'SVK', svk_bin, 'HEAD') ]
+
+	vcs_template = [ 'FolderSet' ]
+        for key, name, cmd, rev in vcs:
+            temp = [ 'List',
+		     [ 'File', key + '_bin', cmd, _('Command') ],
+                     [ 'String', key + '_default_revision', rev, _('Default Revision') ]
+		   ]
+            if isWindows():
+                temp.append([ 'Boolean', key + '_bash', False, _('Launch from a Bash login shell') ])
+                if key != 'git':
+                    temp.append([ 'Boolean', key + '_cygwin', False, _('Update paths for Cygwin') ])
+            vcs_template.extend([ name, temp ])
+
+	self.template.extend([ _('Version Control'), vcs_template ])
         self._initFromTemplate(self.template)
         # load the user's preferences
         self.path = os.path.expanduser('~/.diffuse/prefs')
@@ -802,6 +854,15 @@ class Preferences:
                 s = ''.join([unichr(ord(c)) for c in s])
             result.append(s)
         return result, None
+
+    def safeLocalPath(self, s, cygwin_pref):
+        s = os.path.join(os.path.curdir, os.path.basename(s))
+        if isWindows():
+            if self.getBool(cygwin_pref):
+                s = s.replace('\\', '/')
+            else:
+                s = s.replace('/', '\\')
+        return s
 
 def cutBlocks(i, blocks):
     pre, post, nlines = [], [], 0
@@ -1027,7 +1088,7 @@ class VCSs:
             return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return [ prefs.getString('bzr_bin'), 'cat', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
+            return 'bzr_bash', [ prefs.getString('bzr_bin'), 'cat', '-r', rev, prefs.safeLocalPath(name, 'bzr_cygwin') ]
 
     # CVS support
     class Cvs:
@@ -1035,7 +1096,7 @@ class VCSs:
             return [ (name, prefs.getString('cvs_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return [ prefs.getString('cvs_bin'), '-Q', 'update', '-p', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
+            return 'cvs_bash', [ prefs.getString('cvs_bin'), '-Q', 'update', '-p', '-r', rev, prefs.safeLocalPath(name, 'cvs_cygwin') ]
 
     # Darcs support
     class Darcs:
@@ -1047,7 +1108,7 @@ class VCSs:
             return [ (name, prefs.getString('darcs_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return [ prefs.getString('darcs_bin'), 'show', 'contents', '-p', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
+            return 'darcs_bash', [ prefs.getString('darcs_bin'), 'show', 'contents', '-p', rev, prefs.safeLocalPath(name, 'darcs_cygwin') ]
 
     # Git support
     class Git:
@@ -1065,7 +1126,7 @@ class VCSs:
                 while i < len(name) and name[i] == os.path.sep:
                     i += 1
                 name = name[i:]
-            return [ prefs.getString('git_bin'), 'show', '%s:%s' % (rev, name) ]
+            return 'git_bash', [ prefs.getString('git_bin'), 'show', '%s:%s' % (rev, name.replace(os.sep, '/')) ]
 
     # Mercurial support
     class Hg:
@@ -1077,7 +1138,7 @@ class VCSs:
             return [ (name, prefs.getString('hg_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return [ prefs.getString('hg_bin'), 'cat', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
+            return 'hg_bash', [ prefs.getString('hg_bin'), 'cat', '-r', rev, prefs.safeLocalPath(name, 'hg_cygwin') ]
 
     # Monotone support
     class Mtn:
@@ -1089,7 +1150,7 @@ class VCSs:
             return [ (name, prefs.getString('mtn_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return [ prefs.getString('mtn_bin'), 'cat', '--quiet', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
+            return 'mtn_bash', [ prefs.getString('mtn_bin'), 'cat', '--quiet', '-r', rev, prefs.safeLocalPath(name, 'mtn_cygwin') ]
 
     # Subversion support
     class Svn:
@@ -1109,10 +1170,12 @@ class VCSs:
             return [ (name, prefs.getString('svn_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return [ prefs.getString('svn_bin'), 'cat', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
+            return 'svn_bash', [ prefs.getString('svn_bin'), 'cat', '-r', rev, prefs.safeLocalPath(name, 'svn_cygwin') ]
 
     # SVK support
     def isSvkManaged(self, name):
+        if isWindows():
+            name = name.upper()
         if os.path.isfile(self.svkconfig):
             try:
                 # find working copies by parsing the config file
@@ -1148,7 +1211,10 @@ class VCSs:
                                 else:
                                     tt.append(s[i])
                                     i += 1
-                            projs[''.join(tt).replace(sep, os.sep)] = None
+                            key = ''.join(tt).replace(sep, os.sep)
+			    if isWindows():
+                                key = key.upper()
+                            projs[key] = None
                     elif s.startswith('  hash:'):
                         hash = True
                 while True:
@@ -1168,7 +1234,7 @@ class VCSs:
             return [ (name, prefs.getString('svk_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return [ prefs.getString('svk_bin'), 'cat', '-r', rev, os.path.join(os.path.curdir, os.path.basename(name)) ]
+            return 'svk_bash', [ prefs.getString('svk_bin'), 'cat', '-r', rev, prefs.safeLocalPath(name, 'svk_cygwin') ]
 
     def __init__(self):
         if os.environ.has_key('SVKROOT'):
@@ -2163,9 +2229,20 @@ class FileDiffViewer(gtk.Table):
                         raise IOError('Not under revision control.')
                     label = '%s (%s)' % (name, rev)
                     fullname = os.path.abspath(name)
-                    cmd = spec.vcs.getRevisionCommand(self.prefs, fullname, rev)
+                    bash_pref, cmd = spec.vcs.getRevisionCommand(self.prefs, fullname, rev)
                     dn = os.path.dirname(fullname)
-                    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, cwd=dn)
+                    if isWindows() and self.prefs.getBool(bash_pref):
+                        cmd = [ self.prefs.convertToNativePath('/bin/bash.exe'), '-l', '-c', 'cd %s; %s' % (shellEscape(dn), ' '.join([ shellEscape(arg) for arg in cmd ])) ]
+                        dn = None
+                    if isWindows():
+                        info = subprocess.STARTUPINFO()
+                        info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                        info.wShowWindow = subprocess.SW_HIDE
+                    else:
+                        info = None
+                    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=dn, startupinfo=info)
+                    proc.stdin.close()
+                    proc.stderr.close()
                     fd = proc.stdout
                 else:
                     label = name
@@ -2179,7 +2256,7 @@ class FileDiffViewer(gtk.Table):
                     ss, spec.encoding = self.prefs.convertToUnicode(ss)
                 else:
                     ss = [ unicode(s, spec.encoding) for s in ss ]
-            except (IOError, UnicodeDecodeError):
+            except (IOError, UnicodeDecodeError, WindowsError):
                 # FIXME: this can occur before the toplevel window is drawn
                 if rev is not None:
                     msg = 'Error reading revision %(rev)s of "%(file)s".' % { 'rev': rev, 'file': name }
@@ -4344,14 +4421,14 @@ if __name__ == '__main__':
     else:
         rc_file = os.path.expanduser('~/.diffuse/diffuserc')
         if not os.path.exists(rc_file):
-            try:
-                f = open(rc_file, 'w')
-                f.write("""# personal initialisation file for %s
-import %s
-""" % (APP_NAME, RESOURCES))
-                f.close()
-            except:
-                pass
+            if isWindows():
+                if hasattr(sys, 'frozen'):
+                    rcdir = os.path.dirname(sys.executable)
+                else:
+                    rcdir = os.path.dirname(sys.argv[0])
+            else:
+                rcdir = '/etc'
+            rc_file = os.path.join(rcdir, 'diffuserc')
         if os.path.isfile(rc_file):
             theResources.parse(rc_file)
 
@@ -4451,7 +4528,7 @@ import %s
             else:
                 print _('Skipping unknown argument %s.') % (repr(args[i]), )
         else:
-            filename = args[i]
+            filename = diff.prefs.convertToNativePath(args[i])
             if len(specs) == 0:
                 isdirviewer = os.path.isdir(filename)
             elif not isdirviewer and os.path.isdir(filename):
