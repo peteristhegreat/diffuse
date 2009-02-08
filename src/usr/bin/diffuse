@@ -22,7 +22,7 @@
 import gettext
 import sys
 
-# translation location: '/usr/share/locale/<LANG>/LC_MESSAGES/diffuse.mo'
+# translation location: '../share/locale/<LANG>/LC_MESSAGES/diffuse.mo'
 # where '<LANG>' is the language key
 gettext.textdomain('diffuse')
 _ = gettext.gettext
@@ -184,6 +184,12 @@ class SyntaxParser:
             start = end
         return state_name, blocks
 
+# This class to hold all customisable behaviour not exposed in the preferences
+# dialogue: hotkey assignment, colours, syntax highlighting, etc.
+# Syntax highlighting is implemented in supporting '*.syntax' files normally
+# read from the system wide initialisation file '/etc/diffuserc'.
+# The personal initialisation file '~/diffuse/diffuserc' can be used to change
+# default behaviour.
 class Resources:
     def __init__(self):
         # initialise defaults
@@ -297,6 +303,7 @@ class Resources:
                         help_browser = s
                         break
             s = os.path.join(bin_dir, '../share/gnome/help/diffuse')
+
             # find the help directory for the current locale
             d = os.path.join(s, 'C')
             lang = locale.getdefaultlocale()[0]
@@ -317,6 +324,8 @@ class Resources:
            'help_file': '',
            'help_url': WEBSITE + 'manual.html',
            'icon': iconpath }
+
+        # use the online help if local help browser or files are unavailable
         if help_browser is not None and help_file is not None and os.path.isfile(help_file):
            self.strings['help_browser'] = help_browser
            self.strings['help_file'] = help_file
@@ -328,7 +337,6 @@ class Resources:
         self.current_syntax = None
 
         self.resource_files = {}
-
         self.setDifferenceColours('difference_1 difference_2 difference_3')
         self.setCharacterClasses('48-57:48 65-90:48 97-122:48 95:48 9:32')
 
@@ -457,6 +465,7 @@ class Resources:
 
     # parse resource files
     def parse(self, file_name):
+        # only process files once
         if not self.resource_files.has_key(file_name):
             self.resource_files[file_name] = None
             try:
@@ -472,6 +481,8 @@ class Resources:
                 args = shlex.split(s, True)
                 if len(args) > 0:
                    try:
+                       # eg. add Python syntax highlighting:
+                       #    import /usr/share/diffuse/syntax/python.syntax
                        if args[0] == 'import' and len(args) == 2:
                            path = os.path.expanduser(args[1])
                            paths = glob.glob(path)
@@ -479,21 +490,38 @@ class Resources:
                                paths = [ path ]
                            for path in paths:
                                self.parse(path)
+                       # eg. make Ctrl+o trigger the open_file menu item
+                       #    keybinding menu open_file Ctrl+o
                        elif args[0] == 'keybinding' and len(args) == 4:
                            self.setKeyBinding(args[1], args[2], args[3])
+                       # eg. set the regular background colour to white
+                       #    colour text_background 1.0 1.0 1.0
                        elif args[0] in [ 'colour', 'color' ] and len(args) == 5:
                            self.colours[args[1]] = Colour(float(args[2]), float(args[3]), float(args[4]))
+                       # eg. set opacity of the line_selection colour
+                       #    float line_selection_alpha 0.4
                        elif args[0] == 'float' and len(args) == 3:
                            self.floats[args[1]] = float(args[2])
+                       # eg. set the help browser
+                       #    string help_browser gnome-help
                        elif args[0] == 'string' and len(args) == 3:
                            self.strings[args[1]] = args[2]
                            if args[1] == 'difference_colours':
                                self.setDifferenceColours(args[2])
                            elif args[1] == 'character_classes':
                                self.setCharacterClasses(args[2])
+                       # eg. start a syntax specification for Python
+                       #    syntax Python normal text
+                       # where 'normal' is the name of the default state and
+                       # 'text' is the classification of all characters not
+                       # explicitly matched by a syntax highlighting rule
                        elif args[0] == 'syntax' and len(args) == 4:
                            self.current_syntax = SyntaxParser(args[2], args[3])
                            self.syntaxes[args[1]] = self.current_syntax
+                       # eg. transition from state 'normal' to 'comment' when
+                       # the pattern '#' is matched and classify the matched
+                       # characters as 'python_comment'
+                       #    syntax_pattern normal comment python_comment '#'
                        elif args[0] == 'syntax_pattern' and self.current_syntax is not None and len(args) >= 5:
                            flags = 0
                            for arg in args[5:]:
@@ -502,6 +530,9 @@ class Resources:
                                else:
                                    raise ValueError()
                            self.current_syntax.addPattern(args[1], args[2], args[3], re.compile(args[4], flags))
+                       # eg. default to the Python syntax rules when viewing
+                       # a file ending with '.py' or '.pyw'
+                       #    syntax_files Python '\.pyw?$'
                        elif args[0] == 'syntax_files' and len(args) == 3:
                            flags = 0
                            if isWindows():
@@ -543,6 +574,7 @@ class FileEntry(gtk.HBox):
         self.pack_start(button, False, False, 0)
         button.show()
 
+    # action performed when the pick file button is pressed
     def chooseFile(self, widget):
         dialog = gtk.FileChooserDialog(self.title, self.toplevel, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         if dialog.run() == gtk.RESPONSE_OK:
@@ -569,28 +601,6 @@ def bashEscape(s):
 
 # class to store preferences and construct a dialogue for manipulating them
 class Preferences:
-    def convertToNativePath(self, s):
-        if isWindows() or isCygwin():
-            prefix = self.getString('cygwin_cygdrive_prefix')
-            prefix = ''.join([ '/' + p for p in prefix.split('/') if p != '' ])
-            if isCygwin():
-                p = s.replace('\\', '/').split('/')
-                if p[0].endswith(':'):
-                    p[0] = prefix + '/' + p[0][:-1]
-                s = '/'.join(p)
-            else:
-                p = s.replace('/', '\\').split('\\')
-                if p[0] == '':
-                    pr = prefix.split('/')
-                    n = len(pr)
-                    if len(p) > n and p[:n] == pr and len(p[n]) == 1:
-                        p[:n + 1] = [ p[n] + ':' ]
-                    elif len(p) > 1:
-                        if p[1] != '':
-                            p[0] = self.getString('cygwin_root')
-                s = '\\'.join(p)
-        return s
-
     def __init__(self):
         self.bool_prefs = {}
         self.int_prefs = {}
@@ -611,6 +621,22 @@ class Preferences:
             git_bin = 'git'
             svk_bin = 'svk'
 
+        # self.template describes how preference dialogue layout
+        #
+        # this will be traversed later to build the preferences dialogue and
+        # discover which preferences exist
+        #
+        # folders are described using:
+        #    [ 'FolderSet', label1, template1, label2, template2, ... ]
+        # lists are described using:
+        #    [ 'List', template1, template2, template3, ... ]
+        # individual preferences are described using one of the following
+        # depending upon its type and the desired widget:
+        #    [ 'Boolean', name, default, label ]
+        #    [ 'Integer', name, default, label ]
+        #    [ 'String', name, default, label ]
+        #    [ 'File', name, default, label ]
+        #    [ 'Font', name, default, label ]
         self.template = [ 'FolderSet',
             _('Display'),
             [ 'List',
@@ -700,6 +726,9 @@ class Preferences:
             except IOError:
                 print _('Error reading %s.') % (repr(self.path), )
 
+    # recursively traverses 'template' to discover the preferences and
+    # initialise their default values in self.bool_prefs, self.int_prefs, and
+    # self.string_prefs
     def _initFromTemplate(self, template):
         if template[0] == 'FolderSet' or template[0] == 'List':
             i = 1
@@ -715,6 +744,8 @@ class Preferences:
         elif template[0] in [ 'String', 'File', 'Font' ]:
             self.string_prefs[template[1]] = template[2]
 
+    # display the dialogue and update the preference values if the accept
+    # button was pressed
     def runDialog(self, parent):
         dialog = gtk.Dialog(_('Preferences'), parent, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_OK))
 
@@ -753,6 +784,9 @@ class Preferences:
         dialog.destroy()
         return accept
 
+    # recursively traverses 'template' to build the preferences dialogue
+    # and the individual preference widgets into 'widgets' so their value
+    # can be easily queried by the caller
     def _buildPrefsDialog(self, parent, widgets, template):
         type = template[0]
         if type == 'FolderSet':
@@ -814,6 +848,7 @@ class Preferences:
                 table.show()
             return table
 
+    # get/set methods to manipulate the preference values
     def getBool(self, name):
         return self.bool_prefs[name]
 
@@ -857,89 +892,31 @@ class Preferences:
             result.append(s)
         return result, None
 
-    def safeLocalPath(self, s, cygwin_pref):
-        s = os.path.join(os.path.curdir, os.path.basename(s))
-        if isWindows():
-            if self.getBool(cygwin_pref):
-                s = s.replace('\\', '/')
+    # cygwin and native applications can be used on windows, use this method
+    # to convert a path to the usual form expected on sys.platform
+    def convertToNativePath(self, s):
+        if isWindows() or isCygwin():
+            prefix = self.getString('cygwin_cygdrive_prefix')
+            prefix = ''.join([ '/' + p for p in prefix.split('/') if p != '' ])
+            if isCygwin():
+                # convert to a cygwin style path
+                p = s.replace('\\', '/').split('/')
+                if p[0].endswith(':'):
+                    p[0] = prefix + '/' + p[0][:-1]
+                s = '/'.join(p)
             else:
-                s = s.replace('/', '\\')
+                # convert to a Windows native style path
+                p = s.replace('/', '\\').split('\\')
+                if p[0] == '':
+                    pr = prefix.split('/')
+                    n = len(pr)
+                    if len(p) > n and p[:n] == pr and len(p[n]) == 1:
+                        p[:n + 1] = [ p[n] + ':' ]
+                    elif len(p) > 1:
+                        if p[1] != '':
+                            p[0] = self.getString('cygwin_root')
+                s = '\\'.join(p)
         return s
-
-def cutBlocks(i, blocks):
-    pre, post, nlines = [], [], 0
-    for b in blocks:
-        if nlines >= i:
-            post.append(b)
-        elif nlines + b <= i:
-            pre.append(b)
-        else:
-            n = i - nlines
-            pre.append(n)
-            post.append(b - n)
-        nlines += b
-    return pre, post
-
-def mergeBlocks(leftblocks, rightblocks):
-    leftblocks, rightblocks, b = leftblocks[:], rightblocks[:], []
-    while len(leftblocks) > 0:
-        nleft, nright = leftblocks[0], rightblocks[0]
-        n = min(nleft, nright)
-        if n < nleft:
-            leftblocks[0] -= n
-        else:
-            del leftblocks[0]
-        if n < nright:
-            rightblocks[0] -= n
-        else:
-            del rightblocks[0]
-        b.append(n)
-    return b
-
-def mergeRanges(r1, r2):
-    r1, r2, result, start = r1[:], r2[:], [], 0
-    rs = [ r1, r2 ]
-    while len(r1) > 0 and len(r2) > 0:
-        flags, start = 0, min(r1[0][0], r2[0][0])
-        if start == r1[0][0]:
-            r1end = r1[0][1]
-            flags |= r1[0][2]
-        else:
-            r1end = r1[0][0]
-        if start == r2[0][0]:
-            r2end = r2[0][1]
-            flags |= r2[0][2]
-        else:
-            r2end = r2[0][0]
-        end = min(r1end, r2end)
-        result.append((start, end, flags))
-        for r in rs:
-            if start == r[0][0]:
-                if end == r[0][1]:
-                    del r[0]
-                else:
-                    r[0] = (end, r[0][1], r[0][2])
-    result.extend(r1)
-    result.extend(r2)
-    return result
-
-def removeNullLines(blocks, lines_set):
-    bi, bn, i = 0, 0, 0
-    while bi < len(blocks):
-        while i < bn + blocks[bi]:
-            for lines in lines_set:
-                if lines[i] is not None:
-                    i += 1
-                    break
-            else:
-                for lines in lines_set:
-                    del lines[i]
-                blocks[bi] -= 1
-        if blocks[bi] == 0:
-            del blocks[bi]
-        else:
-            bn += blocks[bi]
-            bi += 1
 
 # convenience method for creating a menu according to a template
 def createMenu(specs, accel_group=None):
@@ -1004,14 +981,6 @@ def appendButtons(box, size, specs):
             box.pack_start(separator, False, False, 5)
             separator.show()
 
-# convenience method to request confirmation before doing an operation that
-# will cause edits to be lost
-def confirmDiscardEdits(parent):
-    dialog = MessageDialog(parent, gtk.MESSAGE_QUESTION, _('Discard unsaved changes?'))
-    end = (dialog.run() == gtk.RESPONSE_OK)
-    dialog.destroy()
-    return end
-
 # True if the string ends with '\r\n'
 def has_dos_line_ending(s):
     return s is not None and len(s) > 1 and s[-2:] == '\r\n'
@@ -1027,6 +996,7 @@ def has_unix_line_ending(s):
 DOS_FORMAT = 1
 UNIX_FORMAT = 2
 
+# returns the format mask for a list of strings
 def getFormat(ss):
     flags = 0
     for s in ss:
@@ -1049,6 +1019,7 @@ def len_minus_line_ending(format, s):
             n -= 1
     return n
 
+# returns the string without the line ending characters
 def strip_line_ending(format, s):
     if s is not None:
         return s[:len_minus_line_ending(format, s)]
@@ -1079,6 +1050,17 @@ class FileSpec:
         self.vcs = vcs
         self.encoding = encoding
 
+# helper function prevent files from being confused with command line options
+# by prepending './' to the basename
+def safeLocalPath(s, prefs, cygwin_pref):
+    s = os.path.join(os.path.curdir, os.path.basename(s))
+    if isWindows():
+        if prefs.getBool(cygwin_pref):
+            s = s.replace('\\', '/')
+        else:
+            s = s.replace('/', '\\')
+    return s
+
 class VCSs:
     # Bazaar support
     class Bzr:
@@ -1090,7 +1072,7 @@ class VCSs:
             return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return 'bzr_bash', [ prefs.getString('bzr_bin'), 'cat', '-r', rev, prefs.safeLocalPath(name, 'bzr_cygwin') ]
+            return 'bzr_bash', [ prefs.getString('bzr_bin'), 'cat', '-r', rev, safeLocalPath(name, prefs, 'bzr_cygwin') ]
 
     # CVS support
     class Cvs:
@@ -1098,7 +1080,7 @@ class VCSs:
             return [ (name, prefs.getString('cvs_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return 'cvs_bash', [ prefs.getString('cvs_bin'), '-Q', 'update', '-p', '-r', rev, prefs.safeLocalPath(name, 'cvs_cygwin') ]
+            return 'cvs_bash', [ prefs.getString('cvs_bin'), '-Q', 'update', '-p', '-r', rev, safeLocalPath(name, prefs, 'cvs_cygwin') ]
 
     # Darcs support
     class Darcs:
@@ -1110,7 +1092,7 @@ class VCSs:
             return [ (name, prefs.getString('darcs_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return 'darcs_bash', [ prefs.getString('darcs_bin'), 'show', 'contents', '-p', rev, prefs.safeLocalPath(name, 'darcs_cygwin') ]
+            return 'darcs_bash', [ prefs.getString('darcs_bin'), 'show', 'contents', '-p', rev, safeLocalPath(name, prefs, 'darcs_cygwin') ]
 
     # Git support
     class Git:
@@ -1140,7 +1122,7 @@ class VCSs:
             return [ (name, prefs.getString('hg_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return 'hg_bash', [ prefs.getString('hg_bin'), 'cat', '-r', rev, prefs.safeLocalPath(name, 'hg_cygwin') ]
+            return 'hg_bash', [ prefs.getString('hg_bin'), 'cat', '-r', rev, safeLocalPath(name, prefs, 'hg_cygwin') ]
 
     # Monotone support
     class Mtn:
@@ -1152,7 +1134,7 @@ class VCSs:
             return [ (name, prefs.getString('mtn_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return 'mtn_bash', [ prefs.getString('mtn_bin'), 'cat', '--quiet', '-r', rev, prefs.safeLocalPath(name, 'mtn_cygwin') ]
+            return 'mtn_bash', [ prefs.getString('mtn_bin'), 'cat', '--quiet', '-r', rev, safeLocalPath(name, prefs, 'mtn_cygwin') ]
 
     # Subversion support
     class Svn:
@@ -1172,7 +1154,7 @@ class VCSs:
             return [ (name, prefs.getString('svn_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return 'svn_bash', [ prefs.getString('svn_bin'), 'cat', '-r', rev, prefs.safeLocalPath(name, 'svn_cygwin') ]
+            return 'svn_bash', [ prefs.getString('svn_bin'), 'cat', '-r', rev, safeLocalPath(name, prefs, 'svn_cygwin') ]
 
     # SVK support
     def isSvkManaged(self, name):
@@ -1236,7 +1218,7 @@ class VCSs:
             return [ (name, prefs.getString('svk_default_revision')), (name, None) ]
 
         def getRevisionCommand(self, prefs, name, rev):
-            return 'svk_bash', [ prefs.getString('svk_bin'), 'cat', '-r', rev, prefs.safeLocalPath(name, 'svk_cygwin') ]
+            return 'svk_bash', [ prefs.getString('svk_bin'), 'cat', '-r', rev, safeLocalPath(name, prefs, 'svk_cygwin') ]
 
     def __init__(self):
         if os.environ.has_key('SVKROOT'):
@@ -1247,6 +1229,7 @@ class VCSs:
         self.leaf_dir_repos = [('.svn', VCSs.Svn), ('CVS', VCSs.Cvs)]
         self.common_dir_repos = [('.git', VCSs.Git), ('.hg', VCSs.Hg), ('.bzr', VCSs.Bzr), ('_darcs', VCSs.Darcs), ('_MTN', VCSs.Mtn)]
 
+    # determines which VCS to use for the named file
     def findByFilename(self, name):
         for dir_name, repo in self.leaf_dir_repos:
             if os.path.isdir(os.path.join(os.path.dirname(name), dir_name)):
@@ -1265,7 +1248,8 @@ class VCSs:
 
 theVCSs = VCSs()
 
-# custom dialogue for picking files
+# custom dialogue for picking files with widgets for specifying the encoding
+# and revision
 class FileChooserDialog(gtk.FileChooserDialog):
     def __init__(self, title, parent, prefs, action, accept):
         gtk.FileChooserDialog.__init__(self, title, parent, action, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, accept, gtk.RESPONSE_OK))
@@ -1359,6 +1343,7 @@ class ScrolledWindow(gtk.Table):
     def get_hadjustment(self):
         return self.hbar.get_adjustment()
 
+    # updates the adjustments to match the new widget size
     def configure_cb(self, widget, event):
         w, h = event.width, event.height
 
@@ -1376,6 +1361,7 @@ class ScrolledWindow(gtk.Table):
         adj.page_size = h
         adj.page_increment = h
 
+    # update the vertical adjustment when the mouse's scroll wheel is used
     def scroll_cb(self, widget, event):
         vadj = self.get_vadjustment()
         v = vadj.get_value()
@@ -1392,6 +1378,8 @@ class ScrolledWindow(gtk.Table):
         pos_y = int(self.get_vadjustment().get_value())
         self.position = (pos_x, pos_y)
         if self.darea.window is not None:
+            # window.scroll() although visually nice, is slow, revert to
+            # queue_draw() if scroll a lot without seeing an expose event
             if self.scroll_count < 2:
                 self.scroll_count += 1
                 self.darea.window.scroll(old_x - pos_x, old_y - pos_y)
@@ -1433,6 +1421,7 @@ def url_hook(dialog, link, userdata):
 
 gtk.about_dialog_set_url_hook(url_hook, None)
 
+# the about dialogue
 class AboutDialog(gtk.AboutDialog):
     def __init__(self):
         gtk.AboutDialog.__init__(self)
@@ -1456,11 +1445,108 @@ You should have received a copy of the GNU General Public License along with thi
         self.set_license(''.join(ss))
         self.set_wrap_license(True)
 
+# Enforcing manual alignment is accomplished by dividing the lines of text into
+# sections that are matched independently.  'blocks' is an array of integers
+# describing how many lines (including null lines for spacing) that are in each
+# section starting from the begining of the files.  When no manual alignment
+# has been specified, all lines are in the same section so 'blocks' should
+# contain a single entry equal to the number of lines.  Zeros are not allowed
+# in this array so 'blocks' will be an empty array when there are no lines.  A
+# 'cut' at location 'i' means a line 'i-1' and line 'i' belong to different
+# sections
+
+# returns the two sets of blocks after cutting at 'i'
+def cutBlocks(i, blocks):
+    pre, post, nlines = [], [], 0
+    for b in blocks:
+        if nlines >= i:
+            post.append(b)
+        elif nlines + b <= i:
+            pre.append(b)
+        else:
+            n = i - nlines
+            pre.append(n)
+            post.append(b - n)
+        nlines += b
+    return pre, post
+
+# returns a set of blocks containing all of the cuts in the inputs
+def mergeBlocks(leftblocks, rightblocks):
+    leftblocks, rightblocks, b = leftblocks[:], rightblocks[:], []
+    while len(leftblocks) > 0:
+        nleft, nright = leftblocks[0], rightblocks[0]
+        n = min(nleft, nright)
+        if n < nleft:
+            leftblocks[0] -= n
+        else:
+            del leftblocks[0]
+        if n < nright:
+            rightblocks[0] -= n
+        else:
+            del rightblocks[0]
+        b.append(n)
+    return b
+
+def mergeRanges(r1, r2):
+    r1, r2, result, start = r1[:], r2[:], [], 0
+    rs = [ r1, r2 ]
+    while len(r1) > 0 and len(r2) > 0:
+        flags, start = 0, min(r1[0][0], r2[0][0])
+        if start == r1[0][0]:
+            r1end = r1[0][1]
+            flags |= r1[0][2]
+        else:
+            r1end = r1[0][0]
+        if start == r2[0][0]:
+            r2end = r2[0][1]
+            flags |= r2[0][2]
+        else:
+            r2end = r2[0][0]
+        end = min(r1end, r2end)
+        result.append((start, end, flags))
+        for r in rs:
+            if start == r[0][0]:
+                if end == r[0][1]:
+                    del r[0]
+                else:
+                    r[0] = (end, r[0][1], r[0][2])
+    result.extend(r1)
+    result.extend(r2)
+    return result
+
+# eliminates lines that are spacing lines in all panes
+def removeNullLines(blocks, lines_set):
+    bi, bn, i = 0, 0, 0
+    while bi < len(blocks):
+        while i < bn + blocks[bi]:
+            for lines in lines_set:
+                if lines[i] is not None:
+                    i += 1
+                    break
+            else:
+                for lines in lines_set:
+                    del lines[i]
+                blocks[bi] -= 1
+        if blocks[bi] == 0:
+            del blocks[bi]
+        else:
+            bn += blocks[bi]
+            bi += 1
+
+# convenience method to request confirmation before doing an operation that
+# will cause edits to be lost
+def confirmDiscardEdits(parent):
+    dialog = MessageDialog(parent, gtk.MESSAGE_QUESTION, _('Discard unsaved changes?'))
+    end = (dialog.run() == gtk.RESPONSE_OK)
+    dialog.destroy()
+    return end
+
 def nullToEmpty(s):
     if s is None:
         s = ''
     return s
 
+# returns true if the string only contains whitespace characters
 def isBlank(s):
     for c in string.whitespace:
         s = s.replace(c, '')
