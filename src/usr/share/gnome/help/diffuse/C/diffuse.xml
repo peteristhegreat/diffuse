@@ -9,7 +9,7 @@
 
   <bookinfo>
     <copyright>
-      <year>2008</year>
+      <year>2009</year>
       <holder>Derrick Moser</holder>
     </copyright>
 
@@ -41,7 +41,7 @@
       <para>
         &app; was written by Derrick Moser.
       </para>
-      <para>&copy; 2006-2008 Derrick Moser.  All Rights Reserved.</para>
+      <para>&copy; 2006-2009 Derrick Moser.  All Rights Reserved.</para>
     </sect1>
 
     <sect1 id="introduction-licence">
@@ -580,6 +580,20 @@
             <term><userinput>go_to_line</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Go To Line...</guimenuitem></menuchoice> menu item</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>decrease_indenting</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Decrease Indenting</guimenuitem></menuchoice> menu item</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>increase_indenting</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Increase Indenting</guimenuitem></menuchoice> menu item</para>
             </listitem>
           </varlistentry>
 

@@ -123,6 +123,7 @@ else:
 # colour resources
 class Colour:
     def __init__(self, r, g, b, a=1.0):
+        # the individual colour components as floats in the range [0, 1]
         self.red = r
         self.green = g
         self.blue = b
@@ -148,8 +149,14 @@ class SyntaxParser:
     # create a new state machine that begins in initial_state and classifies
     # all characters not matched by the patterns as default_token_type
     def __init__(self, initial_state, default_token_type):
+        # initial state for the state machine when parsing a new file
         self.initial_state = initial_state
+        # default classification of characters that are not explicitly matched
+        # by any state transition patterns
         self.default_token_type = default_token_type
+        # mappings from a state to a list of (pattern, token_type, next_state)
+        # tuples indicating the new state for the state machine when 'pattern'
+        # is matched and how to classify the matched characters
         self.transitions_lookup = { initial_state : [] }
 
     # Adds a new edge to the finite state machine from prev_state to
@@ -192,7 +199,7 @@ class SyntaxParser:
 # default behaviour.
 class Resources:
     def __init__(self):
-        # initialise defaults
+        # default keybindings
         self.keybindings = {}
         self.keybindings_lookup = {}
         set_binding = self.setKeyBinding
@@ -213,6 +220,8 @@ class Resources:
         set_binding('menu', 'find_next', 'Ctrl+g')
         set_binding('menu', 'find_previous', 'Shift+Ctrl+G')
         set_binding('menu', 'go_to_line', 'Shift+Ctrl+l')
+        set_binding('menu', 'decrease_indenting', 'Shift+Ctrl+less')
+        set_binding('menu', 'increase_indenting', 'Shift+Ctrl+greater')
         set_binding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
         set_binding('menu', 'convert_to_unix', 'Ctrl+e')
         set_binding('menu', 'previous_tab', 'Ctrl+Page_Up')
@@ -264,6 +273,7 @@ class Resources:
         set_binding('align_mode', 'align', 'space')
         set_binding('character_mode', 'enter_line_mode', 'Escape')
 
+        # default colours
         self.colours = {
             'align' : Colour(1.0, 1.0, 0.0),
             'char_selection' : Colour(0.7, 0.7, 1.0),
@@ -279,7 +289,10 @@ class Resources:
             'modified' : Colour(0.5, 1.0, 0.5),
             'text' : Colour(0.0, 0.0, 0.0),
             'text_background' : Colour(1.0, 1.0, 1.0) }
+        # list of unknown colour resources we have already issued warnings for
         self.unknown_colours = {}
+
+        # default floats
         self.floats = {
            'align_alpha' : 1.0,
            'char_difference_alpha' : 0.4,
@@ -287,8 +300,10 @@ class Resources:
            'line_difference_alpha' : 0.3,
            'line_selection_alpha' : 0.4,
            'modified_alpha' : 0.4 }
+        # list of unknown float resources we have already issued warnings for
         self.unknown_floats = {}
 
+        # handle platform specific icon and help system
         help_browser = None
         if isWindows():
             iconpath = os.path.join(bin_dir, 'diffuse.ico')
@@ -319,6 +334,7 @@ class Resources:
                             d = path
             help_file = os.path.join(d, 'diffuse.xml')
 
+        # default strings
         self.strings = {
            'help_browser': '',
            'help_file': '',
@@ -329,14 +345,21 @@ class Resources:
         if help_browser is not None and help_file is not None and os.path.isfile(help_file):
            self.strings['help_browser'] = help_browser
            self.strings['help_file'] = help_file
+        # list of unknown string resources we have already issued warnings for
         self.unknown_strings = {}
+
         self.default_colour = Colour(0.0, 0.0, 0.0)
         self.char_classes = {}
+
+        # syntax highlighting support
         self.syntaxes = {}
         self.syntax_file_patterns = {}
         self.current_syntax = None
 
+        # list of imported resources files (we only import each file once)
         self.resource_files = {}
+
+        # special string resources
         self.setDifferenceColours('difference_1 difference_2 difference_3')
         self.setCharacterClasses('48-57:48 65-90:48 97-122:48 95:48 9:32')
 
@@ -1045,9 +1068,13 @@ def convert_to_format(s, format):
 # contains information about a file
 class FileSpec:
     def __init__(self, name=None, revision=None, vcs=None, encoding=None):
+        # file name
         self.name = name
+        # revision used to retrieve file from the VCS
         self.revision = revision
+        # the VCS object
         self.vcs = vcs
+        # name of codec used to translate the file contents to unicode text
         self.encoding = encoding
 
 # helper function prevent files from being confused with command line options
@@ -1158,6 +1185,8 @@ class VCSs:
 
     # SVK support
     def isSvkManaged(self, name):
+        # parse the ~/.svk/config file to discover which directories are part
+        # of SVK repositories
         if isWindows():
             name = name.upper()
         if os.path.isfile(self.svkconfig):
@@ -1221,6 +1250,7 @@ class VCSs:
             return 'svk_bash', [ prefs.getString('svk_bin'), 'cat', '-r', rev, safeLocalPath(name, prefs, 'svk_cygwin') ]
 
     def __init__(self):
+        # initialise the VCS objects
         if os.environ.has_key('SVKROOT'):
             svkroot = os.environ['SVKROOT']
         else:
@@ -1487,6 +1517,14 @@ def mergeBlocks(leftblocks, rightblocks):
         b.append(n)
     return b
 
+# utility method to simplify working with structures used to describe character
+# differences of a line
+#
+# ranges of character differences are indicated by (start, end, flags) tuples
+# where 'flags' is a mask used to indicate if the characters are different from
+# the line to the left, right, or both
+#
+# this method will return the union of two sorted lists of ranges
 def mergeRanges(r1, r2):
     r1, r2, result, start = r1[:], r2[:], [], 0
     rs = [ r1, r2 ]
@@ -1556,6 +1594,8 @@ def isBlank(s):
 def pixels(size):
     return int(size / pango.SCALE + 0.5)
 
+# the file diff viewer is always in one of these modes defining the cursor,
+# and hotkey behaviour
 LINE_MODE = 0
 CHAR_MODE = 1
 ALIGN_MODE = 2
@@ -1565,17 +1605,36 @@ class FileDiffViewer(gtk.Table):
     # class describing a text pane
     class Pane:
         def __init__(self):
+            # list of lines displayed in this pane (including spacing lines)
             self.lines = []
+            # file's name and information about how to retrieve it from a VCS
             self.spec = FileSpec()
+            # label for the pane (filename and revision information)
             self.label = ''
+            # high water mark for line length in pango units (used to determine
+            # the required horizontal scroll range)
             self.line_lengths = 0
+            # highest line number
             self.max_line_number = 0
+            # cache of syntax highlighting information for each line
+            # self.syntax_cache[i] corresponds to self.lines[i]
+            # the list is truncated when a change to a line invalidates a
+            # portion of the cache
             self.syntax_cache = []
+            # cache of character differences for each line
+            # self.diff_cache[i] corresponds to self.lines[i]
+            # portion of the cache are cleared by setting entries to None
             self.diff_cache = []
+            # mask indicating the type of line endings present
             self.format = 0
+            # 'stat' for files read from disk -- used to warn about changes to
+            # the file on disk before saving
             self.stat = None
+            # most recent 'stat' for files read from disk -- used on focus
+            # change to warn about changes to file on disk
             self.last_stat = None
 
+        # returns True if any line contains modifications
         def hasEdits(self):
             for line in self.lines:
                 if line is not None and line.is_modified:
@@ -1585,12 +1644,19 @@ class FileDiffViewer(gtk.Table):
     # class describing a single line of a pane
     class Line:
         def __init__(self, line_number = None, text = None):
+            # line number
             self.line_number = line_number
+            # original text for the line
             self.text = text
+            # flag indicating modifications are present
             self.is_modified = False
+            # actual modified text
             self.modified_text = None
+            # cache used to speed up comparison of strings
+            # this should be cleared whenever the comparison preferences change
             self.compare_string = None
 
+        # returns the current text for this line
         def getText(self):
             if self.is_modified:
                 return self.modified_text
@@ -1740,6 +1806,7 @@ class FileDiffViewer(gtk.Table):
         # scroll to first difference when realised
         darea.connect_after('realize', self._realise_cb)
 
+    # updates the display font and resizes viewports as necessary
     def setFont(self, font):
         self.font = font
         metrics = self.get_pango_context().get_metrics(self.font)
@@ -1748,6 +1815,8 @@ class FileDiffViewer(gtk.Table):
         self.updateSize(True)
         self.map.queue_draw()
 
+    # returns the 'column width' for a string -- used to help position
+    # characters when tabs and other special characters are present
     def getStringColumnWidth(self, f, s):
         if self.prefs.getBool('display_hide_endofline'):
             s = strip_line_ending(self.panes[f].format, s)
@@ -1775,6 +1844,7 @@ class FileDiffViewer(gtk.Table):
                 col += 1
         return col
 
+    # returns the 'column width' for a single character created at column 'i'
     def characterWidth(self, i, c):
         v = ord(c)
         if v < 32:
@@ -1794,6 +1864,8 @@ class FileDiffViewer(gtk.Table):
             return 2
         return 1
 
+    # returns the 'column width' of a string taking into account the optional
+    # display of EOL characters 
     def stringWidth(self, f, s):
         if self.prefs.getBool('display_hide_endofline'):
             s = strip_line_ending(self.panes[f].format, s)
@@ -1802,6 +1874,8 @@ class FileDiffViewer(gtk.Table):
             w += width(w, c)
         return w
 
+    # translates a string into an array of the printable representation for
+    # each character
     def expand(self, f, s):
         if self.prefs.getBool('display_hide_endofline'):
             s = strip_line_ending(self.panes[f].format, s)
@@ -1821,6 +1895,7 @@ class FileDiffViewer(gtk.Table):
             col += self.characterWidth(col, c)
         return result
 
+    # changes the viewer's mode to LINE_MODE
     def setLineMode(self):
         if self.mode == CHAR_MODE:
             self.dareas[self.current_pane].queue_draw()
@@ -1834,6 +1909,7 @@ class FileDiffViewer(gtk.Table):
         self.mode = LINE_MODE
         self.updatePrompt()
 
+    # changes the viewer's mode to CHAR_MODE
     def setCharMode(self):
         if self.mode == LINE_MODE:
             self.cursor_column = -1
@@ -1847,66 +1923,98 @@ class FileDiffViewer(gtk.Table):
         self.mode = CHAR_MODE
         self.updatePrompt()
 
+    # sets the syntax hightlighting rules
     def setSyntax(self, syntax):
         if self.syntax is not syntax:
             self.syntax = syntax
+            # invalidate the syntax caches
             for pane in self.panes:
                 pane.syntax_cache = []
+            # force all panes to redraw
             for darea in self.dareas:
                 darea.queue_draw()
 
+    # returns True if any pane contains edits
     def hasEdits(self):
         for pane in self.panes:
             if pane.hasEdits():
                 return True
         return False
 
+    # sets the status bar text
     def setStatus(self, text):
         self.statusbar.pop(self.status_context)
         self.statusbar.push(self.status_context, text)
 
+    # Changes to the diff viewer's state is recorded so they can be later
+    # undone.  The recorded changes are organised into blocks that correspond
+    # to high level action initiated by the user.  For example, pasting some
+    # text may modify some lines and cause insertion of spacing lines to keep
+    # proper alignment with the rest of the panes.  An undo operation initiated
+    # by the user should undo all of these changes in a single step.
+    # openUndoBlock() should be called when the action from a user, like a
+    # mouse button press, menu item, etc. may cause change to the diff viewer's
+    # state
     def openUndoBlock(self):
         self.undoblock = []
 
+    # all changes to the diff viewer's state should create an Undo object and
+    # add it to the current undo block using this method
+    # this method does not need to be called when the state change is a result
+    # of an undo/redo operation (self.undoblock is None in these cases)
     def addUndo(self, u):
         self.undoblock.append(u)
 
+    # all openUndoBlock() calls should also have a matching closeUndoBlock()
+    # this method collects all Undos created since the openUndoBlock() call
+    # and pushes them onto the undo stack as a single unit
     def closeUndoBlock(self):
         if len(self.undoblock) > 0:
             self.redos = []
             self.undos.append(self.undoblock)
         self.undoblock = None
 
+    # undo the last block of changes on the undo stack
     def undo(self):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             if len(self.undos) > 0:
+                # move the block to the redo stack
                 block = self.undos.pop()
                 self.redos.append(block)
+                # undo all changes in the block in reverse order
                 for u in block[::-1]:
                     u.undo(self)
 
+    # re-apply the block of changes on the redo stack
     def redo(self):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             if len(self.redos) > 0:
+                # move the block to the undo stack
                 block = self.redos.pop()
                 self.undos.append(block)
+                # re-apply all changes in the block
                 for u in block:
                     u.redo(self)
 
-    def getNumLineNumberDigits(self):
+    # returns the width of the viewport's line number column in pango units
+    def getLineNumberWidth(self):
+        # find the maximum number of digits for a line number from all panes
         n = 0
         for pane in self.panes:
             n = max(n, len(str(pane.max_line_number)))
-        return n
+        # pad the total width by the width of a digit on either side
+        return (n + 2) * self.digit_width
 
-    def getLineNumberWidth(self):
-        return (self.getNumLineNumberDigits() + 2) * self.digit_width
-
+    # returns the width of a string in pango units
     def getTextWidth(self, text):
         layout = self.create_pango_layout(text)
         layout.set_font_description(self.font)
         return layout.get_size()[0]
 
+    # updates the size of the viewport
+    # set 'compute_width' to False if the high water mark for line length can
+    # be used to determine the required width for the viewport, use True for
+    # this value otherwise
     def updateSize(self, compute_width, f=None):
         if compute_width:
             if f is None:
@@ -1916,6 +2024,7 @@ class FileDiffViewer(gtk.Table):
             for f, pane in enumerate(panes):
                 del pane.syntax_cache[:]
                 del pane.diff_cache[:]
+                # re-compute the high water mark
                 pane.line_lengths = 0
                 for line in pane.lines:
                     if line is not None:
@@ -1926,29 +2035,36 @@ class FileDiffViewer(gtk.Table):
                         for s in text:
                             if s is not None:
                                 pane.line_lengths = max(pane.line_lengths, self.digit_width * self.getStringColumnWidth(f, s))
+        # compute the maximum extents
         num_lines, line_lengths = 0, 0
         for pane in self.panes:
             num_lines = max(num_lines, len(pane.lines))
             line_lengths = max(line_lengths, pane.line_lengths)
+        # the cursor can move one line past the last line of text, add it so we
+        # can scroll to see this line
         num_lines += 1
         width = self.getLineNumberWidth() + self.digit_width + line_lengths
         width = pixels(width)
         height = self.font_height * num_lines
+        # update the adjustments
         self.hadj.upper = width
         self.hadj.step_increment = self.font_height
         self.vadj.upper = height
         self.vadj.step_increment = self.font_height
 
+    # returns a line from the specified pane and offset
     def getLine(self, f, i):
         lines = self.panes[f].lines
         if i < len(lines):
             return lines[i]
 
+    # returns the text for the specified line
     def getLineText(self, f, i):
         line = self.getLine(f, i)
         if line is not None:
             return line.getText()
 
+    # Undo for changes to the cached line ending style
     class SetFormatUndo:
         def __init__(self, f, format, old_format):
             self.data = (f, format, old_format)
@@ -1961,12 +2077,14 @@ class FileDiffViewer(gtk.Table):
             f, format, old_format = self.data
             viewer.setFormat(f, format)
 
+    # sets the cached line ending style
     def setFormat(self, f, format):
         pane = self.panes[f]
         if self.undoblock is not None:
             self.addUndo(FileDiffViewer.SetFormatUndo(f, format, pane.format))
         pane.format = format
 
+    # Undo for the creation of Line objects
     class InstanceLineUndo:
         def __init__(self, f, i, reverse):
             self.data = (f, i, reverse)
@@ -1979,6 +2097,8 @@ class FileDiffViewer(gtk.Table):
             f, i, reverse = self.data
             viewer.instanceLine(f, i, reverse)
 
+    # creates an instance of a Line object for the specified pane and offset
+    # deletes an instance when 'reverse' is set to True
     def instanceLine(self, f, i, reverse=False):
         if self.undoblock is not None:
             self.addUndo(FileDiffViewer.InstanceLineUndo(f, i, reverse))
@@ -1989,6 +2109,7 @@ class FileDiffViewer(gtk.Table):
             line = FileDiffViewer.Line()
             pane.lines[i] = line
 
+    # Undo for changing the text for a Line object
     class UpdateLineTextUndo:
         def __init__(self, f, i, old_is_modified, old_text, is_modified, text):
             self.data = (f, i, old_is_modified, old_text, is_modified, text)
@@ -2379,18 +2500,15 @@ class FileDiffViewer(gtk.Table):
         self.recordEditMode()
         f = self.current_pane
         pane = self.panes[f]
-        line0 = self.selection_line
-        line1 = self.current_line
+        line0, line1 = self.selection_line, self.current_line
         if self.mode == LINE_MODE:
-            col0 = 0
-            col1 = 0
+            col0, col1 = 0, 0
             if line1 < line0:
                 line0, line1 = line1, line0
             if line1 < len(pane.lines):
                 line1 += 1
         else:
-            col0 = self.selection_char
-            col1 = self.current_char
+            col0, col1 = self.selection_char, self.current_char
             if line1 < line0 or (line1 == line0 and col1 < col0):
                 line0, col0, line1, col1 = line1, col1, line0, col0
         # update text
@@ -2437,7 +2555,7 @@ class FileDiffViewer(gtk.Table):
             self.selection_line = line0
             self.setCurrentLine(f, line0 + max(n_need, n_have) - 1, True)
         else:
-            self.setCurrentChar(cur_line, lastcol, False)
+            self.setCurrentChar(cur_line, lastcol)
         self.recordEditMode()
 
     def align(self, f, line1, line2):
@@ -2630,17 +2748,14 @@ class FileDiffViewer(gtk.Table):
 
     def getSelectedText(self):
         f = self.current_pane
-        start = self.selection_line
-        end = self.current_line
+        start, end = self.selection_line, self.current_line
         if self.mode == LINE_MODE:
             if end < start:
                 start, end = end, start
             end += 1
-            col0 = 0
-            col1 = 0
+            col0, col1 = 0, 0
         else:
-            col0 = self.selection_char
-            col1 = self.current_char
+            col0, col1 = self.selection_char, self.current_char
             if end < start or (end == start and col1 < col0):
                 start, col0, end, col1 = end, col1, start, col0
             if col1 > 0:
@@ -2717,12 +2832,12 @@ class FileDiffViewer(gtk.Table):
                                 k -= 1
                             while j < n and theResources.getCharacterClass(text[j]) == c:
                                 j += 1
-                            self.setCurrentChar(i, k, False)
+                            self.setCurrentChar(i, k)
                             self.setCurrentChar(i, j, True)
             elif event.type == gtk.gdk._3BUTTON_PRESS:
                 if self.mode == CHAR_MODE and self.current_pane == f:
                     i2 = min(i + 1, nlines)
-                    self.setCurrentChar(i, 0, False)
+                    self.setCurrentChar(i, 0)
                     self.setCurrentChar(i2, 0, True)
             else:
                 is_shifted = event.state & gtk.gdk.SHIFT_MASK
@@ -2974,8 +3089,7 @@ class FileDiffViewer(gtk.Table):
                 elif self.mode == LINE_MODE:
                     # draw line selection
                     if self.current_pane == f:
-                        start = self.selection_line
-                        end = self.current_line
+                        start, end = self.selection_line, self.current_line
                         if end < start:
                             start, end = end, start
                         if i >= start and i <= end:
@@ -2986,10 +3100,8 @@ class FileDiffViewer(gtk.Table):
                 elif self.mode == CHAR_MODE:
                     # draw char selection
                     if self.current_pane == f and text is not None:
-                        start = self.selection_line
-                        start_char = self.selection_char
-                        end = self.current_line
-                        end_char = self.current_char
+                        start, end = self.selection_line, self.current_line
+                        start_char, end_char = self.selection_char, self.current_char
                         if end < start or (end == start and end_char < start_char):
                             start, start_char, end, end_char = end, end_char, start, start_char
                         if start <= i and end >= i:
@@ -3763,6 +3875,54 @@ class FileDiffViewer(gtk.Table):
                 m.run()
                 m.destroy()
 
+    # adjust indenting of the selected lines by 'offset' soft tabs
+    def _adjust_indenting(self, offset):
+        if self.mode == LINE_MODE or self.mode == CHAR_MODE:
+            # find range of lines to operate upon
+            f = self.current_pane
+            start, end = self.selection_line, self.current_line
+            if end < start:
+                start, end = end, start
+            end += 1
+
+            self.openUndoBlock()
+            self.recordEditMode()
+            for i in range(start, end):
+                text = self.getLineText(f, i)
+                if text is not None and len(strip_line_ending(self.panes[f].format, text)) > 0:
+                    # count spacing before the first non-whitespace character
+                    j, ws = 0, 0
+                    while j < len(text) and text[j] in ' \t':
+                        ws += self.characterWidth(ws, text[j])
+                        j += 1
+                    # adjust by a multiple of the soft tab width
+                    width = self.prefs.getInt('editor_soft_tab_width')
+                    soft_tabs = ws // width + offset
+                    if soft_tabs >= 0:
+                        ws = soft_tabs * width + ws % width
+                        if self.prefs.getBool('editor_expand_tabs'):
+                            s = u' ' * ws
+                        else:
+                            tab_width = self.prefs.getInt('display_tab_width')
+                            s = u'\t' * (ws // tab_width)
+                            s += u' ' * (ws % tab_width)
+                    else:
+                        s = u''
+                    self.updateText(f, i, s + text[j:])
+            if self.mode == CHAR_MODE:
+                # ensure the cursor position is valid
+                i = self.current_line
+                self.setCurrentChar(self.selection_line, 0)
+                self.setCurrentChar(i, 0, True)
+            self.recordEditMode()
+            self.closeUndoBlock()
+
+    def decrease_indenting_cb(self, widget, data):
+        self._adjust_indenting(-1)
+
+    def increase_indenting_cb(self, widget, data):
+        self._adjust_indenting(1)
+
     def convert_to_dos_cb(self, widget, data):
         self.setLineMode()
         self.openUndoBlock()
@@ -3857,8 +4017,7 @@ class FileDiffViewer(gtk.Table):
         self.openUndoBlock()
         self.recordEditMode()
         f = self.current_pane
-        start = self.selection_line
-        end = self.current_line
+        start, end = self.selection_line, self.current_line
         if end < start:
             start, end = end, start
         end = min(end + 1, len(self.panes[0].lines))
@@ -3874,8 +4033,7 @@ class FileDiffViewer(gtk.Table):
     def merge_lines(self, f_dst, f_src):
         self.setLineMode()
         pane = self.panes[f_dst]
-        start = self.selection_line
-        end = self.current_line
+        start, end = self.selection_line, self.current_line
         if end < start:
             start, end = end, start
         end = min(end + 1, len(pane.lines))
@@ -3919,8 +4077,7 @@ class FileDiffViewer(gtk.Table):
     def _isolate(self):
         self.setLineMode()
         f = self.current_pane
-        start = self.selection_line
-        end = self.current_line
+        start, end = self.selection_line, self.current_line
         if end < start:
             start, end = end, start
         end += 1
@@ -4181,6 +4338,9 @@ class Diffuse(gtk.Window):
                      [_('Find Pre_vious'), self.find_previous_cb, None, None, 'find_previous'],
                      [_('Go To _Line...'), self.go_to_line_cb, None, None, 'go_to_line'],
                      [],
+                     [_('Decrea_se Indenting'), self.decrease_indenting_cb, None, None, 'decrease_indenting'],
+                     [_('_Increase Indenting'), self.increase_indenting_cb, None, gtk.STOCK_INDENT, 'increase_indenting'],
+                     [],
                      [_('Convert to _DOS Format'), self.convert_to_dos_cb, None, None, 'convert_to_dos'],
                      [_('Convert to Uni_x Format'), self.convert_to_unix_cb, None, None, 'convert_to_unix'] ] ])
 
@@ -4410,6 +4570,12 @@ class Diffuse(gtk.Window):
     def go_to_line_cb(self, widget, data):
         self.getCurrentViewer().go_to_line_cb(widget, data)
 
+    def decrease_indenting_cb(self, widget, data):
+        self.getCurrentViewer().decrease_indenting_cb(widget, data)
+
+    def increase_indenting_cb(self, widget, data):
+        self.getCurrentViewer().increase_indenting_cb(widget, data)
+
     def convert_to_dos_cb(self, widget, data):
         self.getCurrentViewer().convert_to_dos_cb(widget, data)
 
@@ -4529,6 +4695,8 @@ if __name__ == '__main__':
     else:
         rc_file = os.path.expanduser('~/.diffuse/diffuserc')
         if not os.path.exists(rc_file):
+            # fallback on system wide initialisation file when the personal
+            # initialisation file is not present
             if isWindows():
                 rcdir = bin_dir
             else:
@@ -4537,9 +4705,11 @@ if __name__ == '__main__':
         if os.path.isfile(rc_file):
             theResources.parse(rc_file)
 
+    # associate our icon with all of our windows
     icon = theResources.getString('icon')
     if os.path.isfile(icon):
         gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(icon))
+
     diff = Diffuse()
     # load state
     configpath = os.path.join(path, 'config')
@@ -4566,6 +4736,7 @@ if __name__ == '__main__':
             print _('Error reading %s.') % (repr(configpath), )
     diff.connect('configure_event', configure_cb)
     diff.connect('window_state_event', window_state_cb)
+
     # process remaining command line arguments
     tab_label = None
     encoding = None
@@ -4651,6 +4822,9 @@ if __name__ == '__main__':
     if n > 0:
         diff.newLoadedFileDiffViewer(tab_label, specs)
     nb = diff.notebook
+
+    # create a file diff viewer if the command line arguments haven't
+    # implicitly created any
     n = nb.get_n_pages()
     if n == 0:
         diff.newLoadedFileDiffViewer(tab_label, [])
