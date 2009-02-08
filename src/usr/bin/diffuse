@@ -3891,24 +3891,20 @@ class FileDiffViewer(gtk.Table):
                 text = self.getLineText(f, i)
                 if text is not None and len(strip_line_ending(self.panes[f].format, text)) > 0:
                     # count spacing before the first non-whitespace character
-                    j, ws = 0, 0
+                    j, w = 0, 0
                     while j < len(text) and text[j] in ' \t':
-                        ws += self.characterWidth(ws, text[j])
+                        w += self.characterWidth(w, text[j])
                         j += 1
                     # adjust by a multiple of the soft tab width
-                    width = self.prefs.getInt('editor_soft_tab_width')
-                    soft_tabs = ws // width + offset
-                    if soft_tabs >= 0:
-                        ws = soft_tabs * width + ws % width
+                    ws = max(0, w + offset * self.prefs.getInt('editor_soft_tab_width'))
+                    if ws != w:
                         if self.prefs.getBool('editor_expand_tabs'):
                             s = u' ' * ws
                         else:
                             tab_width = self.prefs.getInt('display_tab_width')
                             s = u'\t' * (ws // tab_width)
                             s += u' ' * (ws % tab_width)
-                    else:
-                        s = u''
-                    self.updateText(f, i, s + text[j:])
+                        self.updateText(f, i, s + text[j:])
             if self.mode == CHAR_MODE:
                 # ensure the cursor position is valid
                 i = self.current_line
@@ -4338,7 +4334,7 @@ class Diffuse(gtk.Window):
                      [_('Find Pre_vious'), self.find_previous_cb, None, None, 'find_previous'],
                      [_('Go To _Line...'), self.go_to_line_cb, None, None, 'go_to_line'],
                      [],
-                     [_('Decrea_se Indenting'), self.decrease_indenting_cb, None, None, 'decrease_indenting'],
+                     [_('Decrea_se Indenting'), self.decrease_indenting_cb, None, gtk.STOCK_UNINDENT, 'decrease_indenting'],
                      [_('_Increase Indenting'), self.increase_indenting_cb, None, gtk.STOCK_INDENT, 'increase_indenting'],
                      [],
                      [_('Convert to _DOS Format'), self.convert_to_dos_cb, None, None, 'convert_to_dos'],
