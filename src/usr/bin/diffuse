@@ -100,6 +100,7 @@ import shlex
 import stat
 import string
 import subprocess
+import urllib
 import webbrowser
 
 # platform tests
@@ -303,37 +304,11 @@ class Resources:
         # list of unknown float resources we have already issued warnings for
         self.unknown_floats = {}
 
-        # handle platform specific icon and help system
-        help_browser = None
+        # handle platform specific icon
         if isWindows():
             iconpath = os.path.join(bin_dir, 'diffuse.ico')
-            help_file = os.path.join(os.path.join(bin_dir, 'help'), 'index.html')
         else:
             iconpath = os.path.join(bin_dir, '../share/pixmaps/diffuse.png')
-            if os.environ.has_key('PATH'):
-                s = 'gnome-help'
-                for p in os.environ['PATH'].split(os.pathsep):
-                    fp = os.path.join(p, s)
-                    if os.path.isfile(fp):
-                        help_browser = s
-                        break
-            s = os.path.join(bin_dir, '../share/gnome/help/diffuse')
-
-            # find the help directory for the current locale
-            d = os.path.join(s, 'C')
-            lang = locale.getdefaultlocale()[0]
-            if lang is not None:
-                path = os.path.join(s, lang)
-                if os.path.exists(path):
-                    d = path
-                else:
-                    postfix = lang.index('_')
-                    if postfix > 0:
-                        path = os.path.join(s, lang[:postfix])
-                        if os.path.exists(path):
-                            d = path
-            help_file = os.path.join(d, 'diffuse.xml')
-
         # default strings
         self.strings = {
            'help_browser': '',
@@ -341,10 +316,6 @@ class Resources:
            'help_url': WEBSITE + 'manual.html',
            'icon': iconpath }
 
-        # use the online help if local help browser or files are unavailable
-        if help_browser is not None and help_file is not None and os.path.isfile(help_file):
-           self.strings['help_browser'] = help_browser
-           self.strings['help_file'] = help_file
         # list of unknown string resources we have already issued warnings for
         self.unknown_strings = {}
 
@@ -691,6 +662,8 @@ class Preferences:
         if isWindows() or isCygwin():
             if os.environ.has_key('SYSTEMDRIVE'):
                 root = os.environ['SYSTEMDRIVE']
+                if not root.endswith('\\'):
+                    root += '\\'
             else:
                 root = 'C:\\'
             self.template.extend([
@@ -1593,6 +1566,14 @@ def isBlank(s):
 # use pango.SCALE instead of pango.PIXELS to avoid overflow exception
 def pixels(size):
     return int(size / pango.SCALE + 0.5)
+
+# constructs a full URL for the name file
+def path2url(path, proto='file'):
+    s = urllib.pathname2url(os.path.abspath(path))
+    i = 0
+    while i < len(s) and s[i] == '/':
+        i += 1
+    return ''.join([ proto, ':///', s[i:] ])
 
 # the file diff viewer is always in one of these modes defining the cursor,
 # and hotkey behaviour
@@ -4636,12 +4617,54 @@ class Diffuse(gtk.Window):
     def isolate_cb(self, widget, data):
         self.getCurrentViewer().isolate_cb(widget, data)
 
+    # display help documenation
     def help_contents_cb(self, widget, data):
         browser = theResources.getString('help_browser')
+        help_file = theResources.getString('help_file')
+        help_url = theResources.getString('help_url')
+        if help_file == '':
+            # use the local help documentation and browser if available,
+            # otherwise fall back on the on-line manual
+            browser = ''
+            if isWindows():
+                # help documentation is distributed as local HTML files
+                help_file = os.path.join(bin_dir, 'manual.html')
+                if os.path.isfile(help_file):
+                    help_url = path2url(help_file)
+            else:
+                # help documentation is distributed as in DocBook format
+                # find the help directory for the current locale and display
+                # using the Gnome help browser
+                s = os.path.join(bin_dir, '../share/gnome/help/diffuse')
+                d = os.path.join(s, 'C')
+                lang = locale.getdefaultlocale()[0]
+                if lang is not None:
+                    path = os.path.join(s, lang)
+                    if os.path.exists(path):
+                        d = path
+                    else:
+                        postfix = lang.index('_')
+                        if postfix > 0:
+                            path = os.path.join(s, lang[:postfix])
+                            if os.path.exists(path):
+                                d = path
+                help_file = os.path.join(d, 'diffuse.xml')
+                if os.path.isfile(help_file):
+                    help_file = path2url(help_file, 'ghelp')
+                    if os.environ.has_key('PATH'):
+                        s = 'gnome-help'
+                        for p in os.environ['PATH'].split(os.pathsep):
+                            fp = os.path.join(p, s)
+                            if os.path.isfile(fp):
+                                browser = fp
+                                break
+        elif browser == '':
+            help_url = path2url(help_file)
         if browser == '':
-            webbrowser.open(theResources.getString('help_url'))
+            # use a web browser to display the help documentation
+            webbrowser.open(help_url)
         else:
-            args = [ browser, theResources.getString('help_file') ]
+            args = [ browser, help_file ]
             # spawnvp is not available on some systems, use spawnv instead
             os.spawnv(os.P_NOWAIT, args[0], args)
 
