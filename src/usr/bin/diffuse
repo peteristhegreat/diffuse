@@ -1169,9 +1169,11 @@ class VCSs:
                 ss = f.readlines()
                 f.close()
                 projs, hash, sep = {}, False, os.sep
+                # find the separator character
                 for s in ss:
                     if s.startswith('  sep: ') and len(s) > 7:
                         sep = s[7]
+		# find the project directories
                 for s in ss:
                     if hash:
                         if not s.startswith('    '):
@@ -1180,16 +1182,19 @@ class VCSs:
                         if n > 4 and s[4] != ' ':
                             if s.endswith(': \n'):
                                 n -= 3
+                            # parse directory path
                             tt = []
                             i = 4
                             while i < n: 
                                 if s[i] == '"':
+                                    # quoted string
                                     i += 1
                                     while i < n:
                                         if s[i] == '"':
                                             i += 1
                                             break
                                         elif s[i] == '\\':
+                                            # escaped character
                                             i += 1
                                         if i < n:
                                             tt.append(s[i])
@@ -1203,6 +1208,7 @@ class VCSs:
                             projs[key] = None
                     elif s.startswith('  hash:'):
                         hash = True
+		# check if the file belongs to one of the project directories
                 while True:
                     newname = os.path.dirname(name)
                     if newname == name:
@@ -1457,6 +1463,11 @@ You should have received a copy of the GNU General Public License along with thi
 # in this array so 'blocks' will be an empty array when there are no lines.  A
 # 'cut' at location 'i' means a line 'i-1' and line 'i' belong to different
 # sections
+
+def createBlock(n):
+    if n > 0:
+        return [ n ]
+    return []
 
 # returns the two sets of blocks after cutting at 'i'
 def cutBlocks(i, blocks):
@@ -1759,7 +1770,7 @@ class FileDiffViewer(gtk.Table):
                 sw.set_vadjustment(self.vadj)
             self.attach(sw, i, i + 1, 1, 2)
             sw.show()
-        self.vadj.connect('value_changed', self.map_vadj_changed)
+        self.vadj.connect('value_changed', self.map_vadj_changed_cb)
 
         # add diff map
         self.map = map = gtk.DrawingArea()
@@ -2062,6 +2073,7 @@ class FileDiffViewer(gtk.Table):
     def setFormat(self, f, format):
         pane = self.panes[f]
         if self.undoblock is not None:
+            # create an Undo object for the action
             self.addUndo(FileDiffViewer.SetFormatUndo(f, format, pane.format))
         pane.format = format
 
@@ -2082,6 +2094,7 @@ class FileDiffViewer(gtk.Table):
     # deletes an instance when 'reverse' is set to True
     def instanceLine(self, f, i, reverse=False):
         if self.undoblock is not None:
+            # create an Undo object for the action
             self.addUndo(FileDiffViewer.InstanceLineUndo(f, i, reverse))
         pane = self.panes[f]
         if reverse:
@@ -2115,16 +2128,19 @@ class FileDiffViewer(gtk.Table):
             flags |= 4
         return flags
 
+    # update line 'i' in pane 'f' to contain 'text'
     def updateLineText(self, f, i, is_modified, text):
         pane = self.panes[f]
         line = pane.lines[i]
         flags = self.getMapFlags(f, i)
         if self.undoblock is not None:
+            # create an Undo object for the action
             self.addUndo(FileDiffViewer.UpdateLineTextUndo(f, i, line.is_modified, line.modified_text, is_modified, text))
         line.is_modified = is_modified
         line.modified_text = text
         line.compare_string = None
 
+        # update/invalidate all relevent caches and queue widgets for redraw
         if text is not None:
             pane.line_lengths = max(pane.line_lengths, self.digit_width * self.getStringColumnWidth(f, text))
         self.updateSize(False)
@@ -2151,6 +2167,7 @@ class FileDiffViewer(gtk.Table):
             self.map_cache = None
             self.map.queue_draw()
 
+    # Undo for inserting a spacing line in a single pane
     class InsertNullUndo:
         def __init__(self, f, i, reverse):
             self.data = (f, i, reverse)
@@ -2163,11 +2180,16 @@ class FileDiffViewer(gtk.Table):
             f, i, reverse = self.data
             viewer.insertNull(f, i, reverse)
 
+    # insert a spacing line at line 'i' in pane 'f'
+    # this caller must ensure the blocks and number of lines in each pane
+    # are valid again
     def insertNull(self, f, i, reverse):
         if self.undoblock is not None:
+            # create an Undo object for the action
             self.addUndo(FileDiffViewer.InsertNullUndo(f, i, reverse))
         pane = self.panes[f]
         lines = pane.lines
+        # update/invalidate all relevent caches
         if reverse:
             del lines[i]
             if i < len(pane.syntax_cache):
@@ -2178,6 +2200,7 @@ class FileDiffViewer(gtk.Table):
                 state = pane.syntax_cache[i][0]
                 pane.syntax_cache.insert(i, [state, state, None, None])
 
+    # Undo for manipulating a section of the line matching data
     class InvalidateLineMatchingUndo:
         def __init__(self, i, n, new_n):
             self.data = (i, n, new_n)
@@ -2190,9 +2213,12 @@ class FileDiffViewer(gtk.Table):
             i, n, new_n = self.data
             viewer.invalidateLineMatching(i, n, new_n)
 
+    # manipulate a section of the line matching data
     def invalidateLineMatching(self, i, n, new_n):
         if self.undoblock is not None:
+            # create an Undo object for the action
             self.addUndo(FileDiffViewer.InvalidateLineMatchingUndo(i, n, new_n))
+        # update/invalidate all relevent caches and queue widgets for redraw
         i2 = i + n
         for f, pane in enumerate(self.panes):
             if i < len(pane.diff_cache):
@@ -2205,9 +2231,11 @@ class FileDiffViewer(gtk.Table):
         self.map_cache = None
         self.map.queue_draw()
 
+    # updates the alignment of 'n' lines starting from 'i'
     def updateAlignment(self, i, n, lines):
         new_n = len(lines[0])
         i2 = i + n
+        # insert spacing lines
         for f in range(len(self.panes)):
             for j in range(i2-1, i-1, -1):
                 if self.getLine(f, j) is None:
@@ -2216,11 +2244,14 @@ class FileDiffViewer(gtk.Table):
             for j in range(new_n):
                 if temp[j] is None:
                     self.insertNull(f, i + j, False)
+        # update line matching for this block
+
         # FIXME: we should be able to do something more intelligent here...
         # the syntax cache will become invalidated.... we don't really need to
         # do that...
         self.invalidateLineMatching(i, n, new_n)
 
+    # Undo for changing how lines are cut into blocks for alignment
     class UpdateBlocksUndo:
         def __init__(self, old_blocks, blocks):
             self.data = (old_blocks, blocks)
@@ -2233,11 +2264,14 @@ class FileDiffViewer(gtk.Table):
             old_blocks, blocks = self.data
             viewer.updateBlocks(blocks)
 
+    # change how lines are cut into blocks for alignment
     def updateBlocks(self, blocks):
         if self.undoblock is not None:
+            # create an Undo object for the action
             self.addUndo(FileDiffViewer.UpdateBlocksUndo(self.blocks, blocks))
         self.blocks = blocks
 
+    # insert 'n' blank lines in all panes
     def insertLines(self, i, n):
         # insert lines
         self.updateAlignment(i, 0, [ n * [ None ] for pane in self.panes ])
@@ -2256,6 +2290,7 @@ class FileDiffViewer(gtk.Table):
         self.map_cache = None
         self.map.queue_draw()
 
+    # Undo for replacing the lines for a single pane with a new set
     class ReplaceLinesUndo:
         def __init__(self, f, lines, new_lines, max_num, new_max_num):
             self.data = (f, lines, new_lines, max_num, new_max_num)
@@ -2268,11 +2303,14 @@ class FileDiffViewer(gtk.Table):
             f, lines, new_lines, max_num, new_max_num = self.data
             viewer.replaceLines(f, lines, new_lines, max_num, new_max_num)
 
+    # replace the lines for a single pane with a new set
     def replaceLines(self, f, lines, new_lines, max_num, new_max_num):
         if self.undoblock is not None:
+            # create an Undo object for the action
             self.addUndo(FileDiffViewer.ReplaceLinesUndo(f, lines, new_lines, max_num, new_max_num))
         pane = self.panes[f]
         pane.lines = new_lines
+        # update/invalidate all relevent caches and queue widgets for redraw
         del pane.syntax_cache[:]
         pane.max_line_number = new_max_num
         self.dareas[f].queue_draw()
@@ -2280,16 +2318,22 @@ class FileDiffViewer(gtk.Table):
         self.map_cache = None
         self.map.queue_draw()
 
-    def stringHash(self, line):
+    # create a hash for a line to use for line matching
+    def _alignmentHash(self, line):
         text = line.getText()
         if text is None:
             return ''
+        # hashes for non-null lines should start with '+' to distinguish them
+        # from blank lines
         if self.prefs.getBool('align_ignore_blanklines') and isBlank(text):
+            # consider all lines containing only white space as the same
             return '+'
         if self.prefs.getBool('align_ignore_whitespace'):
+            # strip all white space from the string
             for c in string.whitespace:
                 text = text.replace(c, '')
         elif self.prefs.getBool('align_ignore_whitespace_changes'):
+            # replace all blocks of white space with a single space
             pc = True
             r = []
             append = r.append
@@ -2303,78 +2347,124 @@ class FileDiffViewer(gtk.Table):
                     pc = True
             text = ''.join(r)
         if self.prefs.getBool('align_ignore_case'):
+            # convert everything to upper case
             text = text.upper()
         return '+' + text
 
+    # align sets of lines by insertting null spacers and updating the size
+    # of blocks to which they belong
+    #
+    # Leftlines and rightlines are list of list of lines.  Only the inner list
+    # of lines are aligned (leftlines[-1] and rightlines[0]). Any spacers
+    # needed for alignment are inserted in all lists of lines for a particular
+    # side to keep them all in sync.
     def alignBlocks(self, leftblocks, leftlines, rightblocks, rightlines):
-        blocks = [ leftblocks, rightblocks ]
-        lines = [ leftlines, rightlines ]
-        middle = [ leftlines[-1], rightlines[0] ]
-        mlines = [ [ line for line in middle[0] if line is not None ],
-                   [ line for line in middle[1] if line is not None ] ]
-        s1 = mlines[0]
-        s2 = mlines[1]
-        n1 = 0
-        n2 = 0
-        t1 = [ self.stringHash(s) for s in s1 ]
-        t2 = [ self.stringHash(s) for s in s2 ]
+        blocks = ( leftblocks, rightblocks )
+        lines = ( leftlines, rightlines )
+        # get the inner lines we are to match
+        middle = ( leftlines[-1], rightlines[0] )
+        # eliminate any existing spacer lines
+        mlines = ( [ line for line in middle[0] if line is not None ],
+                   [ line for line in middle[1] if line is not None ] )
+        s1, s2 = mlines
+        n1, n2 = 0, 0
+        # hash lines according to the alignment preferences
+        t1 = [ self._alignmentHash(s) for s in s1 ]
+        t2 = [ self._alignmentHash(s) for s in s2 ]
+        # align s1 and s2 by inserting spacer lines
+        # this will be used to determine which lines from the inner lists of
+        # lines should be neighbours
         for block in difflib.SequenceMatcher(None, t1, t2).get_matching_blocks():
             delta = (n1 + block[0]) - (n2 + block[1])
             if delta < 0:
+                # insert spacer lines in s1
                 i = n1 + block[0]
                 s1[i:i] = -delta * [ None ]
                 n1 -= delta
             elif delta > 0:
+                # insert spacer lines in s2
                 i = n2 + block[1]
                 s2[i:i] = delta * [ None ]
                 n2 += delta
         nmatch = len(s1)
 
-        i = 0
-        k = 0
+        # insert spacer lines in leftlines and rightlines and increase the
+        # size of blocks in leftblocks and rightblocks as spacer lines are
+        # inserted
+        #
+        # advance one row at a time inserting spacer lines as we go
+        # 'i' indicates which row we are processing
+        # 'k' indicates which pair of neighbours we are processing
+        i, k = 0, 0
         bi = [ 0, 0 ]
         bn = [ 0, 0 ]
         while True:
+            # if we have reached the end of the list for any side, it needs
+            # spacer lines to align with the other side
             insert = [ i >= len(m) for m in middle  ]
             if insert == [ True, True ]:
+                # we have reached the end of both inner lists of lines
+                # we are done
                 break
             if insert == [ False, False ] and k < nmatch:
+                # determine if either side needs spacer lines to make the
+                # inner list of lines match up
                 accept = True
                 for j in range(2):
                     m = mlines[j][k]
                     if middle[j][i] is not m:
+                        # this line does not correspond to the pair of
+                        # neighbours we expected
                         if m is None:
+                            # we expected to find a null here so insert one
                             insert[j] = True
                         else:
+                            # we have a null but didn't expect one we will not
+                            # obtain the pairing we expected by iserting nulls
                             accept = False
                 if accept:
+                    # our lines will be correctly paired up
+                    # move on to the next pair
                     k += 1
                 else:
+                    # insert spacer lines as needed
                     insert = [ m[i] is not None for m in middle ]
             for j in range(2):
                 if insert[j]:
+                    # insert spacers lines for side 'j'
                     for temp in lines[j]:
                         temp.insert(i, None)
                     blocksj = blocks[j]
                     bij = bi[j]
                     bnj = bn[j]
+                    # append a new block if needed
                     if len(blocksj) == 0:
                         blocksj.append(0)
+                    # advance to the current block
                     while bnj + blocksj[bij] < i:
                         bnj += blocksj[bij]
                         bij += 1
+                    # increase the current block size
                     blocksj[bij] += 1
+            # advance to the next row
             i += 1
 
+    # replace the contents of pane 'f' with the strings list of strings 'ss'
     def updatePane(self, f, ss):
+        # determine the format for the text
         self.setFormat(f, getFormat(ss))
-        # align
+
+        # create an initial set of blocks for the lines
         blocks = []
         n = len(ss)
         if n > 0:
             blocks.append(n)
+        # create line objects for the text
         mid = [ [ FileDiffViewer.Line(j + 1, ss[j]) for j in range(n) ] ]
+
         if f > 0:
+            # align with panes to the left
+            # use copies so the originals can be used by the Undo object
             leftblocks = self.blocks[:]
             leftlines = [ pane.lines[:] for pane in self.panes[:f] ]
             removeNullLines(leftblocks, leftlines)
@@ -2382,6 +2472,8 @@ class FileDiffViewer(gtk.Table):
             mid[:0] = leftlines
             blocks = mergeBlocks(leftblocks, blocks)
         if f + 1 < len(self.panes):
+            # align with panes to the right
+            # use copies so the originals can be used by the Undo object
             rightblocks = self.blocks[:]
             rightlines = [ pane.lines[:] for pane in self.panes[f + 1:] ]
             removeNullLines(rightblocks, rightlines)
@@ -2389,11 +2481,13 @@ class FileDiffViewer(gtk.Table):
             mid.extend(rightlines)
             blocks = mergeBlocks(blocks, rightblocks)
 
-        # update
+        # update the lines for this pane
         pane = self.panes[f]
         old_n = len(pane.lines)
         new_n = len(mid[f])
         self.replaceLines(f, pane.lines, mid[f], pane.max_line_number, n)
+
+        # insert or remove spacer lines from the other panes
         for f_idx in range(len(self.panes)):
             if f_idx != f:
                 for j in range(old_n-1, -1, -1):
@@ -2403,29 +2497,49 @@ class FileDiffViewer(gtk.Table):
                 for j in range(new_n):
                     if temp[j] is None:
                         self.insertNull(f_idx, j, False)
+
+        # update the blocks
         self.invalidateLineMatching(0, old_n, new_n)
         self.updateBlocks(blocks)
 
+    # change the label for pane 'f' to 's'
     def setLabel(self, f, s):
         self.panes[f].label = s
         self.labels[f].set_text(s)
 
+    # load a new file into pane 'f'
+    # 'spec' indicates the name of the file and how to retrieve it from the
+    # version control system if applicable
     def load(self, f, spec):
         name = spec.name
         stat = None
-        if name is not None:
+        if name is None:
+            # reset to an empty pane
+            label = ''
+            ss = []
+        else:
             rev = spec.revision
             try:
-                if rev is not None:
+                if rev is None:
+                    # we are loading a plain file
+                    label = name
+                    fd = open(name, 'rb')
+                    # get the file's modification times so we can detect changes
+                    stat = os.stat(name)
+                else:
                     if spec.vcs is None:
                         raise IOError('Not under revision control.')
                     label = '%s (%s)' % (name, rev)
                     fullname = os.path.abspath(name)
+                    # find command to retrieve the file from the version
+                    # control system
                     bash_pref, cmd = spec.vcs.getRevisionCommand(self.prefs, fullname, rev)
                     dn = os.path.dirname(fullname)
                     if isWindows() and self.prefs.getBool(bash_pref):
+                        # launch the command from a bash shell is requested
                         cmd = [ self.prefs.convertToNativePath('/bin/bash.exe'), '-l', '-c', 'cd %s; %s' % (bashEscape(dn), ' '.join([ bashEscape(arg) for arg in cmd ])) ]
                         dn = None
+                    # use subprocess.Popen to retrieve the file contents
                     if isWindows():
                         info = subprocess.STARTUPINFO()
                         info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -2436,14 +2550,13 @@ class FileDiffViewer(gtk.Table):
                     proc.stdin.close()
                     proc.stderr.close()
                     fd = proc.stdout
-                else:
-                    label = name
-                    fd = open(name, 'rb')
-                    stat = os.stat(name)
+                # read the file's contents
                 ss = fd.readlines()
                 fd.close()
+                # report any errors
                 if rev is not None and proc.wait() != 0:
                     raise IOError('Command failed.')
+                # convert file contents to unicode
                 if spec.encoding is None:
                     ss, spec.encoding = self.prefs.convertToUnicode(ss)
                 else:
@@ -2458,27 +2571,30 @@ class FileDiffViewer(gtk.Table):
                 dialog.run()
                 dialog.destroy()
                 return
-        else:
-            label = ''
-            ss = []
+        # update the panes contents, last modified time, and label
         self.updatePane(f, ss)
         pane = self.panes[f]
         pane.spec = spec
         pane.last_stat = pane.stat = stat
         self.setLabel(f, label)
+        # use the file name to choose appropriate syntax highlighting rules
         if name is not None:
             syntax = theResources.getSyntaxByFilename(name)
             if syntax is not None:
                 self.setSyntax(syntax)
 
+    # update the contents for a line, creating the line if necessary
     def updateText(self, f, i, text, is_modified=True):
         if self.panes[f].lines[i] is None:
             self.instanceLine(f, i)
         self.updateLineText(f, i, is_modified, text)
 
+    # replace the current selection with 'text'
     def replaceText(self, text):
-        # find range
+        # record the edit mode as we will be updating the selection too
         self.recordEditMode()
+
+        # find the extents of the current selection
         f = self.current_pane
         pane = self.panes[f]
         line0, line1 = self.selection_line, self.current_line
@@ -2492,24 +2608,31 @@ class FileDiffViewer(gtk.Table):
             col0, col1 = self.selection_char, self.current_char
             if line1 < line0 or (line1 == line0 and col1 < col0):
                 line0, col0, line1, col1 = line1, col1, line0, col0
+
         # update text
         if text is None:
             text = ''
+        # split the replacement text into lines
         ss = text.split('\n')
         last = ss.pop()
         ss = [ s + '\n' for s in ss ]
         ss.append(last)
+        # change the format to that of the target pane
         if pane.format == 0:
             self.setFormat(f, getFormat(ss))
         ss = [ convert_to_format(s, pane.format) for s in ss ]
+        # prepend original text that was before the selection
         if col0 > 0:
             pre = self.getLineText(f, line0)[:col0]
             ss[0] = pre + ss[0]
+        # remove the last line as it needs special casing
         last = ss.pop()
         cur_line = line0 + len(ss)
         lastcol = len(last)
         if lastcol > 0:
-            # need more text
+            # the replacement text does not end with a new line character
+            # we need more text to finish the line, search forward for some
+            # more text
             while line1 < len(pane.lines):
                 s = self.getLineText(f, line1)
                 line1 += 1
@@ -2519,15 +2642,19 @@ class FileDiffViewer(gtk.Table):
                 col1 = 0
             ss.append(last)
         elif col1 > 0:
+            # append original text that was after the selection
             s = self.getLineText(f, line1)
             ss.append(s[col1:])
             line1 += 1
+        # insert blank lines for more space if needed
         n_have = line1 - line0
         n_need = len(ss)
         if n_need > n_have:
             self.insertLines(line1, n_need - n_have)
+        # update the text
         for i, s in enumerate(ss):
             self.updateText(f, line0 + i, s)
+        # clear all unused lines
         if n_have > n_need:
             for i in range(n_need, n_have):
                 self.updateText(f, line0 + i, None)
@@ -2539,10 +2666,13 @@ class FileDiffViewer(gtk.Table):
             self.setCurrentChar(cur_line, lastcol)
         self.recordEditMode()
 
+    # manually adjust line matching so 'line1' of pane 'f' is a neighbour of
+    # 'line2' from pane 'f+1'
     def align(self, f, line1, line2):
+        # record the edit mode as we will be updating the selection too
         self.recordEditMode()
 
-        # find blocks
+        # find the smallest span of blocks that inclues line1 and line2
         start = line1
         end = line2
         if end < start:
@@ -2563,40 +2693,47 @@ class FileDiffViewer(gtk.Table):
         start = sum(pre_blocks)
         end = start + sum(mid)
 
-        # cut into sections
+        # cut the span of blocks into three sections:
+        # 1. lines before the matched pair
+        # 2. the matched pair
+        # 3. lines after the matched pair
+        # each section has lines and blocks for left and right sides
         lines_s = [ [], [], [] ]
         cutblocks = [ [], [], [] ]
         lines = [ pane.lines for pane in self.panes ]
         nlines = len(lines[0])
         for temp, m in zip([ lines[:f + 1], lines[f + 1:] ], [ line1, line2 ]):
-            lines_s[0].append([ s[start:m] for s in temp ])
+            # cut the blocks just before the line being matched
             pre, post = cutBlocks(m - start, mid)
             if len(temp) == 1:
-                s = sum(pre)
-                if s == 0:
-                    pre = []
-                else:
-                    pre = [ s ]
+                # if we only have one pane on this side, we don't need to
+                # preserve other cuts
+                pre = createBlock(sum(pre))
+            # the first section of lines to match
+            lines_s[0].append([ s[start:m] for s in temp ])
             cutblocks[0].append(pre)
+            # the line to match may be after the actual lines
             if m < nlines:
                 m1 = [ [ s[m] ] for s in temp ]
                 m2 = [ s[m + 1:end] for s in temp ]
+                # cut the blocks just after the line being matched
                 b1, b2 = cutBlocks(1, post)
                 if len(temp) == 1:
-                    s = sum(b2)
-                    if s == 0:
-                        b2 = []
-                    else:
-                        b2 = [ s ]
+                    # if we only have one pane on this side, we don't need to
+                    # preserve other cuts
+                    b2 = createBlock(sum(b2))
             else:
                 m1 = [ [] for s in temp ]
                 m2 = [ [] for s in temp ]
                 b1, b2 = [], []
+            # the second section of lines to match
             lines_s[1].append(m1)
-            lines_s[2].append(m2)
             cutblocks[1].append(b1)
+            # the third section of lines to match
+            lines_s[2].append(m2)
             cutblocks[2].append(b2)
 
+        # align each section and concatenate the results
         finallines = [ [] for s in lines ]
         for b, lines_t in zip(cutblocks, lines_s):
             removeNullLines(b[0], lines_t[0])
@@ -2609,6 +2746,7 @@ class FileDiffViewer(gtk.Table):
             pre_blocks.extend(mergeBlocks(b[0], b[1]))
         pre_blocks.extend(post_blocks)
 
+        # update the actual lines and blocks
         self.updateAlignment(start, end - start, finallines)
         self.updateBlocks(pre_blocks)
 
@@ -2616,6 +2754,7 @@ class FileDiffViewer(gtk.Table):
         self.setCurrentLine(self.current_pane, start + len(lines_s[0][0][0]))
         self.recordEditMode()
 
+    # Undo for changing the selection mode and range
     class EditModeUndo:
         def __init__(self, mode, current_pane, current_line, current_char, selection_line, selection_char, cursor_column):
             self.data = (mode, current_pane, current_line, current_char, selection_line, selection_char, cursor_column)
@@ -2627,9 +2766,13 @@ class FileDiffViewer(gtk.Table):
         def redo(self, viewer):
             self.undo(viewer)
 
+    # appends an undo to reset to the specified selection mode and range
+    # this should be called before and after actions that also change the
+    # selection
     def recordEditMode(self):
         self.addUndo(FileDiffViewer.EditModeUndo(self.mode, self.current_pane, self.current_line, self.current_char, self.selection_line, self.selection_char, self.cursor_column))
 
+    # change the selection mode
     def setEditMode(self, mode, f, current_line, current_char, selection_line, selection_char, cursor_column):
         # FIXME: this should also record the scroll spot
         old_f = self.current_pane
@@ -2644,9 +2787,13 @@ class FileDiffViewer(gtk.Table):
             self.setCurrentChar(self.current_line, self.current_char, True)
         else:
             self.setCurrentLine(self.current_pane, self.current_line, True)
+        # some selections display information in the status bar
         self.updatePrompt()
+        # queue a redraw to show the updated selection
         self.dareas[old_f].queue_draw()
 
+    # change the current selection in LINE_MODE
+    # use extend=True to extend the selection
     def setCurrentLine(self, f, i, extend=False):
         # update selection
         old_f = self.current_pane
@@ -2668,10 +2815,11 @@ class FileDiffViewer(gtk.Table):
             vadj.set_value(lower)
         elif upper > v + ps:
             vadj.set_value(upper - ps)
-        # queue draw
+        # queue redraw
         self.dareas[old_f].queue_draw()
         self.dareas[f].queue_draw()
 
+    # display the cursor's column position
     def updatePrompt(self):
         if self.mode == CHAR_MODE:
             j = self.current_char
@@ -2682,6 +2830,8 @@ class FileDiffViewer(gtk.Table):
         else:
             self.setStatus('')
 
+    # change the current selection in CHAR_MODE
+    # use extend=True to extend the selection
     def setCurrentChar(self, i, j, extend=False):
         f = self.current_pane
         self.cursor_column = -1
@@ -2692,7 +2842,6 @@ class FileDiffViewer(gtk.Table):
         else:
             self.selection_line = i
             self.selection_char = j
-
         # scroll vertically to current position
         h = self.font_height
         lower = i * h
@@ -2705,7 +2854,6 @@ class FileDiffViewer(gtk.Table):
             vadj.set_value(lower)
         elif upper > v + ps:
             vadj.set_value(upper - ps)
-
         # scroll horizontally to current position
         # but try to keep the line numbers visible
         if j > 0:
@@ -2723,13 +2871,15 @@ class FileDiffViewer(gtk.Table):
             hadj.set_value(lower)
         elif upper > v + ps:
             hadj.set_value(upper - ps)
-
+        # queue redraw
         self.dareas[f].queue_draw()
         self.updatePrompt()
 
+    # returns the currently selected text
     def getSelectedText(self):
         f = self.current_pane
         start, end = self.selection_line, self.current_line
+        # find extents of selection
         if self.mode == LINE_MODE:
             if end < start:
                 start, end = end, start
@@ -2741,14 +2891,18 @@ class FileDiffViewer(gtk.Table):
                 start, col0, end, col1 = end, col1, start, col0
             if col1 > 0:
                end += 1
+        # get the text for the selected lines
         end = min(end, len(self.panes[f].lines))
         ss = [ self.getLineText(f, i) for i in range(start, end) ]
+        # trim out the unselected parts of the lines
+        # check for col > 0 as some lines may be null
         if col1 > 0:
             ss[-1] = ss[-1][:col1]
         if col0 > 0:
             ss[0] = ss[0][col0:]
         return ''.join([ s for s in ss if s is not None ])
 
+    # expands the selection to include everything
     def selectAll(self):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             f = self.current_pane
@@ -2759,7 +2913,10 @@ class FileDiffViewer(gtk.Table):
                 self.current_char = 0
             self.dareas[f].queue_draw()
 
-    def getPickedCharacter(self, f, text, x, partial):
+    # returns the index of the last character in text that should be left of
+    # 'x' pixels from the edge of the darea widget
+    # if partial=True, include characters only partially to the left of 'x'
+    def _getPickedCharacter(self, f, text, x, partial):
         if text is None:
             return 0
         n = len(text)
@@ -2776,16 +2933,18 @@ class FileDiffViewer(gtk.Table):
             w += width
         return n
 
+    # update the selection in response to a mouse button press
     def button_press(self, f, x, y, extend):
         i = min(y // self.font_height, len(self.panes[f].lines))
         if self.mode == CHAR_MODE and f == self.current_pane:
             text = strip_line_ending(self.panes[f].format, self.getLineText(f, i))
-            j = self.getPickedCharacter(f, text, x, True)
+            j = self._getPickedCharacter(f, text, x, True)
             self.setCurrentChar(i, j, extend)
         else:
             self.setLineMode()
             self.setCurrentLine(f, i, extend and f == self.current_pane)
 
+    # callback for mouse button presses in the text window
     def darea_button_press_cb(self, widget, event):
         self.get_toplevel().set_focus(self)
         x = int(event.x + self.hadj.get_value())
@@ -2794,17 +2953,21 @@ class FileDiffViewer(gtk.Table):
         nlines = len(self.panes[f].lines)
         i = min(y // self.font_height, nlines)
         if event.button == 1:
+            # left mouse button
             if event.type == gtk.gdk._2BUTTON_PRESS:
+                # double click
                 if self.mode == LINE_MODE:
+                    # change to CHAR_MODE
                     self.setCurrentLine(f, i)
                     # silently switch mode so the viewer does not scroll yet.
                     self.mode = CHAR_MODE
                     self.button_press(f, x, y, False)
                 elif self.mode == CHAR_MODE and self.current_pane == f:
+                    # select word
                     text = strip_line_ending(self.panes[f].format, self.getLineText(f, i))
                     if text is not None:
                         n = len(text)
-                        j = self.getPickedCharacter(f, text, x, False)
+                        j = self._getPickedCharacter(f, text, x, False)
                         if j < n:
                             ss = self.expand(f, text[:n])
                             c = theResources.getCharacterClass(text[j])
@@ -2816,19 +2979,23 @@ class FileDiffViewer(gtk.Table):
                             self.setCurrentChar(i, k)
                             self.setCurrentChar(i, j, True)
             elif event.type == gtk.gdk._3BUTTON_PRESS:
+                # triple click, select a whole line
                 if self.mode == CHAR_MODE and self.current_pane == f:
                     i2 = min(i + 1, nlines)
                     self.setCurrentChar(i, 0)
                     self.setCurrentChar(i2, 0, True)
             else:
+                # update the selection
                 is_shifted = event.state & gtk.gdk.SHIFT_MASK
                 extend = (is_shifted and f == self.current_pane)
                 self.button_press(f, x, y, extend)
         elif event.button == 2:
+            # middle mouse button, paste primary selection
             if self.mode == CHAR_MODE and f == self.current_pane:
                 self.button_press(f, x, y, False)
-                gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).request_text(self.receiveClipboardText)
+                gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).request_text(self.receive_clipboard_text_cb)
         elif event.button == 3:
+            # right mouse button, raise context sensitive menu
             flag = (self.mode == LINE_MODE and (f == self.current_pane + 1 or f == self.current_pane - 1))
             can_align = (flag or self.mode == ALIGN_MODE)
             can_isolate = (self.mode == LINE_MODE and f == self.current_pane)
@@ -2851,59 +3018,80 @@ class FileDiffViewer(gtk.Table):
                       [_('Select All'), self.select_all_cb, None, None, None, can_select] ])
             menu.popup(None, None, None, event.button, event.time)
 
+    # callback used to notify us about click and drag motion
     def darea_motion_notify_cb(self, widget, event):
         if event.state & gtk.gdk.BUTTON1_MASK:
+            # left mouse button
             f = self.dareas.index(widget)
             extend = (f == self.current_pane)
             x = int(event.x + self.hadj.get_value())
             y = int(event.y + self.vadj.get_value())
             self.button_press(f, x, y, extend)
 
+    # return a list of (begin, end, flag) tuples marking characters that differ
+    # from the text in line 'i' from panes 'f' and 'f+1'
+    # return the results for pane 'f' if idx=0 and 'f+1' if idx=1
     def getDiffRanges(self, f, i, idx, flag):
         result = []
         s1 = nullToEmpty(self.getLineText(f, i))
         s2 = nullToEmpty(self.getLineText(f + 1, i))
 
+        # ignore blank lines if specified
         if self.prefs.getBool('display_ignore_blanklines') and isBlank(s1) and isBlank(s2):
             return result
 
-        if self.prefs.getBool('display_ignore_whitespace') or self.prefs.getBool('display_ignore_whitespace_changes'):
+        # ignore white space preferences
+        ignore_whitespace = self.prefs.getBool('display_ignore_whitespace')
+        if ignore_whitespace or self.prefs.getBool('display_ignore_whitespace_changes'):
             if idx == 0:
                 s = s1
             else:
                 s = s2
+            s1 = nullToEmpty(self.getCompareString(f, i))
+            s2 = nullToEmpty(self.getCompareString(f + 1, i))
+
+            # build a mapping from characters in compare string to those in the
+            # original string
             v = 0
             lookup = []
-            if self.prefs.getBool('display_ignore_whitespace'):
+            # we only need to consider white space here as those are the only
+            # ones that can change the number of characters in the compare
+            # string
+            if ignore_whitespace:
+                # all white space characters were removed
                 for c in s:
                     if c not in string.whitespace:
                         lookup.append(v)
                     v += 1
             else:
-                pc = True
+                # all white space characters were replaced with a single space
+                first = True
                 for c in s:
                     if c in string.whitespace:
-                        if pc:
-                           lookup.append(v)
-                           pc = False
+                        # only include the first white space character of a span
+                        if first:
+                            lookup.append(v)
+                            first = False
                     else:
                         lookup.append(v)
-                        pc = True
+                        first = True
                     v += 1
             lookup.append(v)
-            s1 = nullToEmpty(self.getCompareString(f, i))
-            s2 = nullToEmpty(self.getCompareString(f + 1, i))
         else:
             lookup = None
 
-        ignore_whitespace = self.prefs.getBool('display_ignore_whitespace')
         start = 0
         for block in difflib.SequenceMatcher(None, s1, s2).get_matching_blocks():
             end = block[idx]
+            # skip zero length blocks
             if start < end:
-                if lookup is not None:
+                if lookup is None:
+                    result.append((start, end, flag))
+                else:
+                    # map to indices for the original string
                     lookup_start = lookup[start]
                     lookup_end = lookup[end]
+                    # scan for whitespace and skip those sections if specified
                     for j in range(lookup_start, lookup_end):
                         if ignore_whitespace and s[j] in string.whitespace:
                             if lookup_start != j:
@@ -2911,40 +3099,49 @@ class FileDiffViewer(gtk.Table):
                             lookup_start = j + 1
                     if lookup_start != lookup_end:
                         result.append((lookup_start, lookup_end, flag))
-                else:
-                    result.append((start, end, flag))
             start = end + block[2]
         return result
 
+    # returns a hash of a string that can be used to quickly compare strings
+    # according to the display preferences
     def getCompareString(self, f, i):
         line = self.getLine(f, i)
-        if line is not None:
-            s = line.compare_string
-            if s is None:
-                s = line.getText()
-                if s is not None:
-                    if self.prefs.getBool('display_ignore_blanklines') and isBlank(s):
-                        return None
-                    if self.prefs.getBool('display_ignore_whitespace'):
-                        for c in string.whitespace:
-                            s = s.replace(c, '')
-                    elif self.prefs.getBool('display_ignore_whitespace_changes'):
-                        pc = True
-                        r = []
-                        for c in s:
-                            if c in string.whitespace:
-                                if pc:
-                                   r.append(' ')
-                                   pc = False
-                            else:
-                                r.append(c)
-                                pc = True
-                        s = ''.join(r)
-                    if self.prefs.getBool('display_ignore_case'):
-                        s = s.upper()
-                line.compare_string = s
+        if line is None:
+            return None
+        # if a cached value exists, use it
+        s = line.compare_string
+        if s is not None:
             return s
+        # compute a new hash and cache it
+        s = line.getText()
+        if s is not None:
+            if self.prefs.getBool('display_ignore_blanklines') and isBlank(s):
+                return None
+            if self.prefs.getBool('display_ignore_whitespace'):
+                # strip all white space characters
+                for c in string.whitespace:
+                    s = s.replace(c, '')
+            elif self.prefs.getBool('display_ignore_whitespace_changes'):
+                # map all spans of white space characters to a single space
+                pc = True
+                r = []
+                for c in s:
+                    if c in string.whitespace:
+                        if pc:
+                           r.append(' ')
+                           pc = False
+                    else:
+                        r.append(c)
+                        pc = True
+                s = ''.join(r)
+            if self.prefs.getBool('display_ignore_case'):
+                # force everything to be upper case
+                s = s.upper()
+        # cache the hash
+        line.compare_string = s
+        return s
 
+    # draw the text viewport
     def darea_expose_cb(self, widget, event):
         f = self.dareas.index(widget)
         pane = self.panes[f]
@@ -2954,6 +3151,7 @@ class FileDiffViewer(gtk.Table):
         x = offset_x + int(self.hadj.get_value())
         y = offset_y + int(self.vadj.get_value())
 
+        # draw to a pixmap to avoid screen flicker
         pixmap = gtk.gdk.Pixmap(widget.window, width, height)
 
         cr = pixmap.cairo_create()
@@ -2967,6 +3165,7 @@ class FileDiffViewer(gtk.Table):
         diffcolours = [ theResources.getDifferenceColour(f), theResources.getDifferenceColour(f + 1) ]
         diffcolours.append((diffcolours[0] + diffcolours[1]) * 0.5)
 
+        # iterate over each exposed line
         i = y // h
         y_start = i * h
         while y_start < maxy:
@@ -3001,16 +3200,23 @@ class FileDiffViewer(gtk.Table):
                 text = self.getLineText(f, i)
                 ss = None
 
-                if i >= len(pane.diff_cache) or pane.diff_cache[i] is None:
+                # enlarge cache to fit pan.diff_cache[i]
+                if i >= len(pane.diff_cache):
+                    pane.diff_cache.extend((i - len(pane.diff_cache) + 1) * [ None ])
+                # construct a list of ranges for this lines character
+                # differences if not already cached
+                if pane.diff_cache[i] is None:
                     flags = 0
                     temp_diff = []
                     comptext = self.getCompareString(f, i)
                     if f > 0:
+                        # compare with neighbour to the left
                         if self.getCompareString(f - 1, i) != comptext:
                             flags |= 1
                         if text is not None:
                             temp_diff = mergeRanges(temp_diff, self.getDiffRanges(f - 1, i, 1, 1))
                     if f + 1 < len(self.panes):
+                        # compare with neighbour to the right
                         if self.getCompareString(f + 1, i) != comptext:
                             flags |= 2
                         if text is not None:
@@ -3018,10 +3224,10 @@ class FileDiffViewer(gtk.Table):
 
                     chardiff = []
                     if text is not None:
-                        if ss is None:
-                            ss = self.expand(f, text)
+                        # expand text into a list of visual representations
+                        ss = self.expand(f, text)
 
-                        # draw char diffs
+                        # find the size of each region in pango units
                         old_end = 0
                         x_temp = 0
                         for start, end, tflags in temp_diff:
@@ -3034,12 +3240,12 @@ class FileDiffViewer(gtk.Table):
                             chardiff.append((x_temp, w, diffcolours[tflags - 1]))
                             old_end = end
                             x_temp += w
-                    if i >= len(pane.diff_cache):
-                        pane.diff_cache.extend((i - len(pane.diff_cache) + 1) * [ None ])
+                    # cache flags and character diff ranges
                     pane.diff_cache[i] = (flags, chardiff)
                 else:
                     flags, chardiff = pane.diff_cache[i]
 
+                # draw background
                 colour = theResources.getColour('text_background')
                 if flags != 0:
                     colour = (diffcolours[flags - 1] * theResources.getFloat('line_difference_alpha')).over(colour)
@@ -3131,29 +3337,36 @@ class FileDiffViewer(gtk.Table):
                             x_temp += h2
                         cr.stroke()
                 else:
+                    # continue populating the cache until line 'i' is included
+                    # in the syntax highlighting cache
                     n = len(pane.syntax_cache)
-                    if i >= n:
-                        while i >= n:
-                            temp = self.getLineText(f, n)
-                            if syntax is None:
-                                initial_state, end_state = None, None
-                                if temp is None:
-                                    blocks = None
-                                else:
-                                    blocks = [ (0, len(temp), 'text') ]
+                    while i >= n:
+                        temp = self.getLineText(f, n)
+                        if syntax is None:
+                            initial_state, end_state = None, None
+                            if temp is None:
+                                blocks = None
                             else:
-                                if n == 0:
-                                    initial_state = syntax.initial_state
-                                else:
-                                    initial_state = pane.syntax_cache[-1][1]
-                                if temp is None:
-                                    end_state, blocks = initial_state, None
-                                else:
-                                    end_state, blocks = syntax.parse(initial_state, temp)
-                            pane.syntax_cache.append([initial_state, end_state, blocks, None])
-                            n += 1
+                                blocks = [ (0, len(temp), 'text') ]
+                        else:
+                            # apply the syntax highlighting rules to identify
+                            # ranges of similarly coloured characters
+                            if n == 0:
+                                initial_state = syntax.initial_state
+                            else:
+                                initial_state = pane.syntax_cache[-1][1]
+                            if temp is None:
+                                end_state, blocks = initial_state, None
+                            else:
+                                end_state, blocks = syntax.parse(initial_state, temp)
+                        pane.syntax_cache.append([initial_state, end_state, blocks, None])
+                        n += 1
+
+                    # use the cache the position, layout, and colour of each
+                    # span of characters
                     blocks = pane.syntax_cache[i][3]
                     if blocks is None:
+                        # populate the cache item if it didn't exist
                         if ss is None:
                             ss = self.expand(f, text)
                         x_temp = 0
@@ -3197,27 +3410,33 @@ class FileDiffViewer(gtk.Table):
                         cr.line_to(maxx, y_start + h - 0.5)
                         cr.stroke()
                 cr.restore()
+            # advance to the next exposed line
             i += 1
             y_start += h
 
+        # draw the pixmap to window
         gc = pixmap.new_gc()
         widget.window.draw_drawable(gc, pixmap, 0, 0, offset_x, offset_y, width, height)
 
-    def map_vadj_changed(self, vadj):
+    # callback for update the overview map when the scroll position changes
+    def map_vadj_changed_cb(self, vadj):
         self.map.queue_draw()
 
+    # callback to handle button presses on the overview map
     def map_button_press_cb(self, widget, event):
         vadj = self.vadj
 
         h = widget.get_allocation().height
         hmax = max(int(vadj.upper), h)
 
+        # centre view about picked location
         y = event.y * hmax // h
         v = y - int(vadj.page_size / 2)
         v = max(v, int(vadj.lower))
         v = min(v, int(vadj.upper - vadj.page_size))
         vadj.set_value(v)
 
+    # callback to handle mouse scrollwheel events
     def map_scroll_cb(self, widget, event):
         vadj = self.vadj
         v = vadj.get_value()
@@ -3228,21 +3447,30 @@ class FileDiffViewer(gtk.Table):
         v = min(v, int(vadj.upper - vadj.page_size))
         vadj.set_value(v)
 
+    # redraws the overview map when a portion is exposed
     def map_expose_cb(self, widget, event):
         n = len(self.panes)
 
-        # compute map
+        # compute map if it hasn't already been cached
+        # the map is a list of (start, end, flags) tuples for each pane
+        # flags & 1 indicates differences with the pane to the left
+        # flags & 2 indicates differences with the pane to the right
+        # flags & 4 indicates modified lines
+        # flags & 8 indicates regular lines with text
         if self.map_cache is None:
             nlines = len(self.panes[0].lines)
             start = n * [ 0 ]
             flags = n * [ 0 ]
             self.map_cache = [ [] for f in range(n) ]
+            # iterate over each row of lines
             for i in range(nlines):
                 nextflag = 0
+                # iterate over each pane
                 for f in range(n):
                     flag = nextflag
                     nextflag = 0
                     s0 = self.getCompareString(f, i)
+                    # compare with neighbour to the right
                     if f + 1 < n:
                         if s0 != self.getCompareString(f + 1, i):
                             flag |= 2
@@ -3262,10 +3490,12 @@ class FileDiffViewer(gtk.Table):
                             self.map_cache[f].append([start[f], i, flags[f]])
                         start[f] = i
                         flags[f] = flag
+            # finish any incomplete ranges
             for f in range(n):
                 if flags[f] != 0:
                     self.map_cache[f].append([start[f], nlines, flags[f]])
 
+        # draw to a pixmap to avoid screen flicker
         x, y, width, height = event.area
         pixmap = gtk.gdk.Pixmap(widget.window, width, height)
         cr = pixmap.cairo_create()
@@ -3339,9 +3569,12 @@ class FileDiffViewer(gtk.Table):
                 cr.rectangle(0.5, ymin + 0.5, w - 1, yh - 1)
                 cr.stroke()
 
+        # draw the pixmap to the window
         gc = pixmap.new_gc()
         widget.window.draw_drawable(gc, pixmap, 0, 0, x, y, width, height)
 
+    # returns the maximum valid offset for a cursor position
+    # cursors cannot be moved to the right of line ending characters
     def getMaxCharPosition(self, i):
         f = self.current_pane
         text = self.getLineText(f, i)
@@ -3349,6 +3582,7 @@ class FileDiffViewer(gtk.Table):
            return 0
         return len_minus_line_ending(self.panes[f].format, text)
 
+    # 'enter_align_mode' keybinding action
     def _line_mode_enter_align_mode(self):
         self.mode = ALIGN_MODE
         self.selection_line = self.current_line
@@ -3356,65 +3590,84 @@ class FileDiffViewer(gtk.Table):
         self.align_line = self.current_line
         self.dareas[self.align_pane].queue_draw()
 
+    # 'first_line' keybinding action
     def _first_line(self):
         self.setCurrentLine(self.current_pane, 0)
 
+    # 'extend_first_line' keybinding action
     def _extend_first_line(self):
         self.setCurrentLine(self.current_pane, 0, True)
 
+    # 'last_line' keybinding action
     def _last_line(self):
         f = self.current_pane
         self.setCurrentLine(f, len(self.panes[f].lines))
 
+    # 'extend_last_line' keybinding action
     def _extend_last_line(self):
         f = self.current_pane
         self.setCurrentLine(f, len(self.panes[f].lines), True)
 
+    # 'up' keybinding action
     def _line_mode_up(self, extend=False):
         self.setCurrentLine(self.current_pane, self.current_line - 1, extend)
 
+    # 'extend_up' keybinding action
     def _line_mode_extend_up(self):
         self._line_mode_up(True)
 
+    # 'down' keybinding action
     def _line_mode_down(self, extend=False):
         self.setCurrentLine(self.current_pane, self.current_line + 1, extend)
 
+    # 'extend_down' keybinding action
     def _line_mode_extend_down(self):
         self._line_mode_down(True)
 
+    # 'left' keybinding action
     def _line_mode_left(self, extend=False):
         self.setCurrentLine(self.current_pane - 1, self.current_line, extend)
 
+    # 'extend_left' keybinding action
     def _line_mode_extend_left(self):
         self._line_mode_left(True)
 
+    # 'right' keybinding action
     def _line_mode_right(self, extend=False):
         self.setCurrentLine(self.current_pane + 1, self.current_line, extend)
 
+    # 'extend_right' keybinding action
     def _line_mode_extend_right(self):
         self._line_mode_right(True)
 
+    # 'page_up' keybinding action
     def _line_mode_page_up(self, extend=False):
         delta = int(self.vadj.page_size // self.font_height)
         self.setCurrentLine(self.current_pane, self.current_line - delta, extend)
 
+    # 'extend_page_up' keybinding action
     def _line_mode_extend_page_up(self):
         self._line_mode_page_up(True)
 
+    # 'page_down' keybinding action
     def _line_mode_page_down(self, extend=False):
         delta = int(self.vadj.page_size // self.font_height)
         self.setCurrentLine(self.current_pane, self.current_line + delta, extend)
 
+    # 'extend_page_down' keybinding action
     def _line_mode_extend_page_down(self):
         self._line_mode_page_down(True)
 
+    # 'delete_text' keybinding action
     def _delete_text(self):
         self.replaceText('')
 
+    # 'enter_line_mode' keybinding action
     def _align_mode_enter_line_mode(self):
         self.selection_line = self.current_line
         self.setLineMode()
 
+    # 'align' keybinding action
     def _align_text(self):
         f1 = self.align_pane
         line1 = self.align_line
@@ -3426,13 +3679,17 @@ class FileDiffViewer(gtk.Table):
         elif self.current_pane + 1 == f1:
             self.align(self.current_pane, line2, line1)
 
+    # callback for keyboard events
+    # only keypresses that are not handled by menu item accelerators reach here
     def key_press_cb(self, widget, event):
         retval = False
+        # determine the modified keys used
         mask = event.state & (gtk.gdk.SHIFT_MASK | gtk.gdk.CONTROL_MASK)
         if event.state & gtk.gdk.LOCK_MASK:
             mask ^= gtk.gdk.SHIFT_MASK
         self.openUndoBlock()
         if self.mode == LINE_MODE:
+            # check if the keyval matches a line mode action
             action = theResources.getActionForKey('line_mode', event.keyval, mask)
             if self._line_mode_actions.has_key(action):
                 self._line_mode_actions[action]()
@@ -3442,16 +3699,20 @@ class FileDiffViewer(gtk.Table):
             is_shifted = event.state & gtk.gdk.SHIFT_MASK
             is_ctrl = event.state & gtk.gdk.CONTROL_MASK
             retval = True
+            # check if the keyval matches a character mode action
             action = theResources.getActionForKey('character_mode', event.keyval, mask)
             if self._character_mode_actions.has_key(action):
                 self._character_mode_actions[action]()
+            # allow CTRL-Tab for widget navigation
             elif event.keyval == gtk.keysyms.Tab and event.state & gtk.gdk.CONTROL_MASK:
-                # allow CTRL-Tab for widget navigation
                 retval = False
+            # up/down cursor navigation
             elif event.keyval in [ gtk.keysyms.Up, gtk.keysyms.Down, gtk.keysyms.Page_Up, gtk.keysyms.Page_Down ]:
                 i = self.current_line
+                # move back to the remembered cursor column if possible
                 col = self.cursor_column
                 if col < 0:
+                    # find the current cursor column
                     s = nullToEmpty(self.getLineText(f, i))[:self.current_char]
                     col = self.getStringColumnWidth(f, s)
                 if event.keyval in [ gtk.keysyms.Up, gtk.keysyms.Down ]:
@@ -3468,6 +3729,7 @@ class FileDiffViewer(gtk.Table):
                 elif i > nlines:
                     i = nlines
                 else:
+                    # move the cursor to column 'col' if possible
                     s = self.getLineText(f, i)
                     if s is not None:
                         s = strip_line_ending(self.panes[f].format, s)
@@ -3480,12 +3742,14 @@ class FileDiffViewer(gtk.Table):
                             j += 1
                 self.setCurrentChar(i, j, is_shifted)
                 self.cursor_column = col
+            # home key
             elif event.keyval == gtk.keysyms.Home:
                 if is_ctrl:
                     i = 0
                 else:
                     i = self.current_line
                 self.setCurrentChar(i, 0, is_shifted)
+            # end key
             elif event.keyval == gtk.keysyms.End:
                 if is_ctrl:
                     i = len(self.panes[f].lines)
@@ -3494,6 +3758,7 @@ class FileDiffViewer(gtk.Table):
                     i = self.current_line
                     j = self.getMaxCharPosition(i)
                 self.setCurrentChar(i, j, is_shifted)
+            # cursor left navigation
             elif event.keyval == gtk.keysyms.Left:
                 i = self.current_line
                 j = self.current_char
@@ -3503,6 +3768,7 @@ class FileDiffViewer(gtk.Table):
                     i -= 1
                     j = self.getMaxCharPosition(i)
                 self.setCurrentChar(i, j, is_shifted)
+            # cursor right navigation
             elif event.keyval == gtk.keysyms.Right:
                 i = self.current_line
                 j = self.current_char
@@ -3512,12 +3778,16 @@ class FileDiffViewer(gtk.Table):
                     i += 1
                     j = 0
                 self.setCurrentChar(i, j, is_shifted)
+            # backspace
             elif event.keyval == gtk.keysyms.BackSpace:
                 s = ''
                 i = self.current_line
                 j = self.current_char
                 if self.selection_line == i and self.selection_char == j:
                     if j > 0:
+                        # delete back to the last soft-tab location if there
+                        # are only spaces and tabs from the beginning of the
+                        # line to the current cursor position
                         text = self.getLineText(f, i)[:j]
                         for c in text:
                             if c not in ' \t':
@@ -3534,6 +3804,8 @@ class FileDiffViewer(gtk.Table):
                                 s = u'\t' * (w // width) + u' ' * (w % width)
                             j = 0
                     else:
+                        # delete back to an end of line character from the
+                        # previous line
                         while i > 0:
                             i -= 1
                             text = self.getLineText(f, i)
@@ -3543,10 +3815,13 @@ class FileDiffViewer(gtk.Table):
                     self.current_line = i
                     self.current_char = j
                 self.replaceText(s)
+            # delete key
             elif event.keyval == gtk.keysyms.Delete:
                 i = self.current_line
                 j = self.current_char
                 if self.selection_line == i and self.selection_char == j:
+                    # advance the selection to the next character so we can
+                    # delete it
                     text = self.getLineText(f, i)
                     while text is None and i < len(self.panes[f].lines):
                         i += 1
@@ -3561,9 +3836,13 @@ class FileDiffViewer(gtk.Table):
                     self.current_line = i
                     self.current_char = j
                 self.replaceText('')
+            # return key, add the platform specific end of line characters
             elif event.keyval == gtk.keysyms.Return:
                 self.replaceText(unicode(os.linesep))
+            # insert key
             elif event.keyval == gtk.keysyms.Tab:
+                # insert soft-tabs if there are only spaces and tabs from the
+                # beginning of the line to the cursor location
                 start_i, start_j = self.selection_line, self.selection_char
                 end_i, end_j = self.current_line, self.current_char
                 if end_i < start_i or (end_i == start_i and end_j < start_j):
@@ -3578,8 +3857,10 @@ class FileDiffViewer(gtk.Table):
                     w = 0
                 tab_width = self.prefs.getInt('display_tab_width')
                 if temp > 0:
+                    # insert a regular tab
                     ws = tab_width - w % tab_width
                 else:
+                    # insert a soft tab
                     self.selection_line = start_i
                     self.selection_char = 0
                     self.current_line = end_i
@@ -3588,14 +3869,18 @@ class FileDiffViewer(gtk.Table):
                     ws = w + width - w % width
                     w = 0
                 if self.prefs.getBool('editor_expand_tabs'):
+                    # convert to spaces
                     s = u' ' * ws
                 else:
+                    # replace with tab characters where possible
                     s = u'\t' * ((w + ws) // tab_width - w // tab_width)
                     s += u' ' * ((w + ws) % tab_width)
                 self.replaceText(s)
+            # handle all other printable characters
             elif len(event.string) > 0:
                 self.replaceText(event.string)
         elif self.mode == ALIGN_MODE:
+            # check if the keyval matches an align mode action
             action = theResources.getActionForKey('align_mode', event.keyval, mask)
             if self._align_mode_actions.has_key(action):
                 self._align_mode_actions[action]()
@@ -3603,6 +3888,7 @@ class FileDiffViewer(gtk.Table):
         self.closeUndoBlock()
         return retval
 
+    # check changes to files on disk when receiving keyboard focus
     def focus_in_cb(self, widget, event):
         for f, pane in enumerate(self.panes):
             if pane.last_stat is not None:
@@ -3610,6 +3896,7 @@ class FileDiffViewer(gtk.Table):
                 try:
                     new_stat = os.stat(spec.name)
                     if pane.last_stat[stat.ST_MTIME] < new_stat[stat.ST_MTIME]:
+                        # update our notion of the most recent modification
                         pane.last_stat = new_stat
                         msg = _('The file "%s" changed on disk.  Do you want to reload the file?') % (spec.name, )
                         dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
@@ -3617,15 +3904,19 @@ class FileDiffViewer(gtk.Table):
                         dialog.destroy()
                         if ok:
                             self.open_file(f, True)
-                except:
+                except IOError:
                     pass
 
+    # load a new file into pane 'f'
     def open_file(self, f, reload=False):
         pane = self.panes[f]
         spec = pane.spec
+        # warn users of any unsaved changes they might lose
         if pane.hasEdits() and not confirmDiscardEdits(self.get_toplevel()):
-           return
+            return
         if not reload:
+            # we need to ask for a file name if we are not reloading the
+            # existing file
             dialog = FileChooserDialog(_('Open File'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN)
             if spec.name is not None:
                 dialog.set_filename(os.path.realpath(spec.name))
@@ -3651,27 +3942,35 @@ class FileDiffViewer(gtk.Table):
         self.recordEditMode()
         self.closeUndoBlock()
 
-    def reload_file_button_cb(self, widget, data):
-        self.open_file(data, True)
-
+    # callback for reload file menu item
     def reload_file_cb(self, widget, data):
         self.open_file(self.current_file, True)
 
+    # callback for reload file button
+    def reload_file_button_cb(self, widget, data):
+        self.open_file(data, True)
+
+    # callback for open file menu item
     def open_file_cb(self, widget, data):
         self.open_file(self.current_file)
 
+    # callback for open file button
     def open_file_button_cb(self, widget, data):
         self.open_file(data)
 
+    # save contents of pane 'f' to file
     def save_file(self, f, save_as=False, name=None):
         pane = self.panes[f]
         spec = pane.spec
         if spec.name is None or spec.revision is not None:
+            # we need to prompt for a file name the current contents were not
+            # loaded from a regular file
             save_as = True
         spec = FileSpec(spec.name, None, None, spec.encoding)
         if name is not None:
             spec.name = name
         if save_as:
+            # prompt for a file name
             dialog = FileChooserDialog(_('Save File'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_SAVE, gtk.STOCK_SAVE)
             if spec.name is not None:
                 dialog.set_filename(os.path.abspath(spec.name))
@@ -3686,9 +3985,12 @@ class FileDiffViewer(gtk.Table):
             return
         try:
             msg = None
+            # warn if we are about to overwrite an existing file
             if save_as:
                 if os.path.exists(spec.name):
                     msg = _('A file named "%s" already exists.  Do you want to overwrite it?') % (spec.name, )
+            # warn if we are about to overwrite a file that has changed since
+            # we last read it
             elif pane.stat is not None:
                 if pane.stat[stat.ST_MTIME] < os.stat(spec.name)[stat.ST_MTIME]:
                     msg = _('The file "%s" has been modified by another process since reading it.  If you save, all the external changes could be lost.  Save anyways?') % (spec.name, )
@@ -3701,6 +4003,9 @@ class FileDiffViewer(gtk.Table):
         except IOError:
             pass
         try:
+            # convert the text to the output encoding
+            # refresh the lines to contain new objects with updated line
+            # numbers and no local edits
             ss = [ self.getLineText(f, i) for i in range(len(pane.lines)) ]
             encoded = []
             lines = []
@@ -3725,7 +4030,10 @@ class FileDiffViewer(gtk.Table):
             self.replaceLines(f, pane.lines, lines, pane.max_line_number, len(encoded))
             self.closeUndoBlock()
             pane.spec = spec
+            # update the pane's label
             self.setLabel(f, spec.name)
+            # update the syntax highlighting incase we changed the file
+            # extension
             syntax = theResources.getSyntaxByFilename(spec.name)
             if syntax is not None:
                 self.setSyntax(syntax)
@@ -3738,22 +4046,28 @@ class FileDiffViewer(gtk.Table):
             dialog.run()
             dialog.destroy()
 
+    # callback for save file menu item
     def save_file_cb(self, widget, data):
         self.save_file(self.current_pane)
 
-    def save_file_as_cb(self, widget, data):
-        self.save_file(self.current_pane, True)
-
+    # callback for save file button
     def save_file_button_cb(self, widget, data):
         self.save_file(data)
 
+    # callback for save file as menu item
+    def save_file_as_cb(self, widget, data):
+        self.save_file(self.current_pane, True)
+
+    # callback for save file as button
     def save_file_as_button_cb(self, widget, data):
         self.save_file(data, True)
 
+    # callback for copy menu item
     def copy_cb(self, widget, data):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD).set_text(self.getSelectedText())
 
+    # callback for cut menu item
     def cut_cb(self, widget, data):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             self.copy_cb(widget, data)
@@ -3761,21 +4075,26 @@ class FileDiffViewer(gtk.Table):
             self.replaceText('')
             self.closeUndoBlock()
 
-    def receiveClipboardText(self, clipboard, text, data):
+    # callback used when receiving clipboard text
+    def receive_clipboard_text_cb(self, clipboard, text, data):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             self.openUndoBlock()
             self.replaceText(self.prefs.convertToUnicode([ text ])[0][0])
             self.closeUndoBlock()
 
+    # callback for paste menu item
     def paste_cb(self, widget, data):
-         gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD).request_text(self.receiveClipboardText)
+         gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD).request_text(self.receive_clipboard_text_cb)
 
+    # callback for select all menu item
     def select_all_cb(self, widget, data):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             self.selectAll()
 
+    # callback for find menu item
     def find_cb(self, pattern, match_case, backwards):
         self.setCharMode()
+        # determine where to start searching from
         f = self.current_pane
         nlines = len(self.panes[f].lines)
         i, j = self.current_line, self.current_char
@@ -3790,22 +4109,26 @@ class FileDiffViewer(gtk.Table):
             pattern = pattern.upper()
         more = True
         while more:
+            # iterate over all valid lines
             while i < nlines + 1:
                 text = self.getLineText(f, i)
                 if text is not None:
                     if not match_case:
                         text = text.upper()
+                    # search for pattern
                     if backwards:
                         idx = text.rfind(pattern, 0, j)
                     else:
                         idx = text.find(pattern, j)
                     if idx >= 0:
+                        # we found a match
                         end = idx + len(pattern)
                         if backwards:
                             idx, end = end, idx
                         self.setCurrentChar(i, idx)
                         self.setCurrentChar(i, end, True)
                         return
+                # advance
                 if backwards:
                     if i == 0:
                         break
@@ -3819,6 +4142,7 @@ class FileDiffViewer(gtk.Table):
                     i += 1
                     j = 0
 
+            # we have reached the end, ask if we should continue
             j = 0
             if backwards:
                 msg = _('Phrase not found.  Continue from the end of the file?')
@@ -3831,6 +4155,7 @@ class FileDiffViewer(gtk.Table):
             more = (dialog.run() == gtk.RESPONSE_OK)
             dialog.destroy()
 
+    # callback for go to line menu item
     def go_to_line_cb(self, widget, data):
         parent = self.get_toplevel()
         dialog = GoToLineDialog(parent)
@@ -3839,18 +4164,22 @@ class FileDiffViewer(gtk.Table):
         dialog.destroy()
         if okay:
             try:
+                # parse the line number
                 f, idx, i = self.current_pane, 0, int(i)
                 if i > 0:
+                    # search for a line matching that number
+                    # we want to leave the cursor at the end of the file
+                    # if 'i' is greater than the last numbered line
                     lines = self.panes[f].lines
                     while idx < len(lines):
                         line = lines[idx]
                         if line is not None and line.line_number == i:
                             break
                         idx += 1
+                # select the line and make sure it is visible
                 self.setLineMode()
                 self.centre_view_about_y((idx + 0.5) * self.font_height)
                 self.setCurrentLine(f, idx)
-                return
             except ValueError:
                 m = MessageDialog(parent, gtk.MESSAGE_ERROR, _('Error parsing line number.'))
                 m.run()
@@ -3894,12 +4223,15 @@ class FileDiffViewer(gtk.Table):
             self.recordEditMode()
             self.closeUndoBlock()
 
+    # callback for decrease indenting menu item
     def decrease_indenting_cb(self, widget, data):
         self._adjust_indenting(-1)
 
+    # callback for increase indenting menu item
     def increase_indenting_cb(self, widget, data):
         self._adjust_indenting(1)
 
+    # callback for convert to DOS format menu item
     def convert_to_dos_cb(self, widget, data):
         self.setLineMode()
         self.openUndoBlock()
@@ -3908,12 +4240,14 @@ class FileDiffViewer(gtk.Table):
         for i in range(len(self.panes[f].lines)):
             text = self.getLineText(f, i)
             s = convert_to_dos(text)
+            # only modify lines that actually change
             if s != text:
                 self.updateLineText(f, i, True, s)
         self.setFormat(f, DOS_FORMAT)
         self.recordEditMode()
         self.closeUndoBlock()
 
+    # callback for convert to Unix format menu item
     def convert_to_unix_cb(self, widget, data):
         self.setLineMode()
         self.openUndoBlock()
@@ -3922,12 +4256,14 @@ class FileDiffViewer(gtk.Table):
         for i in range(len(self.panes[f].lines)):
             text = self.getLineText(f, i)
             s = convert_to_unix(text)
+            # only modify lines that actually change
             if s != text:
                 self.updateLineText(f, i, True, s)
         self.setFormat(f, UNIX_FORMAT)
         self.recordEditMode()
         self.closeUndoBlock()
 
+    # Undo for changes to the pane ordering
     class SwapPanesUndo:
         def __init__(self, f_dst, f_src):
             self.data = (f_dst, f_src)
@@ -3940,6 +4276,7 @@ class FileDiffViewer(gtk.Table):
             f_dst, f_src = self.data
             viewer.swapPanes(f_dst, f_src)
 
+    # swap the contents of two panes
     def swapPanes(self, f_dst, f_src):
         if self.undoblock is not None:
             self.addUndo(FileDiffViewer.SwapPanesUndo(f_dst, f_src))
@@ -3953,11 +4290,15 @@ class FileDiffViewer(gtk.Table):
         for f_idx in f_dst, f_src:
             for f in range(f_idx - 1, f_idx + 2):
                 if f >= 0 and f < npanes:
+                    # clear the diff cache and redraw as the pane has a new
+                    # neighour
                     del self.panes[f].diff_cache[:]
                     self.dareas[f].queue_draw()
+        # queue redraw
         self.map_cache = None
         self.map.queue_draw()
 
+    # swap the contents of two panes
     def swap_panes(self, f_dst, f_src):
         if f_dst >= 0 and f_dst < len(self.panes):
             if self.mode == ALIGN_MODE:
@@ -3968,17 +4309,22 @@ class FileDiffViewer(gtk.Table):
             self.recordEditMode()
             self.closeUndoBlock()
 
+    # callback for swap panes menu item
     def swap_panes_cb(self, widget, data):
         self.swap_panes(data, self.current_pane)
 
+    # callback for shift pane left menu item
     def shift_pane_left_cb(self, widget, data):
         f = self.current_pane
         self.swap_panes(f - 1, f)
 
+    # callback for shift pane right menu item
     def shift_pane_right_cb(self, widget, data):
         f = self.current_pane
         self.swap_panes(f + 1, f)
 
+    # recompute viewport size and redraw as the display preferences may have
+    # changed
     def prefsUpdated(self):
         self.setFont(pango.FontDescription(self.prefs.getString('display_font')))
         for pane in self.panes:
@@ -3989,6 +4335,7 @@ class FileDiffViewer(gtk.Table):
         self.map.queue_draw()
         self.updatePrompt()
 
+    # callback for clear edits menu item
     def clear_edits_cb(self, widget, data):
         self.setLineMode()
         self.openUndoBlock()
@@ -4001,12 +4348,15 @@ class FileDiffViewer(gtk.Table):
         for i in range(start, end):
             line = self.getLine(f, i)
             if line is not None and line.is_modified:
+                # remove the edits to the line
                 self.updateText(f, i, None, False)
                 if line.text is None:
+                    # remove the line so it doesn't persist as a spacer
                     self.instanceLine(f, i, True)
         self.recordEditMode()
         self.closeUndoBlock()
 
+    # copies the selected range of lines from pane 'f_src' to 'f_dst'
     def merge_lines(self, f_dst, f_src):
         self.setLineMode()
         pane = self.panes[f_dst]
@@ -4016,10 +4366,13 @@ class FileDiffViewer(gtk.Table):
         end = min(end + 1, len(pane.lines))
         ss = [ self.getLineText(f_src, i) for i in range(start, end) ]
         if pane.format == 0:
+            # copy the format of the source pane if the format for the
+            # destination pane as not yet been determined
             self.setFormat(f_dst, getFormat(ss))
         for i, s in enumerate(ss):
             self.updateText(f_dst, start + i, convert_to_format(s, pane.format))
 
+    # callback for merge lines menu item
     def merge_lines_cb(self, widget, data):
         self.openUndoBlock()
         self.recordEditMode()
@@ -4027,11 +4380,13 @@ class FileDiffViewer(gtk.Table):
         self.recordEditMode()
         self.closeUndoBlock()
 
+    # 'merge_from_left' keybinding action
     def _merge_from_left(self):
         f = self.current_pane
         if f > 0:
             self.merge_lines(f, f - 1)
 
+    # callback for merge from left menu item
     def merge_from_left_cb(self, widget, data):
         self.openUndoBlock()
         self.recordEditMode()
@@ -4039,11 +4394,13 @@ class FileDiffViewer(gtk.Table):
         self.recordEditMode()
         self.closeUndoBlock()
 
+    # 'merge_from_right' keybinding action
     def _merge_from_right(self):
         f = self.current_pane
         if f + 1 < len(self.panes):
             self.merge_lines(f, f + 1)
 
+    # callback for merge from right menu item
     def merge_from_right_cb(self, widget, data):
         self.openUndoBlock()
         self.recordEditMode()
@@ -4051,6 +4408,7 @@ class FileDiffViewer(gtk.Table):
         self.recordEditMode()
         self.closeUndoBlock()
 
+    # 'isolate' keybinding action
     def _isolate(self):
         self.setLineMode()
         f = self.current_pane
@@ -4070,7 +4428,7 @@ class FileDiffViewer(gtk.Table):
             pre, middle = cutBlocks(start, pre)
 
             # remove nulls
-            b = [ n ]
+            b = createBlock(n)
             removeNullLines(b, space)
             end = start + sum(b)
             if end > start:
@@ -4089,6 +4447,7 @@ class FileDiffViewer(gtk.Table):
             pre.extend(post)
             self.updateBlocks(pre)
 
+    # callback for the isolate menu item
     def isolate_cb(self, widget, data):
         self.openUndoBlock()
         self.recordEditMode()
@@ -4096,10 +4455,12 @@ class FileDiffViewer(gtk.Table):
         self.recordEditMode()
         self.closeUndoBlock()
 
+    # callback for the align to selection menu item
     def align_to_selection_cb(self, widget, data):
         self.setLineMode()
         self.openUndoBlock()
         self.recordEditMode()
+        # get the line and pane where the user right clicked
         f, line1 = data
         f2 = self.current_pane
         line2 = self.current_line
@@ -4110,6 +4471,8 @@ class FileDiffViewer(gtk.Table):
         self.recordEditMode()
         self.closeUndoBlock()
 
+    # returns True if line 'i' in pane 'f' has an edit or is different from its
+    # neighbour
     def hasEditsOrDifference(self, f, i):
         line = self.getLine(f, i)
         if line is not None and line.is_modified:
@@ -4117,6 +4480,7 @@ class FileDiffViewer(gtk.Table):
         text = self.getCompareString(f, i)
         return (f > 0 and self.getCompareString(f - 1, i) != text) or (f + 1 < len(self.panes) and text != self.getCompareString(f + 1, i))
 
+    # returns True if there are any differences
     def hasDifferences(self):
         n = len(self.panes)
         nlines = len(self.panes[0].lines)
@@ -4127,11 +4491,13 @@ class FileDiffViewer(gtk.Table):
                     return True
         return False
 
+    # scroll the viewport so pixels at position 'y' are centred
     def centre_view_about_y(self, y):
         vadj = self.vadj
         y = min(max(0, y - vadj.page_size / 2), vadj.upper - vadj.page_size)
         vadj.set_value(y)
 
+    # move the cursor from line 'i' to the next difference in direction 'delta'
     def goto_difference(self, i, delta):
         f = self.current_pane
         nlines = len(self.panes[f].lines)
@@ -4157,6 +4523,7 @@ class FileDiffViewer(gtk.Table):
             self.selection_line = i
             self.setCurrentLine(f, start, True)
 
+    # 'realign_all' keybinding action
     def realign_all_cb(self, widget, data):
         self.setLineMode()
         f = self.current_pane
@@ -4165,12 +4532,11 @@ class FileDiffViewer(gtk.Table):
         lines = []
         blocks = []
         for pane in self.panes:
+            # create a new list of lines with no spacers
             newlines = [ [ line for line in pane.lines if line is not None ] ]
-            newblocks = []
-            nlines = len(newlines[0])
-            if nlines > 0:
-                newblocks.append(nlines)
+            newblocks = createBlock(len(newlines[0]))
             if len(lines) > 0:
+                # match with neighbour to the left
                 self.alignBlocks(blocks, lines, newblocks, newlines)
                 blocks = mergeBlocks(blocks, newblocks)
             else:
@@ -4182,38 +4548,49 @@ class FileDiffViewer(gtk.Table):
         self.recordEditMode()
         self.closeUndoBlock()
 
+    # 'first_difference' keybinding action
     def _first_difference(self):
         self.setLineMode()
         self.goto_difference(0, 1)
 
+    # callback for the first difference menu item
     def first_difference_cb(self, widget, data):
         self._first_difference()
 
+    # 'previous_difference' keybinding action
     def _previous_difference(self):
         self.setLineMode()
         i = min(self.current_line, self.selection_line) - 1
         self.goto_difference(i, -1)
 
+    # callback for the previous difference menu item
     def previous_difference_cb(self, widget, data):
         self._previous_difference()
 
+    # 'next_difference' keybinding action
     def _next_difference(self):
         self.setLineMode()
         i = max(self.current_line, self.selection_line) + 1
         self.goto_difference(i, 1)
 
+    # callback for the next difference menu item
     def next_difference_cb(self, widget, data):
         self._next_difference()
 
+    # 'last_difference' keybinding action
     def _last_difference(self):
         self.setLineMode()
         f = self.current_pane
         i = len(self.panes[f].lines)
         self.goto_difference(i, -1)
 
+    # callback for the last difference menu item
     def last_difference_cb(self, widget, data):
         self._last_difference()
 
+    # callback used when the viewer is first displayed
+    # this must be connected with 'connect_after()' so the final widget sizes
+    # are known and the scroll bar can be moved to the first difference
     def _realise_cb(self, widget):
         self._first_difference()
 
@@ -4264,6 +4641,7 @@ class SearchDialog(gtk.Dialog):
         self.vbox.pack_start(vbox, False, False, 0)
         vbox.show()
 
+    # callback used when the Enter key is pressed
     def entry_cb(self, widget):
         self.response(gtk.RESPONSE_ACCEPT)
 
@@ -4275,7 +4653,9 @@ class Diffuse(gtk.Window):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
 
         self.prefs = Preferences()
+        # number of created viewers (used to label some tabs)
         self.viewer_count = 0
+        # search history is application wide
         self.search_pattern = None
         self.search_history = []
         self.search_match_case = False
@@ -4393,13 +4773,16 @@ class Diffuse(gtk.Window):
         self.add(vbox)
         vbox.show()
 
+    # callback for the close button on each tab
     def remove_tab_cb(self, widget, data):
         if self.notebook.get_n_pages() > 1:
+            # warn about losing unsaved changes before removing a tab
             if not data.hasEdits() or confirmDiscardEdits(self.get_toplevel()):
                 self.notebook.remove(data)
                 self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
 
-    def newFileDiffViewer(self, name, n):
+    # create an empty viewer with 'n' panes
+    def newFileDiffViewer(self, tabname, n):
         viewer = FileDiffViewer(n, self.prefs)
         hbox = gtk.HBox()
         image = gtk.Image()
@@ -4407,9 +4790,9 @@ class Diffuse(gtk.Window):
         hbox.pack_start(image, False, False, 5)
         image.show()
         self.viewer_count += 1
-        if name is None:
-            name = _('File Merge %d') % (self.viewer_count, )
-        label = gtk.Label(name)
+        if tabname is None:
+            tabname = _('File Merge %d') % (self.viewer_count, )
+        label = gtk.Label(tabname)
         hbox.pack_start(label, False, False, 0)
         label.show()
         button = gtk.Button()
@@ -4430,9 +4813,11 @@ class Diffuse(gtk.Window):
         self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
         return viewer
 
+    # create a new viewer to display 'specs'
     def newLoadedFileDiffViewer(self, tabname, specs):
-        # determine the number of panes to show
         if len(specs) == 1:
+            # one file specified
+            # determine which other files to compare it with
             name = specs[0].name
             encoding = specs[0].encoding
             vcs = theVCSs.findByFilename(name)
@@ -4443,6 +4828,7 @@ class Diffuse(gtk.Window):
             else:
                 specs.insert(0, FileSpec())
         else:
+            # multiple files specified, use one pane for each file
             for spec in specs:
                 if spec.revision is not None:
                     spec.vcs = theVCSs.findByFilename(spec.name)
@@ -4454,6 +4840,7 @@ class Diffuse(gtk.Window):
         for i, spec in enumerate(specs):
             viewer.load(i, spec)
 
+    # returns True if the application can safely quit
     def confirmQuit(self):
         for i in range(self.notebook.get_n_pages()):
             viewer = self.notebook.get_nth_page(i)
@@ -4461,72 +4848,92 @@ class Diffuse(gtk.Window):
                 return confirmDiscardEdits(self)
         return True
 
+    # respond to close window request from the window manager
     def delete_cb(self, widget, event):
         if self.confirmQuit():
             gtk.main_quit()
             return False
         return True
 
+    # returns the currently focused viewer
     def getCurrentViewer(self):
         return self.notebook.get_nth_page(self.notebook.get_current_page())
 
+    # callback for the open file menu item
     def open_file_cb(self, widget, data):
         self.getCurrentViewer().open_file_cb(widget, data)
 
+    # callback for the reload file menu item
     def reload_file_cb(self, widget, data):
         self.getCurrentViewer().reload_file_cb(widget, data)
 
+    # callback for the save file menu item
     def save_file_cb(self, widget, data):
         self.getCurrentViewer().save_file_cb(widget, data)
 
+    # callback for the save file as menu item
     def save_file_as_cb(self, widget, data):
         self.getCurrentViewer().save_file_as_cb(widget, data)
 
+    # callback for the new 2-way file merge menu item
     def new_2way_file_merge_cb(self, widget, data):
         viewer = self.newFileDiffViewer(None, 2)
         self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
         viewer.grab_focus()
 
+    # callback for the new 3-way file merge menu item
     def new_3way_file_merge_cb(self, widget, data):
         viewer = self.newFileDiffViewer(None, 3)
         self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
         viewer.grab_focus()
 
+    # callback for the quit menu item
     def quit_cb(self, widget, data):
         if self.confirmQuit():
             gtk.main_quit()
 
+    # callback for the undo menu item
     def undo_cb(self, widget, data):
         self.getCurrentViewer().undo()
 
+    # callback for the redo menu item
     def redo_cb(self, widget, data):
         self.getCurrentViewer().redo()
 
+    # callback for the cut menu item
     def cut_cb(self, widget, data):
         self.getCurrentViewer().cut_cb(widget, data)
 
+    # callback for the copy menu item
     def copy_cb(self, widget, data):
         self.getCurrentViewer().copy_cb(widget, data)
 
+    # callback for the paste menu item
     def paste_cb(self, widget, data):
         self.getCurrentViewer().paste_cb(widget, data)
 
+    # callback for the select all menu item
     def select_all_cb(self, widget, data):
         self.getCurrentViewer().select_all_cb(widget, data)
 
+    # request search parameters if force=True and then perform a search in the
+    # current viewer pane
     def find(self, force, reverse):
         if force or self.search_pattern is None:
+            # construct search dialog
             history = self.search_history
             dialog = SearchDialog(self.get_toplevel(), self.search_pattern, history)
             dialog.match_case_button.set_active(self.search_match_case)
             dialog.backwards_button.set_active(self.search_backwards)
             keep = (dialog.run() == gtk.RESPONSE_ACCEPT)
+            # persist the search options
             pattern = dialog.entry.get_text()
             match_case = dialog.match_case_button.get_active()
             backwards = dialog.backwards_button.get_active()
             dialog.destroy()
             if not keep or pattern == '':
                 return
+            # perform the search
             self.search_pattern = pattern
             if pattern in history:
                 del history[history.index(pattern)]
@@ -4535,85 +4942,110 @@ class Diffuse(gtk.Window):
             self.search_backwards = backwards
         self.getCurrentViewer().find_cb(self.search_pattern, self.search_match_case, reverse ^ self.search_backwards)
 
+    # callback for the find menu item
     def find_cb(self, widget, data):
         self.find(True, False)
 
+    # callback for the find next menu item
     def find_next_cb(self, widget, data):
         self.find(False, False)
 
+    # callback for the find previous menu item
     def find_previous_cb(self, widget, data):
         self.find(False, True)
 
+    # callback for the go to line menu item
     def go_to_line_cb(self, widget, data):
         self.getCurrentViewer().go_to_line_cb(widget, data)
 
+    # callback for the decrease indenting menu item
     def decrease_indenting_cb(self, widget, data):
         self.getCurrentViewer().decrease_indenting_cb(widget, data)
 
+    # callback for the increase indenting menu item
     def increase_indenting_cb(self, widget, data):
         self.getCurrentViewer().increase_indenting_cb(widget, data)
 
+    # callback for the convert to DOS menu item
     def convert_to_dos_cb(self, widget, data):
         self.getCurrentViewer().convert_to_dos_cb(widget, data)
 
+    # callback for the convert to Unix menu item
     def convert_to_unix_cb(self, widget, data):
         self.getCurrentViewer().convert_to_unix_cb(widget, data)
 
+    # callback for all of the syntax highlighting menu items
     def syntax_cb(self, widget, data):
         self.getCurrentViewer().setSyntax(theResources.getSyntax(data))
 
+    # callback for the previous tab menu item
     def previous_tab_cb(self, widget, data):
         i = self.notebook.get_current_page() - 1
         if i >= 0:
             self.notebook.set_current_page(i)
 
+    # callback for the next tab menu item
     def next_tab_cb(self, widget, data):
         i = self.notebook.get_current_page() + 1
         n = self.notebook.get_n_pages()
         if i < n:
             self.notebook.set_current_page(i)
 
+    # callback for the close tab menu item
     def close_tab_cb(self, widget, data):
         self.remove_tab_cb(widget, self.notebook.get_nth_page(self.notebook.get_current_page()))
 
+    # callback for the shift pane left menu item
     def shift_pane_left_cb(self, widget, data):
         self.getCurrentViewer().shift_pane_left_cb(widget, data)
 
+    # callback for the shift pane right menu item
     def shift_pane_right_cb(self, widget, data):
         self.getCurrentViewer().shift_pane_right_cb(widget, data)
 
+    # callback for the preferences menu item
     def preferences_cb(self, widget, data):
         if self.prefs.runDialog(self.get_toplevel()):
             self.preferences_updated()
 
+    # notify all viewers of changes to the preferences
     def preferences_updated(self):
         for i in range(self.notebook.get_n_pages()):
             self.notebook.get_nth_page(i).prefsUpdated()
 
+    # callback for the realign all menu item
     def realign_all_cb(self, widget, data):
         self.getCurrentViewer().realign_all_cb(widget, data)
 
+    # callback for the first difference menu item
     def first_difference_cb(self, widget, data):
         self.getCurrentViewer().first_difference_cb(widget, data)
 
+    # callback for the previous difference menu item
     def previous_difference_cb(self, widget, data):
         self.getCurrentViewer().previous_difference_cb(widget, data)
 
+    # callback for the next difference menu item
     def next_difference_cb(self, widget, data):
         self.getCurrentViewer().next_difference_cb(widget, data)
 
+    # callback for the last difference menu item
     def last_difference_cb(self, widget, data):
         self.getCurrentViewer().last_difference_cb(widget, data)
 
+    # callback for the clear edits menu item
     def clear_edits_cb(self, widget, data):
         self.getCurrentViewer().clear_edits_cb(widget, data)
 
+    # callback for the merge from left menu item
     def merge_from_left_cb(self, widget, data):
         self.getCurrentViewer().merge_from_left_cb(widget, data)
 
+    # callback for the merge from right menu item
     def merge_from_right_cb(self, widget, data):
         self.getCurrentViewer().merge_from_right_cb(widget, data)
 
+    # callback for the isolate menu item
     def isolate_cb(self, widget, data):
         self.getCurrentViewer().isolate_cb(widget, data)
 
@@ -4668,6 +5100,7 @@ class Diffuse(gtk.Window):
             # spawnvp is not available on some systems, use spawnv instead
             os.spawnv(os.P_NOWAIT, args[0], args)
 
+    # callback for the about menu item
     def about_cb(self, widget, data):
         dialog = AboutDialog()
         dialog.run()
