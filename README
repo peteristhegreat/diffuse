@@ -1,7 +1,7 @@
 Diffuse
 Version 0.2.15
 
-Copyright (C) 2006-2008 Derrick Moser <derrick_moser@yahoo.com>
+Copyright (C) 2006-2009 Derrick Moser <derrick_moser@yahoo.com>
 
 ----
 
@@ -36,11 +36,14 @@ dependencies should be installed prior to installing PyGTK.
 
 Diffuse can be installed from source on most Linux distributions by simply
 copying the files and directories in the 'src' directory to the root of the
-host system.
+host system.  For example:
+
+  bash# cp -a src/* /
 
 If you wish to install Diffuse (or portions of Diffuse) to other locations, the
 paths used to locate configuration files, icons, and help documentation in
-'/etc/diffuserc' and '/usr/bin/diffuse' need to be modified.
+'src/etc/diffuserc', 'src/usr/bin/diffuse', and
+'src/usr/share/omf/diffuse/diffuse-C.omf' need to be modified.
 
 Diffuse's help documentation is written in the DocBook format and can be easily
 converted into other formats using XSLT stylesheets.  If the local help
@@ -48,5 +51,15 @@ documentation or its browser are unavailable, Diffuse will attempt to display
 the on-line help documentation using a web browser.
 
 Some platforms specific post-install steps may be required to index the
-documentation and mime-type handling.  A sample RPM SPEC file is included with
-the source for reference.
+documentation and mime-type handling.  For example:
+
+  bash# scrollkeeper-update -q -o /usr/share/omf/diffuse/diffuse-C.omf
+  bash# update-desktop-database
+
+Similar steps may be necessary when uninstalling Diffuse.  For example:
+
+  bash# scrollkeeper-update -q
+  bash# update-desktop-database
+
+The 'windows-installer' directory contains scripts for building a package for
+Windows that includes all dependencies.
