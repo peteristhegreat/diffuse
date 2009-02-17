@@ -1346,12 +1346,15 @@
         </varlistentry>
 
         <varlistentry>
-          <term><userinput>syntax_file <replaceable>name</replaceable> <replaceable>pattern</replaceable></userinput></term>
+          <term><userinput>syntax_file <replaceable>name</replaceable> <optional><replaceable>pattern</replaceable><optional></userinput></term>
           <listitem>
             <para>
               Specifies that files with a name matching
               <replaceable>pattern</replaceable> should be highlighted using
               the syntax style called <replaceable>name</replaceable>.
+              Patterns used to match files for use with the syntax style called
+              <replaceable>name</replaceable> can be removed by omitting
+              <replaceable>pattern</replaceable>.
             </para>
           </listitem>
         </varlistentry>
