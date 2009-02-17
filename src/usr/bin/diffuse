@@ -4645,6 +4645,32 @@ class SearchDialog(gtk.Dialog):
     def entry_cb(self, widget):
         self.response(gtk.RESPONSE_ACCEPT)
 
+# widget classed to create notebook tabs with labels and a close button
+# use notebooktab.button.connect() to be notified when the button is pressed
+class NotebookTab(gtk.HBox):
+    def __init__(self, name, stock):
+        gtk.HBox.__init__(self)
+
+        if stock is not None:
+            image = gtk.Image()
+            image.set_from_stock(stock, gtk.ICON_SIZE_MENU)
+            self.pack_start(image, False, False, 5)
+            image.show()
+        self.label = label = gtk.Label(name)
+        self.pack_start(label, False, False, 0)
+        label.show()
+        self.button = button = gtk.Button()
+        button.set_relief(gtk.RELIEF_NONE)
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_MENU)
+        button.add(image)
+        image.show()
+        self.pack_start(button, False, False, 0)
+        button.show()
+
+    def get_text(self):
+        return self.label.get_text()
+
 # the main application class containing a set of file viewers
 # this class displays tab for switching between viewers and dispatches menu
 # commands to the current viewer
@@ -4662,7 +4688,6 @@ class Diffuse(gtk.Window):
         self.search_backwards = False
 
         self.connect('delete-event', self.delete_cb)
-        self.set_title(APP_NAME)
         accel_group = gtk.AccelGroup()
 
         # Create a VBox for our contents
@@ -4766,6 +4791,7 @@ class Diffuse(gtk.Window):
 
         self.notebook = notebook = gtk.Notebook()
         notebook.set_scrollable(True)
+        notebook.connect('switch-page', self.switch_page_cb)
         vbox.pack_start(notebook, True, True, 0)
         notebook.show()
 
@@ -4781,44 +4807,38 @@ class Diffuse(gtk.Window):
                 self.notebook.remove(data)
                 self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
 
+    # callback used when switching notebook pages
+    def switch_page_cb(self, widget, ptr, page_num):
+        page = widget.get_nth_page(page_num)
+        title = widget.get_tab_label(page).get_text()
+        self.set_title('%s - %s' % (title, APP_NAME))
+
     # create an empty viewer with 'n' panes
-    def newFileDiffViewer(self, tabname, n):
+    def newFileDiffViewer(self, n, tabname=None):
         viewer = FileDiffViewer(n, self.prefs)
-        hbox = gtk.HBox()
-        image = gtk.Image()
-        image.set_from_stock(gtk.STOCK_FILE, gtk.ICON_SIZE_MENU)
-        hbox.pack_start(image, False, False, 5)
-        image.show()
         self.viewer_count += 1
         if tabname is None:
             tabname = _('File Merge %d') % (self.viewer_count, )
-        label = gtk.Label(tabname)
-        hbox.pack_start(label, False, False, 0)
-        label.show()
-        button = gtk.Button()
-        button.connect('clicked', self.remove_tab_cb, viewer)
-        button.set_relief(gtk.RELIEF_NONE)
-        image = gtk.Image()
-        image.set_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_MENU)
-        button.add(image)
-        image.show()
-        hbox.pack_start(button, False, False, 0)
-        button.show()
-        self.notebook.append_page(viewer, hbox)
+        tab = NotebookTab(tabname, gtk.STOCK_FILE)
+        tab.button.connect('clicked', self.remove_tab_cb, viewer)
+        self.notebook.append_page(viewer, tab)
         if hasattr(self.notebook, 'set_tab_reorderable'):
             # some PyGTK packages are missing this method
             self.notebook.set_tab_reorderable(viewer, True)
-        hbox.show()
+        tab.show()
         viewer.show()
         self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
         return viewer
 
     # create a new viewer to display 'specs'
-    def newLoadedFileDiffViewer(self, tabname, specs):
-        if len(specs) == 1:
+    def newLoadedFileDiffViewer(self, specs, tabname=None):
+        n = len(specs)
+        if n == 1:
             # one file specified
             # determine which other files to compare it with
             name = specs[0].name
+            if tabname is None:
+                tabname = name
             encoding = specs[0].encoding
             vcs = theVCSs.findByFilename(name)
             if vcs is not None:
@@ -4827,14 +4847,20 @@ class Diffuse(gtk.Window):
                     specs.append(FileSpec(name, rev, vcs, encoding))
             else:
                 specs.insert(0, FileSpec())
-        else:
+        elif n > 1:
             # multiple files specified, use one pane for each file
+            names = []
             for spec in specs:
+                name = spec.name
                 if spec.revision is not None:
+                    name += ' (' + spec.revision + ')'
                     spec.vcs = theVCSs.findByFilename(spec.name)
+                names.append(name)
+            if tabname is None:
+                tabname = ' : '.join(names)
 
         # open a new viewer
-        viewer = self.newFileDiffViewer(tabname, len(specs))
+        viewer = self.newFileDiffViewer(len(specs), tabname)
 
         # load the files
         for i, spec in enumerate(specs):
@@ -4877,13 +4903,13 @@ class Diffuse(gtk.Window):
 
     # callback for the new 2-way file merge menu item
     def new_2way_file_merge_cb(self, widget, data):
-        viewer = self.newFileDiffViewer(None, 2)
+        viewer = self.newFileDiffViewer(2)
         self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
         viewer.grab_focus()
 
     # callback for the new 3-way file merge menu item
     def new_3way_file_merge_cb(self, widget, data):
-        viewer = self.newFileDiffViewer(None, 3)
+        viewer = self.newFileDiffViewer(3)
         self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
         viewer.grab_focus()
 
@@ -5219,14 +5245,14 @@ if __name__ == '__main__':
                 # open items in separate tabs
                 n = len(specs)
                 if n > 0:
-                    diff.newLoadedFileDiffViewer(tab_label, specs)
+                    diff.newLoadedFileDiffViewer(specs, tab_label)
                     specs = []
                 separate = True
             elif i + 1 < argc and arg in [ '-t', '--tab' ]:
                 # start a new tab
                 n = len(specs)
                 if n > 0:
-                    diff.newLoadedFileDiffViewer(tab_label, specs)
+                    diff.newLoadedFileDiffViewer(specs, tab_label)
                     specs = []
                 i += 1
                 tab_label = args[i]
@@ -5267,19 +5293,19 @@ if __name__ == '__main__':
                 specs.append(FileSpec(filename, None, None, encoding))
             revs = []
             if separate:
-                diff.newLoadedFileDiffViewer(filename, specs)
+                diff.newLoadedFileDiffViewer(specs)
                 specs = []
         i += 1
     n = len(specs)
     if n > 0:
-        diff.newLoadedFileDiffViewer(tab_label, specs)
+        diff.newLoadedFileDiffViewer(specs, tab_label)
     nb = diff.notebook
 
     # create a file diff viewer if the command line arguments haven't
     # implicitly created any
     n = nb.get_n_pages()
     if n == 0:
-        diff.newLoadedFileDiffViewer(tab_label, [])
+        diff.newLoadedFileDiffViewer([], tab_label)
     elif close_on_same:
         for i in range(n - 1, -1, -1):
             if not nb.get_nth_page(i).hasDifferences():
