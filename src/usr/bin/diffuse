@@ -4835,7 +4835,6 @@ class Diffuse(gtk.Window):
 
         self.notebook = notebook = gtk.Notebook()
         notebook.set_scrollable(True)
-        notebook.popup_enable()
         notebook.connect('switch-page', self.switch_page_cb)
         vbox.pack_start(notebook, True, True, 0)
         notebook.show()
@@ -4865,7 +4864,6 @@ class Diffuse(gtk.Window):
     def title_changed_cb(self, widget, title):
         # update the label in the notebook's tab
         self.notebook.get_tab_label(widget).set_text(title)
-        self.notebook.get_menu_label(widget).set_text(title)
         if widget is self.getCurrentViewer():
             self.refreshTitle(widget)
 
@@ -4880,9 +4878,6 @@ class Diffuse(gtk.Window):
         self.notebook.set_tab_reorderable(viewer, True)
         tab.show()
         viewer.show()
-        label = gtk.Label(tabname)
-        self.notebook.set_menu_label(viewer, label)
-        label.show()
         self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
         viewer.connect('title_changed', self.title_changed_cb)
         return viewer
