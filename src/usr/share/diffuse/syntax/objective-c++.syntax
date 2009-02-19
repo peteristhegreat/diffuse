@@ -51,7 +51,7 @@ syntax_pattern normal normal objc_literal '\b(true|false|nil|Nil|NO|NULL|YES)\b'
 syntax_pattern normal normal objc_type '\b(auto|bool|BOOL|bycopy|byref|char|class|Class|const|double|enum|explicit|export|extern|float|id|IMP|in|inline|inout|int|long|mutable|namespace|oneway|out|register|SEL|short|signed|static|struct|STR|template|typedef|typename|union|unsigned|virtual|void|volatile|wchar_t)\b'
 
 # keywords
-syntax_pattern normal normal objc_keyword '@(catch|class|encode|end|finally|implementation|interface|package|private|protected|protocol|public|selector|syntchronized|throw|try)\b'
+syntax_pattern normal normal objc_keyword '@(catch|class|dynamic|encode|end|finally|implementation|interface|optional|package|private|property|protected|protocol|protocol|public|required|selector|synchronized|synthesize|throw|try)\b'
 syntax_pattern normal normal objc_keyword '\b(_cmd|asm|break|case|catch|const_cast|continue|default|delete|do|dynamic_cast|else|for|friend|goto|if|new|operator|private|protected|public|reinterpret_cast|return|self|sizeof|static_cast|super|switch|this|throw|try|typeid|using|while)\b'
 
 # punctuation
