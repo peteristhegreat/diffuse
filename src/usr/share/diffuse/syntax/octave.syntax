@@ -1,7 +1,10 @@
 # Octave syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax Octave normal text
-syntax_files Octave '\.m$'
+# We want Diffuse's default behaviour tot identify files with the '.m'
+# extension as Objective-C files so we do not define a rule for matching files
+# with the extension '.m' here.
+#syntax_files Octave '\.m$'
 
 # whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'

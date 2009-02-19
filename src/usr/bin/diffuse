@@ -479,6 +479,8 @@ class Resources:
                        #    import /usr/share/diffuse/syntax/python.syntax
                        if args[0] == 'import' and len(args) == 2:
                            path = os.path.expanduser(args[1])
+                           # relative paths are relative to the parsed file
+                           path = os.path.join(os.path.dirname(file_name), path)
                            paths = glob.glob(path)
                            if len(paths) == 0:
                                paths = [ path ]
@@ -1055,6 +1057,16 @@ class FileSpec:
         # name of codec used to translate the file contents to unicode text
         self.encoding = encoding
 
+    # returns a description suitable for a label
+    def get_label(self):
+        if self.name is None:
+            s = ''
+        else:
+            s = self.name
+            if self.revision is not None:
+                s = '%s (%s)' % (s, self.revision)
+        return s
+
 # helper function prevent files from being confused with command line options
 # by prepending './' to the basename
 def safeLocalPath(s, prefs, cygwin_pref):
@@ -1178,7 +1190,7 @@ class VCSs:
                 for s in ss:
                     if s.startswith('  sep: ') and len(s) > 7:
                         sep = s[7]
-		# find the project directories
+                # find the project directories
                 for s in ss:
                     if hash:
                         if not s.startswith('    '):
@@ -1213,7 +1225,7 @@ class VCSs:
                             projs[key] = None
                     elif s.startswith('  hash:'):
                         hash = True
-		# check if the file belongs to one of the project directories
+                # check if the file belongs to one of the project directories
                 while True:
                     newname = os.path.dirname(name)
                     if newname == name:
@@ -2517,24 +2529,22 @@ class FileDiffViewer(gtk.Table):
     # version control system if applicable
     def load(self, f, spec):
         name = spec.name
+        label = spec.get_label()
         stat = None
         if name is None:
             # reset to an empty pane
-            label = ''
             ss = []
         else:
             rev = spec.revision
             try:
                 if rev is None:
                     # we are loading a plain file
-                    label = name
                     fd = open(name, 'rb')
                     # get the file's modification times so we can detect changes
                     stat = os.stat(name)
                 else:
                     if spec.vcs is None:
                         raise IOError('Not under revision control.')
-                    label = '%s (%s)' % (name, rev)
                     fullname = os.path.abspath(name)
                     # find command to retrieve the file from the version
                     # control system
@@ -4838,12 +4848,15 @@ class Diffuse(gtk.Window):
     # create a new viewer to display 'specs'
     def newLoadedFileDiffViewer(self, specs, tabname=None):
         n = len(specs)
+
+        # create a label for the new tab
+        if tabname is None and n > 0:
+            tabname = ' : '.join([ spec.get_label() for spec in specs ])
+
         if n == 1:
             # one file specified
             # determine which other files to compare it with
             name = specs[0].name
-            if tabname is None:
-                tabname = name
             encoding = specs[0].encoding
             vcs = theVCSs.findByFilename(name)
             if vcs is not None:
@@ -4852,17 +4865,11 @@ class Diffuse(gtk.Window):
                     specs.append(FileSpec(name, rev, vcs, encoding))
             else:
                 specs.insert(0, FileSpec())
-        elif n > 1:
+        else:
             # multiple files specified, use one pane for each file
-            names = []
             for spec in specs:
-                name = spec.name
                 if spec.revision is not None:
-                    name += ' (' + spec.revision + ')'
                     spec.vcs = theVCSs.findByFilename(spec.name)
-                names.append(name)
-            if tabname is None:
-                tabname = ' : '.join(names)
 
         # open a new viewer
         viewer = self.newFileDiffViewer(len(specs), tabname)
@@ -5181,10 +5188,9 @@ if __name__ == '__main__':
             # fallback on system wide initialisation file when the personal
             # initialisation file is not present
             if isWindows():
-                rcdir = bin_dir
+                rc_file = os.path.join(bin_dir, 'diffuserc')
             else:
-                rcdir = '/etc'
-            rc_file = os.path.join(rcdir, 'diffuserc')
+                rc_file = os.path.join(bin_dir, '../../etc/diffuserc')
         if os.path.isfile(rc_file):
             theResources.parse(rc_file)
 

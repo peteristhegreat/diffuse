@@ -1,5 +1,5 @@
 # initialisation file for diffuse
 #
-# Copyright (C) 2006-2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2006-2009 Derrick Moser <derrick_moser@yahoo.com>
 
-import /usr/share/diffuse/syntax/*.syntax
+import ../usr/share/diffuse/syntax/*.syntax

@@ -13,11 +13,12 @@ SolidCompression=yes
 OutputDir=.
 
 [Files]
-Source: "dist\diffuse.ico"; DestDir: "{app}"; BeforeInstall: MyBeforeInstall();
 Source: "dist\*.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\*.zip"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\*.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\*.pyd"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
+Source: "dist\diffuserc"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
+Source: "dist\diffuse.ico"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\*.html"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\*.css"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\*.txt"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
@@ -40,14 +41,6 @@ Name: "{group}\Diffuse"; Filename: "{app}\diffusew.exe"
 Name: "{group}\Uninstall Diffuse"; Filename: "{app}\unins000.exe"
 
 [Code]
-procedure MyBeforeInstall();
-begin
-    SaveStringToFile(ExpandConstant('{app}\diffuserc'), ExpandConstant(
-        '# initialisation file for diffuse'#13#10 +
-        ''#13#10 +
-        'import ''{app}\syntax\''*.syntax'#13#10), False);
-end;
-
 function GetOpenWithCommand(dummy : String): String;
 var
     S: String;

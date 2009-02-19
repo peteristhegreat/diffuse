@@ -1,10 +1,10 @@
 # C++ syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax C++ normal text
 syntax_files C++ '\.(h|c|C|cc|cxx|c\+\+|cpp)$'
 
 # preprocessor
-syntax_pattern normal cpp c++_cppkeyword '^[ \t]*#[ \t]*(define|undef|if|ifdef|ifndef|elif|else|endif|warning|error|include|line|pragma)\b'
+syntax_pattern normal cpp c++_cppkeyword '^[ \t]*#[ \t]*(define|elif|else|endif|error|if|ifdef|ifndef|include|line|pragma|undef|warning)\b'
 syntax_pattern cpp normal c++_cppkeyword '\n'
 syntax_pattern normal normal text '[ \t\r\n]+'
 
@@ -45,7 +45,7 @@ syntax_pattern string string c++_string '.[^\\"]*'
 
 # literals
 syntax_pattern normal normal c++_literal '((([0-9]+\.[0-9]*|\.[0-9]+)(e[\+\-]?[0-9]+)?|[0-9]+e[\+\-]?[0-9]+)[fl]?|(0|[1-9][0-9]*)f|(0x[0-9a-f]+|0[0-7]*|[1-9][0-9]*)(ul?|lu?)?)' ignorecase
-syntax_pattern normal normal c++_literal '\b(true|false)\b'
+syntax_pattern normal normal c++_literal '\b(true|false|NULL)\b'
 
 # typing keywords
 syntax_pattern normal normal c++_type '\b(auto|bool|char|class|const|double|enum|explicit|export|extern|float|inline|int|long|mutable|namespace|register|short|signed|static|struct|template|typedef|typename|union|unsigned|virtual|void|volatile|wchar_t)\b'
