@@ -1346,7 +1346,7 @@
         </varlistentry>
 
         <varlistentry>
-          <term><userinput>syntax_file <replaceable>name</replaceable> <optional><replaceable>pattern</replaceable></optional></userinput></term>
+          <term><userinput>syntax_files <replaceable>name</replaceable> <optional><replaceable>pattern</replaceable></optional></userinput></term>
           <listitem>
             <para>
               Specifies that files with a name matching

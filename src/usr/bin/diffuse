@@ -1671,7 +1671,7 @@ class FileDiffViewer(gtk.Table):
                 return self.modified_text
             return self.text
 
-    def __init__(self, n, prefs):
+    def __init__(self, n, prefs, title):
         # figure out how many pane panes we should have
         if n < 2:
             n = 2
@@ -1814,6 +1814,9 @@ class FileDiffViewer(gtk.Table):
 
         # scroll to first difference when realised
         darea.connect_after('realize', self._realise_cb)
+
+        # title
+        self.setTitle(title)
 
     # updates the display font and resizes viewports as necessary
     def setFont(self, font):
@@ -2523,6 +2526,26 @@ class FileDiffViewer(gtk.Table):
     def setLabel(self, f, s):
         self.panes[f].label = s
         self.labels[f].set_text(s)
+
+        # choose a short but descriptive title for the viewer
+        names = []
+        unique_names = {}
+        for pane in self.panes:
+            s = pane.spec.name
+            if s is not None:
+                s = os.path.basename(s)
+                names.append(s)
+                unique_names[s] = None
+
+        if len(unique_names) == 1:
+            self.setTitle(names[0])
+        else:
+            self.setTitle(' : '.join(names))
+
+    # set the viewer's title
+    def setTitle(self, s):
+        self.title = s
+        self.emit('title_changed', s)
 
     # load a new file into pane 'f'
     # 'spec' indicates the name of the file and how to retrieve it from the
@@ -4609,6 +4632,9 @@ class FileDiffViewer(gtk.Table):
     def _realise_cb(self, widget):
         self._first_difference()
 
+# create 'title_changed' signal for FileDiffViewer
+gobject.signal_new('title_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
+
 # dialogue used to search for text
 class SearchDialog(gtk.Dialog):
     def __init__(self, parent, pattern=None, history=None):
@@ -4685,6 +4711,9 @@ class NotebookTab(gtk.HBox):
 
     def get_text(self):
         return self.label.get_text()
+
+    def set_text(self, s):
+        self.label.set_text(s)
 
 # the main application class containing a set of file viewers
 # this class displays tab for switching between viewers and dispatches menu
@@ -4822,18 +4851,27 @@ class Diffuse(gtk.Window):
                 self.notebook.remove(data)
                 self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
 
-    # callback used when switching notebook pages
-    def switch_page_cb(self, widget, ptr, page_num):
-        page = widget.get_nth_page(page_num)
-        title = widget.get_tab_label(page).get_text()
+    # update window's title
+    def refreshTitle(self, page):
+        title = self.notebook.get_tab_label(page).get_text()
         self.set_title('%s - %s' % (title, APP_NAME))
 
+    # callback used when switching notebook pages
+    def switch_page_cb(self, widget, ptr, page_num):
+        self.refreshTitle(widget.get_nth_page(page_num))
+
+    # callback used when a viewer's title changes
+    def title_changed_cb(self, widget, title):
+        # update the label in the notebook's tab
+        self.notebook.get_tab_label(widget).set_text(title)
+        if widget is self.getCurrentViewer():
+            self.refreshTitle(widget)
+
     # create an empty viewer with 'n' panes
-    def newFileDiffViewer(self, n, tabname=None):
-        viewer = FileDiffViewer(n, self.prefs)
+    def newFileDiffViewer(self, n):
         self.viewer_count += 1
-        if tabname is None:
-            tabname = _('File Merge %d') % (self.viewer_count, )
+        tabname = _('File Merge %d') % (self.viewer_count, )
+        viewer = FileDiffViewer(n, self.prefs, tabname)
         tab = NotebookTab(tabname, gtk.STOCK_FILE)
         tab.button.connect('clicked', self.remove_tab_cb, viewer)
         self.notebook.append_page(viewer, tab)
@@ -4843,17 +4881,12 @@ class Diffuse(gtk.Window):
         tab.show()
         viewer.show()
         self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
+        viewer.connect('title_changed', self.title_changed_cb)
         return viewer
 
     # create a new viewer to display 'specs'
     def newLoadedFileDiffViewer(self, specs, tabname=None):
-        n = len(specs)
-
-        # create a label for the new tab
-        if tabname is None and n > 0:
-            tabname = ' : '.join([ spec.get_label() for spec in specs ])
-
-        if n == 1:
+        if len(specs) == 1:
             # one file specified
             # determine which other files to compare it with
             name = specs[0].name
@@ -4872,11 +4905,15 @@ class Diffuse(gtk.Window):
                     spec.vcs = theVCSs.findByFilename(spec.name)
 
         # open a new viewer
-        viewer = self.newFileDiffViewer(len(specs), tabname)
+        viewer = self.newFileDiffViewer(len(specs))
 
         # load the files
         for i, spec in enumerate(specs):
             viewer.load(i, spec)
+
+        # set the viewer's title
+        if tabname is not None:
+            viewer.setTitle(tabname)
 
     # returns True if the application can safely quit
     def confirmQuit(self):
