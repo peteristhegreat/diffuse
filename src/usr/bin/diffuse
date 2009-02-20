@@ -64,7 +64,7 @@ General Options:
   ( -e | --encoding ) <codec>      Use <codec> to read and write files
   ( -r | --revision ) <rev>        File revision <rev>
   ( -s | --separate )              Create a separate tab for each file
-  ( -t | --tab ) <label>           Create a new tab called <label>
+  ( -t | --tab )                   Start a new tab
 
 Display Options:
   ( -b | --ignore-space-change )   Ignore changes to white space
@@ -4698,7 +4698,11 @@ class NotebookTab(gtk.HBox):
             self.pack_start(image, False, False, 5)
             image.show()
         self.label = label = gtk.Label(name)
-        self.pack_start(label, False, False, 0)
+        # left justify the widget
+        label.set_alignment(0, 0.5)
+        self.pack_start(label, True, True, 0)
+        # allow the widget to shrink in the x-direction
+        label.set_size_request(0, label.get_size_request()[1])
         label.show()
         self.button = button = gtk.Button()
         button.set_relief(gtk.RELIEF_NONE)
@@ -4875,6 +4879,7 @@ class Diffuse(gtk.Window):
         tab = NotebookTab(tabname, gtk.STOCK_FILE)
         tab.button.connect('clicked', self.remove_tab_cb, viewer)
         self.notebook.append_page(viewer, tab)
+        self.notebook.set_tab_label_packing(viewer, True, True, gtk.PACK_START)
         self.notebook.set_tab_reorderable(viewer, True)
         tab.show()
         viewer.show()
@@ -4883,7 +4888,7 @@ class Diffuse(gtk.Window):
         return viewer
 
     # create a new viewer to display 'specs'
-    def newLoadedFileDiffViewer(self, specs, tabname=None):
+    def newLoadedFileDiffViewer(self, specs):
         if len(specs) == 1:
             # one file specified
             # determine which other files to compare it with
@@ -4908,10 +4913,6 @@ class Diffuse(gtk.Window):
         # load the files
         for i, spec in enumerate(specs):
             viewer.load(i, spec)
-
-        # set the viewer's title
-        if tabname is not None:
-            viewer.setTitle(tabname)
 
     # returns True if the application can safely quit
     def confirmQuit(self):
@@ -5262,7 +5263,6 @@ if __name__ == '__main__':
     diff.connect('window_state_event', window_state_cb)
 
     # process remaining command line arguments
-    tab_label = None
     encoding = None
     specs = []
     revs = []
@@ -5291,17 +5291,15 @@ if __name__ == '__main__':
                 # open items in separate tabs
                 n = len(specs)
                 if n > 0:
-                    diff.newLoadedFileDiffViewer(specs, tab_label)
+                    diff.newLoadedFileDiffViewer(specs)
                     specs = []
                 separate = True
             elif i + 1 < argc and arg in [ '-t', '--tab' ]:
                 # start a new tab
                 n = len(specs)
                 if n > 0:
-                    diff.newLoadedFileDiffViewer(specs, tab_label)
+                    diff.newLoadedFileDiffViewer(specs)
                     specs = []
-                i += 1
-                tab_label = args[i]
             elif i + 1 < argc and arg in [ '-e', '--encoding' ]:
                 i += 1
                 encoding = args[i]
@@ -5344,14 +5342,14 @@ if __name__ == '__main__':
         i += 1
     n = len(specs)
     if n > 0:
-        diff.newLoadedFileDiffViewer(specs, tab_label)
+        diff.newLoadedFileDiffViewer(specs)
     nb = diff.notebook
 
     # create a file diff viewer if the command line arguments haven't
     # implicitly created any
     n = nb.get_n_pages()
     if n == 0:
-        diff.newLoadedFileDiffViewer([], tab_label)
+        diff.newLoadedFileDiffViewer([])
     elif close_on_same:
         for i in range(n - 1, -1, -1):
             if not nb.get_nth_page(i).hasDifferences():

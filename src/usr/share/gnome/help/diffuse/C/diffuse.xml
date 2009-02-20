@@ -209,11 +209,11 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>-t</userinput>, <userinput>--tab</userinput> <replaceable>label</replaceable></term>
+            <term><userinput>-t</userinput>, <userinput>--tab</userinput></term>
             <listitem>
               <para>
-                Start a new tab called <replaceable>label</replaceable> for any
-                remaining files named in the command line arguments.
+                Start a new tab for any remaining files named in the command
+                line arguments.
               </para>
             </listitem>
           </varlistentry>
