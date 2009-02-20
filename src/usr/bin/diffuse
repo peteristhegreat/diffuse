@@ -3982,7 +3982,7 @@ class FileDiffViewer(gtk.Table):
 
     # callback for reload file menu item
     def reload_file_cb(self, widget, data):
-        self.open_file(self.current_file, True)
+        self.open_file(self.current_pane, True)
 
     # callback for reload file button
     def reload_file_button_cb(self, widget, data):
@@ -3990,7 +3990,7 @@ class FileDiffViewer(gtk.Table):
 
     # callback for open file menu item
     def open_file_cb(self, widget, data):
-        self.open_file(self.current_file)
+        self.open_file(self.current_pane)
 
     # callback for open file button
     def open_file_button_cb(self, widget, data):
