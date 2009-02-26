@@ -121,6 +121,9 @@ if hasattr(sys, 'frozen'):
 else:
     bin_dir = os.path.dirname(sys.argv[0])
 
+# avoid some dictionary lookups when string.whitespace is used in loops
+whitespace = string.whitespace
+
 # colour resources
 class Colour:
     def __init__(self, r, g, b, a=1.0):
@@ -1587,7 +1590,7 @@ def nullToEmpty(s):
 
 # returns true if the string only contains whitespace characters
 def isBlank(s):
-    for c in string.whitespace:
+    for c in whitespace:
         s = s.replace(c, '')
     return len(s) == 0
 
@@ -2350,7 +2353,7 @@ class FileDiffViewer(gtk.Table):
             return '+'
         if self.prefs.getBool('align_ignore_whitespace'):
             # strip all white space from the string
-            for c in string.whitespace:
+            for c in whitespace:
                 text = text.replace(c, '')
         elif self.prefs.getBool('align_ignore_whitespace_changes'):
             # replace all blocks of white space with a single space
@@ -2358,7 +2361,7 @@ class FileDiffViewer(gtk.Table):
             r = []
             append = r.append
             for c in text:
-                if c in string.whitespace:
+                if c in whitespace:
                     if pc:
                        append(' ')
                        pc = False
@@ -2599,7 +2602,7 @@ class FileDiffViewer(gtk.Table):
                     ss, spec.encoding = self.prefs.convertToUnicode(ss)
                 else:
                     ss = [ unicode(s, spec.encoding) for s in ss ]
-            except (IOError, UnicodeDecodeError, WindowsError):
+            except (IOError, OSError, UnicodeDecodeError, WindowsError):
                 # FIXME: this can occur before the toplevel window is drawn
                 if rev is not None:
                     msg = 'Error reading revision %(rev)s of "%(file)s".' % { 'rev': rev, 'file': name }
@@ -3098,14 +3101,14 @@ class FileDiffViewer(gtk.Table):
             if ignore_whitespace:
                 # all white space characters were removed
                 for c in s:
-                    if c not in string.whitespace:
+                    if c not in whitespace:
                         lookup.append(v)
                     v += 1
             else:
                 # all white space characters were replaced with a single space
                 first = True
                 for c in s:
-                    if c in string.whitespace:
+                    if c in whitespace:
                         # only include the first white space character of a span
                         if first:
                             lookup.append(v)
@@ -3131,7 +3134,7 @@ class FileDiffViewer(gtk.Table):
                     lookup_end = lookup[end]
                     # scan for whitespace and skip those sections if specified
                     for j in range(lookup_start, lookup_end):
-                        if ignore_whitespace and s[j] in string.whitespace:
+                        if ignore_whitespace and s[j] in whitespace:
                             if lookup_start != j:
                                 result.append((lookup_start, j, flag))
                             lookup_start = j + 1
@@ -3157,26 +3160,26 @@ class FileDiffViewer(gtk.Table):
                 return None
             if self.prefs.getBool('display_ignore_whitespace'):
                 # strip all white space characters
-                for c in string.whitespace:
+                for c in whitespace:
                     s = s.replace(c, '')
             elif self.prefs.getBool('display_ignore_whitespace_changes'):
                 # map all spans of white space characters to a single space
-                pc = True
-                r = []
+                first = True
+                temp = []
                 for c in s:
-                    if c in string.whitespace:
-                        if pc:
-                           r.append(' ')
-                           pc = False
+                    if c in whitespace:
+                        if first:
+                            temp.append(' ')
+                            first = False
                     else:
-                        r.append(c)
-                        pc = True
-                s = ''.join(r)
+                        temp.append(c)
+                        first = True
+                s = ''.join(temp)
             if self.prefs.getBool('display_ignore_case'):
                 # force everything to be upper case
                 s = s.upper()
-        # cache the hash
-        line.compare_string = s
+            # cache the hash
+            line.compare_string = s
         return s
 
     # draw the text viewport
@@ -4729,11 +4732,16 @@ class Diffuse(gtk.Window):
         self.prefs = Preferences()
         # number of created viewers (used to label some tabs)
         self.viewer_count = 0
+
+        # state information that should persist across sessions
+        self.bool_state = { 'window_maximized': False, 'search_matchcase': False, 'search_backwords': False }
+        self.int_state = { 'window_x': 0, 'window_y': 0, 'window_width': 1024, 'window_height': 768 }
+        self.connect('configure_event', self.configure_cb)
+        self.connect('window_state_event', self.window_state_cb)
+
         # search history is application wide
         self.search_pattern = None
         self.search_history = []
-        self.search_match_case = False
-        self.search_backwards = False
 
         self.connect('delete-event', self.delete_cb)
         accel_group = gtk.AccelGroup()
@@ -4846,6 +4854,63 @@ class Diffuse(gtk.Window):
         self.add_accel_group(accel_group)
         self.add(vbox)
         vbox.show()
+
+    # record the window's position and size
+    def configure_cb(self, widget, event):
+        # read the state directly instead of using window_maximized as the order
+        # of configure/window_state events is undefined
+        if (widget.window.get_state() & gtk.gdk.WINDOW_STATE_MAXIMIZED) == 0:
+            self.int_state['window_x'], self.int_state['window_y'] = widget.window.get_root_origin()
+            self.int_state['window_width'] = event.width
+            self.int_state['window_height'] = event.height
+
+    # record the window's maximised state
+    def window_state_cb(self, window, event):
+        self.bool_state['window_maximized'] = ((event.new_window_state & gtk.gdk.WINDOW_STATE_MAXIMIZED) != 0)
+
+    # load state information that should persist across sessions
+    def loadState(self, configpath):
+        if os.path.isfile(configpath):
+            try:
+                f = open(configpath, 'r')
+                ss = f.readlines()
+                f.close()
+                for j, s in enumerate(ss):
+                    try:
+                        a = shlex.split(s, True)
+                        if len(a) > 0:
+                            if len(a) == 2 and self.bool_state.has_key(a[0]):
+                                self.bool_state[a[0]] = (a[1] == 'True')
+                            elif len(a) == 2 and self.int_state.has_key(a[0]):
+                                self.int_state[a[0]] = int(a[1])
+                            else:
+                                raise ValueError()
+                    except ValueError:
+                        print _('Error parsing line %(line)d of "%(file)s".') % { 'line': j + 1, 'file': configpath }
+            except IOError:
+                print _('Error reading %s.') % (repr(configpath), )
+
+        self.move(self.int_state['window_x'], self.int_state['window_y'])
+        self.resize(self.int_state['window_width'], self.int_state['window_height'])
+        if self.bool_state['window_maximized']:
+            self.maximize()
+
+    # save state information that should persist across sessions
+    def saveState(self, configpath):
+        try:
+            ss = []
+            for k, v in self.bool_state.items():
+                ss.append('%s %s\n' % (k, v))
+            for k, v in self.int_state.items():
+                ss.append('%s %s\n' % (k, v))
+            ss.sort()
+            f = open(configpath, 'w')
+            f.write("# This config file was generated by %s %s.\n\n" % (APP_NAME, VERSION))
+            for s in ss:
+                f.write(s)
+            f.close()
+        except IOError:
+            print _('Error writing %s.') % (repr(configpath), )
 
     # callback for the close button on each tab
     def remove_tab_cb(self, widget, data):
@@ -4997,8 +5062,8 @@ class Diffuse(gtk.Window):
             # construct search dialog
             history = self.search_history
             dialog = SearchDialog(self.get_toplevel(), self.search_pattern, history)
-            dialog.match_case_button.set_active(self.search_match_case)
-            dialog.backwards_button.set_active(self.search_backwards)
+            dialog.match_case_button.set_active(self.bool_state['search_matchcase'])
+            dialog.backwards_button.set_active(self.bool_state['search_backwards'])
             keep = (dialog.run() == gtk.RESPONSE_ACCEPT)
             # persist the search options
             pattern = dialog.entry.get_text()
@@ -5012,9 +5077,9 @@ class Diffuse(gtk.Window):
             if pattern in history:
                 del history[history.index(pattern)]
             history.insert(0, pattern)
-            self.search_match_case = match_case
-            self.search_backwards = backwards
-        self.getCurrentViewer().find_cb(self.search_pattern, self.search_match_case, reverse ^ self.search_backwards)
+            self.bool_state['search_matchcase'] = match_case
+            self.bool_state['search_backwards'] = backwards
+        self.getCurrentViewer().find_cb(self.search_pattern, self.bool_state['search_matchcase'], reverse ^ self.bool_state['search_backwards'])
 
     # callback for the find menu item
     def find_cb(self, widget, data):
@@ -5180,27 +5245,6 @@ class Diffuse(gtk.Window):
         dialog.run()
         dialog.destroy()
 
-# variables to record the window size and maximised state so we can save the
-# data when quiting the application (we use globals as the main widget may be
-# destroyed before we are attempt to save the data)
-window_x = 0
-window_y = 0
-window_width = 1024
-window_height = 768
-window_maximized = False
-
-def configure_cb(widget, event):
-    global window_x, window_y, window_width, window_height
-    # read the state directly instead of using window_maximized as the order
-    # of configure/window_state events is undefined
-    if (widget.window.get_state() & gtk.gdk.WINDOW_STATE_MAXIMIZED) == 0:
-        window_x, window_y = widget.window.get_root_origin()
-        window_width, window_height = event.width, event.height
-
-def window_state_cb(window, event):
-    global window_maximized
-    window_maximized = ((event.new_window_state & gtk.gdk.WINDOW_STATE_MAXIMIZED) != 0)
-
 # process the command line arguments
 if __name__ == '__main__':
     path = os.path.expanduser('~/.diffuse')
@@ -5238,29 +5282,7 @@ if __name__ == '__main__':
     diff = Diffuse()
     # load state
     configpath = os.path.join(path, 'config')
-    if os.path.isfile(configpath):
-        try:
-            f = open(configpath, 'r')
-            ss = f.readlines()
-            f.close()
-            for j, s in enumerate(ss):
-                a = shlex.split(s, True)
-                if len(a) > 0:
-                    try:
-                        if len(a) == 3 and a[0] == 'position':
-                            window_x, window_y = int(a[1]), int(a[2])
-                        elif len(a) == 3 and a[0] == 'size':
-                            window_width, window_height = int(a[1]), int(a[2])
-                        elif len(a) == 2 and a[0] == 'maximized':
-                            window_maximized = (a[1] == '1')
-                        else:
-                            raise ValueError()
-                    except ValueError:
-                        print _('Error parsing line %(line)d of "%(file)s".') % { 'line': j + 1, 'file': configpath }
-        except IOError:
-            print _('Error reading %s.') % (repr(configpath), )
-    diff.connect('configure_event', configure_cb)
-    diff.connect('window_state_event', window_state_cb)
+    diff.loadState(configpath)
 
     # process remaining command line arguments
     encoding = None
@@ -5282,7 +5304,10 @@ if __name__ == '__main__':
                 rev = args[i]
                 prev = ''
                 try:
-                    prev = str(int(rev) - 1)
+                    # assume CVS/Subversion style version numbers
+                    r = rev.split('.')
+                    r[-1] = str(int(r[-1]) - 1)
+                    prev = '.'.join(r)
                 except:
                     print _('Error parsing revision %s.') % (repr(rev), )
                 revs.append(prev)
@@ -5358,20 +5383,7 @@ if __name__ == '__main__':
     if n > 0:
         nb.set_show_tabs(n > 1)
         nb.get_nth_page(0).grab_focus()
-        diff.move(window_x, window_y)
-        diff.resize(window_width, window_height)
-        if window_maximized:
-            diff.maximize()
         diff.show()
         gtk.main()
         # save state
-        try:
-            f = open(configpath, 'w')
-            f.write("""# This config file was generated by %s %s.
-position %d %d
-size %d %d
-maximized %d
-""" % (APP_NAME, VERSION, window_x, window_y, window_width, window_height, window_maximized))
-            f.close()
-        except IOError:
-            print _('Error writing %s.') % (repr(configpath), )
+        diff.saveState(configpath)
