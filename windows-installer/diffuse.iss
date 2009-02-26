@@ -3,10 +3,10 @@
 ; Copyright (C) 2009 Derrick Moser <derrick_moser@yahoo.com>
 
 [Setup]
-AppName=Diffuse
+AppName=Diffuse Merge Tool
 AppVerName=Diffuse 0.2.15
 DefaultDirName={pf}\Diffuse
-DefaultGroupName=Diffuse
+DefaultGroupName=Diffuse Merge Tool
 UninstallDisplayIcon={app}\diffusew.exe
 Compression=lzma
 SolidCompression=yes
@@ -32,13 +32,13 @@ Type: files; Name: "{app}\diffuserc"
 
 [Registry]
 Root: HKCR; Subkey: "*\shell"; Flags: uninsdeletekeyifempty
-Root: HKCR; Subkey: "*\shell\Open with Diffuse"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "*\shell\Open with Diffuse\command"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "*\shell\Open with Diffuse\command"; ValueType: string; ValueData: "{code:GetOpenWithCommand|dummy}"
+Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool\command"; Flags: uninsdeletekey
+Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool\command"; ValueType: string; ValueData: "{code:GetOpenWithCommand|dummy}"
 
 [Icons]
-Name: "{group}\Diffuse"; Filename: "{app}\diffusew.exe"
-Name: "{group}\Uninstall Diffuse"; Filename: "{app}\unins000.exe"
+Name: "{group}\Diffuse Merge Tool"; Filename: "{app}\diffusew.exe"
+Name: "{group}\Uninstall Diffuse Merge Tool"; Filename: "{app}\unins000.exe"
 
 [Code]
 function GetOpenWithCommand(dummy : String): String;
