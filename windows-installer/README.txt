@@ -30,7 +30,13 @@ Prerequisites:
    environment variable DOCBOOK_XSL_HOME to the full path of the root
    directory.
 
-6) Inno Setup
+6) ADD_PATH
+   http://blog.barisione.org/project/#add_path
+
+   Unzip the package and set the environment variable ADD_PATH_HOME to the full
+   path of the root directory.
+
+7) Inno Setup
    http://jrsoftware.org/isinfo.php
 
    You may need to manually update the PATH environment variable to run

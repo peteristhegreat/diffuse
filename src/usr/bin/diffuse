@@ -4945,7 +4945,9 @@ class Diffuse(gtk.Window):
         tab.button.connect('clicked', self.remove_tab_cb, viewer)
         self.notebook.append_page(viewer, tab)
         self.notebook.set_tab_label_packing(viewer, True, True, gtk.PACK_START)
-        self.notebook.set_tab_reorderable(viewer, True)
+        if hasattr(self.notebook, 'set_tab_reorderable'):
+            # some PyGTK packages incorrectly omit this method
+            self.notebook.set_tab_reorderable(viewer, True)
         tab.show()
         viewer.show()
         self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)

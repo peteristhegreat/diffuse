@@ -16,6 +16,7 @@ OutputDir=.
 Source: "dist\*.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\*.zip"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\*.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
+Source: "dist\*.manifest"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\*.pyd"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\diffuserc"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
 Source: "dist\diffuse.ico"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
@@ -27,9 +28,6 @@ Source: "dist\lib\*"; DestDir: "{app}\lib"; Flags: ignoreversion recursesubdirs 
 Source: "dist\share\*"; DestDir: "{app}\share"; Flags: ignoreversion recursesubdirs  createallsubdirs
 Source: "dist\syntax\*"; DestDir: "{app}\syntax"; Flags: ignoreversion recursesubdirs  createallsubdirs
 
-[UninstallDelete]
-Type: files; Name: "{app}\diffuserc"
-
 [Registry]
 Root: HKCR; Subkey: "*\shell"; Flags: uninsdeletekeyifempty
 Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool"; Flags: uninsdeletekey
@@ -39,6 +37,12 @@ Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool\command"; ValueType: s
 [Icons]
 Name: "{group}\Diffuse Merge Tool"; Filename: "{app}\diffusew.exe"
 Name: "{group}\Uninstall Diffuse Merge Tool"; Filename: "{app}\unins000.exe"
+
+[Run]
+Filename: "{app}\add_path.exe"; Parameters: "{app}"; Flags: postinstall; Description: "Add the installation path to the search path"
+
+[UninstallRun]
+Filename: "{app}\add_path.exe"; Parameters: "/del {app}"
 
 [Code]
 function GetOpenWithCommand(dummy : String): String;

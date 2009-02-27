@@ -84,6 +84,12 @@ args = [ sys.executable, 'setup.py', 'py2exe' ]
 if os.spawnv(os.P_WAIT, args[0], args) != 0:
     raise IOError()
 
+# include Python 2.6 specific DLLs and manifests
+if platform.python_version_tuple()[:2] == (2, 6):
+    for f in 'msvcm90.dll', 'msvcp90.dll', 'msvcr90.dll':
+        copyFile(os.path.join(os.environ['SYSTEMROOT'], 'WinSxS\\x86_Microsoft.VC90.CRT_1fc8b3b9a1e18e3b_9.0.21022.8_x-ww_d08d0375\\' + f), 'dist\\' + f)
+    copyFile(os.path.join(os.environ['SYSTEMROOT'], 'WinSxS\\Manifests\\x86_Microsoft.VC90.CRT_1fc8b3b9a1e18e3b_9.0.21022.8_x-ww_d08d0375.manifest'), 'dist\\Microsoft.VC90.CRT.manifest')
+
 # include GTK dependencies
 gtk_dir = os.environ['GTK_BASEPATH']
 copyDir(os.path.join(gtk_dir, 'lib'), 'dist\\lib')
@@ -140,6 +146,7 @@ copyFile('style.css', 'dist\\style.css')
 #
 
 # build binary installer 
+copyFile(os.path.join(os.environ['ADD_PATH_HOME'], 'add_path.exe'), 'dist\\add_path.exe')
 if os.system('iscc diffuse.iss /F%s' % (INSTALLER, )) != 0:
     raise IOError()
 
