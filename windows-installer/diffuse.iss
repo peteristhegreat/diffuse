@@ -6,27 +6,14 @@
 AppName=Diffuse Merge Tool
 AppVerName=Diffuse 0.2.15
 DefaultDirName={pf}\Diffuse
-DefaultGroupName=Diffuse Merge Tool
+DefaultGroupName=Diffuse
 UninstallDisplayIcon={app}\diffusew.exe
 Compression=lzma
 SolidCompression=yes
 OutputDir=.
 
 [Files]
-Source: "dist\*.exe"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
-Source: "dist\*.zip"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
-Source: "dist\*.dll"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
-Source: "dist\*.manifest"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
-Source: "dist\*.pyd"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
-Source: "dist\diffuserc"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
-Source: "dist\diffuse.ico"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
-Source: "dist\*.html"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
-Source: "dist\*.css"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
-Source: "dist\*.txt"; DestDir: "{app}"; Flags: ignoreversion restartreplace uninsrestartdelete
-Source: "dist\etc\*"; DestDir: "{app}\etc"; Flags: ignoreversion recursesubdirs  createallsubdirs
-Source: "dist\lib\*"; DestDir: "{app}\lib"; Flags: ignoreversion recursesubdirs  createallsubdirs
-Source: "dist\share\*"; DestDir: "{app}\share"; Flags: ignoreversion recursesubdirs  createallsubdirs
-Source: "dist\syntax\*"; DestDir: "{app}\syntax"; Flags: ignoreversion recursesubdirs  createallsubdirs
+Source: "dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Registry]
 Root: HKCR; Subkey: "*\shell"; Flags: uninsdeletekeyifempty
