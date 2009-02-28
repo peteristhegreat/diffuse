@@ -1,8 +1,8 @@
-.TH "DIFFUSE" "1" "12/03/2008" "diffuse 0\.2\.15" "Diffuse Manual"
+.TH "DIFFUSE" "1" "02/27/2009" "diffuse 0\&.2\&.15" "Diffuse Manual"
 .nh
 .ad l
 .SH "NAME"
-diffuse - graphical tool for merging and comparing text files
+diffuse \- graphical tool for merging and comparing text files
 .SH "SYNOPSIS"
 .HP 8
 \fBdiffuse\fR [\fB\-h\fR | \fB\-?\fR | \fB\-\-help\fR | \fB\-v\fR | \fB\-\-version\fR]
@@ -10,39 +10,34 @@ diffuse - graphical tool for merging and comparing text files
 \fBdiffuse\fR [\fB\-\-no\-rcfile\fR | \fB\-\-rcfile\ \fR\fB\fIfile\fR\fR] [[\fIoption\fR...] | [\fIfile\fR...]...]
 .SH "DESCRIPTION"
 .PP
-Diffuse is a graphical tool for merging and comparing text files\. Diffuse is able to compare an arbitrary number of files side\-by\-side and gives users the ability to manually adjust line matching and directly edit files\. Diffuse can also retrieve revisions of files from Bazaar, CVS, Darcs, Git, Mercurial, Monotone, Subversion, and SVK repositories for comparison and merging\.
+Diffuse is a graphical tool for merging and comparing text files\&. Diffuse is able to compare an arbitrary number of files side\-by\-side and gives users the ability to manually adjust line matching and directly edit files\&. Diffuse can also retrieve revisions of files from Bazaar, CVS, Darcs, Git, Mercurial, Monotone, Subversion, and SVK repositories for comparison and merging\&.
 .SH "OPTIONS"
 .SS "Help Options"
 .PP
-If a help option is specified, it must be the only argument specified on the command line\. Diffuse will immediately quit after displaying the help information\.
+If a help option is specified, it must be the only argument specified on the command line\&. Diffuse will immediately quit after displaying the help information\&.
 .PP
 \fB\-h\fR, \fB\-?\fR, \fB\-\-help\fR
 .RS 4
-Display usage information\.
+Display usage information\&.
 .RE
 .PP
 \fB\-v\fR, \fB\-\-version\fR
 .RS 4
-Display version number and copyright information\.
+Display version number and copyright information\&.
 .RE
 .SS "Configuration Options"
 .PP
-If a configuration option is specified, it must be the first argument specified on the command line\.
+If a configuration option is specified, it must be the first argument specified on the command line\&.
 .PP
 \fB\-\-no\-rcfile\fR
 .RS 4
-Do not read the personal initialisation file
-\fI~/\.diffuse/diffuserc\fR or the system wide initialisation file
-\fI/etc/diffuserc\fR\.
+Do not read any initialisation files\&.
 .RE
 .PP
 \fB\-\-rcfile \fR\fB\fIfile\fR\fR
 .RS 4
-Read initialisation commands from file
-\fIfile\fR
-instead of the personal initialisation file
-\fI~/\.diffuse/diffuserc\fR or the system wide initialisation file
-\fI/etc/diffuserc\fR\.
+Only read initialisation commands from file
+\fIfile\fR\&.
 .RE
 .SS "General Options"
 .PP
@@ -52,59 +47,59 @@ Include revision
 \fIrev \- 1\fR
 and
 \fIrev\fR
-of the next file named in the command line arguments in a file comparison tab\.
+of the next file named in the command line arguments in a file comparison tab\&.
 .RE
 .PP
 \fB\-D\fR, \fB\-\-close\-if\-same\fR
 .RS 4
-Close all tabs with no differences\.
+Close all tabs with no differences\&.
 .RE
 .PP
 \fB\-e\fR, \fB\-\-encoding\fR \fIcodec\fR
 .RS 4
 Use
 \fIcodec\fR
-to read and write files\.
+to read and write files\&.
 .RE
 .PP
 \fB\-r\fR, \fB\-\-revision\fR \fIrev\fR
 .RS 4
 Include revision
 \fIrev\fR
-of the next file named in the command line arguments in a file comparison tab\.
+of the next file named in the command line arguments in a file comparison tab\&.
 .RE
 .PP
 \fB\-s\fR, \fB\-\-separate\fR
 .RS 4
-Open all remaining files specified in the command line arguments in separate file comparison tabs\.
+Open all remaining files specified in the command line arguments in separate file comparison tabs\&.
 .RE
 .PP
 \fB\-t\fR, \fB\-\-tab\fR
 .RS 4
-Start a new tab for any remaining files named in the command line arguments\.
+Start a new tab for any remaining files named in the command line arguments\&.
 .RE
 .SS "Display Options"
 .PP
-Display options specified in the command line arguments will override saved preference values\.
+Display options specified in the command line arguments will override saved preference values\&.
 .PP
 \fB\-b\fR, \fB\-\-ignore\-space\-change\fR
 .RS 4
-Ignore changes to the amount of white space\.
+Ignore changes to the amount of white space\&.
 .RE
 .PP
 \fB\-B\fR, \fB\-\-ignore\-blank\-lines\fR
 .RS 4
-Ignore changes whose lines are all blank\.
+Ignore changes whose lines are all blank\&.
 .RE
 .PP
 \fB\-i\fR, \fB\-\-ignore\-case\fR
 .RS 4
-Ignore case differences in file contents\.
+Ignore case differences in file contents\&.
 .RE
 .PP
 \fB\-w\fR, \fB\-\-ignore\-all\-space\fR
 .RS 4
-Ignore all white space\.
+Ignore all white space\&.
 .RE
 .SH "FILE COMPARISON"
 .PP
@@ -112,58 +107,66 @@ Use the
 File → New 2\-Way File Merge
 and
 File → New 3\-Way File Merge
-menu items to create additional tabs for comparing text files\. File names and revisions can be specified either in the command line arguments used to invoke Diffuse or in fields on the Open File dialogue\.
+menu items to create additional tabs for comparing text files\&. File names and revisions can be specified either in the command line arguments used to invoke Diffuse or in fields on the Open File dialogue\&.
 .PP
-Diffuse displays files side\-by\-side inserting gaps to align similar lines of text\. Differences are highlighted with a different background colour\.
+Diffuse displays files side\-by\-side inserting gaps to align similar lines of text\&. Differences are highlighted with a different background colour\&.
 .SS "Comparison Summary"
 .PP
-A summary of the compared files is located in the far right margin\. The summary illustrates where gaps have been inserted to align matching lines of text and highlights differences using colour\. Manual edits are also highlighted in green\. A blue cursor identifies the region currently being viewed\. The viewed region can be changed by clicking anywhere on the summary\.
+A summary of the compared files is located in the far right margin\&. The summary illustrates where gaps have been inserted to align matching lines of text and highlights differences using colour\&. Manual edits are also highlighted in green\&. A blue cursor identifies the region currently being viewed\&. The viewed region can be changed by clicking anywhere on the summary\&.
 .SS "Selecting"
 .PP
-Lines of text can be selected using the mouse pointer or keyboard\. Select lines of text with the mouse pointer by clicking on a line\. Click and drag to select multiple lines\. Holding down the shift key when clicking will extend the current selection\. Select lines using the keyboard by pressing the page up/down or arrow keys\. Extend the current selection by holding down the shift key and pressing the page up/down or arrow keys\. Move the selection to an adjacent file using the left and right arrow keys\.
+Lines of text can be selected using the mouse pointer or keyboard\&. Select lines of text with the mouse pointer by clicking on a line\&. Click and drag to select multiple lines\&. Holding down the shift key when clicking will extend the current selection\&. Select lines using the keyboard by pressing the page up/down or arrow keys\&. Extend the current selection by holding down the shift key and pressing the page up/down or arrow keys\&. Move the selection to an adjacent file using the left and right arrow keys\&.
 .SS "Matching Lines"
 .PP
-The mouse pointer or keyboard can be used to manually align lines of text with adjacent files\. To aligning lines of text using the mouse pointer, select a line of text with the left mouse button, right click on a line of text from an adjacent file, and choose
-Align to Selection\. To align lines of text using the keyboard, move the selection with the cursor keys, press the space bar to pick the current line of text, move the selection with the cursor keys to a line of text in an adjacent file, and press the space bar to pick the target line of text\. Pressing the escape key will cancel the operation\.
+The mouse pointer or keyboard can be used to manually align lines of text with adjacent files\&. To aligning lines of text using the mouse pointer, select a line of text with the left mouse button, right click on a line of text from an adjacent file, and choose
+Align to Selection\&. To align lines of text using the keyboard, move the selection with the cursor keys, press the space bar to pick the current line of text, move the selection with the cursor keys to a line of text in an adjacent file, and press the space bar to pick the target line of text\&. Pressing the escape key will cancel the operation\&.
 .PP
 Use the
 Isolate
-menu item to prevent the selected lines from being matched with any lines from the adjacent files\.
+menu item to prevent the selected lines from being matched with any lines from the adjacent files\&.
 .SS "Editing"
 .PP
-Press the enter key or double\-click on a text area to enter text editing mode\. The cursor will change to indicate text editing mode and the status bar at the bottom of the window will display the cursor\'s column position\.
+Press the enter key or double\-click on a text area to enter text editing mode\&. The cursor will change to indicate text editing mode and the status bar at the bottom of the window will display the cursor\'s column position\&.
 .PP
-In text editing mode, text can be selected with the mouse pointer by click and dragging\. The current selection can be extended by holding down the shift key and moving the cursor by clicking with the mouse pointer or pressing any of the arrow, home, end or page up/down keys\. Individual words can be selected by double\-clicking on them with the mouse pointer\. Whole lines can be selected by triple\-clicking on them with the mouse pointer\.
+In text editing mode, text can be selected with the mouse pointer by click and dragging\&. The current selection can be extended by holding down the shift key and moving the cursor by clicking with the mouse pointer or pressing any of the arrow, home, end or page up/down keys\&. Individual words can be selected by double\-clicking on them with the mouse pointer\&. Whole lines can be selected by triple\-clicking on them with the mouse pointer\&.
 .PP
-Modify text by typing on the keyword\. Modified lines will be highlighted in green\. Use the
+Modify text by typing on the keyword\&. Modified lines will be highlighted in green\&. Use the
 Undo
 and
 Redo
-menu items to undo and redo the previously preformed operations\.
+menu items to undo and redo the previously preformed operations\&.
 .PP
-Press the escape key or click on another file\'s text area using the left mouse button to leave editing mode\.
+Press the escape key or click on another file\'s text area using the left mouse button to leave editing mode\&.
 .SS "Merging"
 .PP
-Use the difference buttons or menu items to navigate between blocks of differences within a file\. When navigating, Diffuse will move the selection to the next continuous set of lines with differences or edits\.
+Use the difference buttons or menu items to navigate between blocks of differences within a file\&. When navigating, Diffuse will move the selection to the next continuous set of lines with differences or edits\&.
 .PP
-Use the merge buttons or menu items to copy blocks of text into the selected range of lines\. The
+Use the merge buttons or menu items to copy blocks of text into the selected range of lines\&. The
 Undo
 and
 Redo
-menu items can be used to undo and redo the previously preformed operations\. All changes to a set of lines can be reverted using the
+menu items can be used to undo and redo the previously preformed operations\&. All changes to a set of lines can be reverted using the
 Clear Edits
-menu item regardless of the order the edits were performed\.
+menu item regardless of the order the edits were performed\&.
 .SH "RESOURCES"
 .PP
-When Diffuse is started, it will read commands from the personal initialisation file
-\fI~/\.diffuse/diffuserc\fR\. Diffuse will use the system wide initialisation file
-\fI/etc/diffuserc\fR\ when no personal initialisation file is present\. A Bourne shell\-like lexical analyser is used to parse initialisation commands\. Comments and special characters can be embedded using the same style of escaping used in Bourne shell scripts\.
+When Diffuse is started, it will read commands from the system wide initialisation file
+\fI/etc/diffuserc\fR
+(\fI%INSTALL_DIR%\ediffuserc\fR
+on Microsoft Windows) and then the personal initialisation file
+\fI~/\&.diffuse/diffuserc\fR
+(\fI%HOME%\e\&.diffuse\ediffuserc\fR
+on Microsoft Windows)\&. This behaviour can be changed with the
+\fB\-\-no\-rcfile\fR
+and
+\fB\-\-rcfile\fR
+configuration options\&. A Bourne shell\-like lexical analyser is used to parse initialisation commands\&. Comments and special characters can be embedded using the same style of escaping used in Bourne shell scripts\&.
 .SS "General"
 .PP
 \fBimport \fR\fB\fIfile\fR\fR
 .RS 4
 Processes initialisation commands from
-\fIfile\fR\. Initialisation files will only be processed once\.
+\fIfile\fR\&. Initialisation files will only be processed once\&.
 .RE
 .SS "Key Bindings"
 .PP
@@ -172,7 +175,7 @@ Processes initialisation commands from
 Binds a key combination to
 \fIaction\fR
 when used in
-\fIcontext\fR\. Specify
+\fIcontext\fR\&. Specify
 Shift
 and
 Control
@@ -182,21 +185,21 @@ and
 \fBCtrl+\fR
 to
 \fIkey_combination\fR
-respectively\. Keys normally modified by the
+respectively\&. Keys normally modified by the
 Shift
 key should be specified using their modified value if
 \fIkey_combination\fR
 involves the
 Shift
-key\. For example,
+key\&. For example,
 \fBCtrl+g\fR
 and
-\fBShift+Ctrl+G\fR\. Remove bindings for
+\fBShift+Ctrl+G\fR\&. Remove bindings for
 \fIkey_combination\fR
 by specifying
 \fBNone\fR
 for the
-\fIaction\fR\.
+\fIaction\fR\&.
 .RE
 .sp
 .it 1 an-trap
@@ -210,12 +213,12 @@ Use
 \fBmenu\fR
 for the
 \fIcontext\fR
-to define key bindings for menu items\. The following values are valid for
+to define key bindings for menu items\&. The following values are valid for
 \fIaction\fR:
 .PP
 \fBopen_file\fR
 .RS 4
-File → Open File\.\.\.
+File → Open File\&.\&.\&.
 menu item
 .RE
 .PP
@@ -233,7 +236,7 @@ menu item
 .PP
 \fBsave_file_as\fR
 .RS 4
-File → Save File As\.\.\.
+File → Save File As\&.\&.\&.
 menu item
 .RE
 .PP
@@ -293,7 +296,7 @@ menu item
 .PP
 \fBfind\fR
 .RS 4
-Edit → Find\.\.\.
+Edit → Find\&.\&.\&.
 menu item
 .RE
 .PP
@@ -311,7 +314,7 @@ menu item
 .PP
 \fBgo_to_line\fR
 .RS 4
-Edit → Go To Line\.\.\.
+Edit → Go To Line\&.\&.\&.
 menu item
 .RE
 .PP
@@ -463,7 +466,7 @@ Use
 \fBline_mode\fR
 for the
 \fIcontext\fR
-to define key bindings for line editing mode\. The following values are valid for
+to define key bindings for line editing mode\&. The following values are valid for
 \fIaction\fR:
 .PP
 \fBenter_align_mode\fR
@@ -608,7 +611,7 @@ Use
 \fBalign_mode\fR
 for the
 \fIcontext\fR
-to define key bindings for alignment editing mode\. The following values are valid for
+to define key bindings for alignment editing mode\&. The following values are valid for
 \fIaction\fR:
 .PP
 \fBenter_line_mode\fR
@@ -678,7 +681,7 @@ Use
 \fBcharacter_mode\fR
 for the
 \fIcontext\fR
-to define key bindings for character editing mode\. The following values are valid for
+to define key bindings for character editing mode\&. The following values are valid for
 \fIaction\fR:
 .PP
 \fBenter_line_mode\fR
@@ -693,7 +696,7 @@ enter line editing mode
 Declares a string resource called
 \fIname\fR
 with value
-\fIvalue\fR\.
+\fIvalue\fR\&.
 .RE
 .sp
 .it 1 an-trap
@@ -711,13 +714,13 @@ describes mapping used to identify characters of a similar class for selection w
 .sp
 This resource is a series of
 \fIrange\fR:\fIvalue\fR
-pairs\. The
+pairs\&. The
 \fIrange\fR
 is either a single number or
 \fIlow\fR\-\fIhigh\fR
-corresponding to the code for the character or characters to be set\. Neighbouring characters that map to the same
+corresponding to the code for the character or characters to be set\&. Neighbouring characters that map to the same
 \fIvalue\fR
-will be selected as a group when double\-clicking on a word\.
+will be selected as a group when double\-clicking on a word\&.
 .RE
 .PP
 \fBdifference_colours\fR
@@ -750,7 +753,7 @@ icon for the about dialogue and window manager decoration
 \fB[ colour | color ] \fR\fB\fIname\fR\fR\fB \fR\fB\fIred\fR\fR\fB \fR\fB\fIgreen\fR\fR\fB \fR\fB\fIblue\fR\fR
 .RS 4
 Declares a colour resource called
-\fIname\fR\. Individual colour components should be expressed as a value between 0 and 1\.
+\fIname\fR\&. Individual colour components should be expressed as a value between 0 and 1\&.
 .RE
 .sp
 .it 1 an-trap
@@ -839,7 +842,7 @@ background colour for the text area
 Declares a floating point resource called
 \fIname\fR
 with value
-\fIvalue\fR\.
+\fIvalue\fR\&.
 .RE
 .sp
 .it 1 an-trap
@@ -886,70 +889,75 @@ alpha value used when compositing the modified line colour
 \fBsyntax \fR\fB\fIname\fR\fR\fB \fR\fB\fIinitial_state\fR\fR\fB \fR\fB\fIdefault_tag\fR\fR
 .RS 4
 Declares a new syntax style called
-\fIname\fR\. Syntax highlighting uses a simple state machine that transitions between states when certain patterns are matched\. The initial state for the state machine will be
-\fIinitial_state\fR\. All characters not matched by a pattern will be tagged as
+\fIname\fR\&. Syntax highlighting uses a simple state machine that transitions between states when certain patterns are matched\&. The initial state for the state machine will be
+\fIinitial_state\fR\&. All characters not matched by a pattern will be tagged as
 \fIdefault_tag\fR
-for highlighting\.
+for highlighting\&. The syntax style called
+\fIname\fR
+can be removed by omitting
+\fIinitial_state\fR
+and
+\fIdefault_tag\fR\&.
 .RE
 .PP
-\fBsyntax_files \fR\fB\fIname\fR\fR\fB \fR\fB\fIpattern\fR\fR
+\fBsyntax_files \fR\fB\fIname\fR\fR\fB \fR\fB[\fIpattern\fR]\fR
 .RS 4
 Specifies that files with a name matching
 \fIpattern\fR
 should be highlighted using the syntax style called
-\fIname\fR\.  Patterns used to match files for use with the syntax style called
+\fIname\fR\&. Patterns used to match files for use with the syntax style called
 \fIname\fR
 can be removed by omitting
-\fIpattern\fR\.
+\fIpattern\fR\&.
 .RE
 .PP
 \fBsyntax_pattern \fR\fB\fIname\fR\fR\fB \fR\fB\fIinitial_state\fR\fR\fB \fR\fB\fIfinal_state\fR\fR\fB \fR\fB\fItag\fR\fR\fB \fR\fB\fIpattern\fR\fR\fB \fR\fB[ignorecase]\fR\fB \fR
 .RS 4
-Adds a pattern to the previously declared syntax style\. The pattern will only be used to match characters if the state machine is in the state
-\fIinitial_state\fR\. The state machine will transition to
+Adds a pattern to the previously declared syntax style\&. The pattern will only be used to match characters if the state machine is in the state
+\fIinitial_state\fR\&. The state machine will transition to
 \fIfinal_state\fR
 if the pattern defined by
 \fIpattern\fR
-is matched\. Case insensitive pattern matching will be used if
+is matched\&. Case insensitive pattern matching will be used if
 \fBignorecase\fR
-is specified\. All characters matched by the pattern will be tagged as
+is specified\&. All characters matched by the pattern will be tagged as
 \fItag\fR
-for highlighting\.
+for highlighting\&.
 .RE
 .SH "FILES"
 .PP
 \fI/etc/diffuserc\fR
 .RS 4
-System wide initialisations\.
+System wide initialisations\&.
 .RE
 .PP
-\fI/usr/share/diffuse/syntax/*\.syntax\fR
+\fI/usr/share/diffuse/syntax/*\&.syntax\fR
 .RS 4
-Syntax files for various languages\.
+Syntax files for various languages\&.
 .RE
 .PP
-\fI~/\.diffuse/config\fR
+\fI~/\&.diffuse/config\fR
 .RS 4
-Data persistent across sessions\.
+Data persistent across sessions\&.
 .RE
 .PP
-\fI~/\.diffuse/diffuserc\fR
+\fI~/\&.diffuse/diffuserc\fR
 .RS 4
-Your initialisations\.
+Your initialisations\&.
 .RE
 .PP
-\fI~/\.diffuse/prefs\fR
+\fI~/\&.diffuse/prefs\fR
 .RS 4
-Your saved preferences\.
+Your saved preferences\&.
 .RE
 .SH "AUTHOR"
 .PP
 Diffuse was written by Derrick Moser
-<derrick_moser@yahoo\.com>\.
+<derrick_moser@yahoo\&.com>\&.
 .SH "COPYRIGHT"
 .PP
-\(co 2006\-2009 Derrick Moser\. All Rights Reserved\.
+\(co 2006\-2009 Derrick Moser\&. All Rights Reserved\&.
 .PP
 Diffuse is free software; you may redistribute it and/or modify it under the terms of the
 GNU General Public License
-as published by the Free Software Foundation; either version 2 of the licence, or (at your option) any later version\.
+as published by the Free Software Foundation; either version 2 of the licence, or (at your option) any later version\&.

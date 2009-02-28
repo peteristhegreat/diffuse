@@ -55,7 +55,7 @@ Help Options:
   ( -v | --version )               Display version and copyright information
 
 Configuration Options:
-  --no-rcfile                      Do not read the standard resource files
+  --no-rcfile                      Do not read any resource files
   --rcfile <file>                  Specify explicit resource file
 
 General Options:
@@ -514,9 +514,15 @@ class Resources:
                        # where 'normal' is the name of the default state and
                        # 'text' is the classification of all characters not
                        # explicitly matched by a syntax highlighting rule
-                       elif args[0] == 'syntax' and len(args) == 4:
-                           self.current_syntax = SyntaxParser(args[2], args[3])
-                           self.syntaxes[args[1]] = self.current_syntax
+                       elif args[0] == 'syntax' and (len(args) == 2 or len(args) == 4):
+                           if len(args) == 2:
+                               # remove a syntax specification
+                               self.current_syntax = None
+                               if self.syntaxes.has_key(args[1]):
+                                   del self.syntaxes[args[1]]
+                           else:
+                               self.current_syntax = SyntaxParser(args[2], args[3])
+                               self.syntaxes[args[1]] = self.current_syntax
                        # eg. transition from state 'normal' to 'comment' when
                        # the pattern '#' is matched and classify the matched
                        # characters as 'python_comment'
@@ -532,9 +538,10 @@ class Resources:
                        # eg. default to the Python syntax rules when viewing
                        # a file ending with '.py' or '.pyw'
                        #    syntax_files Python '\.pyw?$'
-                       elif args[0] == 'syntax_files' and len(args) == 2 or len(args) == 3:
+                       elif args[0] == 'syntax_files' and (len(args) == 2 or len(args) == 3):
                            key = args[1]
                            if len(args) == 2:
+                               # remove file pattern for a syntax specification
                                if self.syntax_file_patterns.has_key(key):
                                    del self.syntax_file_patterns[key]
                            else:
@@ -4704,8 +4711,6 @@ class NotebookTab(gtk.HBox):
         # left justify the widget
         label.set_alignment(0, 0.5)
         self.pack_start(label, True, True, 0)
-        # allow the widget to shrink in the x-direction
-        label.set_size_request(0, label.get_size_request()[1])
         label.show()
         self.button = button = gtk.Button()
         button.set_relief(gtk.RELIEF_NONE)
@@ -4944,7 +4949,6 @@ class Diffuse(gtk.Window):
         tab = NotebookTab(tabname, gtk.STOCK_FILE)
         tab.button.connect('clicked', self.remove_tab_cb, viewer)
         self.notebook.append_page(viewer, tab)
-        self.notebook.set_tab_label_packing(viewer, True, True, gtk.PACK_START)
         if hasattr(self.notebook, 'set_tab_reorderable'):
             # some PyGTK packages incorrectly omit this method
             self.notebook.set_tab_reorderable(viewer, True)
@@ -5265,14 +5269,15 @@ if __name__ == '__main__':
         theResources.parse(args[i])
         i += 1
     else:
+        # parse system wide initialisation file
+        if isWindows():
+            rc_file = os.path.join(bin_dir, 'diffuserc')
+        else:
+            rc_file = os.path.join(bin_dir, '../../etc/diffuserc')
+        if os.path.isfile(rc_file):
+            theResources.parse(rc_file)
+        # parse personal initialisation file
         rc_file = os.path.expanduser('~/.diffuse/diffuserc')
-        if not os.path.exists(rc_file):
-            # fallback on system wide initialisation file when the personal
-            # initialisation file is not present
-            if isWindows():
-                rc_file = os.path.join(bin_dir, 'diffuserc')
-            else:
-                rc_file = os.path.join(bin_dir, '../../etc/diffuserc')
         if os.path.isfile(rc_file):
             theResources.parse(rc_file)
 

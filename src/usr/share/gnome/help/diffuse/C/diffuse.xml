@@ -132,9 +132,7 @@
             <term><userinput>--no-rcfile</userinput></term>
             <listitem>
               <para>
-                Do not read the personal initialisation file
-                <filename>~/.diffuse/diffuserc</filename> or the system wide
-                initialisation file <filename>/etc/diffuserc</filename>.
+                Do not read any initialisation files.
               </para>
             </listitem>
           </varlistentry>
@@ -143,11 +141,8 @@
             <term><userinput>--rcfile <replaceable>file</replaceable></userinput></term>
             <listitem>
               <para>
-                Read initialisation commands from file
-                <replaceable>file</replaceable> instead of the personal
-                initialisation file <filename>~/.diffuse/diffuserc</filename>
-                or the system wide initialisation file
-                <filename>/etc/diffuserc</filename>.
+                Only read initialisation commands from file
+                <replaceable>file</replaceable>.
               </para>
             </listitem>
           </varlistentry>
@@ -400,13 +395,17 @@
     <title>Resources</title>
 
     <para>
-      When &app; is started, it will read commands from the personal
-      initialisation file <filename>~/.diffuse/diffuserc</filename>.  &app;
-      will use the system wide initialisation file
-      <filename>/etc/diffuserc</filename> when no personal initialisation file
-      is present.  A Bourne shell-like lexical analyser is used to parse
-      initialisation commands.  Comments and special characters can be embedded
-      using the same style of escaping used in Bourne shell scripts.
+      When &app; is started, it will read commands from the system wide
+      initialisation file <filename>/etc/diffuserc</filename>
+      (<filename>%INSTALL_DIR%\diffuserc</filename> on Microsoft Windows) and
+      then the personal initialisation file
+      <filename>~/.diffuse/diffuserc</filename>
+      (<filename>%HOME%\.diffuse\diffuserc</filename> on Microsoft Windows).
+      This behaviour can be changed with the <userinput>--no-rcfile</userinput>
+      and <userinput>--rcfile</userinput> configuration options.  A Bourne
+      shell-like lexical analyser is used to parse initialisation commands.
+      Comments and special characters can be embedded using the same style of
+      escaping used in Bourne shell scripts.
     </para>
 
     <sect1 id="resources-general">
@@ -1331,7 +1330,7 @@
       <variablelist>
 
         <varlistentry>
-          <term><userinput>syntax <replaceable>name</replaceable> <replaceable>initial_state</replaceable> <replaceable>default_tag</replaceable></userinput></term>
+          <term><userinput>syntax <replaceable>name</replaceable> <optional><replaceable>initial_state</replaceable> <replaceable>default_tag</replaceable></optional></userinput></term>
           <listitem>
             <para>
               Declares a new syntax style called
@@ -1340,7 +1339,10 @@
               certain patterns are matched.  The initial state for the state
               machine will be <replaceable>initial_state</replaceable>.  All
               characters not matched by a pattern will be tagged as
-              <replaceable>default_tag</replaceable> for highlighting.
+              <replaceable>default_tag</replaceable> for highlighting.  The
+              syntax style called <replaceable>name</replaceable> can be
+              removed by omitting <replaceable>initial_state</replaceable> and
+              <replaceable>default_tag</replaceable>.
             </para>
           </listitem>
         </varlistentry>
