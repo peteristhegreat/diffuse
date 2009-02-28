@@ -4964,14 +4964,22 @@ class Diffuse(gtk.Window):
             # one file specified
             # determine which other files to compare it with
             name = specs[0].name
-            encoding = specs[0].encoding
             vcs = theVCSs.findByFilename(name)
-            if vcs is not None:
-                specs = []
-                for name, rev in vcs.getSingleFileSpecs(self.prefs, name):
-                    specs.append(FileSpec(name, rev, vcs, encoding))
-            else:
+            if vcs is None:
+                # shift the existing file so it will be in the second pane
                 specs.insert(0, FileSpec())
+            else:
+                rev = specs[0].revision
+                encoding = specs[0].encoding
+                specs = []
+                if rev is None:
+                    # no revision specified assume defaults
+                    for name, rev in vcs.getSingleFileSpecs(self.prefs, name):
+                        specs.append(FileSpec(name, rev, vcs, encoding))
+                else:
+                    # single revision specified
+                    specs.append(FileSpec(name, rev, vcs, encoding))
+                    specs.append(FileSpec(name, None, None, encoding))
         else:
             # multiple files specified, use one pane for each file
             for spec in specs:
@@ -5363,10 +5371,10 @@ if __name__ == '__main__':
                 isdirviewer = os.path.isdir(filename)
             elif not isdirviewer and os.path.isdir(filename):
                 filename = os.path.join(filename, os.path.basename(specs[0].name))
+            if len(revs) == 0:
+                revs.append(None)
             for rev in revs:
                 specs.append(FileSpec(filename, rev, None, encoding))
-            if len(revs) <= 1:
-                specs.append(FileSpec(filename, None, None, encoding))
             revs = []
             if separate:
                 diff.newLoadedFileDiffViewer(specs)
