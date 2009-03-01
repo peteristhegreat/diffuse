@@ -31,6 +31,7 @@ setup(
     options = { 'py2exe': {
                    'packages': 'encodings, gtk',
                    'includes': 'cairo, pango, pangocairo, atk, gobject',
-                   'excludes': [ '_ssl', 'pyreadline', 'doctest', 'optparse', 'pickle', 'calendar', 'unittest', 'inspect', 'pdb' ] }
+                   'excludes': [ '_ssl', 'pyreadline', 'doctest', 'optparse', 'pickle', 'calendar', 'unittest', 'inspect', 'pdb' ],
+                   'dll_excludes': [ 'libglade-2.0-0.dll' ] }
               }
  )

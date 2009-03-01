@@ -82,7 +82,7 @@ for p in 'temp\\diffuse.py', 'temp\\diffusew.pyw':
 # build executable in 'dist' from diffuse.py and diffusew.pyw
 args = [ sys.executable, 'setup.py', 'py2exe' ]
 if os.spawnv(os.P_WAIT, args[0], args) != 0:
-    raise IOError()
+    raise IOError('Could not run setup.py')
 
 # include Python 2.6 specific DLLs and manifests
 if platform.python_version_tuple()[:2] == (2, 6):
@@ -132,7 +132,7 @@ fd = proc.stdout
 s = fd.read()
 fd.close()
 if proc.wait() != 0:
-    raise IOError()
+    raise IOError('Could not run xsltproc')
 # add link to style sheet
 s = s.replace('</head>', '<link rel="stylesheet" href="style.css" type="text/css"/></head>')
 # save HTML version of the manual
@@ -148,7 +148,7 @@ copyFile('style.css', 'dist\\style.css')
 # build binary installer 
 copyFile(os.path.join(os.environ['ADD_PATH_HOME'], 'add_path.exe'), 'dist\\add_path.exe')
 if os.system('iscc diffuse.iss /F%s' % (INSTALLER, )) != 0:
-    raise IOError()
+    raise IOError('Could not run iscc')
 
 #
 # Declare success.

@@ -12,7 +12,10 @@ Prerequisites:
    http://www.pygtk.org/
 
    PyGTK has its own set of dependencies.  GTK+ runtime, PyCairo, and PyGObject
-   should be installed in that order prior to installing PyGTK.
+   should be installed in that order prior to installing PyGTK.  If the GTK+
+   runtime installer did not set the GTK_BASEPATH environment variable,
+   manually set it to the installation path.  Also, add the 'bin' and 'lib'
+   directories to the PATH environment variable.
 
 3) py2exe
    http://www.py2exe.org/
@@ -23,7 +26,7 @@ Prerequisites:
    There is no official installer.  Unzip the Windows binary package and
    manually add its 'bin' directory to the PATH environment variable.
 
-5) DocBook Stylesheets
+5) DocBook stylesheets
    http://docbook.sourceforge.net/
 
    Only the 'docbook-xsl' package is needed.  Unzip the package and set the
