@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
   <!ENTITY app "Diffuse">
-  <!ENTITY appversion "0.2.15">
+  <!ENTITY app-version "0.2.15">
 ]>
 <book id="index" lang="en">
   <title>&app; User's Manual</title>
@@ -21,7 +21,7 @@
       </author>
     </authorgroup>
 
-    <releaseinfo>This manual describes version &appversion; of &app;.</releaseinfo>
+    <releaseinfo>This manual describes version &app-version; of &app;.</releaseinfo>
   </bookinfo>
 
   <chapter id="introduction">
@@ -39,7 +39,7 @@
     <sect1 id="introduction-about">
       <title>About</title>
       <para>
-        &app; was written by Derrick Moser.
+        &app; was written by Derrick Moser <email>derrick_moser@yahoo.com</email>.
       </para>
       <para>&copy; 2006-2009 Derrick Moser.  All Rights Reserved.</para>
     </sect1>
@@ -1381,5 +1381,47 @@
 
       </variablelist>
     </sect1> 
+  </chapter>
+
+  <chapter id="files">
+    <title>Files</title>
+    <para>The following files are used by &app;:</para>
+
+    <variablelist>
+      <varlistentry>
+        <term><filename>/etc/diffuserc</filename></term>
+        <listitem>
+          <para>system wide initialisations</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><filename>/usr/share/diffuse/syntax/*.syntax</filename></term>
+        <listitem>
+          <para>syntax files for various languages</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><filename>~/.diffuse/config</filename></term>
+        <listitem>
+          <para>data persistent across sessions</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+          <term><filename>~/.diffuse/diffuserc</filename></term>
+        <listitem>
+          <para>your initialisations</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><filename>~/.diffuse/prefs</filename></term>
+        <listitem>
+          <para>your saved preferences</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </chapter>
 </book>

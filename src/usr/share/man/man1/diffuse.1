@@ -886,7 +886,7 @@ alpha value used when compositing the modified line colour
 .RE
 .SS "Syntax Highlighting"
 .PP
-\fBsyntax \fR\fB\fIname\fR\fR\fB \fR\fB\fIinitial_state\fR\fR\fB \fR\fB\fIdefault_tag\fR\fR
+\fBsyntax \fR\fB\fIname\fR\fR\fB \fR\fB[\fIinitial_state\fR \fIdefault_tag\fR]\fR
 .RS 4
 Declares a new syntax style called
 \fIname\fR\&. Syntax highlighting uses a simple state machine that transitions between states when certain patterns are matched\&. The initial state for the state machine will be
@@ -926,29 +926,31 @@ for highlighting\&.
 .RE
 .SH "FILES"
 .PP
+The following files are used by Diffuse:
+.PP
 \fI/etc/diffuserc\fR
 .RS 4
-System wide initialisations\&.
+system wide initialisations
 .RE
 .PP
 \fI/usr/share/diffuse/syntax/*\&.syntax\fR
 .RS 4
-Syntax files for various languages\&.
+syntax files for various languages
 .RE
 .PP
 \fI~/\&.diffuse/config\fR
 .RS 4
-Data persistent across sessions\&.
+data persistent across sessions
 .RE
 .PP
 \fI~/\&.diffuse/diffuserc\fR
 .RS 4
-Your initialisations\&.
+your initialisations
 .RE
 .PP
 \fI~/\&.diffuse/prefs\fR
 .RS 4
-Your saved preferences\&.
+your saved preferences
 .RE
 .SH "AUTHOR"
 .PP
