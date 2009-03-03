@@ -1,3 +1,13 @@
+Diffuse 0.3.0 - 2009-03-03
+- new Windows installer
+- notification on focus change when files change on disk
+- menu items for adjusting indentation
+- syntax highlighting for Objective-C++
+- '-c' option now works with CVS-style revision numbers
+- window title now describes current tab
+- search settings now persist across sessions
+- minor bug fixes
+
 Diffuse 0.2.15 - 2008-12-03
 - smoother scrolling
 - panes and tabs can now be manually re-organised

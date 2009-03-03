@@ -2,7 +2,7 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
   <!ENTITY app "Diffuse">
-  <!ENTITY app-version "0.2.15">
+  <!ENTITY app-version "0.3.0">
 ]>
 <book id="index" lang="en">
   <title>&app; User's Manual</title>
@@ -1391,35 +1391,35 @@
       <varlistentry>
         <term><filename>/etc/diffuserc</filename></term>
         <listitem>
-          <para>system wide initialisations</para>
+          <para>system wide initialisations (<filename>%INSTALL_DIR%\diffuserc</filename> on Microsoft Windows)</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
         <term><filename>/usr/share/diffuse/syntax/*.syntax</filename></term>
         <listitem>
-          <para>syntax files for various languages</para>
+          <para>syntax files for various languages (<filename>%INSTALL_DIR%\syntax\*.syntax</filename> on Microsoft Windows)</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
         <term><filename>~/.diffuse/config</filename></term>
         <listitem>
-          <para>data persistent across sessions</para>
+          <para>data persistent across sessions (<filename>%HOME%\.diffuse\config</filename> on Microsoft Windows)</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
           <term><filename>~/.diffuse/diffuserc</filename></term>
         <listitem>
-          <para>your initialisations</para>
+          <para>your initialisations (<filename>%HOME%\.diffuse\diffuserc</filename> on Microsoft Windows)</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
         <term><filename>~/.diffuse/prefs</filename></term>
         <listitem>
-          <para>your saved preferences</para>
+          <para>your saved preferences (<filename>%HOME%\.diffuse\prefs</filename> on Microsoft Windows)</para>
         </listitem>
       </varlistentry>
     </variablelist>

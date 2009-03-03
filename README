@@ -1,5 +1,5 @@
 Diffuse
-Version 0.2.15
+Version 0.3.0
 
 Copyright (C) 2006-2009 Derrick Moser <derrick_moser@yahoo.com>
 
@@ -34,6 +34,19 @@ Diffuse is implemented entirely in Python and should run on any platform with
 Python and PyGTK.  If you need to manually install PyGTK, please be aware its
 dependencies should be installed prior to installing PyGTK.
 
+Diffuse can be run directly from an untared source distribution on any POSIX
+system or installed with the instructions below.
+
+The rules for parsing files in ~/.diffuse have changed in the 0.3.0 release.
+Non-fatal errors may be reported when parsing old files.  These errors can be
+fixed by removing the offending lines (or the entire file) from
+~/.diffuse/diffuserc.  Errors in ~/.diffuse/config will be automatically fixed
+when Diffuse exits.
+
+----
+
+Installing on Linux:
+
 Diffuse can be installed from source on most Linux distributions by simply
 copying the files and directories in the 'src' directory to the root of the
 host system.  For example:
@@ -53,7 +66,7 @@ the on-line help documentation using a web browser.
 Some platforms specific post-install steps may be required to index the
 documentation and mime-type handling.  For example:
 
-  bash# scrollkeeper-update -q -o /usr/share/omf/diffuse/diffuse-C.omf
+  bash# scrollkeeper-update -q -o /usr/share/omf/diffuse
   bash# update-desktop-database
 
 Similar steps may be necessary when uninstalling Diffuse.  For example:
@@ -61,5 +74,9 @@ Similar steps may be necessary when uninstalling Diffuse.  For example:
   bash# scrollkeeper-update -q
   bash# update-desktop-database
 
-The 'windows-installer' directory contains scripts for building a package for
-Windows that includes all dependencies.
+----
+
+Installing on Windows:
+
+The 'windows-installer' directory contains scripts for building an installable
+package for Windows that includes all dependencies.
