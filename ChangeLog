@@ -1,3 +1,6 @@
+Diffuse 0.3.1 - 2009-03-05
+- fixed a typo that broke the 'Find...' dialogue
+
 Diffuse 0.3.0 - 2009-03-03
 - new Windows installer
 - notification on focus change when files change on disk
