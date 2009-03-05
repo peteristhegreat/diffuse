@@ -1784,9 +1784,9 @@ class FileDiffViewer(gtk.Table):
             sw = ScrolledWindow()
             darea = sw.darea
             darea.add_events(gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON1_MOTION_MASK)
-            darea.connect('button_press_event', self.darea_button_press_cb)
-            darea.connect('motion_notify_event', self.darea_motion_notify_cb)
-            darea.connect('expose_event', self.darea_expose_cb)
+            darea.connect('button_press_event', self.darea_button_press_cb, i)
+            darea.connect('motion_notify_event', self.darea_motion_notify_cb, i)
+            darea.connect('expose_event', self.darea_expose_cb, i)
             self.dareas.append(darea)
             if self.hadj is None:
                 self.hadj = sw.get_hadjustment()
@@ -2992,11 +2992,10 @@ class FileDiffViewer(gtk.Table):
             self.setCurrentLine(f, i, extend and f == self.current_pane)
 
     # callback for mouse button presses in the text window
-    def darea_button_press_cb(self, widget, event):
+    def darea_button_press_cb(self, widget, event, f):
         self.get_toplevel().set_focus(self)
         x = int(event.x + self.hadj.get_value())
         y = int(event.y + self.vadj.get_value())
-        f = self.dareas.index(widget)
         nlines = len(self.panes[f].lines)
         i = min(y // self.font_height, nlines)
         if event.button == 1:
@@ -3066,10 +3065,9 @@ class FileDiffViewer(gtk.Table):
             menu.popup(None, None, None, event.button, event.time)
 
     # callback used to notify us about click and drag motion
-    def darea_motion_notify_cb(self, widget, event):
+    def darea_motion_notify_cb(self, widget, event, f):
         if event.state & gtk.gdk.BUTTON1_MASK:
             # left mouse button
-            f = self.dareas.index(widget)
             extend = (f == self.current_pane)
             x = int(event.x + self.hadj.get_value())
             y = int(event.y + self.vadj.get_value())
@@ -3189,8 +3187,7 @@ class FileDiffViewer(gtk.Table):
         return s
 
     # draw the text viewport
-    def darea_expose_cb(self, widget, event):
-        f = self.dareas.index(widget)
+    def darea_expose_cb(self, widget, event, f):
         pane = self.panes[f]
         syntax = self.syntax
 
@@ -4738,7 +4735,7 @@ class Diffuse(gtk.Window):
         self.viewer_count = 0
 
         # state information that should persist across sessions
-        self.bool_state = { 'window_maximized': False, 'search_matchcase': False, 'search_backwords': False }
+        self.bool_state = { 'window_maximized': False, 'search_matchcase': False, 'search_backwards': False }
         self.int_state = { 'window_x': 0, 'window_y': 0, 'window_width': 1024, 'window_height': 768 }
         self.connect('configure_event', self.configure_cb)
         self.connect('window_state_event', self.window_state_cb)
