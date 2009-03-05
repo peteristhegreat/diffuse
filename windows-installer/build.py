@@ -25,8 +25,9 @@ import subprocess
 import sys
 
 VERSION='0.3.0'
+PACKAGE='1'
 PLATFORM='win' + ''.join([ c for c in platform.architecture()[0] if c.isdigit() ])
-INSTALLER='diffuse-%s.%s' % (VERSION, PLATFORM)
+INSTALLER='diffuse-%s-%s.%s' % (VERSION, PACKAGE, PLATFORM)
 
 # makes a directory without complaining if it already exists
 def mkdir(s):
