@@ -2220,12 +2220,33 @@ class FileDiffViewer(gtk.Table):
                 else:
                     del pane.diff_cache[i:]
             self.dareas[f].queue_draw()
-        self.updateSize(False)
         self.map_cache = None
         self.map.queue_draw()
 
+    # Undo for alignment changes
+    class AlignmentChangeUndo:
+        def __init__(self, finished):
+            self.data = finished
+
+        def undo(self, viewer):
+            finished = self.data
+            viewer.alignmentChange(not finished)
+
+        def redo(self, viewer):
+            finished = self.data
+            viewer.alignmentChange(finished)
+
+    # update viewer in response to alignment changes
+    def alignmentChange(self, finished):
+        if self.undoblock is not None:
+            # create an Undo object for the action
+            self.addUndo(FileDiffViewer.AlignmentChangeUndo(finished))
+        if finished:
+            self.updateSize(False)
+
     # updates the alignment of 'n' lines starting from 'i'
     def updateAlignment(self, i, n, lines):
+        self.alignmentChange(False)
         new_n = len(lines[0])
         i2 = i + n
         # insert spacing lines
@@ -2243,6 +2264,7 @@ class FileDiffViewer(gtk.Table):
         # the syntax cache will become invalidated.... we don't really need to
         # do that...
         self.invalidateLineMatching(i, n, new_n)
+        self.alignmentChange(True)
 
     # Undo for changing how lines are cut into blocks for alignment
     class UpdateBlocksUndo:
@@ -4650,105 +4672,101 @@ class NotebookTab(gtk.HBox):
     def set_text(self, s):
         self.label.set_text(s)
 
-# specialisation of FileDiffViewer for Diffuse
-class DiffuseFileDiffViewer(FileDiffViewer):
-    # pane header
-    class PaneHeader(gtk.HBox):
-        def __init__(self):
-            gtk.HBox.__init__(self)
-            appendButtons(self, gtk.ICON_SIZE_MENU, [
-               [ gtk.STOCK_OPEN, self.button_cb, 'open', _('Open File...') ],
-               [ gtk.STOCK_REFRESH, self.button_cb, 'reload', _('Reload File') ],
-               [ gtk.STOCK_SAVE, self.button_cb, 'save', _('Save File') ],
-               [ gtk.STOCK_SAVE_AS, self.button_cb, 'save_as', _('Save File As...') ] ])
-            self.label = label = gtk.Label()
-            label.set_size_request(0, label.get_size_request()[1])
-            self.pack_start(label, True, True, 0)
-            label.show()
-
-        # callback for buttons
-        def button_cb(self, widget, s):
-            self.emit(s)
-
-        # set title
-        def setLabel(self, s):
-            self.label.set_text(s)
-
-    def __init__(self, n, prefs, title):
-        self.headers = headers = [ DiffuseFileDiffViewer.PaneHeader() for i in range(n) ]
-        FileDiffViewer.__init__(self, headers, prefs)
-        self.title = title
-	self.status = ''
-
-        self.connect('file_spec_changed', self.file_spec_changed_cb)
-        self.connect('status_changed', self.status_changed_cb)
-        for i, h in enumerate(headers):
-            h.connect('open', self.open_file_button_cb, i)
-            h.connect('reload', self.reload_file_button_cb, i)
-            h.connect('save', self.save_file_button_cb, i)
-            h.connect('save_as', self.save_file_as_button_cb, i)
-            h.show()
-
-    # callback for open file button
-    def open_file_button_cb(self, widget, f):
-        self.open_file(f)
-
-    # callback for reload file button
-    def reload_file_button_cb(self, widget, f):
-        self.open_file(f, True)
-
-    # callback for save file button
-    def save_file_button_cb(self, widget, f):
-        self.save_file(f)
-
-    # callback for save file as button
-    def save_file_as_button_cb(self, widget, f):
-        self.save_file(f, True)
-
-    # callback to receive notification when the name of a file changes
-    def file_spec_changed_cb(self, widget, f, spec):
-        if spec.name is None:
-            s = ''
-        else:
-            s = spec.name
-            if spec.revision is not None:
-                s = '%s (%s)' % (s, spec.revision)
-        self.headers[f].setLabel(s)
-
-        # choose a short but descriptive title for the viewer
-        names = []
-        unique_names = {}
-        for pane in self.panes:
-            s = pane.spec.name
-            if s is not None:
-                s = os.path.basename(s)
-                names.append(s)
-                unique_names[s] = None
-
-        if len(unique_names) == 1:
-            s = names[0]
-        else:
-            s = ' : '.join(names)
-        self.emit('title_changed', s)
-
-    # callback to record the viewer's current status message
-    def status_changed_cb(self, widget, s):
-        self.status = s
-
-    # gets the status bar text
-    def getStatus(self):
-        return self.status
-
-gobject.signal_new('title_changed', DiffuseFileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
-gobject.signal_new('open', DiffuseFileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-gobject.signal_new('reload', DiffuseFileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-gobject.signal_new('save', DiffuseFileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-gobject.signal_new('save_as', DiffuseFileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-
 # the main application class containing a set of file viewers
 # this class displays tab for switching between viewers and dispatches menu
 # commands to the current viewer
 class Diffuse(gtk.Window):
+    # specialisation of FileDiffViewer for Diffuse
+    class FileDiffViewer(FileDiffViewer):
+        # pane header
+        class PaneHeader(gtk.HBox):
+            def __init__(self):
+                gtk.HBox.__init__(self)
+                appendButtons(self, gtk.ICON_SIZE_MENU, [
+                   [ gtk.STOCK_OPEN, self.button_cb, 'open', _('Open File...') ],
+                   [ gtk.STOCK_REFRESH, self.button_cb, 'reload', _('Reload File') ],
+                   [ gtk.STOCK_SAVE, self.button_cb, 'save', _('Save File') ],
+                   [ gtk.STOCK_SAVE_AS, self.button_cb, 'save_as', _('Save File As...') ] ])
+                self.label = label = gtk.Label()
+                label.set_size_request(0, label.get_size_request()[1])
+                self.pack_start(label, True, True, 0)
+                label.show()
+    
+            # callback for buttons
+            def button_cb(self, widget, s):
+                self.emit(s)
+    
+            # set title
+            def setLabel(self, s):
+                self.label.set_text(s)
+    
+        def __init__(self, n, prefs, title):
+            self.headers = headers = [ Diffuse.FileDiffViewer.PaneHeader() for i in range(n) ]
+            FileDiffViewer.__init__(self, headers, prefs)
+            self.title = title
+            self.status = ''
+    
+            self.connect('file_spec_changed', self.file_spec_changed_cb)
+            self.connect('status_changed', self.status_changed_cb)
+            for i, h in enumerate(headers):
+                h.connect('open', self.open_file_button_cb, i)
+                h.connect('reload', self.reload_file_button_cb, i)
+                h.connect('save', self.save_file_button_cb, i)
+                h.connect('save_as', self.save_file_as_button_cb, i)
+                h.show()
+    
+        # callback for open file button
+        def open_file_button_cb(self, widget, f):
+            self.open_file(f)
+    
+        # callback for reload file button
+        def reload_file_button_cb(self, widget, f):
+            self.open_file(f, True)
+    
+        # callback for save file button
+        def save_file_button_cb(self, widget, f):
+            self.save_file(f)
+    
+        # callback for save file as button
+        def save_file_as_button_cb(self, widget, f):
+            self.save_file(f, True)
+    
+        # callback to receive notification when the name of a file changes
+        def file_spec_changed_cb(self, widget, f, spec):
+            if spec.name is None:
+                s = ''
+            else:
+                s = spec.name
+                if spec.revision is not None:
+                    s = '%s (%s)' % (s, spec.revision)
+            self.headers[f].setLabel(s)
+    
+            # choose a short but descriptive title for the viewer
+            names = []
+            unique_names = {}
+            for pane in self.panes:
+                s = pane.spec.name
+                if s is not None:
+                    s = os.path.basename(s)
+                    names.append(s)
+                    unique_names[s] = None
+    
+            if len(unique_names) == 1:
+                s = names[0]
+            else:
+                s = ' : '.join(names)
+            self.emit('title_changed', s)
+    
+        # callback to record the viewer's current status message
+        def status_changed_cb(self, widget, s):
+            self.status = s
+    
+        # gets the status bar text
+        def getStatus(self):
+            return self.status
+    
+
+
     def __init__(self):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
 
@@ -4982,7 +5000,7 @@ class Diffuse(gtk.Window):
     def newFileDiffViewer(self, n):
         self.viewer_count += 1
         tabname = _('File Merge %d') % (self.viewer_count, )
-        viewer = DiffuseFileDiffViewer(n, self.prefs, tabname)
+        viewer = Diffuse.FileDiffViewer(n, self.prefs, tabname)
         tab = NotebookTab(tabname, gtk.STOCK_FILE)
         tab.button.connect('clicked', self.remove_tab_cb, viewer)
         self.notebook.append_page(viewer, tab)
@@ -5296,6 +5314,12 @@ class Diffuse(gtk.Window):
         dialog = AboutDialog()
         dialog.run()
         dialog.destroy()
+
+gobject.signal_new('title_changed', Diffuse.FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
+gobject.signal_new('open', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
+gobject.signal_new('reload', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
+gobject.signal_new('save', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
+gobject.signal_new('save_as', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
 
 # process the command line arguments
 if __name__ == '__main__':
