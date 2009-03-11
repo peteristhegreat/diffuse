@@ -1676,7 +1676,7 @@ class FileDiffViewer(gtk.Table):
         if n < 2:
             raise ValueError('Invalid number of panes')
 
-        gtk.Table.__init__(self, 3, n + 1)
+        gtk.Table.__init__(self, 2, n + 1)
         self.set_flags(gtk.CAN_FOCUS)
         self.prefs = prefs
 
