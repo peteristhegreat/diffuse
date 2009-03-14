@@ -1,4 +1,4 @@
-.TH "DIFFUSE" "1" "2009\-03\-03" "diffuse 0\&.3\&.0" "Diffuse Manual"
+.TH "DIFFUSE" "1" "2009\-03\-05" "diffuse 0\&.3\&.1" "Diffuse Manual"
 .nh
 .ad l
 .SH "NAME"
@@ -222,6 +222,12 @@ File → Open File\&.\&.\&.
 menu item
 .RE
 .PP
+\fBopen_file_in_new_tab\fR
+.RS 4
+File → Open File In New Tab\&.\&.\&.
+menu item
+.RE
+.PP
 \fBreload_file\fR
 .RS 4
 File → Reload File
@@ -436,6 +442,18 @@ Merge → Merge From Right
 menu item
 .RE
 .PP
+\fBmerge_from_left_then_right\fR
+.RS 4
+Merge → Merge From Left Then Right
+menu item
+.RE
+.PP
+\fBmerge_from_right_then_left\fR
+.RS 4
+Merge → Merge From Right Then Left
+menu item
+.RE
+.PP
 \fBisolate\fR
 .RS 4
 Merge → Isolate
@@ -564,16 +582,6 @@ move cursor down one page, extending the selection
 delete the selected text
 .RE
 .PP
-\fBmerge_from_left\fR
-.RS 4
-merge lines from file on the left
-.RE
-.PP
-\fBmerge_from_right\fR
-.RS 4
-merge lines from file on the right
-.RE
-.PP
 \fBfirst_difference\fR
 .RS 4
 select the first difference
@@ -592,6 +600,31 @@ select the next difference
 \fBlast_difference\fR
 .RS 4
 select the last difference
+.RE
+.PP
+\fBclear_edits\fR
+.RS 4
+clear all edits from the selected lines
+.RE
+.PP
+\fBmerge_from_left\fR
+.RS 4
+merge lines from file on the left
+.RE
+.PP
+\fBmerge_from_right\fR
+.RS 4
+merge lines from file on the right
+.RE
+.PP
+\fBmerge_from_left_then_right\fR
+.RS 4
+merge lines from file on the left then file on the right
+.RE
+.PP
+\fBmerge_from_right_then_left\fR
+.RS 4
+merge lines from file on the right then file on the left
 .RE
 .PP
 \fBisolate\fR

@@ -471,6 +471,13 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>open_file_in_new_tab</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>File</guimenu><guimenuitem>Open File In New Tab...</guimenuitem></menuchoice> menu item</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>reload_file</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>File</guimenu><guimenuitem>Reload File</guimenuitem></menuchoice> menu item</para>
@@ -723,6 +730,20 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>merge_from_left_then_right</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Merge From Left Then Right</guimenuitem></menuchoice> menu item</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>merge_from_right_then_left</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Merge From Right Then Left</guimenuitem></menuchoice> menu item</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>isolate</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Isolate</guimenuitem></menuchoice> menu item</para>
@@ -890,20 +911,6 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>merge_from_left</userinput></term>
-            <listitem>
-              <para>merge lines from file on the left</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>merge_from_right</userinput></term>
-            <listitem>
-              <para>merge lines from file on the right</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><userinput>first_difference</userinput></term>
             <listitem>
               <para>select the first difference</para>
@@ -928,6 +935,41 @@
             <term><userinput>last_difference</userinput></term>
             <listitem>
               <para>select the last difference</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>clear_edits</userinput></term>
+            <listitem>
+              <para>clear all edits from the selected lines</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>merge_from_left</userinput></term>
+            <listitem>
+              <para>merge lines from file on the left</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>merge_from_right</userinput></term>
+            <listitem>
+              <para>merge lines from file on the right</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>merge_from_left_then_right</userinput></term>
+            <listitem>
+              <para>merge lines from file on the left then file on the right</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>merge_from_right_then_left</userinput></term>
+            <listitem>
+              <para>merge lines from file on the right then file on the left</para>
             </listitem>
           </varlistentry>
 

@@ -208,6 +208,7 @@ class Resources:
         self.keybindings_lookup = {}
         set_binding = self.setKeyBinding
         set_binding('menu', 'open_file', 'Ctrl+o')
+        set_binding('menu', 'open_file_in_new_tab', 'Shift+Ctrl+O')
         set_binding('menu', 'reload_file', 'Shift+Ctrl+R')
         set_binding('menu', 'save_file', 'Ctrl+s')
         set_binding('menu', 'save_file_as', 'Shift+Ctrl+S')
@@ -242,6 +243,8 @@ class Resources:
         set_binding('menu', 'clear_edits', 'Ctrl+r')
         set_binding('menu', 'merge_from_left', 'Ctrl+Left')
         set_binding('menu', 'merge_from_right', 'Ctrl+Right')
+        set_binding('menu', 'merge_from_left_then_right', 'Ctrl+m')
+        set_binding('menu', 'merge_from_right_then_left', 'Shift+Ctrl+M')
         set_binding('menu', 'isolate', 'Ctrl+i')
         set_binding('menu', 'help_contents', 'F1')
         set_binding('line_mode', 'enter_align_mode', 'space')
@@ -255,8 +258,10 @@ class Resources:
         set_binding('line_mode', 'right', 'Right')
         set_binding('line_mode', 'extend_right', 'Shift+Right')
         set_binding('line_mode', 'page_up', 'Page_Up')
+        set_binding('line_mode', 'page_up', 'u')
         set_binding('line_mode', 'extend_page_up', 'Shift+Page_Up')
         set_binding('line_mode', 'page_down', 'Page_Down')
+        set_binding('line_mode', 'page_down', 'd')
         set_binding('line_mode', 'extend_page_down', 'Shift+Page_Down')
         set_binding('line_mode', 'delete_text', 'BackSpace')
         set_binding('line_mode', 'delete_text', 'Delete')
@@ -265,7 +270,17 @@ class Resources:
         set_binding('line_mode', 'last_line', 'End')
         set_binding('line_mode', 'extend_last_line', 'Shift+End')
         set_binding('line_mode', 'first_difference', 'Ctrl+Home')
+        set_binding('line_mode', 'first_difference', 'Shift+K')
+        set_binding('line_mode', 'previous_difference', 'k')
+        set_binding('line_mode', 'next_difference', 'j')
         set_binding('line_mode', 'last_difference', 'Ctrl+End')
+        set_binding('line_mode', 'last_difference', 'Shift+J')
+        set_binding('line_mode', 'clear_edits', 'r')
+        set_binding('line_mode', 'merge_from_left', 'h')
+        set_binding('line_mode', 'merge_from_right', 'l')
+        set_binding('line_mode', 'merge_from_left_then_right', 'm')
+        set_binding('line_mode', 'merge_from_right_then_left', 'Shift+M')
+        set_binding('line_mode', 'isolate', 'i')
         set_binding('align_mode', 'enter_line_mode', 'Escape')
         set_binding('align_mode', 'enter_character_mode', 'Return')
         set_binding('align_mode', 'up', 'Up')
@@ -977,6 +992,7 @@ def appendButtons(box, size, specs):
         if len(spec) > 0:
             button = gtk.Button()
             button.set_relief(gtk.RELIEF_NONE)
+            button.unset_flags(gtk.CAN_FOCUS)
             image = gtk.Image()
             image.set_from_stock(spec[0], size)
             button.add(image)
@@ -1724,12 +1740,15 @@ class FileDiffViewer(gtk.Table):
                 'page_down': self._line_mode_page_down,
                 'extend_page_down': self._line_mode_extend_page_down,
                 'delete_text': self._delete_text,
-                'merge_from_left': self._merge_from_left,
-                'merge_from_right': self._merge_from_right,
                 'first_difference': self._first_difference,
                 'previous_difference': self._previous_difference,
                 'next_difference': self._next_difference,
                 'last_difference': self._last_difference,
+                'clear_edits': self._clear_edits,
+                'merge_from_left': self._merge_from_left,
+                'merge_from_right': self._merge_from_right,
+                'merge_from_left_then_right': self._merge_from_left_then_right,
+                'merge_from_right_then_left': self._merge_from_right_then_left,
                 'isolate': self._isolate }
         self._align_mode_actions = {
                 'enter_line_mode': self._align_mode_enter_line_mode,
@@ -4327,10 +4346,9 @@ class FileDiffViewer(gtk.Table):
         self.map.queue_draw()
         self.updatePrompt()
 
-    # callback for clear edits menu item
-    def clear_edits_cb(self, widget, data):
+    # 'clear_edits' keybinding action
+    def _clear_edits(self):
         self.setLineMode()
-        self.openUndoBlock()
         self.recordEditMode()
         f = self.current_pane
         start, end = self.selection_line, self.current_line
@@ -4346,6 +4364,11 @@ class FileDiffViewer(gtk.Table):
                     # remove the line so it doesn't persist as a spacer
                     self.instanceLine(f, i, True)
         self.recordEditMode()
+
+    # callback for clear edits menu item
+    def clear_edits_cb(self, widget, data):
+        self.openUndoBlock()
+        self._clear_edits()
         self.closeUndoBlock()
 
     # copies the selected range of lines from pane 'f_src' to 'f_dst'
@@ -4397,6 +4420,111 @@ class FileDiffViewer(gtk.Table):
         self.openUndoBlock()
         self.recordEditMode()
         self._merge_from_right()
+        self.recordEditMode()
+        self.closeUndoBlock()
+
+    # merge from both left and right into the current pane
+    def _mergeBoth(self, right_first):
+        self.setLineMode()
+        f = self.current_pane
+        start, end = self.selection_line, self.current_line
+        if end < start:
+            start, end = end, start
+        end += 1
+        npanes = len(self.panes)
+        nlines = len(self.panes[f].lines)
+        end = min(end, nlines)
+        n = end - start
+        if n > 0:
+            lines = [ pane.lines[start:end] for pane in self.panes ]
+            spaces = [ n * [ None ] for pane in self.panes ]
+            old_content = [ line for line in lines[f] if line is not None ]
+            for i in range(f + 1, npanes):
+                lines[i], spaces[i] = spaces[i], lines[i]
+            # replace f's lines with merge content
+            if f > 0:
+                lines[f] = lines[f - 1][:]
+            else:
+                lines[f] = n * [ None ]
+            if f + 1 < npanes:
+                spaces[f] = spaces[f + 1][:]
+            else:
+                spaces[f] = n * [ None ]
+            if right_first:
+                lines, spaces = spaces, lines
+
+            pre, post = cutBlocks(end, self.blocks)
+            pre, b = cutBlocks(start, pre)
+
+            #  join and remove null lines
+            b.extend(b)
+            for l, s in zip(lines, spaces):
+                l.extend(s)
+            removeNullLines(b, lines)
+
+            # replace f's lines with original, growing if necessary
+            new_content = lines[f]
+            new_n = len(new_content)
+            lines[f] = old_content
+            min_n = len(old_content)
+
+            delta = new_n - min_n
+            if delta < 0:
+                delta = -delta
+                for i in range(npanes):
+                    if i != f:
+                        lines[i].extend(delta * [ None ])
+                # grow last block
+                if len(b) > 0:
+                    b[-1] += delta
+                else:
+                    b = createBlock(delta)
+            elif delta > 0:
+                old_content.extend(delta * [ None ])
+                new_n = len(old_content)
+
+            # update lines and blocks
+            self.updateAlignment(start, n, lines)
+            pre.extend(b)
+            pre.extend(post)
+            self.updateBlocks(pre)
+
+            for i in range(new_n):
+                s = None
+                if i < len(new_content):
+                    line = new_content[i]
+                    if line is not None:
+                        s = line.getText()
+                self.updateText(f, start + i, s)
+
+            # update selection
+            end = start + new_n
+            if end > start:
+                end -= 1
+            self.selection_line = start
+            self.setCurrentLine(f, end, True)
+
+    # 'merge_from_left_then_right' keybinding action
+    def _merge_from_left_then_right(self):
+        self._mergeBoth(False)
+
+    # 'merge_from_right_then_left' keybinding action
+    def _merge_from_right_then_left(self):
+        self._mergeBoth(True)
+
+    # callback for merge from left then right menu item
+    def merge_from_left_then_right_cb(self, widget, data):
+        self.openUndoBlock()
+        self.recordEditMode()
+        self._merge_from_left_then_right()
+        self.recordEditMode()
+        self.closeUndoBlock()
+
+    # callback for merge from right then left menu item
+    def merge_from_right_then_left_cb(self, widget, data):
+        self.openUndoBlock()
+        self.recordEditMode()
+        self._merge_from_right_then_left()
         self.recordEditMode()
         self.closeUndoBlock()
 
@@ -4764,8 +4892,6 @@ class Diffuse(gtk.Window):
         # gets the status bar text
         def getStatus(self):
             return self.status
-    
-
 
     def __init__(self):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
@@ -4787,12 +4913,42 @@ class Diffuse(gtk.Window):
         self.connect('delete-event', self.delete_cb)
         accel_group = gtk.AccelGroup()
 
-        # Create a VBox for our contents
+        # create a VBox for our contents
         vbox = gtk.VBox()
+
+        # create some custom icons for merging
+        DIFFUSE_STOCK_LEFT_RIGHT = 'diffuse-left-right'
+        DIFFUSE_STOCK_RIGHT_LEFT = 'diffuse-right-left'
+
+        factory = gtk.IconFactory()
+        # render the left and right arrow we will use in our custom icons
+        p0 = self.render_icon(gtk.STOCK_GO_FORWARD, gtk.ICON_SIZE_LARGE_TOOLBAR)
+        p1 = self.render_icon(gtk.STOCK_GO_BACK, gtk.ICON_SIZE_LARGE_TOOLBAR)
+        w, h, s = p0.get_width(), p0.get_height(), 0.7
+        sw, sh = int(s * w), int(s * h)
+        w1, h1 = w - sw, h - sh
+
+        # create merge from left then right icon
+        p = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, w, h)
+        p.fill(0)
+        p1.composite(p, w1, h1, sw, sh, w1, w - sh, s, s, gtk.gdk.INTERP_BILINEAR, 255)
+        p0.composite(p, 0, 0, sw, sh, 0, 0, s, s, gtk.gdk.INTERP_BILINEAR, 255)
+        factory.add(DIFFUSE_STOCK_LEFT_RIGHT, gtk.IconSet(p))
+
+        # create merge from right then left icon
+        p = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, w, h)
+        p.fill(0)
+        p0.composite(p, 0, h1, sw, sh, 0, h1, s, s, gtk.gdk.INTERP_BILINEAR, 255)
+        p1.composite(p, w1, 0, sw, sh, w1, 0, s, s, gtk.gdk.INTERP_BILINEAR, 255)
+        factory.add(DIFFUSE_STOCK_RIGHT_LEFT, gtk.IconSet(p))
+
+        # make the icons available for use
+        factory.add_default()
 
         menuspecs = []
         menuspecs.append([ _('_File'), [
                      [_('_Open File...'), self.open_file_cb, None, gtk.STOCK_OPEN, 'open_file'],
+                     [_('Open File In New _Tab...'), self.open_file_in_new_tab_cb, None, None, 'open_file_in_new_tab'],
                      [_('_Reload File'), self.reload_file_cb, None, gtk.STOCK_REFRESH, 'reload_file'],
                      [_('_Save File'), self.save_file_cb, None, gtk.STOCK_SAVE, 'save_file'],
                      [_('Save File _As...'), self.save_file_as_cb, None, gtk.STOCK_SAVE_AS, 'save_file_as'],
@@ -4815,7 +4971,7 @@ class Diffuse(gtk.Window):
                      [_('_Find...'), self.find_cb, None, gtk.STOCK_FIND, 'find'],
                      [_('Find _Next'), self.find_next_cb, None, None, 'find_next'],
                      [_('Find Pre_vious'), self.find_previous_cb, None, None, 'find_previous'],
-                     [_('Go To _Line...'), self.go_to_line_cb, None, None, 'go_to_line'],
+                     [_('Go To _Line...'), self.go_to_line_cb, None, gtk.STOCK_JUMP_TO, 'go_to_line'],
                      [],
                      [_('Decrea_se Indenting'), self.decrease_indenting_cb, None, gtk.STOCK_UNINDENT, 'decrease_indenting'],
                      [_('_Increase Indenting'), self.increase_indenting_cb, None, gtk.STOCK_INDENT, 'increase_indenting'],
@@ -4854,6 +5010,8 @@ class Diffuse(gtk.Window):
                      [_('_Clear Edits'), self.clear_edits_cb, None, gtk.STOCK_CLEAR, 'clear_edits'],
                      [_('Merge From Le_ft'), self.merge_from_left_cb, None, gtk.STOCK_GO_FORWARD, 'merge_from_left'],
                      [_('Merge From Ri_ght'), self.merge_from_right_cb, None, gtk.STOCK_GO_BACK, 'merge_from_right'],
+                     [_('Merge From Left _Then Right'), self.merge_from_left_then_right_cb, None, DIFFUSE_STOCK_LEFT_RIGHT, 'merge_from_left_then_right'],
+                     [_('Merge From Right T_hen Left'), self.merge_from_right_then_left_cb, None, DIFFUSE_STOCK_RIGHT_LEFT, 'merge_from_right_then_left'],
                      [],
                      [_('_Isolate'), self.isolate_cb, None, None, 'isolate'] ] ])
 
@@ -4879,6 +5037,8 @@ class Diffuse(gtk.Window):
            [ gtk.STOCK_CLEAR, self.clear_edits_cb, None, _('Clear Edits') ],
            [ gtk.STOCK_GO_FORWARD, self.merge_from_left_cb, None, _('Merge From Left') ],
            [ gtk.STOCK_GO_BACK, self.merge_from_right_cb, None, _('Merge From Right') ],
+           [ DIFFUSE_STOCK_LEFT_RIGHT, self.merge_from_left_then_right_cb, None, _('Merge From Left Then Right') ],
+           [ DIFFUSE_STOCK_RIGHT_LEFT, self.merge_from_right_then_left_cb, None, _('Merge From Right Then Left') ],
            [],
            [ gtk.STOCK_CUT, self.cut_cb, None, _('Cut') ],
            [ gtk.STOCK_COPY, self.copy_cb, None, _('Copy') ],
@@ -5048,6 +5208,7 @@ class Diffuse(gtk.Window):
         # load the files
         for i, spec in enumerate(specs):
             viewer.load(i, spec)
+        return viewer
 
     # returns True if the application can safely quit
     def confirmQuit(self):
@@ -5071,6 +5232,26 @@ class Diffuse(gtk.Window):
     # callback for the open file menu item
     def open_file_cb(self, widget, data):
         self.getCurrentViewer().open_file_cb(widget, data)
+
+    # callback for the open file menu item
+    def open_file_in_new_tab_cb(self, widget, data):
+        specs = None
+        dialog = FileChooserDialog(_('Open File In New Tab'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN)
+        dialog.set_default_response(gtk.RESPONSE_OK)
+        if dialog.run() == gtk.RESPONSE_OK:
+            name = dialog.get_filename()
+            rev = None
+            vcs = None
+            revision = dialog.get_revision().strip()
+            if revision != '':
+                rev = revision
+                vcs = theVCSs.findByFilename(name)
+            specs = [ FileSpec(name, rev, vcs, dialog.get_encoding()) ]
+        dialog.destroy()
+        if specs is not None:
+            viewer = self.newLoadedFileDiffViewer(specs)
+            self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
+            viewer.grab_focus()
 
     # callback for the reload file menu item
     def reload_file_cb(self, widget, data):
@@ -5253,6 +5434,14 @@ class Diffuse(gtk.Window):
     # callback for the merge from right menu item
     def merge_from_right_cb(self, widget, data):
         self.getCurrentViewer().merge_from_right_cb(widget, data)
+
+    # callback for the merge from left then right menu item
+    def merge_from_left_then_right_cb(self, widget, data):
+        self.getCurrentViewer().merge_from_left_then_right_cb(widget, data)
+
+    # callback for the merge from right then left menu item
+    def merge_from_right_then_left_cb(self, widget, data):
+        self.getCurrentViewer().merge_from_right_then_left_cb(widget, data)
 
     # callback for the isolate menu item
     def isolate_cb(self, widget, data):
