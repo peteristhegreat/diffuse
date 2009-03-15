@@ -59,6 +59,7 @@ Configuration Options:
   --rcfile <file>                  Specify explicit resource file
 
 General Options:
+  ( -a | --all-changed ) <path>    Create tabs for all changed files          
   ( -c | --commit ) <rev>          File revisions <rev-1> and <rev>
   ( -D | --close-if-same )         Close all tabs with no differences
   ( -e | --encoding ) <codec>      Use <codec> to read and write files
@@ -249,32 +250,43 @@ class Resources:
         set_binding('menu', 'help_contents', 'F1')
         set_binding('line_mode', 'enter_align_mode', 'space')
         set_binding('line_mode', 'enter_character_mode', 'Return')
-        set_binding('line_mode', 'up', 'Up')
-        set_binding('line_mode', 'extend_up', 'Shift+Up')
-        set_binding('line_mode', 'down', 'Down')
-        set_binding('line_mode', 'extend_down', 'Shift+Down')
-        set_binding('line_mode', 'left', 'Left')
-        set_binding('line_mode', 'extend_left', 'Shift+Left')
-        set_binding('line_mode', 'right', 'Right')
-        set_binding('line_mode', 'extend_right', 'Shift+Right')
-        set_binding('line_mode', 'page_up', 'Page_Up')
-        set_binding('line_mode', 'page_up', 'u')
-        set_binding('line_mode', 'extend_page_up', 'Shift+Page_Up')
-        set_binding('line_mode', 'page_down', 'Page_Down')
-        set_binding('line_mode', 'page_down', 'd')
-        set_binding('line_mode', 'extend_page_down', 'Shift+Page_Down')
-        set_binding('line_mode', 'delete_text', 'BackSpace')
-        set_binding('line_mode', 'delete_text', 'Delete')
         set_binding('line_mode', 'first_line', 'Home')
+        set_binding('line_mode', 'first_line', 'g')
         set_binding('line_mode', 'extend_first_line', 'Shift+Home')
         set_binding('line_mode', 'last_line', 'End')
+        set_binding('line_mode', 'last_line', 'Shift+G')
         set_binding('line_mode', 'extend_last_line', 'Shift+End')
+        set_binding('line_mode', 'up', 'Up')
+        set_binding('line_mode', 'up', 'k')
+        set_binding('line_mode', 'extend_up', 'Shift+Up')
+        set_binding('line_mode', 'extend_up', 'Shift+K')
+        set_binding('line_mode', 'down', 'Down')
+        set_binding('line_mode', 'down', 'j')
+        set_binding('line_mode', 'extend_down', 'Shift+Down')
+        set_binding('line_mode', 'extend_down', 'Shift+J')
+        set_binding('line_mode', 'left', 'Left')
+        set_binding('line_mode', 'left', 'Shift+H')
+        set_binding('line_mode', 'extend_left', 'Shift+Left')
+        set_binding('line_mode', 'right', 'Right')
+        set_binding('line_mode', 'right', 'Shift+L')
+        set_binding('line_mode', 'extend_right', 'Shift+Right')
+        set_binding('line_mode', 'page_up', 'Page_Up')
+        set_binding('line_mode', 'page_up', 'Ctrl+u')
+        set_binding('line_mode', 'extend_page_up', 'Shift+Page_Up')
+        set_binding('line_mode', 'extend_page_up', 'Shift+Ctrl+U')
+        set_binding('line_mode', 'page_down', 'Page_Down')
+        set_binding('line_mode', 'page_down', 'Ctrl+d')
+        set_binding('line_mode', 'extend_page_down', 'Shift+Page_Down')
+        set_binding('line_mode', 'extend_page_down', 'Shift+Ctrl+D')
+        set_binding('line_mode', 'delete_text', 'BackSpace')
+        set_binding('line_mode', 'delete_text', 'Delete')
+        set_binding('line_mode', 'delete_text', 'x')
         set_binding('line_mode', 'first_difference', 'Ctrl+Home')
-        set_binding('line_mode', 'first_difference', 'Shift+K')
-        set_binding('line_mode', 'previous_difference', 'k')
-        set_binding('line_mode', 'next_difference', 'j')
+        set_binding('line_mode', 'first_difference', 'Shift+P')
+        set_binding('line_mode', 'previous_difference', 'p')
+        set_binding('line_mode', 'next_difference', 'n')
         set_binding('line_mode', 'last_difference', 'Ctrl+End')
-        set_binding('line_mode', 'last_difference', 'Shift+J')
+        set_binding('line_mode', 'last_difference', 'Shift+N')
         set_binding('line_mode', 'clear_edits', 'r')
         set_binding('line_mode', 'merge_from_left', 'h')
         set_binding('line_mode', 'merge_from_right', 'l')
@@ -283,12 +295,22 @@ class Resources:
         set_binding('line_mode', 'isolate', 'i')
         set_binding('align_mode', 'enter_line_mode', 'Escape')
         set_binding('align_mode', 'enter_character_mode', 'Return')
+        set_binding('align_mode', 'first_line', 'g')
+        set_binding('align_mode', 'last_line', 'Shift+G')
         set_binding('align_mode', 'up', 'Up')
+        set_binding('align_mode', 'up', 'k')
         set_binding('align_mode', 'down', 'Down')
+        set_binding('align_mode', 'down', 'j')
         set_binding('align_mode', 'left', 'Left')
+        set_binding('align_mode', 'left', 'h')
+        set_binding('align_mode', 'left', 'Shift+H')
         set_binding('align_mode', 'right', 'Right')
+        set_binding('align_mode', 'right', 'l')
+        set_binding('align_mode', 'right', 'Shift+L')
         set_binding('align_mode', 'page_up', 'Page_Up')
+        set_binding('align_mode', 'page_up', 'Ctrl+u')
         set_binding('align_mode', 'page_down', 'Page_Down')
+        set_binding('align_mode', 'page_down', 'Ctrl+d')
         set_binding('align_mode', 'align', 'space')
         set_binding('character_mode', 'enter_line_mode', 'Escape')
 
@@ -1071,20 +1093,35 @@ def convert_to_format(s, format):
 
 # contains information about a file
 class FileSpec:
-    def __init__(self, name=None, revision=None, vcs=None, encoding=None):
+    def __init__(self, name=None, encoding=None, vcs=None, revision=None):
         # file name
         self.name = name
-        # revision used to retrieve file from the VCS
-        self.revision = revision
-        # the VCS object
-        self.vcs = vcs
         # name of codec used to translate the file contents to unicode text
         self.encoding = encoding
+        # the VCS object
+        self.vcs = vcs
+        # revision used to retrieve file from the VCS
+        self.revision = revision
+
+# constructs a relative path from 'a' to 'b', both should be absolute paths
+def relpath(a, b):
+    c1 = [ c for c in a.split(os.sep) if c != '' ]
+    c2 = [ c for c in b.split(os.sep) if c != '' ]
+    i, n = 0, len(c1)
+    while i < n and i < len(c2) and c1[i] == c2[i]:
+        i += 1
+    r = (n - i) * [ os.pardir ]
+    r.extend(c2[i:])
+    return os.sep.join(r)
+
+# constructs a relative path from 'a' to join(b1, b2).
+def relpath2(a, b1, b2):
+    return os.path.join(a, relpath(os.path.abspath(a), os.path.abspath(os.path.join(b1, b2))))
 
 # helper function prevent files from being confused with command line options
 # by prepending './' to the basename
-def safeLocalPath(s, prefs, cygwin_pref):
-    s = os.path.join(os.path.curdir, os.path.basename(s))
+def safeRelativePath(abspath1, name, prefs, cygwin_pref):
+    s = os.path.join(os.curdir, relpath(abspath1, os.path.abspath(name)))
     if isWindows():
         if prefs.getBool(cygwin_pref):
             s = s.replace('\\', '/')
@@ -1092,13 +1129,50 @@ def safeLocalPath(s, prefs, cygwin_pref):
             s = s.replace('/', '\\')
     return s
 
+# use popen to read the output of a command
+def popenReadLines(dn, cmd, prefs, bash_pref):
+    # print 'dn', dn
+    # print 'cmd', cmd
+    if isWindows() and prefs.getBool(bash_pref):
+        # launch the command from a bash shell is requested
+        cmd = [ self.prefs.convertToNativePath('/bin/bash.exe'), '-l', '-c', 'cd %s; %s' % (bashEscape(dn), ' '.join([ bashEscape(arg) for arg in cmd ])) ]
+        dn = None
+    # use subprocess.Popen to retrieve the file contents
+    if isWindows():
+        info = subprocess.STARTUPINFO()
+        info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        info.wShowWindow = subprocess.SW_HIDE
+    else:
+        info = None
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=dn, startupinfo=info)
+    proc.stdin.close()
+    proc.stderr.close()
+    fd = proc.stdout
+    # read the command's output
+    ss = fd.readlines()
+    fd.close()
+    if proc.wait() != 0:
+        raise IOError('Command failed.')
+    return ss
+
+# returns the list of strings without EOL characters
+def strip_eol(ss):
+    r = []
+    for s in ss:
+        if s.endswith('\r\n'):
+            s = s[:-2]
+        elif s.endswith('\n'):
+            s = s[:-1]
+        r.append(s)
+    return r
+
 class VCSs:
     # Bazaar support
     class Bzr:
-        def __init__(self, proj_dir):
-            pass
+        def __init__(self, root):
+            self.root = root
 
-        def getSingleFileSpecs(self, prefs, name):
+        def getFileTemplate(self, prefs, name):
             # merge conflict
             left = name + '.OTHER'
             right = name + '.THIS'
@@ -1107,72 +1181,201 @@ class VCSs:
             # default case
             return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, prefs, name, rev):
-            return 'bzr_bash', [ prefs.getString('bzr_bin'), 'cat', '-r', rev, safeLocalPath(name, prefs, 'bzr_cygwin') ]
+        def getFolderTemplate(self, prefs, name):
+            # FIXME: need to sort items
+            result = []
+            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('bzr_bin'), 'status', '-SV', safeRelativePath(self.root, name, prefs, 'bzr_cygwin') ], prefs, 'bzr_bash')):
+                if len(s) > 4:
+                    k = s[4:]
+                    if s[1] == 'M':
+                        # also conflict
+                        k = relpath2(name, self.root, k)
+                        if not os.path.isdir(k):
+                            result.append( [ (k, None) ] )
+                    elif s[1] == 'N':
+                        k = relpath2(name, self.root, k)
+                        if not os.path.isdir(k):
+                            result.append( [ (None, None), (k, None) ] )
+                    elif s[1] == 'D':
+                        k = relpath2(name, self.root, k)
+                        if not os.path.isdir(k):
+                            result.append( [ (k, prefs.getString('bzr_default_revision')), (None, None) ] )
+                    elif s[0] == 'R':
+                        k = k.split(' => ')
+                        if len(k) == 2:
+                            k0 = relpath2(name, self.root, k[0])
+                            k1 = relpath2(name, self.root, k[1])
+                            if not os.path.isdir(k0) and not os.path.isdir(k1):
+                                result.append( [ (k0, prefs.getString('bzr_default_revision')), (k1, None) ] )
+            return result
+
+        def getRevision(self, prefs, name, rev):
+            return popenReadLines(self.root, [ prefs.getString('bzr_bin'), 'cat', '--name-from-revision', '-r', rev, safeRelativePath(self.root, name, prefs, 'bzr_cygwin') ], prefs, 'bzr_bash')
 
     # CVS support
     class Cvs:
-        def getSingleFileSpecs(self, prefs, name):
+        def __init__(self, root):
+            self.root = root
+
+        def getFileTemplate(self, prefs, name):
             return [ (name, prefs.getString('cvs_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, prefs, name, rev):
-            return 'cvs_bash', [ prefs.getString('cvs_bin'), '-Q', 'update', '-p', '-r', rev, safeLocalPath(name, prefs, 'cvs_cygwin') ]
+        def getFolderTemplate(self, prefs, name):
+            result = []
+            r = {}
+            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('cvs_bin'), '-nq', 'update', '-R', safeRelativePath(self.root, name, prefs, 'cvs_cygwin') ], prefs, 'cvs_bash')):
+                if len(s) > 2 and s[0] in 'ACMR':
+                    r[relpath2(name, self.root, s[2:])] = s[0]
+            for k in sorted(r.keys()):
+                v = r[k]
+                if v in 'CM':
+                    result.append( [ (k, None) ] )
+                elif v == 'A':
+                    result.append( [ (None, None), (k, None) ] )
+                elif v == 'R':
+                    result.append( [ (k, 'HEAD'), (None, None) ] )
+            return result
+
+        def getRevision(self, prefs, name, rev):
+            return popenReadLines(self.root, [ prefs.getString('cvs_bin'), '-Q', 'update', '-p', '-r', rev, safeRelativePath(self.root, name, prefs, 'cvs_cygwin') ], prefs, 'cvs_bash')
 
     # Darcs support
     class Darcs:
-        def __init__(self, proj_dir):
-            pass
+        def __init__(self, root):
+            self.root = root
 
-        def getSingleFileSpecs(self, prefs, name):
+        def getFileTemplate(self, prefs, name):
             # FIXME: merge conflicts?
             return [ (name, prefs.getString('darcs_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, prefs, name, rev):
-            return 'darcs_bash', [ prefs.getString('darcs_bin'), 'show', 'contents', '-p', rev, safeLocalPath(name, prefs, 'darcs_cygwin') ]
+        def getFolderTemplate(self, prefs, name):
+            result = []
+            r = {}
+            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('darcs_bin'), 'whatsnew', '-l', safeRelativePath(self.root, name, prefs, 'darcs_cygwin') ], prefs, 'darcs_bash')):
+                p = s.split(' ')
+                if len(p) >= 2 and s[0] in 'AMR':
+                    r[relpath2(name, self.root, p[1])] = s[0]
+            for k in sorted(r.keys()):
+                if not os.path.isdir(k):
+                    v = r[k]
+                    if v in 'M':
+                        result.append( [ (k, None) ] )
+                    elif v == 'A':
+                        result.append( [ (None, None), (k, None) ] )
+                    elif v == 'R':
+                        result.append( [ (k, prefs.getString('darcs_default_revision')), (None, None) ] )
+            return result
+
+        def getRevision(self, prefs, name, rev):
+            return popenReadLines(self.root, [ prefs.getString('darcs_bin'), 'show', 'contents', '-p', rev, safeRelativePath(self.root, name, prefs, 'darcs_cygwin') ], prefs, 'darcs_bash')
 
     # Git support
     class Git:
-        def __init__(self, proj_dir):
-            self.proj_dir = proj_dir
+        def __init__(self, root):
+            self.root = root
 
-        def getSingleFileSpecs(self, prefs, name):
+        def getFileTemplate(self, prefs, name):
             return [ (name, prefs.getString('git_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, prefs, name, rev):
-            name = os.path.abspath(name)
-            if name.startswith(self.proj_dir):
-                i = len(self.proj_dir)
-                while i < len(name) and name[i] == os.path.sep:
-                    i += 1
-                name = name[i:]
-            return 'git_bash', [ prefs.getString('git_bin'), 'show', '%s:%s' % (rev, name.replace(os.sep, '/')) ]
+        def getFolderTemplate(self, prefs, name):
+            result = []
+            ss = strip_eol(popenReadLines(self.root, [ prefs.getString('git_bin'), 'status', os.path.join(os.curdir, relpath(self.root, os.path.abspath(name))).replace(os.sep, '/') ], prefs, 'git_bash'))
+            i = 0
+            while i < len(ss):
+                s = ss[i]
+                i += 1
+                if s.startswith('# Changes to be committed:'):
+                    break
+            while i < len(ss):
+                s = ss[i]
+                i += 1
+                if s.startswith('#\tdeleted:    '):
+                    k = relpath2(name, self.root, s[14:])
+                    result.append( [ (k, prefs.getString('git_default_revision')), (None, None) ] )
+                elif s.startswith('#\tmodified:   '):
+                    k = relpath2(name, self.root, s[14:])
+                    result.append( [ (k, None) ] )
+                elif s.startswith('#\tnew file:   '):
+                    k = relpath2(name, self.root, s[14:])
+                    result.append( [ (None, None), (k, None) ] )
+                elif s.startswith('#\trenamed:    '):
+                    keys = s[14:].split(' -> ')
+                    if len(keys) == 2:
+                        k0 = relpath2(name, self.root, keys[0])
+                        k1 = relpath2(name, self.root, keys[1])
+                        result.append( [ (k0, prefs.getString('git_default_revision')), (k1, None) ] )
+                elif not s.startswith('#  ') and s != '#':
+                    break
+            return result
+
+        def getRevision(self, prefs, name, rev):
+            return popenReadLines(self.root, [ prefs.getString('git_bin'), 'show', '%s:%s' % (rev, relpath(self.root, os.path.abspath(name)).replace(os.sep, '/')) ], prefs, 'git_bash')
 
     # Mercurial support
     class Hg:
-        def __init__(self, proj_dir):
-            pass
+        def __init__(self, root):
+            self.root = root
 
-        def getSingleFileSpecs(self, prefs, name):
+        def getFileTemplate(self, prefs, name):
             return [ (name, prefs.getString('hg_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, prefs, name, rev):
-            return 'hg_bash', [ prefs.getString('hg_bin'), 'cat', '-r', rev, safeLocalPath(name, prefs, 'hg_cygwin') ]
+        def getFolderTemplate(self, prefs, name):
+            result = []
+            r = {}
+            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('hg_bin'), 'status', '-q', safeRelativePath(self.root, name, prefs, 'hg_cygwin') ], prefs, 'hg_bash')):
+                if len(s) > 2 and s[0] in 'ADM':
+                    r[relpath2(name, self.root, s[2:])] = s[0]
+            for k in sorted(r.keys()):
+                v = r[k]
+                if v in 'M':
+                    result.append( [ (k, None) ] )
+                elif v == 'A':
+                    result.append( [ (None, None), (k, None) ] )
+                elif v == 'D':
+                    result.append( [ (k, prefs.getString('hg_default_revision')), (None, None) ] )
+            return result
+
+        def getRevision(self, prefs, name, rev):
+            return popenReadLines(self.root, [ prefs.getString('hg_bin'), 'cat', '-r', rev, safeRelativePath(self.root, name, prefs, 'hg_cygwin') ], prefs, 'hg_bash')
 
     # Monotone support
     class Mtn:
-        def __init__(self, proj_dir):
-            pass
+        def __init__(self, root):
+            self.root = root
 
-        def getSingleFileSpecs(self, prefs, name):
+        def getFileTemplate(self, prefs, name):
             # FIXME: merge conflicts?
             return [ (name, prefs.getString('mtn_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, prefs, name, rev):
-            return 'mtn_bash', [ prefs.getString('mtn_bin'), 'cat', '--quiet', '-r', rev, safeLocalPath(name, prefs, 'mtn_cygwin') ]
+        def getFolderTemplate(self, prefs, name):
+            result = []
+            renamed = None
+            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('mtn_bin'), 'status', safeRelativePath(self.root, name, prefs, 'mtn_cygwin') ], prefs, 'mtn_bash')):
+                if len(s) > 11:
+                    k = relpath2(name, self.root, s[11:])
+                    if not os.path.isdir(k):
+                        if s.startswith('  dropped  '):
+                            result.append( [ (k, prefs.getString('mtn_default_revision')), (None, None) ] )
+                        elif s.startswith('  patched  '):
+                            result.append( [ (k, None) ] )
+                        elif s.startswith('  added    '):
+                            result.append( [ (None, None), (k, None) ] )
+                        elif s.startswith('  renamed  '):
+                            renamed = k
+                        elif s.startswith('       to  ') and renamed is not None:
+                            result.append( [ (renamed, prefs.getString('mtn_default_revision')), (k, None) ] )
+                            renamed = None
+            return result
+
+        def getRevision(self, prefs, name, rev):
+            return popenReadLines(self.root, [ prefs.getString('mtn_bin'), 'cat', '--quiet', '-r', rev, safeRelativePath(self.root, name, prefs, 'mtn_cygwin') ], prefs, 'mtn_bash')
 
     # Subversion support
     class Svn:
-        def getSingleFileSpecs(self, prefs, name):
+        def __init__(self, root):
+            self.root = root
+
+        def getFileTemplate(self, prefs, name):
             # merge conflict
             left = glob.glob(name + '.merge-left.r*')
             right = glob.glob(name + '.merge-right.r*')
@@ -1187,8 +1390,27 @@ class VCSs:
             # default case
             return [ (name, prefs.getString('svn_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, prefs, name, rev):
-            return 'svn_bash', [ prefs.getString('svn_bin'), 'cat', '-r', rev, safeLocalPath(name, prefs, 'svn_cygwin') ]
+        def getFolderTemplate(self, prefs, name):
+            result = []
+            r = {}
+            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('svn_bin'), 'status', '-q', safeRelativePath(self.root, name, prefs, 'svn_cygwin') ], prefs, 'svn_bash')):
+                if len(s) > 7 and s[0] in 'ACDMR':
+                    r[relpath2(name, self.root, s[7:])] = s[0]
+            for k in sorted(r.keys()):
+                v = r[k]
+                if v in 'CM':
+                    result.append( [ (k, None) ] )
+                elif v == 'A':
+                    result.append( [ (None, None), (k, None) ] )
+                elif v == 'D':
+                    result.append( [ (k, prefs.getString('svn_default_revision')), (None, None) ] )
+                elif v == 'R':
+                    result.append( [ (k + '@BASE', prefs.getString('svn_default_revision')), (None, None) ] )
+                    result.append( [ (None, None), (k, None) ] )
+            return result
+
+        def getRevision(self, prefs, name, rev):
+            return popenReadLines(self.root, [ prefs.getString('svn_bin'), 'cat', '-r', rev, safeRelativePath(self.root, name, prefs, 'svn_cygwin') ], prefs, 'svn_bash')
 
     # SVK support
     def isSvkManaged(self, name):
@@ -1200,67 +1422,88 @@ class VCSs:
             try:
                 # find working copies by parsing the config file
                 f = open(self.svkconfig, 'r')
-                ss = f.readlines()
+                ss = strip_eol(f.readlines())
                 f.close()
-                projs, hash, sep = {}, False, os.sep
+                projs, sep = {}, os.sep
                 # find the separator character
                 for s in ss:
                     if s.startswith('  sep: ') and len(s) > 7:
                         sep = s[7]
                 # find the project directories
-                for s in ss:
-                    if hash:
-                        if not s.startswith('    '):
-                            break
-                        n = len(s)
-                        if n > 4 and s[4] != ' ':
-                            if s.endswith(': \n'):
-                                n -= 3
-                            # parse directory path
-                            tt = []
-                            i = 4
-                            while i < n: 
-                                if s[i] == '"':
-                                    # quoted string
-                                    i += 1
-                                    while i < n:
-                                        if s[i] == '"':
-                                            i += 1
-                                            break
-                                        elif s[i] == '\\':
-                                            # escaped character
-                                            i += 1
-                                        if i < n:
-                                            tt.append(s[i])
-                                            i += 1
-                                else:
-                                    tt.append(s[i])
-                                    i += 1
-                            key = ''.join(tt).replace(sep, os.sep)
-                            if isWindows():
-                                key = key.upper()
-                            projs[key] = None
-                    elif s.startswith('  hash:'):
-                        hash = True
+                i = 0
+                while i < len(ss):
+                    s = ss[i]
+                    i += 1
+                    if s.startswith('  hash: '):
+                        while i < len(ss) and ss[i].startswith('    '):
+                            s = ss[i]
+                            i += 1
+                            if s.endswith(': ') and i < len(ss) and ss[i].startswith('      depotpath: '):
+                                key = s[4:-2].replace(sep, os.sep)
+                                # parse directory path
+                                j, n, tt = 0, len(key), []
+                                while j < n: 
+                                    if key[j] == '"':
+                                        # quoted string
+                                        j += 1
+                                        while j < n:
+                                            if key[j] == '"':
+                                                j += 1
+                                                break
+                                            elif key[j] == '\\':
+                                                # escaped character
+                                                j += 1
+                                            if j < n:
+                                                tt.append(key[j])
+                                                j += 1
+                                    else:
+                                        tt.append(key[j])
+                                        j += 1
+                                key = ''.join(tt).replace(sep, os.sep)
+                                if isWindows():
+                                    key = key.upper()
+                                projs[key] = None
+                        break
                 # check if the file belongs to one of the project directories
                 while True:
+                    if projs.has_key(name):
+                        return True
                     newname = os.path.dirname(name)
                     if newname == name:
                         break
-                    if projs.has_key(newname):
-                        return True
                     name = newname
             except IOError:
-                print 'Error parsing %s.' % (config, )
+                print _('Error parsing %s.') % (config, )
         return False
 
     class Svk:
-        def getSingleFileSpecs(self, prefs, name):
+        def __init__(self, root):
+            self.root = root
+
+        def getFileTemplate(self, prefs, name):
             # FIXME: merge conflicts?
             return [ (name, prefs.getString('svk_default_revision')), (name, None) ]
 
-        def getRevisionCommand(self, prefs, name, rev):
-            return 'svk_bash', [ prefs.getString('svk_bin'), 'cat', '-r', rev, safeLocalPath(name, prefs, 'svk_cygwin') ]
+        def getFolderTemplate(self, prefs, name):
+            result = []
+            r = {}
+            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('svk_bin'), 'status', '-q', safeRelativePath(self.root, name, prefs, 'svk_cygwin') ], prefs, 'svk_bash')):
+                if len(s) > 4 and s[0] in 'ACDMR':
+                    r[relpath2(name, self.root, s[4:])] = s[0]
+            result = []
+            for k in sorted(r.keys()):
+                if not os.path.isdir(k):
+                    v = r[k]
+                    if v in 'CMR':
+                        result.append( [ (k, None) ] )
+                    elif v == 'A':
+                        result.append( [ (None, None), (k, None) ] )
+                    elif v == 'D':
+                        result.append( [ (k, prefs.getString('svk_default_revision')), (None, None) ] )
+            return result
+
+        def getRevision(self, prefs, name, rev):
+            return popenReadLines(self.root, [ prefs.getString('svk_bin'), 'cat', '-r', rev, safeRelativePath(self.root, name, prefs, 'svk_cygwin') ], prefs, 'svk_bash')
 
     def __init__(self):
         # initialise the VCS objects
@@ -1273,21 +1516,27 @@ class VCSs:
         self.common_dir_repos = [('.git', VCSs.Git), ('.hg', VCSs.Hg), ('.bzr', VCSs.Bzr), ('_darcs', VCSs.Darcs), ('_MTN', VCSs.Mtn)]
 
     # determines which VCS to use for the named file
-    def findByFilename(self, name):
+    def findByFolder(self, path):
+        path = os.path.abspath(path)
         for dir_name, repo in self.leaf_dir_repos:
-            if os.path.isdir(os.path.join(os.path.dirname(name), dir_name)):
-                return repo()
-        name = os.path.abspath(name)
-        if self.isSvkManaged(name):
-            return VCSs.Svk()
+            name = os.path.join(path, dir_name)
+            if os.path.isdir(name):
+                return repo(path)
+        if self.isSvkManaged(path):
+            return VCSs.Svk(path)
         while True:
-            newname = os.path.dirname(name)
-            if newname == name:
-                break
-            name = newname
             for dir_name, repo in self.common_dir_repos:
-                if os.path.isdir(os.path.join(name, dir_name)):
-                    return repo(name)
+                name = os.path.join(path, dir_name)
+                if os.path.isdir(name):
+                    return repo(path)
+            newpath = os.path.dirname(path)
+            if newpath == path:
+                break
+            path = newpath
+
+    # determines which VCS to use for the named file
+    def findByFilename(self, name):
+        return self.findByFolder(os.path.dirname(name))
 
 theVCSs = VCSs()
 
@@ -2554,39 +2803,18 @@ class FileDiffViewer(gtk.Table):
             rev = spec.revision
             try:
                 if rev is None:
-                    # we are loading a plain file
+                    # load the contents of a plain file
                     fd = open(name, 'rb')
+                    ss = fd.readlines()
+                    fd.close()
                     # get the file's modification times so we can detect changes
                     stat = os.stat(name)
                 else:
                     if spec.vcs is None:
-                        raise IOError('Not under revision control.')
+                        raise IOError('Not under version control.')
                     fullname = os.path.abspath(name)
-                    # find command to retrieve the file from the version
-                    # control system
-                    bash_pref, cmd = spec.vcs.getRevisionCommand(self.prefs, fullname, rev)
-                    dn = os.path.dirname(fullname)
-                    if isWindows() and self.prefs.getBool(bash_pref):
-                        # launch the command from a bash shell is requested
-                        cmd = [ self.prefs.convertToNativePath('/bin/bash.exe'), '-l', '-c', 'cd %s; %s' % (bashEscape(dn), ' '.join([ bashEscape(arg) for arg in cmd ])) ]
-                        dn = None
-                    # use subprocess.Popen to retrieve the file contents
-                    if isWindows():
-                        info = subprocess.STARTUPINFO()
-                        info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                        info.wShowWindow = subprocess.SW_HIDE
-                    else:
-                        info = None
-                    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=dn, startupinfo=info)
-                    proc.stdin.close()
-                    proc.stderr.close()
-                    fd = proc.stdout
-                # read the file's contents
-                ss = fd.readlines()
-                fd.close()
-                # report any errors
-                if rev is not None and proc.wait() != 0:
-                    raise IOError('Command failed.')
+                    # retrieve the revision from the version control system
+                    ss = spec.vcs.getRevision(self.prefs, fullname, rev)
                 # convert file contents to unicode
                 if spec.encoding is None:
                     ss, spec.encoding = self.prefs.convertToUnicode(ss)
@@ -2595,9 +2823,9 @@ class FileDiffViewer(gtk.Table):
             except (IOError, OSError, UnicodeDecodeError, WindowsError):
                 # FIXME: this can occur before the toplevel window is drawn
                 if rev is not None:
-                    msg = 'Error reading revision %(rev)s of "%(file)s".' % { 'rev': rev, 'file': name }
+                    msg = _('Error reading revision %(rev)s of "%(file)s".') % { 'rev': rev, 'file': name }
                 else:
-                    msg = 'Error reading %s.' % (repr(name), )
+                    msg = _('Error reading %s.') % (repr(name), )
                 dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, msg)
                 dialog.run()
                 dialog.destroy()
@@ -3958,7 +4186,7 @@ class FileDiffViewer(gtk.Table):
             if revision != '':
                 rev = revision
                 vcs = theVCSs.findByFilename(name)
-            spec = FileSpec(name, rev, vcs, dialog.get_encoding())
+            spec = FileSpec(name, dialog.get_encoding(), vcs, rev)
             dialog.destroy()
             if end:
                 return
@@ -3986,7 +4214,7 @@ class FileDiffViewer(gtk.Table):
             # we need to prompt for a file name the current contents were not
             # loaded from a regular file
             save_as = True
-        spec = FileSpec(spec.name, None, None, spec.encoding)
+        spec = FileSpec(spec.name, spec.encoding)
         if name is not None:
             spec.name = name
         if save_as:
@@ -5174,33 +5402,37 @@ class Diffuse(gtk.Window):
         viewer.connect('status_changed', self.status_changed_cb)
         return viewer
 
-    # create a new viewer to display 'specs'
-    def newLoadedFileDiffViewer(self, specs):
-        if len(specs) == 1:
+    # create a new viewer to display 'items'
+    def newLoadedFileDiffViewer(self, items):
+        specs = []
+        if len(items) == 1 and len(items[0][1]) == 1:
             # one file specified
             # determine which other files to compare it with
-            name = specs[0].name
+            name, data = items[0]
+            rev, encoding = data[0]
             vcs = theVCSs.findByFilename(name)
             if vcs is None:
                 # shift the existing file so it will be in the second pane
-                specs.insert(0, FileSpec())
+                specs.append(FileSpec())
+                specs.append(FileSpec(name, encoding))
             else:
-                rev = specs[0].revision
-                encoding = specs[0].encoding
-                specs = []
                 if rev is None:
                     # no revision specified assume defaults
-                    for name, rev in vcs.getSingleFileSpecs(self.prefs, name):
-                        specs.append(FileSpec(name, rev, vcs, encoding))
+                    for name, rev in vcs.getFileTemplate(self.prefs, name):
+                        specs.append(FileSpec(name, encoding, vcs, rev))
                 else:
                     # single revision specified
-                    specs.append(FileSpec(name, rev, vcs, encoding))
-                    specs.append(FileSpec(name, None, None, encoding))
+                    specs.append(FileSpec(name, encoding, vcs, rev))
+                    specs.append(FileSpec(name, encoding))
         else:
             # multiple files specified, use one pane for each file
-            for spec in specs:
-                if spec.revision is not None:
-                    spec.vcs = theVCSs.findByFilename(spec.name)
+            for name, data in items:
+                for rev, encoding in data:
+                    if rev is None:
+                        vcs = None
+                    else:
+                        vcs = theVCSs.findByFilename(name)
+                    specs.append(FileSpec(name, encoding, vcs, rev))
 
         # open a new viewer
         viewer = self.newFileDiffViewer(max(2, len(specs)))
@@ -5209,6 +5441,18 @@ class Diffuse(gtk.Window):
         for i, spec in enumerate(specs):
             viewer.load(i, spec)
         return viewer
+
+    # create multiple new viewer to display 'items'
+    def newFileDiffViewers(self, items, encoding):
+        vcs = theVCSs.findByFolder(items)
+        if vcs is not None:
+            try:
+                for template in vcs.getFolderTemplate(self.prefs, items):
+                    self.newLoadedFileDiffViewer([ (name, [ (rev, encoding) ]) for name, rev in template ])
+            except (IOError, OSError, UnicodeDecodeError, WindowsError):
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving change list.'))
+                dialog.run()
+                dialog.destroy()
 
     # returns True if the application can safely quit
     def confirmQuit(self):
@@ -5239,14 +5483,10 @@ class Diffuse(gtk.Window):
         dialog = FileChooserDialog(_('Open File In New Tab'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN)
         dialog.set_default_response(gtk.RESPONSE_OK)
         if dialog.run() == gtk.RESPONSE_OK:
-            name = dialog.get_filename()
-            rev = None
-            vcs = None
-            revision = dialog.get_revision().strip()
-            if revision != '':
-                rev = revision
-                vcs = theVCSs.findByFilename(name)
-            specs = [ FileSpec(name, rev, vcs, dialog.get_encoding()) ]
+            rev = dialog.get_revision().strip()
+            if rev == '':
+                rev = None
+            specs = [ (dialog.get_filename(), (rev, dialog.get_encoding()) ) ]
         dialog.destroy()
         if specs is not None:
             viewer = self.newLoadedFileDiffViewer(specs)
@@ -5554,16 +5794,21 @@ if __name__ == '__main__':
     encoding = None
     specs = []
     revs = []
-    isdirviewer = True
     separate = False
     close_on_same = False
     while i < argc:
         arg = args[i]
         if len(arg) > 0 and arg[0] == '-':
-            if i + 1 < argc and arg in [ '-r', '--revision' ]:
-                # specified revision
-                i += 1
-                revs.append(args[i])
+            if arg in [ '-a', '--all-changed' ]:
+                if i + 1 < argc:
+                    i += 1
+                    s = args[i]
+                else:
+                    s = ''
+                if len(specs) > 0:
+                    diff.newLoadedFileDiffViewer(specs)
+                    specs = []
+                diff.newFileDiffViewers(s, encoding)
             elif i + 1 < argc and arg in [ '-c', '--commit' ]:
                 # specified revision
                 i += 1
@@ -5576,8 +5821,20 @@ if __name__ == '__main__':
                     prev = '.'.join(r)
                 except:
                     print _('Error parsing revision %s.') % (repr(rev), )
-                revs.append(prev)
-                revs.append(rev)
+                revs.append((prev, encoding))
+                revs.append((rev, encoding))
+            elif arg in [ '-D', '--close-if-same' ]:
+                close_on_same = True
+            elif i + 1 < argc and arg in [ '-e', '--encoding' ]:
+                i += 1
+                encoding = args[i]
+                if encodings.aliases.aliases.has_key(encoding):
+                    encoding = encodings.aliases.aliases[encoding]
+            elif i + 1 < argc and arg in [ '-r', '--revision' ]:
+                # specified revision
+                i += 1
+                revs.append((args[i], encoding))
+
             elif arg in [ '-s', '--separate' ]:
                 # open items in separate tabs
                 n = len(specs)
@@ -5591,11 +5848,6 @@ if __name__ == '__main__':
                 if n > 0:
                     diff.newLoadedFileDiffViewer(specs)
                     specs = []
-            elif i + 1 < argc and arg in [ '-e', '--encoding' ]:
-                i += 1
-                encoding = args[i]
-                if encodings.aliases.aliases.has_key(encoding):
-                    encoding = encodings.aliases.aliases[encoding]
             elif arg in [ '-b', '--ignore-space-change' ]:
                 diff.prefs.setBool('display_ignore_whitespace_changes', True)
                 diff.prefs.setBool('align_ignore_whitespace_changes', True)
@@ -5612,20 +5864,15 @@ if __name__ == '__main__':
                 diff.prefs.setBool('display_ignore_whitespace', True)
                 diff.prefs.setBool('align_ignore_whitespace', True)
                 diff.preferences_updated()
-            elif arg in [ '-D', '--close-if-same' ]:
-                close_on_same = True
             else:
                 print _('Skipping unknown argument %s.') % (repr(args[i]), )
         else:
             filename = diff.prefs.convertToNativePath(args[i])
-            if len(specs) == 0:
-                isdirviewer = os.path.isdir(filename)
-            elif not isdirviewer and os.path.isdir(filename):
-                filename = os.path.join(filename, os.path.basename(specs[0].name))
+            if len(specs) > 0 and os.path.isdir(filename):
+                filename = os.path.join(filename, os.path.basename(specs[-1][0]))
             if len(revs) == 0:
-                revs.append(None)
-            for rev in revs:
-                specs.append(FileSpec(filename, rev, None, encoding))
+                revs.append((None, encoding))
+            specs.append((filename, revs))
             revs = []
             if separate:
                 diff.newLoadedFileDiffViewer(specs)

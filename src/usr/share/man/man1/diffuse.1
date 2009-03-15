@@ -41,6 +41,13 @@ Only read initialisation commands from file
 .RE
 .SS "General Options"
 .PP
+\fB\-a\fR, \fB\-\-all\-changed\fR [\fIpath\fR]
+.RS 4
+Create tabs for all changed files in
+\fIpath\fR\&. If
+\fIpath\fRis not specified, the current directory is used\&.
+.RE
+.PP
 \fB\-c\fR, \fB\-\-commit\fR \fIrev\fR
 .RS 4
 Include revision
@@ -220,256 +227,342 @@ to define key bindings for menu items\&. The following values are valid for
 .RS 4
 File → Open File\&.\&.\&.
 menu item
+.sp
+Default: Ctrl+o
 .RE
 .PP
 \fBopen_file_in_new_tab\fR
 .RS 4
 File → Open File In New Tab\&.\&.\&.
 menu item
+.sp
+Default: Shift+Ctrl+O
 .RE
 .PP
 \fBreload_file\fR
 .RS 4
 File → Reload File
 menu item
+.sp
+Default: Shift+Ctrl+R
 .RE
 .PP
 \fBsave_file\fR
 .RS 4
 File → Save File
 menu item
+.sp
+Default: Ctrl+s
 .RE
 .PP
 \fBsave_file_as\fR
 .RS 4
 File → Save File As\&.\&.\&.
 menu item
+.sp
+Default: Shift+Ctrl+S
 .RE
 .PP
 \fBnew_2_way_file_merge\fR
 .RS 4
 File → New 2\-Way File Merge
 menu item
+.sp
+Default: Ctrl+2
 .RE
 .PP
 \fBnew_3_way_file_merge\fR
 .RS 4
 File → New 3\-Way File Merge
 menu item
+.sp
+Default: Ctrl+3
 .RE
 .PP
 \fBquit\fR
 .RS 4
 File → Quit
 menu item
+.sp
+Default: Ctrl+q
 .RE
 .PP
 \fBundo\fR
 .RS 4
 Edit → Undo
 menu item
+.sp
+Default: Ctrl+z
 .RE
 .PP
 \fBredo\fR
 .RS 4
 Edit → Redo
 menu item
+.sp
+Default: Shift+Ctrl+Z
 .RE
 .PP
 \fBcut\fR
 .RS 4
 Edit → Cut
 menu item
+.sp
+Default: Ctrl+x
 .RE
 .PP
 \fBcopy\fR
 .RS 4
 Edit → Copy
 menu item
+.sp
+Default: Ctrl+c
 .RE
 .PP
 \fBpaste\fR
 .RS 4
 Edit → Paste
 menu item
+.sp
+Default: Ctrl+v
 .RE
 .PP
 \fBselect_all\fR
 .RS 4
 Edit → Select All
 menu item
+.sp
+Default: Ctrl+a
 .RE
 .PP
 \fBfind\fR
 .RS 4
 Edit → Find\&.\&.\&.
 menu item
+.sp
+Default: Ctrl+f
 .RE
 .PP
 \fBfind_next\fR
 .RS 4
 Edit → Find Next
 menu item
+.sp
+Default: Ctrl+g
 .RE
 .PP
 \fBfind_previous\fR
 .RS 4
 Edit → Find Previous
 menu item
+.sp
+Default: Shift+Ctrl+G
 .RE
 .PP
 \fBgo_to_line\fR
 .RS 4
 Edit → Go To Line\&.\&.\&.
 menu item
+.sp
+Default: Shift+Ctrl+L
 .RE
 .PP
 \fBdecrease_indenting\fR
 .RS 4
 Edit → Decrease Indenting
 menu item
+.sp
+Default: Shift+Ctrl+<
 .RE
 .PP
 \fBincrease_indenting\fR
 .RS 4
 Edit → Increase Indenting
 menu item
+.sp
+Default: Shift+Ctrl+>
 .RE
 .PP
 \fBconvert_to_dos\fR
 .RS 4
 Edit → Convert to DOS Format
 menu item
+.sp
+Default: Shift+Ctrl+E
 .RE
 .PP
 \fBconvert_to_unix\fR
 .RS 4
 Edit → Convert to Unix Format
 menu item
+.sp
+Default: Ctrl+e
 .RE
 .PP
 \fBno_syntax_highlighting\fR
 .RS 4
 View → Syntax Highlighting → None
 menu item
+.sp
+Default: None
 .RE
 .PP
 \fBsyntax_highlighting_\fR\fB\fIsyntax\fR\fR
 .RS 4
 View → Syntax Highlighting → \fIsyntax\fR
 menu item
+.sp
+Default: None
 .RE
 .PP
 \fBprevious_tab\fR
 .RS 4
 View → Previous Tab
 menu item
+.sp
+Default: Ctrl+Page_Up
 .RE
 .PP
 \fBnext_tab\fR
 .RS 4
 View → Next Tab
 menu item
+.sp
+Default: Ctrl+Page_Down
 .RE
 .PP
 \fBclose_tab\fR
 .RS 4
 View → Close Tab
 menu item
+.sp
+Default: Ctrl+w
 .RE
 .PP
 \fBshift_pane_left\fR
 .RS 4
 shift the currently selected pane to the left
+.sp
+Default: Shift+Ctrl+Left
 .RE
 .PP
 \fBshift_pane_right\fR
 .RS 4
 shift the currently selected pane to the right
+.sp
+Default: Shift+Ctrl+Right
 .RE
 .PP
 \fBpreferences\fR
 .RS 4
 View → Preferences
 menu item
+.sp
+Default: Ctrl+p
 .RE
 .PP
 \fBrealign_all\fR
 .RS 4
 Merge → Realign All
 menu item
+.sp
+Default: Ctrl+l
 .RE
 .PP
 \fBfirst_difference\fR
 .RS 4
 Merge → First Difference
 menu item
+.sp
+Default: Shift+Ctrl+Up
 .RE
 .PP
 \fBprevious_difference\fR
 .RS 4
 Merge → Previous Difference
 menu item
+.sp
+Default: Ctrl+Up
 .RE
 .PP
 \fBnext_difference\fR
 .RS 4
 Merge → Next Difference
 menu item
+.sp
+Default: Ctrl+Down
 .RE
 .PP
 \fBlast_difference\fR
 .RS 4
 Merge → Last Difference
 menu item
+.sp
+Default: Shift+Ctrl+Down
 .RE
 .PP
 \fBclear_edits\fR
 .RS 4
 Merge → Clear Edits
 menu item
+.sp
+Default: Ctrl+r
 .RE
 .PP
 \fBmerge_from_left\fR
 .RS 4
 Merge → Merge From Left
 menu item
+.sp
+Default: Ctrl+Left
 .RE
 .PP
 \fBmerge_from_right\fR
 .RS 4
 Merge → Merge From Right
 menu item
+.sp
+Default: Ctrl+Right
 .RE
 .PP
 \fBmerge_from_left_then_right\fR
 .RS 4
 Merge → Merge From Left Then Right
 menu item
+.sp
+Default: Ctrl+m
 .RE
 .PP
 \fBmerge_from_right_then_left\fR
 .RS 4
 Merge → Merge From Right Then Left
 menu item
+.sp
+Default: Shift+Ctrl+M
 .RE
 .PP
 \fBisolate\fR
 .RS 4
 Merge → Isolate
 menu item
+.sp
+Default: Ctrl+i
 .RE
 .PP
 \fBhelp_contents\fR
 .RS 4
 Help → Help Contents
 menu item
+.sp
+Default: F1
 .RE
 .PP
 \fBabout\fR
 .RS 4
 Help → About
 menu item
+.sp
+Default: None
 .RE
 .RE
 .sp
@@ -490,146 +583,204 @@ to define key bindings for line editing mode\&. The following values are valid f
 \fBenter_align_mode\fR
 .RS 4
 enter alignment editing mode
+.sp
+Default: space
 .RE
 .PP
 \fBenter_character_mode\fR
 .RS 4
 enter character editing mode
+.sp
+Default: Return
 .RE
 .PP
 \fBfirst_line\fR
 .RS 4
 move cursor to the first line
+.sp
+Defaults: Home, g
 .RE
 .PP
 \fBextend_first_line\fR
 .RS 4
 move cursor to the first line, extending the selection
+.sp
+Default: Shift+Home
 .RE
 .PP
 \fBlast_line\fR
 .RS 4
 move cursor to the last line
+.sp
+Defaults: End, Shift+G
 .RE
 .PP
 \fBextend_last_line\fR
 .RS 4
 move cursor to the last line, extending the selection
+.sp
+Default: Shift+End
 .RE
 .PP
 \fBup\fR
 .RS 4
 move cursor up one line
+.sp
+Defaults: Up, k
 .RE
 .PP
 \fBextend_up\fR
 .RS 4
 move cursor up one line, extending the selection
+.sp
+Defaults: Shift+Up, Shift+K
 .RE
 .PP
 \fBdown\fR
 .RS 4
 move cursor down one line
+.sp
+Defaults: Down, j
 .RE
 .PP
 \fBextend_down\fR
 .RS 4
 move cursor down one line, extending the selection
+.sp
+Defaults: Shift+Down, Shift+J
 .RE
 .PP
 \fBleft\fR
 .RS 4
 move cursor left one file
+.sp
+Defaults: Left, Shift+H
 .RE
 .PP
 \fBextend_left\fR
 .RS 4
 move cursor left one file, extending the selection
+.sp
+Default: Shift+Left
 .RE
 .PP
 \fBright\fR
 .RS 4
 move cursor right one file
+.sp
+Defaults: Right, Shift+L
 .RE
 .PP
 \fBextend_right\fR
 .RS 4
 move cursor right one file, extending the selection
+.sp
+Default: Shift+Right
 .RE
 .PP
 \fBpage_up\fR
 .RS 4
 move cursor up one page
+.sp
+Defaults: Page_Up, Ctrl+u
 .RE
 .PP
 \fBextend_page_up\fR
 .RS 4
 move cursor up one page, extending the selection
+.sp
+Defaults: Shift+Page_Up, Shift+Ctrl+u
 .RE
 .PP
 \fBpage_down\fR
 .RS 4
 move cursor down one page
+.sp
+Defaults: Page_Down, Ctrl+d
 .RE
 .PP
 \fBextend_page_down\fR
 .RS 4
 move cursor down one page, extending the selection
+.sp
+Defaults: Shift+Page_Down, Shift+Ctrl+d
 .RE
 .PP
 \fBdelete_text\fR
 .RS 4
 delete the selected text
+.sp
+Defaults: BackSpace, Delete, x
 .RE
 .PP
 \fBfirst_difference\fR
 .RS 4
 select the first difference
+.sp
+Defaults: Ctrl+Home, Shift+P
 .RE
 .PP
 \fBprevious_difference\fR
 .RS 4
 select the previous difference
+.sp
+Default: p
 .RE
 .PP
 \fBnext_difference\fR
 .RS 4
 select the next difference
+.sp
+Default: n
 .RE
 .PP
 \fBlast_difference\fR
 .RS 4
 select the last difference
+.sp
+Defaults: Ctrl+End, Shift+N
 .RE
 .PP
 \fBclear_edits\fR
 .RS 4
 clear all edits from the selected lines
+.sp
+Default: r
 .RE
 .PP
 \fBmerge_from_left\fR
 .RS 4
 merge lines from file on the left
+.sp
+Default: h
 .RE
 .PP
 \fBmerge_from_right\fR
 .RS 4
 merge lines from file on the right
+.sp
+Default: l
 .RE
 .PP
 \fBmerge_from_left_then_right\fR
 .RS 4
 merge lines from file on the left then file on the right
+.sp
+Default: m
 .RE
 .PP
 \fBmerge_from_right_then_left\fR
 .RS 4
 merge lines from file on the right then file on the left
+.sp
+Default: Shift+M
 .RE
 .PP
 \fBisolate\fR
 .RS 4
 isolate the selected lines
+.sp
+Default: i
 .RE
 .RE
 .sp
@@ -650,56 +801,78 @@ to define key bindings for alignment editing mode\&. The following values are va
 \fBenter_line_mode\fR
 .RS 4
 enter line editing mode
+.sp
+Default: Escape
 .RE
 .PP
 \fBenter_character_mode\fR
 .RS 4
 enter character editing mode
+.sp
+Default: Return
 .RE
 .PP
 \fBfirst_line\fR
 .RS 4
 move cursor to the first line
+.sp
+Default: g
 .RE
 .PP
 \fBlast_line\fR
 .RS 4
 move cursor to the last line
+.sp
+Default: Shift+G
 .RE
 .PP
 \fBup\fR
 .RS 4
 move cursor up one line
+.sp
+Defaults: Up, k
 .RE
 .PP
 \fBdown\fR
 .RS 4
 move cursor down one line
+.sp
+Defaults: Down, j
 .RE
 .PP
 \fBleft\fR
 .RS 4
 move cursor left one file
+.sp
+Defaults: Left, h, Shift+H
 .RE
 .PP
 \fBright\fR
 .RS 4
 move cursor right one file
+.sp
+Defaults: Right, l, Shift+L
 .RE
 .PP
 \fBpage_up\fR
 .RS 4
 move cursor up one page
+.sp
+Defaults: Page_Up, Ctrl+u
 .RE
 .PP
 \fBpage_down\fR
 .RS 4
 move cursor down one page
+.sp
+Defaults: Page_Down, Ctrl+d
 .RE
 .PP
 \fBalign\fR
 .RS 4
 align the selected line to the cursor position
+.sp
+Default: space
 .RE
 .RE
 .sp
@@ -720,6 +893,8 @@ to define key bindings for character editing mode\&. The following values are va
 \fBenter_line_mode\fR
 .RS 4
 enter line editing mode
+.sp
+Default: Escape
 .RE
 .RE
 .SS "Strings"
