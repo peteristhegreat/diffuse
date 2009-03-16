@@ -4850,11 +4850,12 @@ class FileDiffViewer(gtk.Table):
         f = self.current_pane
         nlines = len(self.panes[f].lines)
         # back up to beginning of difference
-        while self.hasEditsOrDifference(f, i):
-            i2 = i - delta
-            if i2 < 0 or i2 > nlines:
-                break
-            i = i2
+        if i >= 0 and i <= nlines:
+            while self.hasEditsOrDifference(f, i):
+                i2 = i - delta
+                if i2 < 0 or i2 > nlines:
+                    break
+                i = i2
         # step over non-difference
         while i >= 0 and i <= nlines and not self.hasEditsOrDifference(f, i):
             i += delta
@@ -5152,7 +5153,7 @@ class Diffuse(gtk.Window):
         # render the left and right arrow we will use in our custom icons
         p0 = self.render_icon(gtk.STOCK_GO_FORWARD, gtk.ICON_SIZE_LARGE_TOOLBAR)
         p1 = self.render_icon(gtk.STOCK_GO_BACK, gtk.ICON_SIZE_LARGE_TOOLBAR)
-        w, h, s = p0.get_width(), p0.get_height(), 0.7
+        w, h, s = p0.get_width(), p0.get_height(), 2.0/3
         sw, sh = int(s * w), int(s * h)
         w1, h1 = w - sw, h - sh
 
