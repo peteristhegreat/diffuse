@@ -59,12 +59,12 @@ Configuration Options:
   --rcfile <file>                  Specify explicit resource file
 
 General Options:
-  ( -a | --all-changed ) <path>    Create tabs for all changed files          
   ( -c | --commit ) <rev>          File revisions <rev-1> and <rev>
   ( -D | --close-if-same )         Close all tabs with no differences
   ( -e | --encoding ) <codec>      Use <codec> to read and write files
+  ( -m | --modified )              Create a new tab for each modified file
   ( -r | --revision ) <rev>        File revision <rev>
-  ( -s | --separate )              Create a separate tab for each file
+  ( -s | --separate )              Create a new tab for each file
   ( -t | --tab )                   Start a new tab
 
 Display Options:
@@ -265,10 +265,10 @@ class Resources:
         set_binding('line_mode', 'extend_down', 'Shift+Down')
         set_binding('line_mode', 'extend_down', 'Shift+J')
         set_binding('line_mode', 'left', 'Left')
-        set_binding('line_mode', 'left', 'Shift+H')
+        set_binding('line_mode', 'left', 'h')
         set_binding('line_mode', 'extend_left', 'Shift+Left')
         set_binding('line_mode', 'right', 'Right')
-        set_binding('line_mode', 'right', 'Shift+L')
+        set_binding('line_mode', 'right', 'l')
         set_binding('line_mode', 'extend_right', 'Shift+Right')
         set_binding('line_mode', 'page_up', 'Page_Up')
         set_binding('line_mode', 'page_up', 'Ctrl+u')
@@ -288,8 +288,8 @@ class Resources:
         set_binding('line_mode', 'last_difference', 'Ctrl+End')
         set_binding('line_mode', 'last_difference', 'Shift+N')
         set_binding('line_mode', 'clear_edits', 'r')
-        set_binding('line_mode', 'merge_from_left', 'h')
-        set_binding('line_mode', 'merge_from_right', 'l')
+        set_binding('line_mode', 'merge_from_left', 'Shift+H')
+        set_binding('line_mode', 'merge_from_right', 'Shift+L')
         set_binding('line_mode', 'merge_from_left_then_right', 'm')
         set_binding('line_mode', 'merge_from_right_then_left', 'Shift+M')
         set_binding('line_mode', 'isolate', 'i')
@@ -303,10 +303,8 @@ class Resources:
         set_binding('align_mode', 'down', 'j')
         set_binding('align_mode', 'left', 'Left')
         set_binding('align_mode', 'left', 'h')
-        set_binding('align_mode', 'left', 'Shift+H')
         set_binding('align_mode', 'right', 'Right')
         set_binding('align_mode', 'right', 'l')
-        set_binding('align_mode', 'right', 'Shift+L')
         set_binding('align_mode', 'page_up', 'Page_Up')
         set_binding('align_mode', 'page_up', 'Ctrl+u')
         set_binding('align_mode', 'page_down', 'Page_Down')
@@ -1103,8 +1101,18 @@ class FileSpec:
         # revision used to retrieve file from the VCS
         self.revision = revision
 
+# returns the Windows drive or share from a from an absolute path
+def drive_from_path(s):
+    c = s.split(os.sep)
+    if len(c) > 3 and c[0] == '' and c[1] == '':
+        return os.path.join(c[:4])
+    return c[0]
+
 # constructs a relative path from 'a' to 'b', both should be absolute paths
 def relpath(a, b):
+    if isWindows() and not isCygwin():
+        if drive_from_path(a) != drive_from_path(b):
+            return b
     c1 = [ c for c in a.split(os.sep) if c != '' ]
     c2 = [ c for c in b.split(os.sep) if c != '' ]
     i, n = 0, len(c1)
@@ -1116,7 +1124,7 @@ def relpath(a, b):
 
 # constructs a relative path from 'a' to join(b1, b2).
 def relpath2(a, b1, b2):
-    return os.path.join(a, relpath(os.path.abspath(a), os.path.abspath(os.path.join(b1, b2))))
+    return relpath(a, os.path.abspath(os.path.join(b1, b2)))
 
 # helper function prevent files from being confused with command line options
 # by prepending './' to the basename
@@ -1184,27 +1192,28 @@ class VCSs:
         def getFolderTemplate(self, prefs, name):
             # FIXME: need to sort items
             result = []
+            pwd = os.path.abspath(os.curdir)
             for s in strip_eol(popenReadLines(self.root, [ prefs.getString('bzr_bin'), 'status', '-SV', safeRelativePath(self.root, name, prefs, 'bzr_cygwin') ], prefs, 'bzr_bash')):
                 if len(s) > 4:
                     k = s[4:]
                     if s[1] == 'M':
                         # also conflict
-                        k = relpath2(name, self.root, k)
+                        k = relpath2(pwd, self.root, k)
                         if not os.path.isdir(k):
                             result.append( [ (k, None) ] )
                     elif s[1] == 'N':
-                        k = relpath2(name, self.root, k)
+                        k = relpath2(pwd, self.root, k)
                         if not os.path.isdir(k):
                             result.append( [ (None, None), (k, None) ] )
                     elif s[1] == 'D':
-                        k = relpath2(name, self.root, k)
+                        k = relpath2(pwd, self.root, k)
                         if not os.path.isdir(k):
                             result.append( [ (k, prefs.getString('bzr_default_revision')), (None, None) ] )
                     elif s[0] == 'R':
                         k = k.split(' => ')
                         if len(k) == 2:
-                            k0 = relpath2(name, self.root, k[0])
-                            k1 = relpath2(name, self.root, k[1])
+                            k0 = relpath2(pwd, self.root, k[0])
+                            k1 = relpath2(pwd, self.root, k[1])
                             if not os.path.isdir(k0) and not os.path.isdir(k1):
                                 result.append( [ (k0, prefs.getString('bzr_default_revision')), (k1, None) ] )
             return result
@@ -1222,10 +1231,11 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, name):
             result = []
+            pwd = os.path.abspath(os.curdir)
             r = {}
             for s in strip_eol(popenReadLines(self.root, [ prefs.getString('cvs_bin'), '-nq', 'update', '-R', safeRelativePath(self.root, name, prefs, 'cvs_cygwin') ], prefs, 'cvs_bash')):
                 if len(s) > 2 and s[0] in 'ACMR':
-                    r[relpath2(name, self.root, s[2:])] = s[0]
+                    r[relpath2(pwd, self.root, s[2:])] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
                 if v in 'CM':
@@ -1250,11 +1260,12 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, name):
             result = []
+            pwd = os.path.abspath(os.curdir)
             r = {}
             for s in strip_eol(popenReadLines(self.root, [ prefs.getString('darcs_bin'), 'whatsnew', '-l', safeRelativePath(self.root, name, prefs, 'darcs_cygwin') ], prefs, 'darcs_bash')):
                 p = s.split(' ')
                 if len(p) >= 2 and s[0] in 'AMR':
-                    r[relpath2(name, self.root, p[1])] = s[0]
+                    r[relpath2(pwd, self.root, p[1])] = s[0]
             for k in sorted(r.keys()):
                 if not os.path.isdir(k):
                     v = r[k]
@@ -1279,6 +1290,7 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, name):
             result = []
+            pwd = os.path.abspath(os.curdir)
             ss = strip_eol(popenReadLines(self.root, [ prefs.getString('git_bin'), 'status', os.path.join(os.curdir, relpath(self.root, os.path.abspath(name))).replace(os.sep, '/') ], prefs, 'git_bash'))
             i = 0
             while i < len(ss):
@@ -1290,19 +1302,19 @@ class VCSs:
                 s = ss[i]
                 i += 1
                 if s.startswith('#\tdeleted:    '):
-                    k = relpath2(name, self.root, s[14:])
+                    k = relpath2(pwd, self.root, s[14:])
                     result.append( [ (k, prefs.getString('git_default_revision')), (None, None) ] )
                 elif s.startswith('#\tmodified:   '):
-                    k = relpath2(name, self.root, s[14:])
+                    k = relpath2(pwd, self.root, s[14:])
                     result.append( [ (k, None) ] )
                 elif s.startswith('#\tnew file:   '):
-                    k = relpath2(name, self.root, s[14:])
+                    k = relpath2(pwd, self.root, s[14:])
                     result.append( [ (None, None), (k, None) ] )
                 elif s.startswith('#\trenamed:    '):
                     keys = s[14:].split(' -> ')
                     if len(keys) == 2:
-                        k0 = relpath2(name, self.root, keys[0])
-                        k1 = relpath2(name, self.root, keys[1])
+                        k0 = relpath2(pwd, self.root, keys[0])
+                        k1 = relpath2(pwd, self.root, keys[1])
                         result.append( [ (k0, prefs.getString('git_default_revision')), (k1, None) ] )
                 elif not s.startswith('#  ') and s != '#':
                     break
@@ -1321,10 +1333,11 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, name):
             result = []
+            pwd = os.path.abspath(os.curdir)
             r = {}
             for s in strip_eol(popenReadLines(self.root, [ prefs.getString('hg_bin'), 'status', '-q', safeRelativePath(self.root, name, prefs, 'hg_cygwin') ], prefs, 'hg_bash')):
                 if len(s) > 2 and s[0] in 'ADM':
-                    r[relpath2(name, self.root, s[2:])] = s[0]
+                    r[relpath2(pwd, self.root, s[2:])] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
                 if v in 'M':
@@ -1349,10 +1362,11 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, name):
             result = []
+            pwd = os.path.abspath(os.curdir)
             renamed = None
             for s in strip_eol(popenReadLines(self.root, [ prefs.getString('mtn_bin'), 'status', safeRelativePath(self.root, name, prefs, 'mtn_cygwin') ], prefs, 'mtn_bash')):
                 if len(s) > 11:
-                    k = relpath2(name, self.root, s[11:])
+                    k = relpath2(pwd, self.root, s[11:])
                     if not os.path.isdir(k):
                         if s.startswith('  dropped  '):
                             result.append( [ (k, prefs.getString('mtn_default_revision')), (None, None) ] )
@@ -1392,10 +1406,11 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, name):
             result = []
+            pwd = os.path.abspath(os.curdir)
             r = {}
             for s in strip_eol(popenReadLines(self.root, [ prefs.getString('svn_bin'), 'status', '-q', safeRelativePath(self.root, name, prefs, 'svn_cygwin') ], prefs, 'svn_bash')):
                 if len(s) > 7 and s[0] in 'ACDMR':
-                    r[relpath2(name, self.root, s[7:])] = s[0]
+                    r[relpath2(pwd, self.root, s[7:])] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
                 if v in 'CM':
@@ -1486,10 +1501,11 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, name):
             result = []
+            pwd = os.path.abspath(os.curdir)
             r = {}
             for s in strip_eol(popenReadLines(self.root, [ prefs.getString('svk_bin'), 'status', '-q', safeRelativePath(self.root, name, prefs, 'svk_cygwin') ], prefs, 'svk_bash')):
                 if len(s) > 4 and s[0] in 'ACDMR':
-                    r[relpath2(name, self.root, s[4:])] = s[0]
+                    r[relpath2(pwd, self.root, s[4:])] = s[0]
             result = []
             for k in sorted(r.keys()):
                 if not os.path.isdir(k):
@@ -5443,17 +5459,31 @@ class Diffuse(gtk.Window):
             viewer.load(i, spec)
         return viewer
 
-    # create multiple new viewer to display 'items'
-    def newFileDiffViewers(self, items, encoding):
-        vcs = theVCSs.findByFolder(items)
-        if vcs is not None:
-            try:
-                for template in vcs.getFolderTemplate(self.prefs, items):
-                    self.newLoadedFileDiffViewer([ (name, [ (rev, encoding) ]) for name, rev in template ])
-            except (IOError, OSError, UnicodeDecodeError, WindowsError):
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving change list.'))
-                dialog.run()
-                dialog.destroy()
+    # create a new viewer for 'items'
+    def createSingleTab(self, items):
+        if len(items) > 0:
+            self.newLoadedFileDiffViewer(items)
+
+    # create a new viewer for each item in 'items'
+    def createSeparateTabs(self, items):
+        for item in items:
+            self.newLoadedFileDiffViewer([ item ])
+
+    # create a new viewer for each modified file found in 'items'
+    def createModifiedFileTabs(self, items):
+        for item in items:
+            s = item[0]
+            if os.path.isfile(s):
+                s = os.path.dirname(s)
+            vcs = theVCSs.findByFolder(s)
+            if vcs is not None:
+                try:
+                    for template in vcs.getFolderTemplate(self.prefs, s):
+                        self.newLoadedFileDiffViewer([ (name, [ (rev, encoding) ]) for name, rev in template ])
+                except (IOError, OSError, UnicodeDecodeError, WindowsError):
+                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving change list.'))
+                    dialog.run()
+                    dialog.destroy()
 
     # returns True if the application can safely quit
     def confirmQuit(self):
@@ -5795,22 +5825,16 @@ if __name__ == '__main__':
     encoding = None
     specs = []
     revs = []
-    separate = False
+    funcs = { 'modified': diff.createModifiedFileTabs,
+              'separate': diff.createSeparateTabs,
+              'single': diff.createSingleTab }
+    mode = 'single'
     close_on_same = False
+    pristine = True
     while i < argc:
         arg = args[i]
         if len(arg) > 0 and arg[0] == '-':
-            if arg in [ '-a', '--all-changed' ]:
-                if i + 1 < argc:
-                    i += 1
-                    s = args[i]
-                else:
-                    s = ''
-                if len(specs) > 0:
-                    diff.newLoadedFileDiffViewer(specs)
-                    specs = []
-                diff.newFileDiffViewers(s, encoding)
-            elif i + 1 < argc and arg in [ '-c', '--commit' ]:
+            if i + 1 < argc and arg in [ '-c', '--commit' ]:
                 # specified revision
                 i += 1
                 rev = args[i]
@@ -5831,24 +5855,24 @@ if __name__ == '__main__':
                 encoding = args[i]
                 if encodings.aliases.aliases.has_key(encoding):
                     encoding = encodings.aliases.aliases[encoding]
+            elif arg in [ '-m', '--modified' ]:
+                funcs[mode](specs)
+                specs = []
+                mode = 'modified'
             elif i + 1 < argc and arg in [ '-r', '--revision' ]:
                 # specified revision
                 i += 1
                 revs.append((args[i], encoding))
-
             elif arg in [ '-s', '--separate' ]:
+                funcs[mode](specs)
+                specs = []
                 # open items in separate tabs
-                n = len(specs)
-                if n > 0:
-                    diff.newLoadedFileDiffViewer(specs)
-                    specs = []
-                separate = True
+                mode = 'separate'
             elif i + 1 < argc and arg in [ '-t', '--tab' ]:
+                funcs[mode](specs)
+                specs = []
                 # start a new tab
-                n = len(specs)
-                if n > 0:
-                    diff.newLoadedFileDiffViewer(specs)
-                    specs = []
+                mode = 'single'
             elif arg in [ '-b', '--ignore-space-change' ]:
                 diff.prefs.setBool('display_ignore_whitespace_changes', True)
                 diff.prefs.setBool('align_ignore_whitespace_changes', True)
@@ -5875,13 +5899,12 @@ if __name__ == '__main__':
                 revs.append((None, encoding))
             specs.append((filename, revs))
             revs = []
-            if separate:
-                diff.newLoadedFileDiffViewer(specs)
-                specs = []
+            pristine = False
         i += 1
-    n = len(specs)
-    if n > 0:
-        diff.newLoadedFileDiffViewer(specs)
+    funcs[mode](specs)
+    if pristine and mode == 'modified':
+        diff.createModifiedFileTabs([(os.curdir, (None, encoding))])
+
     nb = diff.notebook
 
     # create a file diff viewer if the command line arguments haven't

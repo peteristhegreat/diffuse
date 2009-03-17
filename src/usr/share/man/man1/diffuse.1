@@ -41,13 +41,6 @@ Only read initialisation commands from file
 .RE
 .SS "General Options"
 .PP
-\fB\-a\fR, \fB\-\-all\-changed\fR [\fIpath\fR]
-.RS 4
-Create tabs for all changed files in
-\fIpath\fR\&. If
-\fIpath\fRis not specified, the current directory is used\&.
-.RE
-.PP
 \fB\-c\fR, \fB\-\-commit\fR \fIrev\fR
 .RS 4
 Include revision
@@ -67,6 +60,11 @@ Close all tabs with no differences\&.
 Use
 \fIcodec\fR
 to read and write files\&.
+.RE
+.PP
+\fB\-m\fR, \fB\-\-modified\fR
+.RS 4
+Open all modified files found in the remaining paths specified in the command line arguments in separate file comparison tabs\&.
 .RE
 .PP
 \fB\-r\fR, \fB\-\-revision\fR \fIrev\fR
@@ -654,7 +652,7 @@ Defaults: Shift+Down, Shift+J
 .RS 4
 move cursor left one file
 .sp
-Defaults: Left, Shift+H
+Defaults: Left, h
 .RE
 .PP
 \fBextend_left\fR
@@ -668,7 +666,7 @@ Default: Shift+Left
 .RS 4
 move cursor right one file
 .sp
-Defaults: Right, Shift+L
+Defaults: Right, l
 .RE
 .PP
 \fBextend_right\fR
@@ -752,14 +750,14 @@ Default: r
 .RS 4
 merge lines from file on the left
 .sp
-Default: h
+Default: Shift+H
 .RE
 .PP
 \fBmerge_from_right\fR
 .RS 4
 merge lines from file on the right
 .sp
-Default: l
+Default: Shift+L
 .RE
 .PP
 \fBmerge_from_left_then_right\fR
@@ -844,14 +842,14 @@ Defaults: Down, j
 .RS 4
 move cursor left one file
 .sp
-Defaults: Left, h, Shift+H
+Defaults: Left, h
 .RE
 .PP
 \fBright\fR
 .RS 4
 move cursor right one file
 .sp
-Defaults: Right, l, Shift+L
+Defaults: Right, l
 .RE
 .PP
 \fBpage_up\fR
