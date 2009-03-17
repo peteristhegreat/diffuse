@@ -1139,8 +1139,6 @@ def safeRelativePath(abspath1, name, prefs, cygwin_pref):
 
 # use popen to read the output of a command
 def popenReadLines(dn, cmd, prefs, bash_pref):
-    # print 'dn', dn
-    # print 'cmd', cmd
     if isWindows() and prefs.getBool(bash_pref):
         # launch the command from a bash shell is requested
         cmd = [ self.prefs.convertToNativePath('/bin/bash.exe'), '-l', '-c', 'cd %s; %s' % (bashEscape(dn), ' '.join([ bashEscape(arg) for arg in cmd ])) ]
@@ -1198,23 +1196,28 @@ class VCSs:
                     k = s[4:]
                     if s[1] == 'M':
                         # also conflict
-                        k = relpath2(pwd, self.root, k)
+                        k = os.path.abspath(os.path.join(self.root, k))
                         if not os.path.isdir(k):
+                            k = relpath(pwd, k)
                             result.append( [ (k, None) ] )
                     elif s[1] == 'N':
-                        k = relpath2(pwd, self.root, k)
+                        k = os.path.abspath(os.path.join(self.root, k))
                         if not os.path.isdir(k):
+                            k = relpath(pwd, k)
                             result.append( [ (None, None), (k, None) ] )
                     elif s[1] == 'D':
-                        k = relpath2(pwd, self.root, k)
+                        k = os.path.abspath(os.path.join(self.root, k))
                         if not os.path.isdir(k):
+                            k = relpath(pwd, k)
                             result.append( [ (k, prefs.getString('bzr_default_revision')), (None, None) ] )
                     elif s[0] == 'R':
                         k = k.split(' => ')
                         if len(k) == 2:
-                            k0 = relpath2(pwd, self.root, k[0])
-                            k1 = relpath2(pwd, self.root, k[1])
+                            k0 = os.path.abspath(os.path.join(self.root, k[0]))
+                            k1 = os.path.abspath(os.path.join(self.root, k[1]))
                             if not os.path.isdir(k0) and not os.path.isdir(k1):
+                                k0 = relpath(pwd, k0)
+                                k1 = relpath(pwd, k1)
                                 result.append( [ (k0, prefs.getString('bzr_default_revision')), (k1, None) ] )
             return result
 
@@ -1265,7 +1268,9 @@ class VCSs:
             for s in strip_eol(popenReadLines(self.root, [ prefs.getString('darcs_bin'), 'whatsnew', '-l', safeRelativePath(self.root, name, prefs, 'darcs_cygwin') ], prefs, 'darcs_bash')):
                 p = s.split(' ')
                 if len(p) >= 2 and s[0] in 'AMR':
-                    r[relpath2(pwd, self.root, p[1])] = s[0]
+                    k = os.path.abspath(os.path.join(self.root, p[1]))
+                    if not os.path.isdir(k):
+                        r[relpath(pwd, k)] = s[0]
             for k in sorted(r.keys()):
                 if not os.path.isdir(k):
                     v = r[k]
@@ -1366,8 +1371,9 @@ class VCSs:
             renamed = None
             for s in strip_eol(popenReadLines(self.root, [ prefs.getString('mtn_bin'), 'status', safeRelativePath(self.root, name, prefs, 'mtn_cygwin') ], prefs, 'mtn_bash')):
                 if len(s) > 11:
-                    k = relpath2(pwd, self.root, s[11:])
+                    k = os.path.abspath(os.path.join(self.root, s[11:]))
                     if not os.path.isdir(k):
+                        k = relpath(pwd, k)
                         if s.startswith('  dropped  '):
                             result.append( [ (k, prefs.getString('mtn_default_revision')), (None, None) ] )
                         elif s.startswith('  patched  '):
@@ -5472,16 +5478,16 @@ class Diffuse(gtk.Window):
     # create a new viewer for each modified file found in 'items'
     def createModifiedFileTabs(self, items):
         for item in items:
-            s = item[0]
+            dn = s = item[0]
             if os.path.isfile(s):
-                s = os.path.dirname(s)
-            vcs = theVCSs.findByFolder(s)
+                dn = os.path.dirname(s)
+            vcs = theVCSs.findByFolder(dn)
             if vcs is not None:
                 try:
                     for template in vcs.getFolderTemplate(self.prefs, s):
                         self.newLoadedFileDiffViewer([ (name, [ (rev, encoding) ]) for name, rev in template ])
-                except (IOError, OSError, UnicodeDecodeError, WindowsError):
-                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving change list.'))
+                except (IOError, OSError, WindowsError):
+                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving modifications for "%s".') % (s, ))
                     dialog.run()
                     dialog.destroy()
 

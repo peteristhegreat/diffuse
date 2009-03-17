@@ -186,8 +186,8 @@
             <term><userinput>-m</userinput>, <userinput>--modified</userinput></term>
             <listitem>
               <para>
-                Open all modified files found in the remaining paths specified
-                in the command line arguments in separate file comparison tabs.
+                Open all modified files from the remaining paths specified in
+                the command line arguments in separate file comparison tabs.
               </para>
             </listitem>
           </varlistentry>
