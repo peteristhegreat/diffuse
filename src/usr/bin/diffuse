@@ -704,7 +704,8 @@ class Preferences:
             _('Editor'),
             [ 'List',
               [ 'Integer', 'editor_soft_tab_width', 8, _('Soft Tab Width') ],
-              [ 'Boolean', 'editor_expand_tabs', False, _('Expand Tabs to Spaces') ]
+              [ 'Boolean', 'editor_expand_tabs', False, _('Expand Tabs to Spaces') ],
+              [ 'Boolean', 'editor_auto_indent', False, _('Auto Indent') ]
             ],
             _('Regional Settings'),
             [ 'List',
@@ -1241,7 +1242,7 @@ class VCSs:
             r = {}
             args = [ prefs.getString('cvs_bin'), '-nq', 'update', '-R' ]
             for name in names:
-	        args.append(safeRelativePath(self.root, name, prefs, 'cvs_cygwin'))
+                args.append(safeRelativePath(self.root, name, prefs, 'cvs_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'cvs_bash')):
                 if len(s) > 2 and s[0] in 'ACMR':
                     r[relpath2(pwd, self.root, s[2:])] = s[0]
@@ -1273,7 +1274,7 @@ class VCSs:
             r = {}
             args = [ prefs.getString('darcs_bin'), 'whatsnew', '-l' ]
             for name in names:
-	        args.append(safeRelativePath(self.root, name, prefs, 'darcs_cygwin'))
+                args.append(safeRelativePath(self.root, name, prefs, 'darcs_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'darcs_bash')):
                 p = s.split(' ')
                 if len(p) >= 2 and s[0] in 'AMR':
@@ -1307,7 +1308,7 @@ class VCSs:
             pwd = os.path.abspath(os.curdir)
             args = [ prefs.getString('git_bin'), 'status' ]
             for name in names:
-		args.append(os.path.join(os.curdir, relpath(self.root, os.path.abspath(name))).replace(os.sep, '/'))
+                args.append(os.path.join(os.curdir, relpath(self.root, os.path.abspath(name))).replace(os.sep, '/'))
             ss = strip_eol(popenReadLines(self.root, args, prefs, 'git_bash'))
             i = 0
             while i < len(ss):
@@ -1354,7 +1355,7 @@ class VCSs:
             r = {}
             args = [ prefs.getString('hg_bin'), 'status', '-q' ]
             for name in names:
-		args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
+                args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'hg_bash')):
                 if len(s) > 2 and s[0] in 'ADM':
                     r[relpath2(pwd, self.root, s[2:])] = s[0]
@@ -1386,7 +1387,7 @@ class VCSs:
             renamed = None
             args = [ prefs.getString('mtn_bin'), 'status' ]
             for name in names:
-		args.append(safeRelativePath(self.root, name, prefs, 'mtn_cygwin'))
+                args.append(safeRelativePath(self.root, name, prefs, 'mtn_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'mtn_bash')):
                 if len(s) > 11:
                     k = os.path.abspath(os.path.join(self.root, s[11:]))
@@ -1434,7 +1435,7 @@ class VCSs:
             r = {}
             args = [ prefs.getString('svn_bin'), 'status', '-q' ]
             for name in names:
-		args.append(safeRelativePath(self.root, name, prefs, 'svn_cygwin'))
+                args.append(safeRelativePath(self.root, name, prefs, 'svn_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'svn_bash')):
                 if len(s) > 7 and s[0] in 'ACDMR':
                     r[relpath2(pwd, self.root, s[7:])] = s[0]
@@ -1531,7 +1532,7 @@ class VCSs:
             r = {}
             args = [ prefs.getString('svk_bin'), 'status', '-q' ]
             for name in names:
-		args.append(safeRelativePath(self.root, name, prefs, 'svk_cygwin'))
+                args.append(safeRelativePath(self.root, name, prefs, 'svk_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'svk_bash')):
                 if len(s) > 4 and s[0] in 'ACDMR':
                     r[relpath2(pwd, self.root, s[4:])] = s[0]
@@ -4139,7 +4140,26 @@ class FileDiffViewer(gtk.Table):
                 self.replaceText('')
             # return key, add the platform specific end of line characters
             elif event.keyval == gtk.keysyms.Return:
-                self.replaceText(unicode(os.linesep))
+                s = unicode(os.linesep)
+                if self.prefs.getBool('editor_auto_indent'):
+                    start_i, start_j = self.selection_line, self.selection_char
+                    end_i, end_j = self.current_line, self.current_char
+                    if end_i < start_i or (end_i == start_i and end_j < start_j):
+                        start_i, start_j = end_i, end_j
+                    if start_j > 0:
+                        j, text = 0, self.getLineText(f, start_i)
+                        while j < start_j and text[j] in ' \t':
+                            j += 1
+                        w = self.stringWidth(f, text[:j])
+                        if self.prefs.getBool('editor_expand_tabs'):
+                            # convert to spaces
+                            s += u' ' * w
+                        else:
+                            tab_width = self.prefs.getInt('display_tab_width')
+                            # replace with tab characters where possible
+                            s += u'\t' * (w // tab_width)
+                            s += u' ' * (w % tab_width)
+                self.replaceText(s)
             # insert key
             elif event.keyval == gtk.keysyms.Tab:
                 # insert soft-tabs if there are only spaces and tabs from the
@@ -5500,17 +5520,17 @@ class Diffuse(gtk.Window):
 
     # create a new viewer for each modified file found in 'items'
     def createModifiedFileTabs(self, items):
-	new_items = []
+        new_items = []
         for item in items:
             s, r = item
             dn = s
             if os.path.isfile(dn):
                 dn = os.path.dirname(dn)
             if len(new_items) == 0 or dn != new_items[-1][0]:
-	        new_items.append([ dn, None, [] ])
+                new_items.append([ dn, None, [] ])
             dst = new_items[-1]
             dst[1] = r[-1][1]
-	    dst[2].append(s)
+            dst[2].append(s)
         for dn, encoding, names in new_items:
             vcs = theVCSs.findByFolder(dn)
             if vcs is not None:
