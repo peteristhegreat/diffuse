@@ -1187,11 +1187,14 @@ class VCSs:
             # default case
             return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
 
-        def getFolderTemplate(self, prefs, name):
+        def getFolderTemplate(self, prefs, names):
             # FIXME: need to sort items
             result = []
             pwd = os.path.abspath(os.curdir)
-            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('bzr_bin'), 'status', '-SV', safeRelativePath(self.root, name, prefs, 'bzr_cygwin') ], prefs, 'bzr_bash')):
+            args = [ prefs.getString('bzr_bin'), 'status', '-SV' ]
+            for name in names:
+                args.append(safeRelativePath(self.root, name, prefs, 'bzr_cygwin'))
+            for s in strip_eol(popenReadLines(self.root, args, prefs, 'bzr_bash')):
                 if len(s) > 4:
                     k = s[4:]
                     if s[1] == 'M':
@@ -1232,11 +1235,14 @@ class VCSs:
         def getFileTemplate(self, prefs, name):
             return [ (name, prefs.getString('cvs_default_revision')), (name, None) ]
 
-        def getFolderTemplate(self, prefs, name):
+        def getFolderTemplate(self, prefs, names):
             result = []
             pwd = os.path.abspath(os.curdir)
             r = {}
-            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('cvs_bin'), '-nq', 'update', '-R', safeRelativePath(self.root, name, prefs, 'cvs_cygwin') ], prefs, 'cvs_bash')):
+            args = [ prefs.getString('cvs_bin'), '-nq', 'update', '-R' ]
+            for name in names:
+	        args.append(safeRelativePath(self.root, name, prefs, 'cvs_cygwin'))
+            for s in strip_eol(popenReadLines(self.root, args, prefs, 'cvs_bash')):
                 if len(s) > 2 and s[0] in 'ACMR':
                     r[relpath2(pwd, self.root, s[2:])] = s[0]
             for k in sorted(r.keys()):
@@ -1261,11 +1267,14 @@ class VCSs:
             # FIXME: merge conflicts?
             return [ (name, prefs.getString('darcs_default_revision')), (name, None) ]
 
-        def getFolderTemplate(self, prefs, name):
+        def getFolderTemplate(self, prefs, names):
             result = []
             pwd = os.path.abspath(os.curdir)
             r = {}
-            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('darcs_bin'), 'whatsnew', '-l', safeRelativePath(self.root, name, prefs, 'darcs_cygwin') ], prefs, 'darcs_bash')):
+            args = [ prefs.getString('darcs_bin'), 'whatsnew', '-l' ]
+            for name in names:
+	        args.append(safeRelativePath(self.root, name, prefs, 'darcs_cygwin'))
+            for s in strip_eol(popenReadLines(self.root, args, prefs, 'darcs_bash')):
                 p = s.split(' ')
                 if len(p) >= 2 and s[0] in 'AMR':
                     k = os.path.abspath(os.path.join(self.root, p[1]))
@@ -1293,10 +1302,13 @@ class VCSs:
         def getFileTemplate(self, prefs, name):
             return [ (name, prefs.getString('git_default_revision')), (name, None) ]
 
-        def getFolderTemplate(self, prefs, name):
+        def getFolderTemplate(self, prefs, names):
             result = []
             pwd = os.path.abspath(os.curdir)
-            ss = strip_eol(popenReadLines(self.root, [ prefs.getString('git_bin'), 'status', os.path.join(os.curdir, relpath(self.root, os.path.abspath(name))).replace(os.sep, '/') ], prefs, 'git_bash'))
+            args = [ prefs.getString('git_bin'), 'status' ]
+            for name in names:
+		args.append(os.path.join(os.curdir, relpath(self.root, os.path.abspath(name))).replace(os.sep, '/'))
+            ss = strip_eol(popenReadLines(self.root, args, prefs, 'git_bash'))
             i = 0
             while i < len(ss):
                 s = ss[i]
@@ -1336,11 +1348,14 @@ class VCSs:
         def getFileTemplate(self, prefs, name):
             return [ (name, prefs.getString('hg_default_revision')), (name, None) ]
 
-        def getFolderTemplate(self, prefs, name):
+        def getFolderTemplate(self, prefs, names):
             result = []
             pwd = os.path.abspath(os.curdir)
             r = {}
-            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('hg_bin'), 'status', '-q', safeRelativePath(self.root, name, prefs, 'hg_cygwin') ], prefs, 'hg_bash')):
+            args = [ prefs.getString('hg_bin'), 'status', '-q' ]
+            for name in names:
+		args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
+            for s in strip_eol(popenReadLines(self.root, args, prefs, 'hg_bash')):
                 if len(s) > 2 and s[0] in 'ADM':
                     r[relpath2(pwd, self.root, s[2:])] = s[0]
             for k in sorted(r.keys()):
@@ -1365,11 +1380,14 @@ class VCSs:
             # FIXME: merge conflicts?
             return [ (name, prefs.getString('mtn_default_revision')), (name, None) ]
 
-        def getFolderTemplate(self, prefs, name):
+        def getFolderTemplate(self, prefs, names):
             result = []
             pwd = os.path.abspath(os.curdir)
             renamed = None
-            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('mtn_bin'), 'status', safeRelativePath(self.root, name, prefs, 'mtn_cygwin') ], prefs, 'mtn_bash')):
+            args = [ prefs.getString('mtn_bin'), 'status' ]
+            for name in names:
+		args.append(safeRelativePath(self.root, name, prefs, 'mtn_cygwin'))
+            for s in strip_eol(popenReadLines(self.root, args, prefs, 'mtn_bash')):
                 if len(s) > 11:
                     k = os.path.abspath(os.path.join(self.root, s[11:]))
                     if not os.path.isdir(k):
@@ -1410,11 +1428,14 @@ class VCSs:
             # default case
             return [ (name, prefs.getString('svn_default_revision')), (name, None) ]
 
-        def getFolderTemplate(self, prefs, name):
+        def getFolderTemplate(self, prefs, names):
             result = []
             pwd = os.path.abspath(os.curdir)
             r = {}
-            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('svn_bin'), 'status', '-q', safeRelativePath(self.root, name, prefs, 'svn_cygwin') ], prefs, 'svn_bash')):
+            args = [ prefs.getString('svn_bin'), 'status', '-q' ]
+            for name in names:
+		args.append(safeRelativePath(self.root, name, prefs, 'svn_cygwin'))
+            for s in strip_eol(popenReadLines(self.root, args, prefs, 'svn_bash')):
                 if len(s) > 7 and s[0] in 'ACDMR':
                     r[relpath2(pwd, self.root, s[7:])] = s[0]
             for k in sorted(r.keys()):
@@ -1502,14 +1523,16 @@ class VCSs:
             self.root = root
 
         def getFileTemplate(self, prefs, name):
-            # FIXME: merge conflicts?
             return [ (name, prefs.getString('svk_default_revision')), (name, None) ]
 
-        def getFolderTemplate(self, prefs, name):
+        def getFolderTemplate(self, prefs, names):
             result = []
             pwd = os.path.abspath(os.curdir)
             r = {}
-            for s in strip_eol(popenReadLines(self.root, [ prefs.getString('svk_bin'), 'status', '-q', safeRelativePath(self.root, name, prefs, 'svk_cygwin') ], prefs, 'svk_bash')):
+            args = [ prefs.getString('svk_bin'), 'status', '-q' ]
+            for name in names:
+		args.append(safeRelativePath(self.root, name, prefs, 'svk_cygwin'))
+            for s in strip_eol(popenReadLines(self.root, args, prefs, 'svk_bash')):
                 if len(s) > 4 and s[0] in 'ACDMR':
                     r[relpath2(pwd, self.root, s[4:])] = s[0]
             result = []
@@ -5477,17 +5500,25 @@ class Diffuse(gtk.Window):
 
     # create a new viewer for each modified file found in 'items'
     def createModifiedFileTabs(self, items):
+	new_items = []
         for item in items:
-            dn = s = item[0]
-            if os.path.isfile(s):
-                dn = os.path.dirname(s)
+            s, r = item
+            dn = s
+            if os.path.isfile(dn):
+                dn = os.path.dirname(dn)
+            if len(new_items) == 0 or dn != new_items[-1][0]:
+	        new_items.append([ dn, None, [] ])
+            dst = new_items[-1]
+            dst[1] = r[-1][1]
+	    dst[2].append(s)
+        for dn, encoding, names in new_items:
             vcs = theVCSs.findByFolder(dn)
             if vcs is not None:
                 try:
-                    for template in vcs.getFolderTemplate(self.prefs, s):
+                    for template in vcs.getFolderTemplate(self.prefs, names):
                         self.newLoadedFileDiffViewer([ (name, [ (rev, encoding) ]) for name, rev in template ])
                 except (IOError, OSError, WindowsError):
-                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving modifications for "%s".') % (s, ))
+                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving modifications for "%s".') % (dn, ))
                     dialog.run()
                     dialog.destroy()
 
@@ -5909,7 +5940,7 @@ if __name__ == '__main__':
         i += 1
     funcs[mode](specs)
     if pristine and mode == 'modified':
-        diff.createModifiedFileTabs([(os.curdir, (None, encoding))])
+        diff.createModifiedFileTabs([(os.curdir, [ (None, encoding) ])])
 
     nb = diff.notebook
 
