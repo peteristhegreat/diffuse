@@ -101,15 +101,11 @@ import shlex
 import stat
 import string
 import subprocess
-import urllib
 import webbrowser
 
 # platform tests
 def isWindows():
     return os.name == 'nt'
-
-def isCygwin():
-    return sys.platform == 'cygwin'
 
 if not hasattr(__builtins__, 'WindowsError'):
     # define 'WindowsError' so 'except' statements will work on all platforms
@@ -712,7 +708,7 @@ class Preferences:
               [ 'String', 'encoding_auto_detect_codecs', 'utf_8 latin_1', _('Order of codecs used to identify encoding') ]
             ],
         ]
-        if isWindows() or isCygwin():
+        if isWindows():
             if os.environ.has_key('SYSTEMDRIVE'):
                 root = os.environ['SYSTEMDRIVE']
                 if not root.endswith('\\'):
@@ -944,27 +940,20 @@ class Preferences:
     # cygwin and native applications can be used on windows, use this method
     # to convert a path to the usual form expected on sys.platform
     def convertToNativePath(self, s):
-        if isWindows() or isCygwin():
+        if isWindows():
             prefix = self.getString('cygwin_cygdrive_prefix')
             prefix = ''.join([ '/' + p for p in prefix.split('/') if p != '' ])
-            if isCygwin():
-                # convert to a cygwin style path
-                p = s.replace('\\', '/').split('/')
-                if p[0].endswith(':'):
-                    p[0] = prefix + '/' + p[0][:-1]
-                s = '/'.join(p)
-            else:
-                # convert to a Windows native style path
-                p = s.replace('/', '\\').split('\\')
-                if p[0] == '':
-                    pr = prefix.split('/')
-                    n = len(pr)
-                    if len(p) > n and p[:n] == pr and len(p[n]) == 1:
-                        p[:n + 1] = [ p[n] + ':' ]
-                    elif len(p) > 1:
-                        if p[1] != '':
-                            p[0] = self.getString('cygwin_root')
-                s = '\\'.join(p)
+            # convert to a Windows native style path
+            p = s.replace('/', '\\').split('\\')
+            if p[0] == '':
+                pr = prefix.split('/')
+                n = len(pr)
+                if len(p) > n and p[:n] == pr and len(p[n]) == 1:
+                    p[:n + 1] = [ p[n] + ':' ]
+                elif len(p) > 1:
+                    if p[1] != '':
+                        p[0] = self.getString('cygwin_root')
+            s = '\\'.join(p)
         return s
 
 # convenience method for creating a menu according to a template
@@ -1111,7 +1100,7 @@ def drive_from_path(s):
 
 # constructs a relative path from 'a' to 'b', both should be absolute paths
 def relpath(a, b):
-    if isWindows() and not isCygwin():
+    if isWindows():
         if drive_from_path(a) != drive_from_path(b):
             return b
     c1 = [ c for c in a.split(os.sep) if c != '' ]
@@ -1189,31 +1178,31 @@ class VCSs:
             return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
 
         def getFolderTemplate(self, prefs, names):
-            # FIXME: need to sort items
             result = []
             pwd = os.path.abspath(os.curdir)
             args = [ prefs.getString('bzr_bin'), 'status', '-SV' ]
             for name in names:
                 args.append(safeRelativePath(self.root, name, prefs, 'bzr_cygwin'))
+            removed, modified, added, renamed = {}, {}, {}, {}
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'bzr_bash')):
                 if len(s) > 4:
                     k = s[4:]
-                    if s[1] == 'M':
-                        # also conflict
+                    if s[1] == 'D':
                         k = os.path.abspath(os.path.join(self.root, k))
                         if not os.path.isdir(k):
                             k = relpath(pwd, k)
-                            result.append( [ (k, None) ] )
+                            removed[k] = [ (k, prefs.getString('bzr_default_revision')), (None, None) ]
                     elif s[1] == 'N':
                         k = os.path.abspath(os.path.join(self.root, k))
                         if not os.path.isdir(k):
                             k = relpath(pwd, k)
-                            result.append( [ (None, None), (k, None) ] )
-                    elif s[1] == 'D':
+                            added[k] = [ (None, None), (k, None) ]
+                    elif s[1] == 'M':
+                        # also conflict
                         k = os.path.abspath(os.path.join(self.root, k))
                         if not os.path.isdir(k):
                             k = relpath(pwd, k)
-                            result.append( [ (k, prefs.getString('bzr_default_revision')), (None, None) ] )
+                            modified[k] = [ (k, None) ]
                     elif s[0] == 'R':
                         k = k.split(' => ')
                         if len(k) == 2:
@@ -1222,7 +1211,16 @@ class VCSs:
                             if not os.path.isdir(k0) and not os.path.isdir(k1):
                                 k0 = relpath(pwd, k0)
                                 k1 = relpath(pwd, k1)
-                                result.append( [ (k0, prefs.getString('bzr_default_revision')), (k1, None) ] )
+                                renamed[k1] = [ (k0, prefs.getString('bzr_default_revision')), (k1, None) ]
+            # sort the results
+            r = {}
+            for m in removed, modified, added, renamed:
+                for k in m.keys():
+                    r[k] = None
+            for k in sorted(r.keys()):
+                for m in removed, modified, added, renamed:
+                    if m.has_key(k):
+                        result.append(m[k])
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1248,12 +1246,12 @@ class VCSs:
                     r[relpath2(pwd, self.root, s[2:])] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
-                if v in 'CM':
-                    result.append( [ (k, None) ] )
+                if v == 'R':
+                    result.append( [ (k, 'HEAD'), (None, None) ] )
                 elif v == 'A':
                     result.append( [ (None, None), (k, None) ] )
-                elif v == 'R':
-                    result.append( [ (k, 'HEAD'), (None, None) ] )
+                elif v in 'CM':
+                    result.append( [ (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1284,12 +1282,12 @@ class VCSs:
             for k in sorted(r.keys()):
                 if not os.path.isdir(k):
                     v = r[k]
-                    if v in 'M':
-                        result.append( [ (k, None) ] )
+                    if v == 'R':
+                        result.append( [ (k, prefs.getString('darcs_default_revision')), (None, None) ] )
                     elif v == 'A':
                         result.append( [ (None, None), (k, None) ] )
-                    elif v == 'R':
-                        result.append( [ (k, prefs.getString('darcs_default_revision')), (None, None) ] )
+                    elif v in 'M':
+                        result.append( [ (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1316,26 +1314,36 @@ class VCSs:
                 i += 1
                 if s.startswith('# Changes to be committed:'):
                     break
+            removed, modified, added, renamed = {}, {}, {}, {}
             while i < len(ss):
                 s = ss[i]
                 i += 1
                 if s.startswith('#\tdeleted:    '):
                     k = relpath2(pwd, self.root, s[14:])
-                    result.append( [ (k, prefs.getString('git_default_revision')), (None, None) ] )
-                elif s.startswith('#\tmodified:   '):
-                    k = relpath2(pwd, self.root, s[14:])
-                    result.append( [ (k, None) ] )
+                    removed[k] = [ (k, prefs.getString('git_default_revision')), (None, None) ]
                 elif s.startswith('#\tnew file:   '):
                     k = relpath2(pwd, self.root, s[14:])
-                    result.append( [ (None, None), (k, None) ] )
+                    added[k] = [ (None, None), (k, None) ]
+                elif s.startswith('#\tmodified:   '):
+                    k = relpath2(pwd, self.root, s[14:])
+                    modified[k] = [ (k, None) ]
                 elif s.startswith('#\trenamed:    '):
                     keys = s[14:].split(' -> ')
                     if len(keys) == 2:
                         k0 = relpath2(pwd, self.root, keys[0])
                         k1 = relpath2(pwd, self.root, keys[1])
-                        result.append( [ (k0, prefs.getString('git_default_revision')), (k1, None) ] )
+                        renamed[k1] = [ (k0, prefs.getString('git_default_revision')), (k1, None) ]
                 elif not s.startswith('#  ') and s != '#':
                     break
+            # sort the results
+            r = {}
+            for m in removed, modified, added, renamed:
+                for k in m.keys():
+                    r[k] = None
+            for k in sorted(r.keys()):
+                for m in removed, modified, added, renamed:
+                    if m.has_key(k):
+                        result.append(m[k])
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1361,12 +1369,12 @@ class VCSs:
                     r[relpath2(pwd, self.root, s[2:])] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
-                if v in 'M':
-                    result.append( [ (k, None) ] )
+                if v == 'D':
+                    result.append( [ (k, prefs.getString('hg_default_revision')), (None, None) ] )
                 elif v == 'A':
                     result.append( [ (None, None), (k, None) ] )
-                elif v == 'D':
-                    result.append( [ (k, prefs.getString('hg_default_revision')), (None, None) ] )
+                elif v in 'M':
+                    result.append( [ (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1384,26 +1392,35 @@ class VCSs:
         def getFolderTemplate(self, prefs, names):
             result = []
             pwd = os.path.abspath(os.curdir)
-            renamed = None
             args = [ prefs.getString('mtn_bin'), 'status' ]
             for name in names:
                 args.append(safeRelativePath(self.root, name, prefs, 'mtn_cygwin'))
+            removed, modified, added, renamed, old_name = {}, {}, {}, {}, None
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'mtn_bash')):
                 if len(s) > 11:
                     k = os.path.abspath(os.path.join(self.root, s[11:]))
                     if not os.path.isdir(k):
                         k = relpath(pwd, k)
                         if s.startswith('  dropped  '):
-                            result.append( [ (k, prefs.getString('mtn_default_revision')), (None, None) ] )
-                        elif s.startswith('  patched  '):
-                            result.append( [ (k, None) ] )
+                            removed[k] = [ (k, prefs.getString('mtn_default_revision')), (None, None) ]
                         elif s.startswith('  added    '):
-                            result.append( [ (None, None), (k, None) ] )
+                            added[k] = [ (None, None), (k, None) ]
+                        elif s.startswith('  patched  '):
+                            modified[k] = [ (k, None) ]
                         elif s.startswith('  renamed  '):
-                            renamed = k
+                            old_name = k
                         elif s.startswith('       to  ') and renamed is not None:
-                            result.append( [ (renamed, prefs.getString('mtn_default_revision')), (k, None) ] )
-                            renamed = None
+                            renamed[k] = [ (old_name, prefs.getString('mtn_default_revision')), (k, None) ]
+                            old_name = None
+            # sort the results
+            r = {}
+            for m in removed, modified, added, renamed:
+                for k in m.keys():
+                    r[k] = None
+            for k in sorted(r.keys()):
+                for m in removed, modified, added, renamed:
+                    if m.has_key(k):
+                        result.append(m[k])
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1441,12 +1458,12 @@ class VCSs:
                     r[relpath2(pwd, self.root, s[7:])] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
-                if v in 'CM':
-                    result.append( [ (k, None) ] )
+                if v == 'D':
+                    result.append( [ (k, prefs.getString('svn_default_revision')), (None, None) ] )
                 elif v == 'A':
                     result.append( [ (None, None), (k, None) ] )
-                elif v == 'D':
-                    result.append( [ (k, prefs.getString('svn_default_revision')), (None, None) ] )
+                elif v in 'CM':
+                    result.append( [ (k, None) ] )
                 elif v == 'R':
                     result.append( [ (k + '@BASE', prefs.getString('svn_default_revision')), (None, None) ] )
                     result.append( [ (None, None), (k, None) ] )
@@ -1540,12 +1557,12 @@ class VCSs:
             for k in sorted(r.keys()):
                 if not os.path.isdir(k):
                     v = r[k]
-                    if v in 'CMR':
-                        result.append( [ (k, None) ] )
+                    if v == 'D':
+                        result.append( [ (k, prefs.getString('svk_default_revision')), (None, None) ] )
                     elif v == 'A':
                         result.append( [ (None, None), (k, None) ] )
-                    elif v == 'D':
-                        result.append( [ (k, prefs.getString('svk_default_revision')), (None, None) ] )
+                    elif v in 'CMR':
+                        result.append( [ (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1909,11 +1926,22 @@ def pixels(size):
 
 # constructs a full URL for the name file
 def path2url(path, proto='file'):
-    s = urllib.pathname2url(os.path.abspath(path))
+    r = [ proto, ':///' ]
+    s = os.path.abspath(path)
     i = 0
-    while i < len(s) and s[i] == '/':
+    while i < len(s) and s[i] == os.sep:
         i += 1
-    return ''.join([ proto, ':///', s[i:] ])
+    for c in s[i:]:
+        if c == os.sep:
+            c = '/'
+        elif c == ':' and isWindows():
+            c = '|'
+        else:
+            v = ord(c)
+            if v <= 0x20 or v >= 0x7b or c in '$&+,/:;=?@"<>#%\\^[]`':
+                c = '%%%02x' % (v, )
+        r.append(c)
+    return ''.join(r)
 
 # the file diff viewer is always in one of these modes defining the cursor,
 # and hotkey behaviour
@@ -5887,7 +5915,6 @@ if __name__ == '__main__':
               'single': diff.createSingleTab }
     mode = 'single'
     close_on_same = False
-    pristine = True
     while i < argc:
         arg = args[i]
         if len(arg) > 0 and arg[0] == '-':
@@ -5956,16 +5983,14 @@ if __name__ == '__main__':
                 revs.append((None, encoding))
             specs.append((filename, revs))
             revs = []
-            pristine = False
         i += 1
+    if mode == 'modified' and len(specs) == 0:
+        specs.append((os.curdir, [ (None, encoding) ]))
     funcs[mode](specs)
-    if pristine and mode == 'modified':
-        diff.createModifiedFileTabs([(os.curdir, [ (None, encoding) ])])
-
-    nb = diff.notebook
 
     # create a file diff viewer if the command line arguments haven't
     # implicitly created any
+    nb = diff.notebook
     n = nb.get_n_pages()
     if n == 0:
         diff.newLoadedFileDiffViewer([])
