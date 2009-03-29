@@ -208,7 +208,8 @@ class Resources:
         set_binding('menu', 'open_file_in_new_tab', 'Shift+Ctrl+O')
         set_binding('menu', 'reload_file', 'Shift+Ctrl+R')
         set_binding('menu', 'save_file', 'Ctrl+s')
-        set_binding('menu', 'save_file_as', 'Shift+Ctrl+S')
+        set_binding('menu', 'save_file_as', 'Shift+Ctrl+A')
+        set_binding('menu', 'save_all', 'Shift+Ctrl+S')
         set_binding('menu', 'new_2_way_file_merge', 'Ctrl+2')
         set_binding('menu', 'new_3_way_file_merge', 'Ctrl+3')
         set_binding('menu', 'quit', 'Ctrl+q')
@@ -636,10 +637,6 @@ class FontButton(gtk.FontButton):
 
     def get_text(self):
         return self.get_font_name()
-
-# escape arguments for use with bash
-def bashEscape(s):
-    return "'" + s.replace("'", "'\\''") + "'"
 
 # class to store preferences and construct a dialogue for manipulating them
 class Preferences:
@@ -1079,18 +1076,6 @@ def convert_to_format(s, format):
        s = convert_to_unix(s)
    return s
 
-# contains information about a file
-class FileSpec:
-    def __init__(self, name=None, encoding=None, vcs=None, revision=None):
-        # file name
-        self.name = name
-        # name of codec used to translate the file contents to unicode text
-        self.encoding = encoding
-        # the VCS object
-        self.vcs = vcs
-        # revision used to retrieve file from the VCS
-        self.revision = revision
-
 # returns the Windows drive or share from a from an absolute path
 def drive_from_path(s):
     c = s.split(os.sep)
@@ -1126,6 +1111,10 @@ def safeRelativePath(abspath1, name, prefs, cygwin_pref):
         else:
             s = s.replace('/', '\\')
     return s
+
+# escape arguments for use with bash
+def bashEscape(s):
+    return "'" + s.replace("'", "'\\''") + "'"
 
 # use popen to read the output of a command
 def popenReadLines(dn, cmd, prefs, bash_pref):
@@ -1502,7 +1491,7 @@ class VCSs:
                                 key = s[4:-2].replace(sep, os.sep)
                                 # parse directory path
                                 j, n, tt = 0, len(key), []
-                                while j < n: 
+                                while j < n:
                                     if key[j] == '"':
                                         # quoted string
                                         j += 1
@@ -1602,53 +1591,6 @@ class VCSs:
         return self.findByFolder(os.path.dirname(name))
 
 theVCSs = VCSs()
-
-# custom dialogue for picking files with widgets for specifying the encoding
-# and revision
-class FileChooserDialog(gtk.FileChooserDialog):
-    def __init__(self, title, parent, prefs, action, accept):
-        gtk.FileChooserDialog.__init__(self, title, parent, action, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, accept, gtk.RESPONSE_OK))
-        self.prefs = prefs
-        hbox = gtk.HBox()
-        label = gtk.Label(_('Encoding: '))
-        hbox.pack_start(label, False, False, 0)
-        label.show()
-        self.combobox = combobox = gtk.combo_box_new_text()
-        self.encodings = prefs.getEncodings()
-        for e in self.encodings:
-            combobox.append_text(e)
-        if action == gtk.FILE_CHOOSER_ACTION_OPEN:
-            self.encodings = self.encodings[:]
-            self.encodings.insert(0, None)
-            combobox.prepend_text('Auto Detect')
-            combobox.set_active(0)
-        hbox.pack_start(combobox, False, False, 5)
-        combobox.show()
-        if action == gtk.FILE_CHOOSER_ACTION_OPEN:
-            self.revision = entry = gtk.Entry()
-            hbox.pack_end(entry, False, False, 0)
-            entry.show()
-            label = gtk.Label(_('Revision: '))
-            hbox.pack_end(label, False, False, 0)
-            label.show()
-
-        self.vbox.pack_start(hbox, False, False, 0)
-        hbox.show()
-        self.set_current_folder(os.path.realpath(os.path.curdir))
-
-    def set_encoding(self, encoding):
-        if encoding not in self.encodings:
-            encoding = self.prefs.getDefaultEncoding()
-        if encoding in self.encodings:
-            self.combobox.set_active(self.encodings.index(encoding))
-
-    def get_encoding(self):
-        i = self.combobox.get_active()
-        if i >= 0:
-            return self.encodings[i]
-
-    def get_revision(self):
-        return self.revision.get_text()
 
 # This is a replacement for gtk.ScrolledWindow as it forced expose events to be
 # handled immediately after changing the viewport position.  This could cause
@@ -1770,36 +1712,6 @@ class GoToLineDialog(gtk.Dialog):
     def entry_cb(self, widget):
         self.response(gtk.RESPONSE_ACCEPT)
 
-# establish callback for the about dialog's link to Diffuse's web site
-def url_hook(dialog, link, userdata):
-    webbrowser.open(link)
-
-gtk.about_dialog_set_url_hook(url_hook, None)
-
-# the about dialogue
-class AboutDialog(gtk.AboutDialog):
-    def __init__(self):
-        gtk.AboutDialog.__init__(self)
-        if hasattr(self, 'set_program_name'):
-            # only available in pygtk >= 2.12
-            self.set_program_name(APP_NAME)
-        self.set_version(VERSION)
-        self.set_comments(_('a file comparison and merge tool'))
-        self.set_copyright(COPYRIGHT)
-        self.set_website(WEBSITE)
-        self.set_authors([ 'Derrick Moser <derrick_moser@yahoo.com>' ])
-        ss = [ APP_NAME + ' ' + VERSION + '\n',
-               self.get_comments() + '\n',
-               COPYRIGHT + '\n\n',
-               _("""This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the licence, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program.  You may also obtain a copy of the GNU General Public License from the Free Software Foundation by visiting their web site (http://www.fsf.org/) or by writing to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-""") ]
-        self.set_license(''.join(ss))
-        self.set_wrap_license(True)
-
 # Enforcing manual alignment is accomplished by dividing the lines of text into
 # sections that are matched independently.  'blocks' is an array of integers
 # describing how many lines (including null lines for spacing) that are in each
@@ -1901,14 +1813,6 @@ def removeNullLines(blocks, lines_set):
             bn += blocks[bi]
             bi += 1
 
-# convenience method to request confirmation before doing an operation that
-# will cause edits to be lost
-def confirmDiscardEdits(parent):
-    dialog = MessageDialog(parent, gtk.MESSAGE_QUESTION, _('Discard unsaved changes?'))
-    end = (dialog.run() == gtk.RESPONSE_OK)
-    dialog.destroy()
-    return end
-
 def nullToEmpty(s):
     if s is None:
         s = ''
@@ -1924,7 +1828,7 @@ def isBlank(s):
 def pixels(size):
     return int(size / pango.SCALE + 0.5)
 
-# constructs a full URL for the name file
+# constructs a full URL for the named file
 def path2url(path, proto='file'):
     r = [ proto, ':///' ]
     s = os.path.abspath(path)
@@ -1939,7 +1843,7 @@ def path2url(path, proto='file'):
         else:
             v = ord(c)
             if v <= 0x20 or v >= 0x7b or c in '$&+,/:;=?@"<>#%\\^[]`':
-                c = '%%%02x' % (v, )
+                c = '%%%02X' % (v, )
         r.append(c)
     return ''.join(r)
 
@@ -1956,8 +1860,6 @@ class FileDiffViewer(gtk.Table):
         def __init__(self):
             # list of lines displayed in this pane (including spacing lines)
             self.lines = []
-            # file's name and information about how to retrieve it from a VCS
-            self.spec = FileSpec()
             # high water mark for line length in pango units (used to determine
             # the required horizontal scroll range)
             self.line_lengths = 0
@@ -1974,19 +1876,8 @@ class FileDiffViewer(gtk.Table):
             self.diff_cache = []
             # mask indicating the type of line endings present
             self.format = 0
-            # 'stat' for files read from disk -- used to warn about changes to
-            # the file on disk before saving
-            self.stat = None
-            # most recent 'stat' for files read from disk -- used on focus
-            # change to warn about changes to file on disk
-            self.last_stat = None
-
-        # returns True if any line contains modifications
-        def hasEdits(self):
-            for line in self.lines:
-                if line is not None and line.is_modified:
-                    return True
-            return False
+            # number of lines with edits
+            self.num_edits = 0
 
     # class describing a single line of a pane
     class Line:
@@ -2130,7 +2021,6 @@ class FileDiffViewer(gtk.Table):
         map.set_size_request(16 * n, 0)
         self.add_events(gtk.gdk.KEY_PRESS_MASK | gtk.gdk.FOCUS_CHANGE)
         self.connect('key_press_event', self.key_press_cb)
-        self.connect('focus_in_event', self.focus_in_cb)
 
         # font
         self.setFont(pango.FontDescription(prefs.getString('display_font')))
@@ -2197,7 +2087,7 @@ class FileDiffViewer(gtk.Table):
         return 1
 
     # returns the 'column width' of a string taking into account the optional
-    # display of EOL characters 
+    # display of EOL characters
     def stringWidth(self, f, s):
         if self.prefs.getBool('display_hide_endofline'):
             s = strip_line_ending(self.panes[f].format, s)
@@ -2269,7 +2159,7 @@ class FileDiffViewer(gtk.Table):
     # returns True if any pane contains edits
     def hasEdits(self):
         for pane in self.panes:
-            if pane.hasEdits():
+            if pane.num_edits > 0:
                 return True
         return False
 
@@ -2471,6 +2361,13 @@ class FileDiffViewer(gtk.Table):
         if self.undoblock is not None:
             # create an Undo object for the action
             self.addUndo(FileDiffViewer.UpdateLineTextUndo(f, i, line.is_modified, line.modified_text, is_modified, text))
+        old_num_edits = pane.num_edits
+        if is_modified and not line.is_modified:
+            pane.num_edits += 1
+        elif not is_modified and line.is_modified:
+            pane.num_edits -= 1
+        if pane.num_edits != old_num_edits:
+            self.emit('num_edits_changed', f)
         line.is_modified = is_modified
         line.modified_text = text
         line.compare_string = None
@@ -2668,6 +2565,13 @@ class FileDiffViewer(gtk.Table):
         pane = self.panes[f]
         pane.lines = new_lines
         # update/invalidate all relevent caches and queue widgets for redraw
+        old_num_edits = pane.num_edits
+        pane.num_edits = 0
+        for line in new_lines:
+            if line is not None and line.is_modified:
+                pane.num_edits += 1
+        if pane.num_edits != old_num_edits:
+            self.emit('num_edits_changed', f)
         del pane.syntax_cache[:]
         pane.max_line_number = new_max_num
         self.dareas[f].queue_draw()
@@ -2807,7 +2711,7 @@ class FileDiffViewer(gtk.Table):
             i += 1
 
     # replace the contents of pane 'f' with the strings list of strings 'ss'
-    def updatePane(self, f, ss):
+    def _replaceContents(self, f, ss):
         # determine the format for the text
         self.setFormat(f, getFormat(ss))
 
@@ -2859,61 +2763,32 @@ class FileDiffViewer(gtk.Table):
         self.invalidateLineMatching(0, old_n, new_n)
         self.updateBlocks(blocks)
 
-    # change the file spec for pane 'f' to 'spec'
-    def setFileSpec(self, f, spec):
-        self.panes[f].spec = spec
-        self.emit('file_spec_changed', f, spec)
+    # replace the contents of pane 'f' with the strings list of strings 'ss'
+    def replaceContents(self, f, ss):
+        self.setLineMode()
+        self.openUndoBlock()
+        self.recordEditMode()
+        self._replaceContents(f, ss)
+        self.setCurrentLine(f, min(self.current_line, len(self.panes[f].lines)))
+        self.recordEditMode()
+        self.closeUndoBlock()
 
-    # load a new file into pane 'f'
-    # 'spec' indicates the name of the file and how to retrieve it from the
-    # version control system if applicable
-    def load(self, f, spec):
-        name = spec.name
-        stat = None
-        if name is None:
-            # reset to an empty pane
-            ss = []
-        else:
-            rev = spec.revision
-            try:
-                if rev is None:
-                    # load the contents of a plain file
-                    fd = open(name, 'rb')
-                    ss = fd.readlines()
-                    fd.close()
-                    # get the file's modification times so we can detect changes
-                    stat = os.stat(name)
-                else:
-                    if spec.vcs is None:
-                        raise IOError('Not under version control.')
-                    fullname = os.path.abspath(name)
-                    # retrieve the revision from the version control system
-                    ss = spec.vcs.getRevision(self.prefs, fullname, rev)
-                # convert file contents to unicode
-                if spec.encoding is None:
-                    ss, spec.encoding = self.prefs.convertToUnicode(ss)
-                else:
-                    ss = [ unicode(s, spec.encoding) for s in ss ]
-            except (IOError, OSError, UnicodeDecodeError, WindowsError):
-                # FIXME: this can occur before the toplevel window is drawn
-                if rev is not None:
-                    msg = _('Error reading revision %(rev)s of "%(file)s".') % { 'rev': rev, 'file': name }
-                else:
-                    msg = _('Error reading %s.') % (repr(name), )
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, msg)
-                dialog.run()
-                dialog.destroy()
-                return
-        # update the panes contents, last modified time, and label
-        self.updatePane(f, ss)
-        self.setFileSpec(f, spec)
-        pane = self.panes[f]
-        pane.last_stat = pane.stat = stat
-        # use the file name to choose appropriate syntax highlighting rules
-        if name is not None:
-            syntax = theResources.getSyntaxByFilename(name)
-            if syntax is not None:
-                self.setSyntax(syntax)
+    # refresh the lines to contain new objects with updated line numbers and
+    # no local edits
+    def bakeEdits(self, f):
+        pane, lines, line_num = self.panes[f], [], 0
+        for i in range(len(pane.lines)):
+            s = self.getLineText(f, i)
+            if s is None:
+                lines.append(None)
+            else:
+                line_num += 1
+                lines.append(FileDiffViewer.Line(line_num, s))
+
+        # update loaded pane
+        self.openUndoBlock()
+        self.replaceLines(f, pane.lines, lines, pane.max_line_number, line_num)
+        self.closeUndoBlock()
 
     # update the contents for a line, creating the line if necessary
     def updateText(self, f, i, text, is_modified=True):
@@ -3268,6 +3143,8 @@ class FileDiffViewer(gtk.Table):
 
     # update the selection in response to a mouse button press
     def button_press(self, f, x, y, extend):
+        if y < 0:
+            x, y = -1, 0
         i = min(y // self.font_height, len(self.panes[f].lines))
         if self.mode == CHAR_MODE and f == self.current_pane:
             text = strip_line_ending(self.panes[f].format, self.getLineText(f, i))
@@ -4237,163 +4114,6 @@ class FileDiffViewer(gtk.Table):
         self.closeUndoBlock()
         return retval
 
-    # check changes to files on disk when receiving keyboard focus
-    def focus_in_cb(self, widget, event):
-        for f, pane in enumerate(self.panes):
-            if pane.last_stat is not None:
-                spec = pane.spec
-                try:
-                    new_stat = os.stat(spec.name)
-                    if pane.last_stat[stat.ST_MTIME] < new_stat[stat.ST_MTIME]:
-                        # update our notion of the most recent modification
-                        pane.last_stat = new_stat
-                        msg = _('The file "%s" changed on disk.  Do you want to reload the file?') % (spec.name, )
-                        dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
-                        ok = (dialog.run() == gtk.RESPONSE_OK)
-                        dialog.destroy()
-                        if ok:
-                            self.open_file(f, True)
-                except IOError:
-                    pass
-
-    # load a new file into pane 'f'
-    def open_file(self, f, reload=False):
-        pane = self.panes[f]
-        spec = pane.spec
-        # warn users of any unsaved changes they might lose
-        if pane.hasEdits() and not confirmDiscardEdits(self.get_toplevel()):
-            return
-        if not reload:
-            # we need to ask for a file name if we are not reloading the
-            # existing file
-            dialog = FileChooserDialog(_('Open File'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN)
-            if spec.name is not None:
-                dialog.set_filename(os.path.realpath(spec.name))
-            dialog.set_encoding(spec.encoding)
-            dialog.set_default_response(gtk.RESPONSE_OK)
-            end = (dialog.run() != gtk.RESPONSE_OK)
-            name = dialog.get_filename()
-            rev = None
-            vcs = None
-            revision = dialog.get_revision().strip()
-            if revision != '':
-                rev = revision
-                vcs = theVCSs.findByFilename(name)
-            spec = FileSpec(name, dialog.get_encoding(), vcs, rev)
-            dialog.destroy()
-            if end:
-                return
-        self.setLineMode()
-        self.openUndoBlock()
-        self.recordEditMode()
-        self.load(f, spec)
-        self.setCurrentLine(f, min(self.current_line, len(self.panes[f].lines)))
-        self.recordEditMode()
-        self.closeUndoBlock()
-
-    # callback for reload file menu item
-    def reload_file_cb(self, widget, data):
-        self.open_file(self.current_pane, True)
-
-    # callback for open file menu item
-    def open_file_cb(self, widget, data):
-        self.open_file(self.current_pane)
-
-    # save contents of pane 'f' to file
-    def save_file(self, f, save_as=False, name=None):
-        pane = self.panes[f]
-        spec = pane.spec
-        if spec.name is None or spec.revision is not None:
-            # we need to prompt for a file name the current contents were not
-            # loaded from a regular file
-            save_as = True
-        spec = FileSpec(spec.name, spec.encoding)
-        if name is not None:
-            spec.name = name
-        if save_as:
-            # prompt for a file name
-            dialog = FileChooserDialog(_('Save File'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_SAVE, gtk.STOCK_SAVE)
-            if spec.name is not None:
-                dialog.set_filename(os.path.abspath(spec.name))
-            dialog.set_encoding(spec.encoding)
-            spec.name = None
-            dialog.set_default_response(gtk.RESPONSE_OK)
-            if dialog.run() == gtk.RESPONSE_OK:
-                spec.name = dialog.get_filename()
-                spec.encoding = dialog.get_encoding()
-            dialog.destroy()
-        if spec.name is None:
-            return
-        try:
-            msg = None
-            # warn if we are about to overwrite an existing file
-            if save_as:
-                if os.path.exists(spec.name):
-                    msg = _('A file named "%s" already exists.  Do you want to overwrite it?') % (spec.name, )
-            # warn if we are about to overwrite a file that has changed since
-            # we last read it
-            elif pane.stat is not None:
-                if pane.stat[stat.ST_MTIME] < os.stat(spec.name)[stat.ST_MTIME]:
-                    msg = _('The file "%s" has been modified by another process since reading it.  If you save, all the external changes could be lost.  Save anyways?') % (spec.name, )
-            if msg is not None:
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
-                end = (dialog.run() != gtk.RESPONSE_OK)
-                dialog.destroy()
-                if end:
-                    return
-        except IOError:
-            pass
-        try:
-            # convert the text to the output encoding
-            # refresh the lines to contain new objects with updated line
-            # numbers and no local edits
-            ss = [ self.getLineText(f, i) for i in range(len(pane.lines)) ]
-            encoded = []
-            lines = []
-            i = 0
-            for s in ss:
-                if s is None:
-                    lines.append(None)
-                else:
-                    i += 1
-                    lines.append(FileDiffViewer.Line(i, s))
-                    encoded.append(codecs.encode(s, spec.encoding))
-
-            # write file
-            fd = open(spec.name, 'wb')
-            for s in encoded:
-                fd.write(s)
-            fd.close()
-            pane.last_stat = pane.stat = os.stat(spec.name)
-
-            # update loaded pane
-            self.openUndoBlock()
-            self.replaceLines(f, pane.lines, lines, pane.max_line_number, len(encoded))
-            self.closeUndoBlock()
-            # update the pane file spec
-            self.setFileSpec(f, spec)
-            # update the syntax highlighting incase we changed the file
-            # extension
-            syntax = theResources.getSyntaxByFilename(spec.name)
-            if syntax is not None:
-                self.setSyntax(syntax)
-        except UnicodeEncodeError:
-            dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error ecoding to %s.') % (repr(spec.encoding), ))
-            dialog.run()
-            dialog.destroy()
-        except IOError:
-            dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(spec.name), ))
-            dialog.run()
-            dialog.destroy()
-
-    # callback for save file menu item
-    def save_file_cb(self, widget, data):
-        self.save_file(self.current_pane)
-
-    # callback for save file as menu item
-    def save_file_as_cb(self, widget, data):
-        self.save_file(self.current_pane, True)
-
     # callback for copy menu item
     def copy_cb(self, widget, data):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
@@ -4616,8 +4336,6 @@ class FileDiffViewer(gtk.Table):
         f0 = self.panes[f_dst]
         f1 = self.panes[f_src]
         self.panes[f_dst], self.panes[f_src] = f1, f0
-        self.setFileSpec(f_dst, f1.spec)
-        self.setFileSpec(f_src, f0.spec)
         npanes = len(self.panes)
         for f_idx in f_dst, f_src:
             for f in range(f_idx - 1, f_idx + 2):
@@ -4629,6 +4347,7 @@ class FileDiffViewer(gtk.Table):
         # queue redraw
         self.map_cache = None
         self.map.queue_draw()
+        self.emit('swapped_panes', f_dst, f_src)
 
     # swap the contents of two panes
     def swap_panes(self, f_dst, f_src):
@@ -5037,8 +4756,9 @@ class FileDiffViewer(gtk.Table):
         self._first_difference()
 
 # create 'title_changed' signal for FileDiffViewer
+gobject.signal_new('swapped_panes', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, int))
+gobject.signal_new('num_edits_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, ))
 gobject.signal_new('status_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
-gobject.signal_new('file_spec_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, object))
 
 # dialogue used to search for text
 class SearchDialog(gtk.Dialog):
@@ -5091,6 +4811,91 @@ class SearchDialog(gtk.Dialog):
     def entry_cb(self, widget):
         self.response(gtk.RESPONSE_ACCEPT)
 
+# convenience method to request confirmation before doing an operation that
+# will cause edits to be lost
+def confirmDiscardEdits(parent):
+    dialog = MessageDialog(parent, gtk.MESSAGE_QUESTION, _('Discard unsaved changes?'))
+    end = (dialog.run() == gtk.RESPONSE_OK)
+    dialog.destroy()
+    return end
+
+# custom dialogue for picking files with widgets for specifying the encoding
+# and revision
+class FileChooserDialog(gtk.FileChooserDialog):
+    def __init__(self, title, parent, prefs, action, accept):
+        gtk.FileChooserDialog.__init__(self, title, parent, action, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, accept, gtk.RESPONSE_OK))
+        self.prefs = prefs
+        hbox = gtk.HBox()
+        label = gtk.Label(_('Encoding: '))
+        hbox.pack_start(label, False, False, 0)
+        label.show()
+        self.combobox = combobox = gtk.combo_box_new_text()
+        self.encodings = prefs.getEncodings()
+        for e in self.encodings:
+            combobox.append_text(e)
+        if action == gtk.FILE_CHOOSER_ACTION_OPEN:
+            self.encodings = self.encodings[:]
+            self.encodings.insert(0, None)
+            combobox.prepend_text('Auto Detect')
+            combobox.set_active(0)
+        hbox.pack_start(combobox, False, False, 5)
+        combobox.show()
+        if action == gtk.FILE_CHOOSER_ACTION_OPEN:
+            self.revision = entry = gtk.Entry()
+            hbox.pack_end(entry, False, False, 0)
+            entry.show()
+            label = gtk.Label(_('Revision: '))
+            hbox.pack_end(label, False, False, 0)
+            label.show()
+
+        self.vbox.pack_start(hbox, False, False, 0)
+        hbox.show()
+        self.set_current_folder(os.path.realpath(os.path.curdir))
+
+    def set_encoding(self, encoding):
+        if encoding not in self.encodings:
+            encoding = self.prefs.getDefaultEncoding()
+        if encoding in self.encodings:
+            self.combobox.set_active(self.encodings.index(encoding))
+
+    def get_encoding(self):
+        i = self.combobox.get_active()
+        if i >= 0:
+            return self.encodings[i]
+
+    def get_revision(self):
+        return self.revision.get_text()
+
+# establish callback for the about dialog's link to Diffuse's web site
+def url_hook(dialog, link, userdata):
+    webbrowser.open(link)
+
+gtk.about_dialog_set_url_hook(url_hook, None)
+
+# the about dialogue
+class AboutDialog(gtk.AboutDialog):
+    def __init__(self):
+        gtk.AboutDialog.__init__(self)
+        if hasattr(self, 'set_program_name'):
+            # only available in pygtk >= 2.12
+            self.set_program_name(APP_NAME)
+        self.set_version(VERSION)
+        self.set_comments(_('a file comparison and merge tool'))
+        self.set_copyright(COPYRIGHT)
+        self.set_website(WEBSITE)
+        self.set_authors([ 'Derrick Moser <derrick_moser@yahoo.com>' ])
+        ss = [ APP_NAME + ' ' + VERSION + '\n',
+               self.get_comments() + '\n',
+               COPYRIGHT + '\n\n',
+               _("""This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the licence, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  You may also obtain a copy of the GNU General Public License from the Free Software Foundation by visiting their web site (http://www.fsf.org/) or by writing to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+""") ]
+        self.set_license(''.join(ss))
+        self.set_wrap_license(True)
+
 # widget classed to create notebook tabs with labels and a close button
 # use notebooktab.button.connect() to be notified when the button is pressed
 class NotebookTab(gtk.HBox):
@@ -5122,6 +4927,24 @@ class NotebookTab(gtk.HBox):
     def set_text(self, s):
         self.label.set_text(s)
 
+# contains information about a file
+class FileInfo:
+    def __init__(self, name=None, encoding=None, vcs=None, revision=None):
+        # file name
+        self.name = name
+        # name of codec used to translate the file contents to unicode text
+        self.encoding = encoding
+        # the VCS object
+        self.vcs = vcs
+        # revision used to retrieve file from the VCS
+        self.revision = revision
+        # 'stat' for files read from disk -- used to warn about changes to the
+        # file on disk before saving
+        self.stat = None
+        # most recent 'stat' for files read from disk -- used on focus change
+        # to warn about changes to file on disk
+        self.last_stat = None
+
 # the main application class containing a set of file viewers
 # this class displays tab for switching between viewers and dispatches menu
 # commands to the current viewer
@@ -5137,80 +4960,321 @@ class Diffuse(gtk.Window):
                    [ gtk.STOCK_REFRESH, self.button_cb, 'reload', _('Reload File') ],
                    [ gtk.STOCK_SAVE, self.button_cb, 'save', _('Save File') ],
                    [ gtk.STOCK_SAVE_AS, self.button_cb, 'save_as', _('Save File As...') ] ])
+
                 self.label = label = gtk.Label()
                 label.set_size_request(0, label.get_size_request()[1])
                 self.pack_start(label, True, True, 0)
                 label.show()
-    
+
+                # file's name and information about how to retrieve it from a
+                # VCS
+                self.info = FileInfo()
+                self.has_edits = False
+                self.updateTitle()
+
             # callback for buttons
             def button_cb(self, widget, s):
                 self.emit(s)
-    
-            # set title
-            def setLabel(self, s):
-                self.label.set_text(s)
-    
+
+            # creates an appropriate title for the pane header
+            def updateTitle(self):
+                ss = []
+                info = self.info
+                if info.name is not None:
+                    ss.append(info.name)
+                if info.revision is not None:
+                    ss.append('(' + info.revision + ')')
+                if self.has_edits:
+                    ss.append('*')
+                self.label.set_text(' '.join(ss))
+                self.emit('title_changed')
+
+            # set num edits
+            def setEdits(self, has_edits):
+                if self.has_edits != has_edits:
+                    self.has_edits = has_edits
+                    self.updateTitle()
+
         def __init__(self, n, prefs, title):
             self.headers = headers = [ Diffuse.FileDiffViewer.PaneHeader() for i in range(n) ]
             FileDiffViewer.__init__(self, headers, prefs)
             self.title = title
             self.status = ''
-    
-            self.connect('file_spec_changed', self.file_spec_changed_cb)
+
+            self.connect('swapped_panes', self.swapped_panes_cb)
+            self.connect('num_edits_changed', self.num_edits_changed_cb)
             self.connect('status_changed', self.status_changed_cb)
             for i, h in enumerate(headers):
+                h.connect('title_changed', self.title_changed_cb)
                 h.connect('open', self.open_file_button_cb, i)
                 h.connect('reload', self.reload_file_button_cb, i)
                 h.connect('save', self.save_file_button_cb, i)
                 h.connect('save_as', self.save_file_as_button_cb, i)
                 h.show()
-    
-        # callback for open file button
-        def open_file_button_cb(self, widget, f):
-            self.open_file(f)
-    
-        # callback for reload file button
-        def reload_file_button_cb(self, widget, f):
-            self.open_file(f, True)
-    
-        # callback for save file button
-        def save_file_button_cb(self, widget, f):
-            self.save_file(f)
-    
-        # callback for save file as button
-        def save_file_as_button_cb(self, widget, f):
-            self.save_file(f, True)
-    
-        # callback to receive notification when the name of a file changes
-        def file_spec_changed_cb(self, widget, f, spec):
-            if spec.name is None:
-                s = ''
-            else:
-                s = spec.name
-                if spec.revision is not None:
-                    s = '%s (%s)' % (s, spec.revision)
-            self.headers[f].setLabel(s)
-    
+
+        # change the file info for pane 'f' to 'info'
+        def setFileInfo(self, f, info):
+            h = self.headers[f]
+            h.info = info
+            h.updateTitle()
+
+        # callback used when a pane header's title changes
+        def title_changed_cb(self, widget):
             # choose a short but descriptive title for the viewer
+            has_edits = False
             names = []
             unique_names = {}
-            for pane in self.panes:
-                s = pane.spec.name
+            for header in self.headers:
+                has_edits |= header.has_edits
+                s = header.info.name
                 if s is not None:
                     s = os.path.basename(s)
                     names.append(s)
                     unique_names[s] = None
-    
-            if len(unique_names) == 1:
-                s = names[0]
-            else:
-                s = ' : '.join(names)
+
+            if len(unique_names) > 0:
+                if len(unique_names) == 1:
+                    self.title = names[0]
+                else:
+                    self.title = ' : '.join(names)
+            s = self.title
+            if has_edits:
+                s += ' *'
             self.emit('title_changed', s)
-    
+
+        # load a new file into pane 'f'
+        # 'info' indicates the name of the file and how to retrieve it from the
+        # version control system if applicable
+        def load(self, f, info):
+            name = info.name
+            encoding = info.encoding
+            stat = None
+            if name is None:
+                # reset to an empty pane
+                ss = []
+            else:
+                rev = info.revision
+                try:
+                    if rev is None:
+                        # load the contents of a plain file
+                        fd = open(name, 'rb')
+                        ss = fd.readlines()
+                        fd.close()
+                        # get the file's modification times so we can detect changes
+                        stat = os.stat(name)
+                    else:
+                        if info.vcs is None:
+                            raise IOError('Not under version control.')
+                        fullname = os.path.abspath(name)
+                        # retrieve the revision from the version control system
+                        ss = info.vcs.getRevision(self.prefs, fullname, rev)
+                    # convert file contents to unicode
+                    if encoding is None:
+                        ss, encoding = self.prefs.convertToUnicode(ss)
+                    else:
+                        ss = [ unicode(s, encoding) for s in ss ]
+                except (IOError, OSError, UnicodeDecodeError, WindowsError):
+                    # FIXME: this can occur before the toplevel window is drawn
+                    if rev is not None:
+                        msg = _('Error reading revision %(rev)s of "%(file)s".') % { 'rev': rev, 'file': name }
+                    else:
+                        msg = _('Error reading %s.') % (repr(name), )
+                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, msg)
+                    dialog.run()
+                    dialog.destroy()
+                    return
+            # update the panes contents, last modified time, and label
+            self.replaceContents(f, ss)
+            info.encoding = encoding
+            self.setFileInfo(f, info)
+            info.last_stat = info.stat = stat
+            # use the file name to choose appropriate syntax highlighting rules
+            if name is not None:
+                syntax = theResources.getSyntaxByFilename(name)
+                if syntax is not None:
+                    self.setSyntax(syntax)
+
+        # load a new file into pane 'f'
+        def open_file(self, f, reload=False):
+            h = self.headers[f]
+            info = h.info
+            # warn users of any unsaved changes they might lose
+            if h.has_edits and not confirmDiscardEdits(self.get_toplevel()):
+                return
+            if not reload:
+                # we need to ask for a file name if we are not reloading the
+                # existing file
+                dialog = FileChooserDialog(_('Open File'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN)
+                if info.name is not None:
+                    dialog.set_filename(os.path.realpath(info.name))
+                dialog.set_encoding(info.encoding)
+                dialog.set_default_response(gtk.RESPONSE_OK)
+                end = (dialog.run() != gtk.RESPONSE_OK)
+                name = dialog.get_filename()
+                rev = None
+                vcs = None
+                revision = dialog.get_revision().strip()
+                if revision != '':
+                    rev = revision
+                    vcs = theVCSs.findByFilename(name)
+                info = FileInfo(name, dialog.get_encoding(), vcs, rev)
+                dialog.destroy()
+                if end:
+                    return
+            self.load(f, info)
+
+        # callback for open file button
+        def open_file_button_cb(self, widget, f):
+            self.open_file(f)
+
+        # callback for open file menu item
+        def open_file_cb(self, widget, data):
+            self.open_file(self.current_pane)
+
+        # callback for reload file button
+        def reload_file_button_cb(self, widget, f):
+            self.open_file(f, True)
+
+        # callback for reload file menu item
+        def reload_file_cb(self, widget, data):
+            self.open_file(self.current_pane, True)
+
+        # check changes to files on disk when receiving keyboard focus
+        def focus_in_cb(self, widget, event):
+            for f, h in enumerate(self.headers):
+                info = h.info
+                try:
+                    if info.last_stat is not None:
+                        info = h.info
+                        new_stat = os.stat(info.name)
+                        if info.last_stat[stat.ST_MTIME] < new_stat[stat.ST_MTIME]:
+                            # update our notion of the most recent modification
+                            info.last_stat = new_stat
+                            msg = _('The file "%s" changed on disk.  Do you want to reload the file?') % (info.name, )
+                            dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
+                            ok = (dialog.run() == gtk.RESPONSE_OK)
+                            dialog.destroy()
+                            if ok:
+                                self.open_file(f, True)
+                except OSError:
+                    pass
+
+        # save contents of pane 'f' to file
+        def save_file(self, f, save_as=False):
+            h = self.headers[f]
+            info = h.info
+            if info.name is None or info.revision is not None:
+                # we need to prompt for a file name the current contents were
+                # not loaded from a regular file
+                save_as = True
+            info = FileInfo(info.name, info.encoding)
+            if save_as:
+                # prompt for a file name
+                dialog = FileChooserDialog(_('Save %s Buffer %d' % (self.title, f + 1)), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_SAVE, gtk.STOCK_SAVE)
+                if info.name is not None:
+                    dialog.set_filename(os.path.abspath(info.name))
+                dialog.set_encoding(info.encoding)
+                info.name = None
+                dialog.set_default_response(gtk.RESPONSE_OK)
+                if dialog.run() == gtk.RESPONSE_OK:
+                    info.name = dialog.get_filename()
+                    info.encoding = dialog.get_encoding()
+                dialog.destroy()
+            if info.name is None:
+                return
+            try:
+                msg = None
+                # warn if we are about to overwrite an existing file
+                if save_as:
+                    if os.path.exists(info.name):
+                        msg = _('A file named "%s" already exists.  Do you want to overwrite it?') % (info.name, )
+                # warn if we are about to overwrite a file that has changed
+                # since we last read it
+                elif info.stat is not None:
+                    if info.stat[stat.ST_MTIME] < os.stat(info.name)[stat.ST_MTIME]:
+                        msg = _('The file "%s" has been modified by another process since reading it.  If you save, all the external changes could be lost.  Save anyways?') % (info.name, )
+                if msg is not None:
+                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
+                    end = (dialog.run() != gtk.RESPONSE_OK)
+                    dialog.destroy()
+                    if end:
+                        return
+            except OSError:
+                pass
+            try:
+                # convert the text to the output encoding
+                # refresh the lines to contain new objects with updated line
+                # numbers and no local edits
+                encoded = []
+                for line in self.panes[f].lines:
+                    if line is not None:
+                        s = line.getText()
+                        if s is not None:
+                            encoded.append(codecs.encode(s, info.encoding))
+
+                # write file
+                fd = open(info.name, 'wb')
+                for s in encoded:
+                    fd.write(s)
+                fd.close()
+                info.last_stat = info.stat = os.stat(info.name)
+
+                # make the edits look permanent
+                self.bakeEdits(f)
+                # update the pane file info
+                self.setFileInfo(f, info)
+                # update the syntax highlighting incase we changed the file
+                # extension
+                syntax = theResources.getSyntaxByFilename(info.name)
+                if syntax is not None:
+                    self.setSyntax(syntax)
+            except UnicodeEncodeError:
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error ecoding to %s.') % (repr(info.encoding), ))
+                dialog.run()
+                dialog.destroy()
+            except IOError:
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(info.name), ))
+                dialog.run()
+                dialog.destroy()
+
+        # callback for save file menu item
+        def save_file_cb(self, widget, data):
+            self.save_file(self.current_pane)
+
+        # callback for save file as menu item
+        def save_file_as_cb(self, widget, data):
+            self.save_file(self.current_pane, True)
+
+        # callback for save all menu item
+        def save_all_cb(self, widget, data):
+            for f, h in enumerate(self.headers):
+                if h.has_edits:
+                    self.save_file(f)
+
+        # callback for save file button
+        def save_file_button_cb(self, widget, f):
+            self.save_file(f)
+
+        # callback for save file as button
+        def save_file_as_button_cb(self, widget, f):
+            self.save_file(f, True)
+
+        # callback to receive notification when the name of a file changes
+        def swapped_panes_cb(self, widget, f_dst, f_src):
+            f0, f1 = self.headers[f_dst], self.headers[f_src]
+            f0.info, f1.info = f1.info, f0.info
+            f0.has_edits, f1.has_edits = f1.has_edits, f0.has_edits
+            f0.updateTitle()
+            f1.updateTitle()
+
+        # callback to receive notification when the name of a file changes
+        def num_edits_changed_cb(self, widget, f):
+            self.headers[f].setEdits(self.panes[f].num_edits > 0)
+
         # callback to record the viewer's current status message
         def status_changed_cb(self, widget, s):
             self.status = s
-    
+
         # gets the status bar text
         def getStatus(self):
             return self.status
@@ -5246,7 +5310,7 @@ class Diffuse(gtk.Window):
         # render the left and right arrow we will use in our custom icons
         p0 = self.render_icon(gtk.STOCK_GO_FORWARD, gtk.ICON_SIZE_LARGE_TOOLBAR)
         p1 = self.render_icon(gtk.STOCK_GO_BACK, gtk.ICON_SIZE_LARGE_TOOLBAR)
-        w, h, s = p0.get_width(), p0.get_height(), 2.0/3
+        w, h, s = p0.get_width(), p0.get_height(), 0.65
         sw, sh = int(s * w), int(s * h)
         w1, h1 = w - sw, h - sh
 
@@ -5274,6 +5338,7 @@ class Diffuse(gtk.Window):
                      [_('_Reload File'), self.reload_file_cb, None, gtk.STOCK_REFRESH, 'reload_file'],
                      [_('_Save File'), self.save_file_cb, None, gtk.STOCK_SAVE, 'save_file'],
                      [_('Save File _As...'), self.save_file_as_cb, None, gtk.STOCK_SAVE_AS, 'save_file_as'],
+                     [_('Save A_ll'), self.save_all_cb, None, None, 'save_all'],
                      [],
                      [_('New _2-Way File Merge'), self.new_2way_file_merge_cb, None, None, 'new_2_way_file_merge'],
                      [_('New _3-Way File Merge'), self.new_3way_file_merge_cb, None, None, 'new_3_way_file_merge'],
@@ -5383,6 +5448,13 @@ class Diffuse(gtk.Window):
         self.add_accel_group(accel_group)
         self.add(vbox)
         vbox.show()
+        self.connect('focus_in_event', self.focus_in_cb)
+
+    # notifies all viewers on focus changes so they may check for external
+    # changes to files
+    def focus_in_cb(self, widget, event):
+        for i in range(self.notebook.get_n_pages()):
+            self.notebook.get_nth_page(i).focus_in_cb(widget, event)
 
     # record the window's position and size
     def configure_cb(self, widget, event):
@@ -5482,8 +5554,8 @@ class Diffuse(gtk.Window):
     def newFileDiffViewer(self, n):
         self.viewer_count += 1
         tabname = _('File Merge %d') % (self.viewer_count, )
-        viewer = Diffuse.FileDiffViewer(n, self.prefs, tabname)
         tab = NotebookTab(tabname, gtk.STOCK_FILE)
+        viewer = Diffuse.FileDiffViewer(n, self.prefs, tabname)
         tab.button.connect('clicked', self.remove_tab_cb, viewer)
         self.notebook.append_page(viewer, tab)
         if hasattr(self.notebook, 'set_tab_reorderable'):
@@ -5507,17 +5579,17 @@ class Diffuse(gtk.Window):
             vcs = theVCSs.findByFilename(name)
             if vcs is None:
                 # shift the existing file so it will be in the second pane
-                specs.append(FileSpec())
-                specs.append(FileSpec(name, encoding))
+                specs.append(FileInfo())
+                specs.append(FileInfo(name, encoding))
             else:
                 if rev is None:
                     # no revision specified assume defaults
                     for name, rev in vcs.getFileTemplate(self.prefs, name):
-                        specs.append(FileSpec(name, encoding, vcs, rev))
+                        specs.append(FileInfo(name, encoding, vcs, rev))
                 else:
                     # single revision specified
-                    specs.append(FileSpec(name, encoding, vcs, rev))
-                    specs.append(FileSpec(name, encoding))
+                    specs.append(FileInfo(name, encoding, vcs, rev))
+                    specs.append(FileInfo(name, encoding))
         else:
             # multiple files specified, use one pane for each file
             for name, data in items:
@@ -5526,7 +5598,7 @@ class Diffuse(gtk.Window):
                         vcs = None
                     else:
                         vcs = theVCSs.findByFilename(name)
-                    specs.append(FileSpec(name, encoding, vcs, rev))
+                    specs.append(FileInfo(name, encoding, vcs, rev))
 
         # open a new viewer
         viewer = self.newFileDiffViewer(max(2, len(specs)))
@@ -5620,6 +5692,11 @@ class Diffuse(gtk.Window):
     # callback for the save file as menu item
     def save_file_as_cb(self, widget, data):
         self.getCurrentViewer().save_file_as_cb(widget, data)
+
+    # callback for the save all menu item
+    def save_all_cb(self, widget, data):
+        for i in range(self.notebook.get_n_pages()):
+            self.notebook.get_nth_page(i).save_all_cb(widget, data)
 
     # callback for the new 2-way file merge menu item
     def new_2way_file_merge_cb(self, widget, data):
@@ -5861,6 +5938,7 @@ class Diffuse(gtk.Window):
         dialog.destroy()
 
 gobject.signal_new('title_changed', Diffuse.FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
+gobject.signal_new('title_changed', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
 gobject.signal_new('open', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
 gobject.signal_new('reload', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
 gobject.signal_new('save', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())

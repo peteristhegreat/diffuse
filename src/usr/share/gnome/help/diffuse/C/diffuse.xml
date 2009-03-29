@@ -509,6 +509,14 @@
             <term><userinput>save_file_as</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>File</guimenu><guimenuitem>Save File As...</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+A</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>save_all</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>File</guimenu><guimenuitem>Save All</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+S</para>
             </listitem>
           </varlistentry>
