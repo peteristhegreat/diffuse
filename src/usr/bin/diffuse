@@ -2712,6 +2712,7 @@ class FileDiffViewer(gtk.Table):
 
     # replace the contents of pane 'f' with the strings list of strings 'ss'
     def _replaceContents(self, f, ss):
+        self.alignmentChange(False)
         # determine the format for the text
         self.setFormat(f, getFormat(ss))
 
@@ -2762,6 +2763,7 @@ class FileDiffViewer(gtk.Table):
         # update the blocks
         self.invalidateLineMatching(0, old_n, new_n)
         self.updateBlocks(blocks)
+        self.alignmentChange(True)
 
     # replace the contents of pane 'f' with the strings list of strings 'ss'
     def replaceContents(self, f, ss):
@@ -5083,11 +5085,11 @@ class Diffuse(gtk.Window):
                     dialog.run()
                     dialog.destroy()
                     return
-            # update the panes contents, last modified time, and label
+            # update the panes contents, last modified time, and title
             self.replaceContents(f, ss)
             info.encoding = encoding
-            self.setFileInfo(f, info)
             info.last_stat = info.stat = stat
+            self.setFileInfo(f, info)
             # use the file name to choose appropriate syntax highlighting rules
             if name is not None:
                 syntax = theResources.getSyntaxByFilename(name)
@@ -5163,36 +5165,36 @@ class Diffuse(gtk.Window):
         def save_file(self, f, save_as=False):
             h = self.headers[f]
             info = h.info
-            if info.name is None or info.revision is not None:
+            name, encoding, rev = info.name, info.encoding, info.revision
+            if name is None or rev is not None:
                 # we need to prompt for a file name the current contents were
                 # not loaded from a regular file
                 save_as = True
-            info = FileInfo(info.name, info.encoding)
             if save_as:
                 # prompt for a file name
                 dialog = FileChooserDialog(_('Save %s Buffer %d' % (self.title, f + 1)), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_SAVE, gtk.STOCK_SAVE)
-                if info.name is not None:
-                    dialog.set_filename(os.path.abspath(info.name))
-                dialog.set_encoding(info.encoding)
-                info.name = None
+                if name is not None:
+                    dialog.set_filename(os.path.abspath(name))
+                dialog.set_encoding(encoding)
+                name = None
                 dialog.set_default_response(gtk.RESPONSE_OK)
                 if dialog.run() == gtk.RESPONSE_OK:
-                    info.name = dialog.get_filename()
-                    info.encoding = dialog.get_encoding()
+                    name = dialog.get_filename()
+                    encoding = dialog.get_encoding()
                 dialog.destroy()
-            if info.name is None:
+            if name is None:
                 return
             try:
                 msg = None
                 # warn if we are about to overwrite an existing file
                 if save_as:
-                    if os.path.exists(info.name):
-                        msg = _('A file named "%s" already exists.  Do you want to overwrite it?') % (info.name, )
+                    if os.path.exists(name):
+                        msg = _('A file named "%s" already exists.  Do you want to overwrite it?') % (name, )
                 # warn if we are about to overwrite a file that has changed
                 # since we last read it
                 elif info.stat is not None:
-                    if info.stat[stat.ST_MTIME] < os.stat(info.name)[stat.ST_MTIME]:
-                        msg = _('The file "%s" has been modified by another process since reading it.  If you save, all the external changes could be lost.  Save anyways?') % (info.name, )
+                    if info.stat[stat.ST_MTIME] < os.stat(name)[stat.ST_MTIME]:
+                        msg = _('The file "%s" has been modified by another process since reading it.  If you save, all the external changes could be lost.  Save anyways?') % (name, )
                 if msg is not None:
                     dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
                     end = (dialog.run() != gtk.RESPONSE_OK)
@@ -5210,30 +5212,31 @@ class Diffuse(gtk.Window):
                     if line is not None:
                         s = line.getText()
                         if s is not None:
-                            encoded.append(codecs.encode(s, info.encoding))
+                            encoded.append(codecs.encode(s, encoding))
 
                 # write file
-                fd = open(info.name, 'wb')
+                fd = open(name, 'wb')
                 for s in encoded:
                     fd.write(s)
                 fd.close()
-                info.last_stat = info.stat = os.stat(info.name)
 
                 # make the edits look permanent
                 self.bakeEdits(f)
                 # update the pane file info
+                info.name, info.encoding, info.revision = name, encoding, None
+                info.last_stat = info.stat = os.stat(name)
                 self.setFileInfo(f, info)
                 # update the syntax highlighting incase we changed the file
                 # extension
-                syntax = theResources.getSyntaxByFilename(info.name)
+                syntax = theResources.getSyntaxByFilename(name)
                 if syntax is not None:
                     self.setSyntax(syntax)
             except UnicodeEncodeError:
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error ecoding to %s.') % (repr(info.encoding), ))
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error ecoding to %s.') % (repr(encoding), ))
                 dialog.run()
                 dialog.destroy()
             except IOError:
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(info.name), ))
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(name), ))
                 dialog.run()
                 dialog.destroy()
 
