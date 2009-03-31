@@ -5172,7 +5172,7 @@ class Diffuse(gtk.Window):
                 save_as = True
             if save_as:
                 # prompt for a file name
-                dialog = FileChooserDialog(_('Save %s Buffer %d' % (self.title, f + 1)), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_SAVE, gtk.STOCK_SAVE)
+                dialog = FileChooserDialog(_('Save %(title)s Pane %(pane)d') % { 'title': self.title, 'pane': f + 1 }, self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_SAVE, gtk.STOCK_SAVE)
                 if name is not None:
                     dialog.set_filename(os.path.abspath(name))
                 dialog.set_encoding(encoding)
