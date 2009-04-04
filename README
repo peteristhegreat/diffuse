@@ -17,7 +17,7 @@ Some key features of Diffuse:
 - ability to directly edit files
 - syntax highlighting
 - Bazaar, CVS, Darcs, Git, Mercurial, Monotone, Subversion, and SVK support
-- support for UTF-8 encoded unicode
+- Unicode support
 - unlimited undo
 - easy keyboard navigation
 
@@ -35,7 +35,7 @@ Python and PyGTK.  If you need to manually install PyGTK, please be aware its
 dependencies should be installed prior to installing PyGTK.
 
 Diffuse can be run directly from an untared source distribution on any POSIX
-system or installed with the instructions below.
+system or installed with the instructions described in the next section.
 
 The rules for parsing files in ~/.diffuse have changed in the 0.3.0 release.
 Non-fatal errors may be reported when parsing old files.  These errors can be
@@ -45,34 +45,20 @@ when Diffuse exits.
 
 ----
 
-Installing on Linux:
+Installing on POSIX systems:
 
-Diffuse can be installed from source on most Linux distributions by simply
-copying the files and directories in the 'src' directory to the root of the
-host system.  For example:
+Use the 'install.py' script to install or remove Diffuse.  The script accepts
+several options for customising the installation behaviour.  Use the '--help'
+option to obtain a full listing.
 
-  bash# cp -a src/* /
+Install example:
+  bash# ./install.py --destdir=/
 
-If you wish to install Diffuse (or portions of Diffuse) to other locations, the
-paths used to locate configuration files, icons, and help documentation in
-'src/etc/diffuserc', 'src/usr/bin/diffuse', and
-'src/usr/share/omf/diffuse/diffuse-C.omf' need to be modified.
+Removal example:
+  bash# ./install.py --remove --destdir=/
 
-Diffuse's help documentation is written in the DocBook format and can be easily
-converted into other formats using XSLT stylesheets.  If the local help
-documentation or its browser are unavailable, Diffuse will attempt to display
-the on-line help documentation using a web browser.
-
-Some platforms specific post-install steps may be required to index the
-documentation and mime-type handling.  For example:
-
-  bash# scrollkeeper-update -q -o /usr/share/omf/diffuse
-  bash# update-desktop-database
-
-Similar steps may be necessary when uninstalling Diffuse.  For example:
-
-  bash# scrollkeeper-update -q
-  bash# update-desktop-database
+The '--files-only' option should be used to skip the post installation tasks
+when creating installable packages.
 
 ----
 
@@ -80,3 +66,12 @@ Installing on Windows:
 
 The 'windows-installer' directory contains scripts for building an installable
 package for Windows that includes all dependencies.
+
+----
+
+Help Documentation:
+
+Diffuse's help documentation is written in the DocBook format and can be easily
+converted into other formats using XSLT stylesheets.  If the local help
+documentation or its browser are unavailable, Diffuse will attempt to display
+the on-line help documentation using a web browser.
