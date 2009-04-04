@@ -4125,7 +4125,7 @@ class FileDiffViewer(gtk.Table):
             self.selectAll()
 
     # callback for find menu item
-    def find_cb(self, pattern, match_case, backwards):
+    def find(self, pattern, match_case, backwards, from_start):
         self.setCharMode()
         # determine where to start searching from
         f = self.current_pane
@@ -4133,60 +4133,53 @@ class FileDiffViewer(gtk.Table):
         i, j = self.current_line, self.current_char
         si, sj = self.selection_line, self.selection_char
         if backwards:
-            if si < i or (i == si and sj < j):
+            if from_start:
+                i, j = nlines, 0
+            elif si < i or (i == si and sj < j):
                 i, j = si, sj
-        elif i < si or (i == si and j < sj):
-            i, j = si, sj
+        else:
+            if from_start:
+                i, j = 0, 0
+            elif i < si or (i == si and j < sj):
+                i, j = si, sj
 
         if not match_case:
             pattern = pattern.upper()
-        more = True
-        while more:
-            # iterate over all valid lines
-            while i < nlines + 1:
-                text = self.getLineText(f, i)
-                if text is not None:
-                    if not match_case:
-                        text = text.upper()
-                    # search for pattern
-                    if backwards:
-                        idx = text.rfind(pattern, 0, j)
-                    else:
-                        idx = text.find(pattern, j)
-                    if idx >= 0:
-                        # we found a match
-                        end = idx + len(pattern)
-                        if backwards:
-                            idx, end = end, idx
-                        self.setCurrentChar(i, idx)
-                        self.setCurrentChar(i, end, True)
-                        return
-                # advance
-                if backwards:
-                    if i == 0:
-                        break
-                    i -= 1
-                    text = self.getLineText(f, i)
-                    if text is None:
-                        j = 0
-                    else:
-                        j = len(text)
-                else:
-                    i += 1
-                    j = 0
 
-            # we have reached the end, ask if we should continue
-            j = 0
+        # iterate over all valid lines
+        while i < nlines + 1:
+            text = self.getLineText(f, i)
+            if text is not None:
+                if not match_case:
+                    text = text.upper()
+                # search for pattern
+                if backwards:
+                    idx = text.rfind(pattern, 0, j)
+                else:
+                    idx = text.find(pattern, j)
+                if idx >= 0:
+                    # we found a match
+                    end = idx + len(pattern)
+                    if backwards:
+                        idx, end = end, idx
+                    self.setCurrentChar(i, idx)
+                    self.setCurrentChar(i, end, True)
+                    return True
+            # advance
             if backwards:
-                msg = _('Phrase not found.  Continue from the end of the file?')
-                i = nlines
+                if i == 0:
+                    break
+                i -= 1
+                text = self.getLineText(f, i)
+                if text is None:
+                    j = 0
+                else:
+                    j = len(text)
             else:
-                msg = _('Phrase not found.  Continue from the start of the file?')
-                i = 0
-            dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
-            dialog.set_default_response(gtk.RESPONSE_OK)
-            more = (dialog.run() == gtk.RESPONSE_OK)
-            dialog.destroy()
+                i += 1
+                j = 0
+        # we have reached the end without finding a match
+        return False
 
     # move cursor to a given line
     def go_to_line(self, i):
@@ -5774,7 +5767,24 @@ class Diffuse(gtk.Window):
             history.insert(0, pattern)
             self.bool_state['search_matchcase'] = match_case
             self.bool_state['search_backwards'] = backwards
-        self.getCurrentViewer().find_cb(self.search_pattern, self.bool_state['search_matchcase'], reverse ^ self.bool_state['search_backwards'])
+
+        # determine where to start searching from
+        reverse ^= self.bool_state['search_backwards']
+        viewer = self.getCurrentViewer()
+        from_start, more = False, True
+        while more:
+            if viewer.find(self.search_pattern, self.bool_state['search_matchcase'], reverse, from_start):
+                break
+
+            if reverse:
+                msg = _('Phrase not found.  Continue from the end of the file?')
+            else:
+                msg = _('Phrase not found.  Continue from the start of the file?')
+            dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
+            dialog.set_default_response(gtk.RESPONSE_OK)
+            more = (dialog.run() == gtk.RESPONSE_OK)
+            dialog.destroy()
+            from_start = True
 
     # callback for the find menu item
     def find_cb(self, widget, data):
