@@ -1182,29 +1182,29 @@ class VCSs:
                 if len(s) > 4:
                     k = s[4:]
                     if s[1] == 'D':
-                        k = os.path.abspath(os.path.join(self.root, k))
-                        if not os.path.isdir(k):
-                            k = relpath(pwd, k)
+                        k = prefs.convertToNativePath(k)
+                        if not k.endswith(os.sep):
+                            k = relpath(pwd, os.path.abspath(os.path.join(self.root, k)))
                             removed[k] = [ (k, prefs.getString('bzr_default_revision')), (None, None) ]
                     elif s[1] == 'N':
-                        k = os.path.abspath(os.path.join(self.root, k))
-                        if not os.path.isdir(k):
-                            k = relpath(pwd, k)
+                        k = prefs.convertToNativePath(k)
+                        if not k.endswith(os.sep):
+                            k = relpath(pwd, os.path.abspath(os.path.join(self.root, k)))
                             added[k] = [ (None, None), (k, None) ]
                     elif s[1] == 'M':
                         # also conflict
-                        k = os.path.abspath(os.path.join(self.root, k))
-                        if not os.path.isdir(k):
-                            k = relpath(pwd, k)
+                        k = prefs.convertToNativePath(k)
+                        if not k.endswith(os.sep):
+                            k = relpath(pwd, os.path.abspath(os.path.join(self.root, k)))
                             modified[k] = [ (k, None) ]
                     elif s[0] == 'R':
                         k = k.split(' => ')
                         if len(k) == 2:
-                            k0 = os.path.abspath(os.path.join(self.root, k[0]))
-                            k1 = os.path.abspath(os.path.join(self.root, k[1]))
-                            if not os.path.isdir(k0) and not os.path.isdir(k1):
-                                k0 = relpath(pwd, k0)
-                                k1 = relpath(pwd, k1)
+                            k0 = prefs.convertToNativePath(k[0])
+                            k1 = prefs.convertToNativePath(k[1])
+                            if not k0.endswith(os.sep) and not k1.endswith(os.sep):
+                                k0 = relpath(pwd, os.path.abspath(os.path.join(self.root, k0)))
+                                k1 = relpath(pwd, os.path.abspath(os.path.join(self.root, k1)))
                                 renamed[k1] = [ (k0, prefs.getString('bzr_default_revision')), (k1, None) ]
             # sort the results
             r = {}
@@ -1237,7 +1237,7 @@ class VCSs:
                 args.append(safeRelativePath(self.root, name, prefs, 'cvs_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'cvs_bash')):
                 if len(s) > 2 and s[0] in 'ACMR':
-                    r[relpath2(pwd, self.root, s[2:])] = s[0]
+                    r[relpath2(pwd, self.root, prefs.convertToNativePath(s[2:]))] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'R':
@@ -1270,18 +1270,17 @@ class VCSs:
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'darcs_bash')):
                 p = s.split(' ')
                 if len(p) >= 2 and s[0] in 'AMR':
-                    k = os.path.abspath(os.path.join(self.root, p[1]))
-                    if not os.path.isdir(k):
-                        r[relpath(pwd, k)] = s[0]
+                    k = prefs.convertToNativePath(p[1])
+                    if not k.endswith(os.sep):
+                        r[relpath(pwd, os.path.abspath(os.path.join(self.root, k)))] = s[0]
             for k in sorted(r.keys()):
-                if not os.path.isdir(k):
-                    v = r[k]
-                    if v == 'R':
-                        result.append( [ (k, prefs.getString('darcs_default_revision')), (None, None) ] )
-                    elif v == 'A':
-                        result.append( [ (None, None), (k, None) ] )
-                    elif v in 'M':
-                        result.append( [ (k, None) ] )
+                v = r[k]
+                if v == 'R':
+                    result.append( [ (k, prefs.getString('darcs_default_revision')), (None, None) ] )
+                elif v == 'A':
+                    result.append( [ (None, None), (k, None) ] )
+                elif v in 'M':
+                    result.append( [ (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1313,19 +1312,19 @@ class VCSs:
                 s = ss[i]
                 i += 1
                 if s.startswith('#\tdeleted:    '):
-                    k = relpath2(pwd, self.root, s[14:])
+                    k = relpath2(pwd, self.root, prefs.convertToNativePath(s[14:]))
                     removed[k] = [ (k, prefs.getString('git_default_revision')), (None, None) ]
                 elif s.startswith('#\tnew file:   '):
-                    k = relpath2(pwd, self.root, s[14:])
+                    k = relpath2(pwd, self.root, prefs.convertToNativePath(s[14:]))
                     added[k] = [ (None, None), (k, None) ]
                 elif s.startswith('#\tmodified:   '):
-                    k = relpath2(pwd, self.root, s[14:])
+                    k = relpath2(pwd, self.root, prefs.convertToNativePath(s[14:]))
                     modified[k] = [ (k, None) ]
                 elif s.startswith('#\trenamed:    '):
                     keys = s[14:].split(' -> ')
                     if len(keys) == 2:
-                        k0 = relpath2(pwd, self.root, keys[0])
-                        k1 = relpath2(pwd, self.root, keys[1])
+                        k0 = relpath2(pwd, self.root, prefs.convertToNativePath(keys[0]))
+                        k1 = relpath2(pwd, self.root, prefs.convertToNativePath(keys[1]))
                         renamed[k1] = [ (k0, prefs.getString('git_default_revision')), (k1, None) ]
                 elif not s.startswith('#  ') and s != '#':
                     break
@@ -1360,7 +1359,7 @@ class VCSs:
                 args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'hg_bash')):
                 if len(s) > 2 and s[0] in 'ADM':
-                    r[relpath2(pwd, self.root, s[2:])] = s[0]
+                    r[relpath2(pwd, self.root, prefs.convertToNativePath(s[2:]))] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'D':
@@ -1392,7 +1391,8 @@ class VCSs:
             removed, modified, added, renamed, old_name = {}, {}, {}, {}, None
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'mtn_bash')):
                 if len(s) > 11:
-                    k = os.path.abspath(os.path.join(self.root, s[11:]))
+                    k = os.path.abspath(os.path.join(self.root, prefs.convertToNativePath(s[11:])))
+                    # FIXME: prune dropped directories from results
                     if not os.path.isdir(k):
                         k = relpath(pwd, k)
                         if s.startswith('  dropped  '):
@@ -1449,7 +1449,10 @@ class VCSs:
                 args.append(safeRelativePath(self.root, name, prefs, 'svn_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'svn_bash')):
                 if len(s) > 7 and s[0] in 'ACDMR':
-                    r[relpath2(pwd, self.root, s[7:])] = s[0]
+                    k = relpath2(pwd, self.root, prefs.convertToNativePath(s[7:]))
+                    # FIXME: prune dropped directories from the results
+                    if not os.path.isdir(k):
+                        r[k] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'D':
@@ -1546,17 +1549,19 @@ class VCSs:
                 args.append(safeRelativePath(self.root, name, prefs, 'svk_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'svk_bash')):
                 if len(s) > 4 and s[0] in 'ACDMR':
-                    r[relpath2(pwd, self.root, s[4:])] = s[0]
+                    k = relpath2(pwd, self.root, prefs.convertToNativePath(s[4:]))
+                    # FIXME: prune dropped directories from the results
+                    if not os.path.isdir(k):
+                        r[k] = s[0]
             result = []
             for k in sorted(r.keys()):
-                if not os.path.isdir(k):
-                    v = r[k]
-                    if v == 'D':
-                        result.append( [ (k, prefs.getString('svk_default_revision')), (None, None) ] )
-                    elif v == 'A':
-                        result.append( [ (None, None), (k, None) ] )
-                    elif v in 'CMR':
-                        result.append( [ (k, None) ] )
+                v = r[k]
+                if v == 'D':
+                    result.append( [ (k, prefs.getString('svk_default_revision')), (None, None) ] )
+                elif v == 'A':
+                    result.append( [ (None, None), (k, None) ] )
+                elif v in 'CMR':
+                    result.append( [ (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -6076,7 +6081,7 @@ if __name__ == '__main__':
                 logError(_('Skipping unknown argument "%s".') % (args[i], ))
         else:
             filename = diff.prefs.convertToNativePath(args[i])
-            if mode != 'modified' and os.path.isdir(filename):
+            if (mode == 'single' or mode == 'separate') and os.path.isdir(filename):
                 if len(specs) > 0:
                     filename = os.path.join(filename, os.path.basename(specs[-1][0]))
                 else:
