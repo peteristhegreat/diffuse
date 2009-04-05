@@ -119,6 +119,7 @@ def processFiles(install, target, dst, src, template):
                 f.close()
                 if v is not None:
                     c = replace(c, v)
+                print 'Installing %s' % (d, )
                 f = open(d, 'wb')
                 f.write(c)
                 f.close()
