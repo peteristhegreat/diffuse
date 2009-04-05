@@ -47,18 +47,12 @@ when Diffuse exits.
 
 Installing on POSIX systems:
 
-Use the 'install.py' script to install or remove Diffuse.  The script accepts
-several options for customising the installation behaviour.  Use the '--help'
-option to obtain a full listing.
+Run the 'install.py' script to install Diffuse.  The script accepts several
+options for customising the installation behaviour.  Use the '--help' option
+to obtain a full listing.
 
-Install example:
-  bash# ./install.py --destdir=/
-
-Removal example:
-  bash# ./install.py --remove --destdir=/
-
-The '--files-only' option should be used to skip the post installation tasks
-when creating installable packages.
+Diffuse can be removed by running the 'install.py' script with the '--remove'
+option.
 
 ----
 

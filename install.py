@@ -39,38 +39,41 @@ if os.name == 'nt':
 os.umask(stat.S_IWGRP | stat.S_IWOTH)
 
 # option defaults
-options = { 'destdir': '', 'prefix': '/usr/local/', 'sysconfdir': '/etc/', 'python-interpreter': '/usr/bin/env python' }
+options = { 'destdir': '/', 'prefix': '/usr/local/', 'sysconfdir': '/etc/', 'python-interpreter': '/usr/bin/env python' }
 install = True
 files_only = False
 
 # process --help option
 if len(sys.argv) == 2 and sys.argv[1] == '--help':
-    print """Usage: %s --destdir=PATH [ option ]...
-  valid options:
-    --help
-       print this help text and quit
+    print """Usage: %s [OPTION...]
 
-    --remove
-       remove the program
+Install or remove Diffuse.
 
-    --destdir=PATH
-       path to the the installation's root directory
-       a value for PATH must be explicitly specified
+Options:
+  --help
+     print this help text and quit
 
-    --prefix=PATH
-       common installation prefix for files
-       default: %s
+  --remove
+     remove the program
 
-    --sysconfdir=PATH
-       directory for installing read-only single-machine data
-       default: %s
+  --destdir=PATH
+     path to the installation's root directory
+     default: %s
 
-    --python-interpreter=PATH
-       command for python interpreter
-       default: %s
+  --prefix=PATH
+     common installation prefix for files
+     default: %s
 
-    --files-only
-       only install/remove files; skip the post install/removal tasks""" % (app_path, options['prefix'], options['sysconfdir'], options['python-interpreter'])
+  --sysconfdir=PATH
+     directory for installing read-only single-machine data
+     default: %s
+
+  --python-interpreter=PATH
+     command for python interpreter
+     default: %s
+
+  --files-only
+     only install/remove files; skip the post install/removal tasks""" % (app_path, options['destdir'], options['prefix'], options['sysconfdir'], options['python-interpreter'])
     sys.exit(0)
  
 # returns the list of components used in a path
@@ -155,9 +158,6 @@ for opt in 'prefix', 'sysconfdir':
     c.insert(0, '')
     c.append('')
     options[opt] = os.sep.join(c)
-if options['destdir'] == '':
-    logError('Value required for --destdir option.  Use --help for more information.')
-    sys.exit(1)
 
 destdir = options['destdir']
 prefix = options['prefix']
@@ -200,7 +200,7 @@ if not install:
 
 # do post install/removal tasks
 if not files_only:
-    print 'Performing post %s tasks.' % (op, stage)
+    print 'Performing post %s tasks.' % (stage, )
 
     if install:
         cmds = [ 'update-desktop-database',
