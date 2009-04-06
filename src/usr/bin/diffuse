@@ -649,6 +649,8 @@ class Preferences:
         self.bool_prefs = {}
         self.int_prefs = {}
         self.string_prefs = {}
+        self.int_prefs_min = {}
+        self.int_prefs_max = {}
 
         # find available encodings
         encs = {}
@@ -685,25 +687,31 @@ class Preferences:
             _('Display'),
             [ 'List',
               [ 'Font', 'display_font', font, _('Font') ],
-              [ 'Integer', 'display_tab_width', 8, _('Tab Width') ],
-              [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore White Space') ],
-              [ 'Boolean', 'display_ignore_whitespace_changes', False, _('Ignore Changes to White Space') ],
-              [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore Blank Lines') ],
-              [ 'Boolean', 'display_ignore_case', False, _('Ignore Case') ],
-              [ 'Boolean', 'display_hide_endofline', True, _('Hide End of Line Characters') ]
+              [ 'Integer', 'display_tab_width', 8, _('Tab width'), 1, 128 ],
+              [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore white space') ],
+              [ 'Boolean', 'display_ignore_whitespace_changes', False, _('Ignore changes to white space') ],
+              [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore blank lines') ],
+              [ 'Boolean', 'display_ignore_case', False, _('Ignore case') ],
+              [ 'Boolean', 'display_hide_endofline', True, _('Hide end of line characters') ]
             ],
             _('Alignment'),
             [ 'List',
-              [ 'Boolean', 'align_ignore_whitespace', True, _('Ignore White Space') ],
-              [ 'Boolean', 'align_ignore_whitespace_changes', False, _('Ignore Changes to White Space') ],
-              [ 'Boolean', 'align_ignore_blanklines', False, _('Ignore Blank Lines') ],
-              [ 'Boolean', 'align_ignore_case', False, _('Ignore Case') ]
+              [ 'Boolean', 'align_ignore_whitespace', True, _('Ignore white space') ],
+              [ 'Boolean', 'align_ignore_whitespace_changes', False, _('Ignore changes to white space') ],
+              [ 'Boolean', 'align_ignore_blanklines', False, _('Ignore blank lines') ],
+              [ 'Boolean', 'align_ignore_case', False, _('Ignore case') ]
             ],
             _('Editor'),
             [ 'List',
-              [ 'Integer', 'editor_soft_tab_width', 8, _('Soft Tab Width') ],
-              [ 'Boolean', 'editor_expand_tabs', False, _('Expand Tabs to Spaces') ],
-              [ 'Boolean', 'editor_auto_indent', False, _('Auto Indent') ]
+              [ 'Integer', 'editor_soft_tab_width', 8, _('Soft tab width'), 1, 128 ],
+              [ 'Boolean', 'editor_expand_tabs', False, _('Expand tabs to spaces') ],
+              [ 'Boolean', 'editor_auto_indent', False, _('Auto indent') ]
+            ],
+            _('Tabs'),
+            [ 'List',
+              [ 'Integer', 'tabs_default_num_panes', 2, _('Default number of panes'), 2, 16 ],
+              [ 'Boolean', 'tabs_always_show', False, _('Always show the tab bar') ],
+              [ 'Boolean', 'tabs_closing_last_quits', False, _('Closing last tab quits %s' % APP_NAME) ]
             ],
             _('Regional Settings'),
             [ 'List',
@@ -720,8 +728,8 @@ class Preferences:
             self.template.extend([
                     _('Cygwin'),
                     [ 'List',
-                      [ 'File', 'cygwin_root', os.path.join(root, 'cygwin'), _('Root Directory') ],
-                      [ 'String', 'cygwin_cygdrive_prefix', '/cygdrive', _('Cygdrive Prefix') ]
+                      [ 'File', 'cygwin_root', os.path.join(root, 'cygwin'), _('Root directory') ],
+                      [ 'String', 'cygwin_cygdrive_prefix', '/cygdrive', _('Cygdrive prefix') ]
                     ]
                 ])
 
@@ -739,7 +747,7 @@ class Preferences:
         for key, name, cmd, rev in vcs:
             temp = [ 'List',
                      [ 'File', key + '_bin', cmd, _('Command') ],
-                     [ 'String', key + '_default_revision', rev, _('Default Revision') ]
+                     [ 'String', key + '_default_revision', rev, _('Default revision') ]
                    ]
             if isWindows():
                 temp.append([ 'Boolean', key + '_bash', False, _('Launch from a Bash login shell') ])
@@ -763,7 +771,7 @@ class Preferences:
                             if len(a) == 2 and self.bool_prefs.has_key(a[0]):
                                 self.bool_prefs[a[0]] = (a[1] == 'True')
                             elif len(a) == 2 and self.int_prefs.has_key(a[0]):
-                                self.int_prefs[a[0]] = int(a[1])
+                                self.int_prefs[a[0]] = max(self.int_prefs_min[a[0]], min(int(a[1]), self.int_prefs_max[a[0]]))
                             elif len(a) == 2 and self.string_prefs.has_key(a[0]):
                                 self.string_prefs[a[0]] = a[1]
                             else:
@@ -788,6 +796,8 @@ class Preferences:
             self.bool_prefs[template[1]] = template[2]
         elif template[0] == 'Integer':
             self.int_prefs[template[1]] = template[2]
+            self.int_prefs_min[template[1]] = template[4]
+            self.int_prefs_max[template[1]] = template[5]
         elif template[0] in [ 'String', 'File', 'Font' ]:
             self.string_prefs[template[1]] = template[2]
 
@@ -877,7 +887,7 @@ class Preferences:
                             button.set_font_name(self.string_prefs[tpl[1]])
                         else:
                             button = gtk.SpinButton()
-                            button.set_range(1, 128)
+                            button.set_range(tpl[4], tpl[5])
                             button.set_value(self.int_prefs[tpl[1]])
                             button.set_increments(1, 1)
                         widgets[tpl[1]] = button
@@ -2755,7 +2765,7 @@ class FileDiffViewer(gtk.Table):
         self.openUndoBlock()
         self.recordEditMode()
         self._replaceContents(f, ss)
-        self.setCurrentLine(f, min(self.current_line, len(self.panes[f].lines)))
+        self.setCurrentLine(self.current_pane, min(self.current_line, len(self.panes[f].lines)))
         self.recordEditMode()
         self.closeUndoBlock()
 
@@ -5528,7 +5538,9 @@ class Diffuse(gtk.Window):
             # warn about losing unsaved changes before removing a tab
             if not data.hasEdits() or confirmDiscardEdits(self.get_toplevel()):
                 self.notebook.remove(data)
-                self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
+                self.notebook.set_show_tabs(self.prefs.getBool('tabs_always_show') or self.notebook.get_n_pages() > 1)
+        elif self.prefs.getBool('tabs_closing_last_quits'):
+            self.quit_cb(widget, data)
 
     # update window's title
     def updateTitle(self, viewer):
@@ -5572,7 +5584,7 @@ class Diffuse(gtk.Window):
             self.notebook.set_tab_reorderable(viewer, True)
         tab.show()
         viewer.show()
-        self.notebook.set_show_tabs(self.notebook.get_n_pages() > 1)
+        self.notebook.set_show_tabs(self.prefs.getBool('tabs_always_show') or self.notebook.get_n_pages() > 1)
         viewer.connect('title_changed', self.title_changed_cb)
         viewer.connect('status_changed', self.status_changed_cb)
         return viewer
@@ -5580,7 +5592,10 @@ class Diffuse(gtk.Window):
     # create a new viewer to display 'items'
     def newLoadedFileDiffViewer(self, items):
         specs = []
-        if len(items) == 1 and len(items[0][1]) == 1:
+        if len(items) == 0:
+            for i in range(self.prefs.getInt('tabs_default_num_panes')):
+                specs.append(FileInfo())
+        elif len(items) == 1 and len(items[0][1]) == 1:
             # one file specified
             # determine which other files to compare it with
             name, data = items[0]
@@ -5859,7 +5874,9 @@ class Diffuse(gtk.Window):
 
     # notify all viewers of changes to the preferences
     def preferences_updated(self):
-        for i in range(self.notebook.get_n_pages()):
+        n = self.notebook.get_n_pages()
+        self.notebook.set_show_tabs(self.prefs.getBool('tabs_always_show') or n > 1)
+        for i in range(n):
             self.notebook.get_nth_page(i).prefsUpdated()
 
     # callback for the realign all menu item
@@ -6109,7 +6126,7 @@ if __name__ == '__main__':
                 nb.remove_page(i)
     n = nb.get_n_pages()
     if n > 0:
-        nb.set_show_tabs(n > 1)
+        nb.set_show_tabs(diff.prefs.getBool('tabs_always_show') or n > 1)
         nb.get_nth_page(0).grab_focus()
         diff.show()
         gtk.main()
