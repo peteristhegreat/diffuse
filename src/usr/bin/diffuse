@@ -709,9 +709,9 @@ class Preferences:
             ],
             _('Tabs'),
             [ 'List',
-              [ 'Integer', 'tabs_default_number_of_panes', 2, _('Default number of panes'), 2, 16 ],
+              [ 'Integer', 'tabs_default_panes', 2, _('Default panes'), 2, 16 ],
               [ 'Boolean', 'tabs_always_show', False, _('Always show the tab bar') ],
-              [ 'Boolean', 'tabs_closing_last_quits', False, _('Closing last tab quits %s' % APP_NAME) ]
+              [ 'Boolean', 'tabs_closing_last_quits', False, _('Closing the last tab quits %s' % APP_NAME) ]
             ],
             _('Regional Settings'),
             [ 'List',
@@ -2705,7 +2705,8 @@ class FileDiffViewer(gtk.Table):
             i += 1
 
     # replace the contents of pane 'f' with the strings list of strings 'ss'
-    def _replaceContents(self, f, ss):
+    def replaceContents(self, f, ss):
+        self.setLineMode()
         self.alignmentChange(False)
         # determine the format for the text
         self.setFormat(f, getFormat(ss))
@@ -2758,16 +2759,6 @@ class FileDiffViewer(gtk.Table):
         self.invalidateLineMatching(0, old_n, new_n)
         self.updateBlocks(blocks)
         self.alignmentChange(True)
-
-    # replace the contents of pane 'f' with the strings list of strings 'ss'
-    def replaceContents(self, f, ss):
-        self.setLineMode()
-        self.openUndoBlock()
-        self.recordEditMode()
-        self._replaceContents(f, ss)
-        self.setCurrentLine(self.current_pane, min(self.current_line, len(self.panes[f].lines)))
-        self.recordEditMode()
-        self.closeUndoBlock()
 
     # refresh the lines to contain new objects with updated line numbers and
     # no local edits
@@ -5124,7 +5115,11 @@ class Diffuse(gtk.Window):
                 dialog.destroy()
                 if end:
                     return
+            self.openUndoBlock()
+            self.recordEditMode()
             self.load(f, info)
+            self.recordEditMode()
+            self.closeUndoBlock()
 
         # callback for open file button
         def open_file_button_cb(self, widget, f):
@@ -5593,7 +5588,7 @@ class Diffuse(gtk.Window):
     def newLoadedFileDiffViewer(self, items):
         specs = []
         if len(items) == 0:
-            for i in range(self.prefs.getInt('tabs_default_number_of_panes')):
+            for i in range(self.prefs.getInt('tabs_default_panes')):
                 specs.append(FileInfo())
         elif len(items) == 1 and len(items[0][1]) == 1:
             # one file specified
