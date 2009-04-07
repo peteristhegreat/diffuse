@@ -709,7 +709,7 @@ class Preferences:
             ],
             _('Tabs'),
             [ 'List',
-              [ 'Integer', 'tabs_default_num_panes', 2, _('Default number of panes'), 2, 16 ],
+              [ 'Integer', 'tabs_default_number_of_panes', 2, _('Default number of panes'), 2, 16 ],
               [ 'Boolean', 'tabs_always_show', False, _('Always show the tab bar') ],
               [ 'Boolean', 'tabs_closing_last_quits', False, _('Closing last tab quits %s' % APP_NAME) ]
             ],
@@ -5593,7 +5593,7 @@ class Diffuse(gtk.Window):
     def newLoadedFileDiffViewer(self, items):
         specs = []
         if len(items) == 0:
-            for i in range(self.prefs.getInt('tabs_default_num_panes')):
+            for i in range(self.prefs.getInt('tabs_default_number_of_panes')):
                 specs.append(FileInfo())
         elif len(items) == 1 and len(items[0][1]) == 1:
             # one file specified
