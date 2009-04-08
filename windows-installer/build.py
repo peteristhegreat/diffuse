@@ -116,7 +116,7 @@ copyFile('diffuse.ico', 'dist\\diffuse.ico')
 #
 
 # license and other documentation
-for p in 'AUTHORS', 'ChangeLog', 'COPYING', 'README', 'TODO':
+for p in 'AUTHORS', 'ChangeLog', 'COPYING', 'README':
     copyFile(os.path.join('..', p), os.path.join('dist', p + '.txt'), True)
 
 # convert the manual from DocBook to HTML
