@@ -252,6 +252,7 @@ class Resources:
         set_binding('menu', 'help_contents', 'F1')
         set_binding('line_mode', 'enter_align_mode', 'space')
         set_binding('line_mode', 'enter_character_mode', 'Return')
+        set_binding('line_mode', 'enter_character_mode', 'KP_Enter')
         set_binding('line_mode', 'first_line', 'Home')
         set_binding('line_mode', 'first_line', 'g')
         set_binding('line_mode', 'extend_first_line', 'Shift+Home')
@@ -297,6 +298,7 @@ class Resources:
         set_binding('line_mode', 'isolate', 'i')
         set_binding('align_mode', 'enter_line_mode', 'Escape')
         set_binding('align_mode', 'enter_character_mode', 'Return')
+        set_binding('align_mode', 'enter_character_mode', 'KP_Enter')
         set_binding('align_mode', 'first_line', 'g')
         set_binding('align_mode', 'last_line', 'Shift+G')
         set_binding('align_mode', 'up', 'Up')
@@ -1135,7 +1137,7 @@ def bashEscape(s):
 def popenReadLines(dn, cmd, prefs, bash_pref):
     if isWindows() and prefs.getBool(bash_pref):
         # launch the command from a bash shell is requested
-        cmd = [ self.prefs.convertToNativePath('/bin/bash.exe'), '-l', '-c', 'cd %s; %s' % (bashEscape(dn), ' '.join([ bashEscape(arg) for arg in cmd ])) ]
+        cmd = [ prefs.convertToNativePath('/bin/bash.exe'), '-l', '-c', 'cd %s; %s' % (bashEscape(dn), ' '.join([ bashEscape(arg) for arg in cmd ])) ]
         dn = None
     # use subprocess.Popen to retrieve the file contents
     if isWindows():
@@ -4031,7 +4033,7 @@ class FileDiffViewer(gtk.Table):
                     self.current_char = j
                 self.replaceText('')
             # return key, add the platform specific end of line characters
-            elif event.keyval == gtk.keysyms.Return:
+            elif event.keyval in [ gtk.keysyms.Return, gtk.keysyms.KP_Enter ]:
                 s = unicode(os.linesep)
                 if self.prefs.getBool('editor_auto_indent'):
                     start_i, start_j = self.selection_line, self.selection_char
@@ -5228,7 +5230,7 @@ class Diffuse(gtk.Window):
                 if syntax is not None:
                     self.setSyntax(syntax)
             except UnicodeEncodeError:
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error ecoding to %s.') % (repr(encoding), ))
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error encoding to %s.') % (repr(encoding), ))
                 dialog.run()
                 dialog.destroy()
             except IOError:
@@ -5693,7 +5695,7 @@ class Diffuse(gtk.Window):
             rev = dialog.get_revision().strip()
             if rev == '':
                 rev = None
-            specs = [ (dialog.get_filename(), (rev, dialog.get_encoding()) ) ]
+            specs = [ (dialog.get_filename(), [ (rev, dialog.get_encoding()) ]) ]
         dialog.destroy()
         if specs is not None:
             viewer = self.newLoadedFileDiffViewer(specs)

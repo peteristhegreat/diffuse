@@ -850,7 +850,7 @@
             <term><userinput>enter_character_mode</userinput></term>
             <listitem>
               <para>enter character editing mode</para>
-              <para>Default: Return</para>
+              <para>Default: Return, KP_Enter</para>
             </listitem>
           </varlistentry>
 
@@ -1095,7 +1095,7 @@
             <term><userinput>enter_character_mode</userinput></term>
             <listitem>
               <para>enter character editing mode</para>
-              <para>Default: Return</para>
+              <para>Default: Return, KP_Enter</para>
             </listitem>
           </varlistentry>
 
