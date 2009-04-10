@@ -594,6 +594,14 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>clear_edits</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Clear Edits</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+r</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>find</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Find...</guimenuitem></menuchoice> menu item</para>
@@ -658,6 +666,14 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>preferences</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Preferences</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+p</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>no_syntax_highlighting</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Syntax Highlighting</guimenuitem><guimenuitem>None</guimenuitem></menuchoice> menu item</para>
@@ -670,6 +686,54 @@
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Syntax Highlighting</guimenuitem><guimenuitem><replaceable>syntax</replaceable></guimenuitem></menuchoice> menu item</para>
               <para>Default: None</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>realign_all</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Realign All</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+l</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>isolate</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Isolate</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+i</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>first_difference</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>First Difference</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+Up</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>previous_difference</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Previous Difference</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+Up</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>next_difference</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Next Difference</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+Down</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>last_difference</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Last Difference</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+Down</para>
             </listitem>
           </varlistentry>
 
@@ -714,62 +778,6 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>preferences</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Preferences</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+p</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>realign_all</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Realign All</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+l</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>first_difference</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>First Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Shift+Ctrl+Up</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>previous_difference</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Previous Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+Up</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>next_difference</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Next Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+Down</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>last_difference</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Last Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Shift+Ctrl+Down</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>clear_edits</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Clear Edits</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+r</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><userinput>merge_from_left</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Merge From Left</guimenuitem></menuchoice> menu item</para>
@@ -798,14 +806,6 @@
             <listitem>
               <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Merge From Right Then Left</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+M</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>isolate</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Isolate</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+i</para>
             </listitem>
           </varlistentry>
 
