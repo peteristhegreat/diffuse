@@ -1,3 +1,19 @@
+- new POSIX installer with '--destdir=' and '--files-only' options for packagers
+- vi-like keybindings for line mode
+- new '-m' option to open modified files in separate tabs
+- new 'Merge From Left Then Right' and 'Merge From Right Then Left' menu items
+- drag-n-drop support
+- new preferences for behaviour of tabs
+- '*' now used to tag files with edits
+- auto indent
+- new 'Open File In New Tab', 'Save All' menu items
+- improved organisation of menu items
+- button bar no longer grabs keyboard focus
+- removed dependence on urllib module
+- errors are now reported on stderr
+- removed TODO list
+- minor bug fixes
+
 Diffuse 0.3.1 - 2009-03-05
 - fixed a typo that broke the 'Find...' dialogue
 

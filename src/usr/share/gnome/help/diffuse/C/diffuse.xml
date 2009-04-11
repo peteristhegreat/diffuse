@@ -538,6 +538,14 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>close_tab</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Close Tab</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+w</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>quit</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>File</guimenu><guimenuitem>Quit</guimenuitem></menuchoice> menu item</para>
@@ -750,14 +758,6 @@
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Next Tab</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+Page_Down</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>close_tab</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Close Tab</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+w</para>
             </listitem>
           </varlistentry>
 

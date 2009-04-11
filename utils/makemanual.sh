@@ -29,4 +29,5 @@ if [ "$1" == "" ]; then
 fi
 
 xsltproc --nonet book2manual.xsl ../src/usr/share/gnome/help/diffuse/C/diffuse.xml | xsltproc --nonet "$1/manpages/docbook.xsl" -
-sed -i '/^\.\\"/d' diffuse.1
+# eliminate comment lines and replace arrow character with correct sequence
+sed -i '/^\.\\"/d;s/\xe2\x86\x92/\\(->/g' diffuse.1

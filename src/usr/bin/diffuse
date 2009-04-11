@@ -217,6 +217,7 @@ class Resources:
         set_binding('menu', 'save_all', 'Shift+Ctrl+S')
         set_binding('menu', 'new_2_way_file_merge', 'Ctrl+2')
         set_binding('menu', 'new_3_way_file_merge', 'Ctrl+3')
+        set_binding('menu', 'close_tab', 'Ctrl+w')
         set_binding('menu', 'quit', 'Ctrl+q')
         set_binding('menu', 'undo', 'Ctrl+z')
         set_binding('menu', 'redo', 'Shift+Ctrl+Z')
@@ -242,7 +243,6 @@ class Resources:
         set_binding('menu', 'last_difference', 'Shift+Ctrl+Down')
         set_binding('menu', 'previous_tab', 'Ctrl+Page_Up')
         set_binding('menu', 'next_tab', 'Ctrl+Page_Down')
-        set_binding('menu', 'close_tab', 'Ctrl+w')
         set_binding('menu', 'shift_pane_left', 'Shift+Ctrl+Left')
         set_binding('menu', 'shift_pane_right', 'Shift+Ctrl+Right')
         set_binding('menu', 'merge_from_left', 'Ctrl+Left')
@@ -647,7 +647,7 @@ class FontButton(gtk.FontButton):
 
 # class to store preferences and construct a dialogue for manipulating them
 class Preferences:
-    def __init__(self):
+    def __init__(self, path):
         self.bool_prefs = {}
         self.int_prefs = {}
         self.string_prefs = {}
@@ -760,7 +760,7 @@ class Preferences:
         self.template.extend([ _('Version Control'), vcs_template ])
         self._initFromTemplate(self.template)
         # load the user's preferences
-        self.path = os.path.expanduser('~/.diffuse/prefs')
+        self.path = path
         if os.path.isfile(self.path):
             try:
                 f = open(self.path, 'r')
@@ -958,7 +958,7 @@ class Preferences:
             prefix = self.getString('cygwin_cygdrive_prefix')
             prefix = ''.join([ '/' + p for p in prefix.split('/') if p != '' ])
             # convert to a Windows native style path
-            p = s.replace('/', '\\').split('\\')
+            p = s.replace('/', os.sep).split(os.sep)
             if p[0] == '':
                 pr = prefix.split('/')
                 n = len(pr)
@@ -967,7 +967,7 @@ class Preferences:
                 elif len(p) > 1:
                     if p[1] != '':
                         p[0] = self.getString('cygwin_root')
-            s = '\\'.join(p)
+            s = os.sep.join(p)
         return s
 
 # convenience method for creating a menu according to a template
@@ -4913,12 +4913,11 @@ class AboutDialog(gtk.AboutDialog):
             # only available in pygtk >= 2.12
             self.set_program_name(APP_NAME)
         self.set_version(VERSION)
-        self.set_comments(_('a file comparison and merge tool'))
+        self.set_comments(_('Diffuse is a graphical tool for merging and comparing text files.'))
         self.set_copyright(COPYRIGHT)
         self.set_website(WEBSITE)
         self.set_authors([ 'Derrick Moser <derrick_moser@yahoo.com>' ])
         ss = [ APP_NAME + ' ' + VERSION + '\n',
-               self.get_comments() + '\n',
                COPYRIGHT + '\n\n',
                _("""This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the licence, or (at your option) any later version.
 
@@ -5045,7 +5044,7 @@ class Diffuse(gtk.Window):
                 h.connect('save_as', self.save_file_as_button_cb, i)
                 h.show()
             for i, darea in enumerate(self.dareas):
-                darea.drag_dest_set(gtk.DEST_DEFAULT_MOTION | gtk.DEST_DEFAULT_HIGHLIGHT | gtk.DEST_DEFAULT_DROP, [ ('text/uri-list', 0, 0) ], gtk.gdk.ACTION_COPY)
+                darea.drag_dest_set(gtk.DEST_DEFAULT_ALL, [ ('text/uri-list', 0, 0) ], gtk.gdk.ACTION_COPY)
                 darea.connect('drag_data_received', self.drag_data_received_cb, i)
 
         # callback used when receiving drag-n-drop data
@@ -5074,11 +5073,12 @@ class Diffuse(gtk.Window):
             # load the first valid file
             for s in ss:
                 if os.path.isfile(s):
-                    self.openUndoBlock()
-                    self.recordEditMode()
-                    self.load(f, FileInfo(s))
-                    self.recordEditMode()
-                    self.closeUndoBlock()
+                    if self.panes[f].num_edits == 0 or confirmDiscardEdits(self.get_toplevel()):
+                        self.openUndoBlock()
+                        self.recordEditMode()
+                        self.load(f, FileInfo(s))
+                        self.recordEditMode()
+                        self.closeUndoBlock()
                     break
 
         # change the file info for pane 'f' to 'info'
@@ -5368,10 +5368,10 @@ class Diffuse(gtk.Window):
         def getStatus(self):
             return self.status
 
-    def __init__(self):
+    def __init__(self, rc_dir):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
 
-        self.prefs = Preferences()
+        self.prefs = Preferences(os.path.join(rc_dir, 'prefs'))
         # number of created viewers (used to label some tabs)
         self.viewer_count = 0
 
@@ -5432,6 +5432,7 @@ class Diffuse(gtk.Window):
                      [_('New _2-Way File Merge'), self.new_2way_file_merge_cb, None, None, 'new_2_way_file_merge'],
                      [_('New _3-Way File Merge'), self.new_3way_file_merge_cb, None, None, 'new_3_way_file_merge'],
                      [],
+                     [_('_Close Tab'), self.close_tab_cb, None, gtk.STOCK_CLOSE, 'close_tab'],
                      [_('_Quit'), self.quit_cb, None, gtk.STOCK_QUIT, 'quit'] ] ])
 
         menuspecs.append([ _('_Edit'), [
@@ -5479,7 +5480,6 @@ class Diffuse(gtk.Window):
                      [],
                      [_('Pre_vious Tab'), self.previous_tab_cb, None, None, 'previous_tab'],
                      [_('Next _Tab'), self.next_tab_cb, None, None, 'next_tab'],
-                     [_('_Close Tab'), self.close_tab_cb, None, None, 'close_tab'],
                      [],
                      [_('Shift Pane _Left'), self.shift_pane_left_cb, None, None, 'shift_pane_left'],
                      [_('Shift Pane _Right'), self.shift_pane_right_cb, None, None, 'shift_pane_right'] ] ])
@@ -5803,6 +5803,10 @@ class Diffuse(gtk.Window):
         self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
         viewer.grab_focus()
 
+    # callback for the close tab menu item
+    def close_tab_cb(self, widget, data):
+        self.remove_tab_cb(widget, self.notebook.get_nth_page(self.notebook.get_current_page()))
+
     # callback for the quit menu item
     def quit_cb(self, widget, data):
         if self.confirmQuit():
@@ -5964,10 +5968,6 @@ class Diffuse(gtk.Window):
         if i < n:
             self.notebook.set_current_page(i)
 
-    # callback for the close tab menu item
-    def close_tab_cb(self, widget, data):
-        self.remove_tab_cb(widget, self.notebook.get_nth_page(self.notebook.get_current_page()))
-
     # callback for the shift pane left menu item
     def shift_pane_left_cb(self, widget, data):
         self.getCurrentViewer().shift_pane_left_cb(widget, data)
@@ -6058,10 +6058,10 @@ gobject.signal_new('save_as', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_
 
 # process the command line arguments
 if __name__ == '__main__':
-    path = os.path.expanduser('~/.diffuse')
-    if not os.path.exists(path):
+    rc_dir = os.path.join(os.path.expanduser('~'), '.diffuse')
+    if not os.path.exists(rc_dir):
         try:
-            os.mkdir(path)
+            os.mkdir(rc_dir)
         except IOError:
             pass
 
@@ -6082,7 +6082,7 @@ if __name__ == '__main__':
         if os.path.isfile(rc_file):
             theResources.parse(rc_file)
         # parse personal initialisation file
-        rc_file = os.path.expanduser('~/.diffuse/diffuserc')
+        rc_file = os.path.join(rc_dir, 'diffuserc')
         if os.path.isfile(rc_file):
             theResources.parse(rc_file)
 
@@ -6091,9 +6091,9 @@ if __name__ == '__main__':
     if os.path.isfile(icon):
         gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(icon))
 
-    diff = Diffuse()
+    diff = Diffuse(rc_dir)
     # load state
-    configpath = os.path.join(path, 'config')
+    configpath = os.path.join(rc_dir, 'config')
     diff.loadState(configpath)
 
     # process remaining command line arguments

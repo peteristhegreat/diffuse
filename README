@@ -54,6 +54,9 @@ to obtain a full listing.
 Diffuse can be removed by running the 'install.py' script with the '--remove'
 option.
 
+Specify the '--destdir=' and '--files-only' options for the 'install.py'
+script when using it to build a platform specific package of Diffuse.
+
 ----
 
 Installing on Windows:
