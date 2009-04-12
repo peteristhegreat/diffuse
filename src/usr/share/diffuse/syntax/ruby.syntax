@@ -1,5 +1,5 @@
 # Ruby syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax Ruby normal text
 syntax_files Ruby '\.rb$'
 
@@ -7,9 +7,9 @@ syntax_files Ruby '\.rb$'
 syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern expr expr text '[ \t\r\n]+'
 syntax_pattern normal comment ruby_comment '#'
-syntax_pattern comment normal ruby_comment '\n'
+syntax_pattern comment normal ruby_comment '(\r\n|\r|\n)$'
 syntax_pattern comment comment ruby_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern comment comment ruby_comment '.[^TFX\n]*'
+syntax_pattern comment comment ruby_comment '.[^TFX\r\n]*'
 syntax_pattern normal doc ruby_comment '^=begin\b'
 syntax_pattern doc normal ruby_comment '^=end\b'
 syntax_pattern doc doc ruby_fixme '\b(TODO|FIXME|XXX)\b'

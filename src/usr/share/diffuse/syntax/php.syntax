@@ -1,5 +1,5 @@
 # PHP syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax PHP normal text
 syntax_files PHP '\.php$'
 
@@ -11,9 +11,9 @@ syntax_pattern php normal php_tag '\?>'
 syntax_pattern php php text '[ \t\r\n]+'
 syntax_pattern php comment php_comment '(//|#)'
 syntax_pattern comment normal php_tag '\?>'
-syntax_pattern comment php php_comment '\n'
+syntax_pattern comment php php_comment '(\r\n|\r|\n)$'
 syntax_pattern comment comment php_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern comment comment php_comment '.[^TFX\n\?]*'
+syntax_pattern comment comment php_comment '.[^TFX\r\n\?]*'
 syntax_pattern php c_comment php_comment '/\*'
 syntax_pattern c_comment normal php_tag '\?>'
 syntax_pattern c_comment php php_comment '\*/'

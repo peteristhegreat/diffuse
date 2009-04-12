@@ -1,5 +1,5 @@
 # Perl syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax Perl normal text
 syntax_files Perl '\.p[hlm]$'
 
@@ -7,9 +7,9 @@ syntax_files Perl '\.p[hlm]$'
 syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern expr expr text '[ \t\r\n]+'
 syntax_pattern normal comment perl_comment '#'
-syntax_pattern comment normal perl_comment '\n'
+syntax_pattern comment normal perl_comment '(\r\n|\r|\n)$'
 syntax_pattern comment comment perl_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern comment comment perl_comment '.[^TFX\n]*'
+syntax_pattern comment comment perl_comment '.[^TFX\r\n]*'
 syntax_pattern normal doc perl_comment '^=(head1|head2|item|over|back|pod|for|begin|end)\b'
 syntax_pattern doc normal perl_comment '^=cut\b'
 syntax_pattern doc doc perl_fixme '\b(TODO|FIXME|XXX)\b'

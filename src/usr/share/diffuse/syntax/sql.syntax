@@ -1,5 +1,5 @@
 # SQL syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax SQL normal text
 syntax_files SQL '\.sql$'
 
@@ -9,8 +9,8 @@ syntax_pattern normal normal text '[ \t\r\n]+'
 # C++ style comments
 syntax_pattern normal cpp_comment sql_comment '(#|--)'
 syntax_pattern cpp_comment cpp_comment sql_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern cpp_comment normal sql_comment '\n'
-syntax_pattern cpp_comment cpp_comment sql_comment '.[^TFX\n]*'
+syntax_pattern cpp_comment normal sql_comment '(\r\n|\r|\n)$'
+syntax_pattern cpp_comment cpp_comment sql_comment '.[^TFX\r\n]*'
 
 # C style comments
 syntax_pattern normal comment sql_comment '/\*'

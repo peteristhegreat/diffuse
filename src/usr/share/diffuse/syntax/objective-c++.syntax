@@ -5,16 +5,16 @@ syntax_files Objective-C++ '\.mm?$'
 
 # preprocessor
 syntax_pattern normal cpp objc_cppkeyword '^[ \t]*#[ \t]*(define|elif|else|endif|error|if|ifdef|ifndef|import|include|line|pragma|undef|warning)\b'
-syntax_pattern cpp normal objc_cppkeyword '\n'
+syntax_pattern cpp normal objc_cppkeyword '(\r\n|\r|\n)$'
 syntax_pattern normal normal text '[ \t\r\n]+'
 
 # C++ style comments
 syntax_pattern normal cpp_comment objc_comment '//'
 syntax_pattern cpp cpp_comment objc_comment '//'
-syntax_pattern cpp_comment normal objc_comment '\n'
-syntax_pattern cpp_comment cpp_comment objc_comment '\\\r?\n'
+syntax_pattern cpp_comment normal objc_comment '(\r\n|\r|\n)$'
+syntax_pattern cpp_comment cpp_comment objc_comment '\\(\r\n|\r|\n)$'
 syntax_pattern cpp_comment cpp_comment objc_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern cpp_comment cpp_comment objc_comment '.[^\\TFX\n]*'
+syntax_pattern cpp_comment cpp_comment objc_comment '.[^\\TFX\r\n]*'
 
 # C style comments
 syntax_pattern normal comment objc_comment '/\*'
@@ -28,8 +28,8 @@ syntax_pattern comment_cpp comment_cpp objc_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern comment_cpp comment_cpp objc_comment '.[^\*TFX]*'
 
 # preprocessor args
-syntax_pattern cpp cpp objc_cpp '\\\r?\n'
-syntax_pattern cpp cpp objc_cpp '.[^\\/\n]*'
+syntax_pattern cpp cpp objc_cpp '\\(\r\n|\r|\n)$'
+syntax_pattern cpp cpp objc_cpp '.[^\\/\r\n]*'
 
 # char
 syntax_pattern normal char objc_string "L?'"

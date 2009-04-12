@@ -1,5 +1,5 @@
 # Bourne Shell syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax 'Bourne Shell' normal text
 syntax_files 'Bourne Shell' '^(.*\.sh|\.bashrc)$'
 
@@ -15,9 +15,9 @@ syntax_pattern declaration2 normal text ''
 
 # whitespace/comments
 syntax_pattern normal comment bash_comment '#'
-syntax_pattern comment normal bash_comment '\n'
+syntax_pattern comment normal bash_comment '(\r\n|\r|\n)$'
 syntax_pattern comment comment bash_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern comment comment bash_comment '.[^TFX\n]*'
+syntax_pattern comment comment bash_comment '.[^TFX\r\n]*'
 syntax_pattern normal expr bash_comment ''
 syntax_pattern expr normal text '[ \t\r\n]+'
 

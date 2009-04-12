@@ -1,13 +1,13 @@
 # Gettext syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax Gettext normal text
 syntax_files Gettext '\.pot?$'
 
 # C++ style comments
 syntax_pattern normal comment gettext_comment '#'
-syntax_pattern comment normal gettext_comment '\n'
+syntax_pattern comment normal gettext_comment '(\r\n|\r|\n)$'
 syntax_pattern comment comment gettext_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern comment comment gettext_comment '.[^\\TFX\n]*'
+syntax_pattern comment comment gettext_comment '.[^\\TFX\r\n]*'
 
 # string
 syntax_pattern normal string gettext_string '"'

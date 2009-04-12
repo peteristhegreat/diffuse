@@ -1,5 +1,5 @@
 # JavaScript syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax JavaScript normal text
 syntax_files JavaScript '\.js$'
 
@@ -10,10 +10,10 @@ syntax_pattern expr expr text '[ \t\r\n]+'
 # C++ style comments
 syntax_pattern normal cpp_comment javascript_comment '//'
 syntax_pattern expr cpp_comment javascript_comment '//'
-syntax_pattern cpp_comment normal javascript_comment '\n'
-syntax_pattern cpp_comment cpp_comment javascript_comment '\\\r?\n'
+syntax_pattern cpp_comment normal javascript_comment '(\r\n|\r|\n)$'
+syntax_pattern cpp_comment cpp_comment javascript_comment '\\(\r\n|\r|\n)$'
 syntax_pattern cpp_comment cpp_comment javascript_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern cpp_comment cpp_comment javascript_comment '.[^\\TFX\n]*'
+syntax_pattern cpp_comment cpp_comment javascript_comment '.[^\\TFX\r\n]*'
 
 # C style comments
 syntax_pattern normal comment javascript_comment '/\*'

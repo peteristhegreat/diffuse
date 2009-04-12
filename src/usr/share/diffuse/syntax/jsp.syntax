@@ -1,5 +1,5 @@
 # JSP syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax JSP normal text
 syntax_files JSP '\.jsp$'
 
@@ -12,10 +12,10 @@ syntax_pattern jsp jsp text '[ \t\r\n]+'
 # C++ style comments
 syntax_pattern jsp cpp_comment jsp_comment '//'
 syntax_pattern cpp_comment normal jsp_tag '%>'
-syntax_pattern cpp_comment jsp jsp_comment '\n'
-syntax_pattern cpp_comment cpp_comment jsp_comment '\\\r?\n'
+syntax_pattern cpp_comment jsp jsp_comment '(\r\n|\r|\n)$'
+syntax_pattern cpp_comment cpp_comment jsp_comment '\\(\r\n|\r|\n)$'
 syntax_pattern cpp_comment cpp_comment jsp_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern cpp_comment cpp_comment jsp_comment '.[^\\TFX\n%]*'
+syntax_pattern cpp_comment cpp_comment jsp_comment '.[^\\TFX\r\n%]*'
 
 # C style comments
 syntax_pattern jsp comment jsp_comment '/\*'

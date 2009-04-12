@@ -1,5 +1,5 @@
 # HTML syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax HTML normal text
 syntax_files HTML '\.html$'
 
@@ -25,10 +25,10 @@ syntax_pattern script_expr script_expr text '[ \t\r\n]+'
 syntax_pattern script script_cpp_comment html_script_comment '//'
 syntax_pattern script_cpp_comment normal html_script '</script>'
 syntax_pattern script_expr script_cpp_comment html_script_comment '//'
-syntax_pattern script_cpp_comment script html_script_comment '\n'
-syntax_pattern script_cpp_comment script_cpp_comment html_script_comment '\\\r?\n'
+syntax_pattern script_cpp_comment script html_script_comment '(\r\n|\r|\n)$'
+syntax_pattern script_cpp_comment script_cpp_comment html_script_comment '\\(\r\n|\r|\n)$'
 syntax_pattern script_cpp_comment script_cpp_comment html_script_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern script_cpp_comment script_cpp_comment html_script_comment '.[^\\TFX\n<]*'
+syntax_pattern script_cpp_comment script_cpp_comment html_script_comment '.[^\\TFX\r\n<]*'
 
 # C style comments
 syntax_pattern script script_comment html_script_comment '/\*'

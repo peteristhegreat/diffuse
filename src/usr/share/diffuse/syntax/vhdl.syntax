@@ -1,5 +1,5 @@
 # VHDL syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax VHDL normal text
 syntax_files VHDL '\.vhdl$'
 
@@ -8,9 +8,9 @@ syntax_pattern normal normal text '[ \t\r\n]+'
 
 # comments
 syntax_pattern normal comment vhdl_comment '--'
-syntax_pattern comment normal vhdl_comment '\n'
+syntax_pattern comment normal vhdl_comment '(\r\n|\r|\n)$'
 syntax_pattern comment comment vhdl_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern comment comment vhdl_comment '.[^\-TFX\n]*'
+syntax_pattern comment comment vhdl_comment '.[^\-TFX\r\n]*'
 
 # char
 syntax_pattern normal normal vhdl_string "'.'"

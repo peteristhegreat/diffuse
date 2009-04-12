@@ -1,19 +1,19 @@
 # Verilog syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax Verilog normal text
 syntax_files Verilog '\.v$'
 
 # directives
 syntax_pattern normal cpp verilog_cppkeyword '`[0-9a-z_]+'
-syntax_pattern cpp normal verilog_cppkeyword '\n'
+syntax_pattern cpp normal verilog_cppkeyword '(\r\n|\r|\n)$'
 syntax_pattern normal normal text '[ \t\r\n]+'
 
 # C++ style comments
 syntax_pattern normal cpp_comment verilog_comment '//'
 syntax_pattern cpp cpp_comment verilog_comment '//'
-syntax_pattern cpp_comment normal verilog_comment '\n'
+syntax_pattern cpp_comment normal verilog_comment '(\r\n|\r|\n)$'
 syntax_pattern cpp_comment cpp_comment verilog_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern cpp_comment cpp_comment verilog_comment '.[^TFX\n]*'
+syntax_pattern cpp_comment cpp_comment verilog_comment '.[^TFX\r\n]*'
 
 # C style comments
 syntax_pattern normal comment verilog_comment '/\*'
@@ -27,7 +27,7 @@ syntax_pattern comment_cpp comment_cpp verilog_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern comment_cpp comment_cpp verilog_comment '.[^\*TFX]*'
 
 # preprocessor args
-syntax_pattern cpp cpp verilog_cpp '.[^/\n]*'
+syntax_pattern cpp cpp verilog_cpp '.[^/\r\n]*'
 
 # string
 syntax_pattern normal string verilog_string '"'

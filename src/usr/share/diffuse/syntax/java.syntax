@@ -1,5 +1,5 @@
 # Java syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax Java normal text
 syntax_files Java '\.java$'
 
@@ -8,10 +8,10 @@ syntax_pattern normal normal text '[ \t\r\n]+'
 
 # C++ style comments
 syntax_pattern normal cpp_comment java_comment '//'
-syntax_pattern cpp_comment normal java_comment '\n'
-syntax_pattern cpp_comment cpp_comment java_comment '\\\r?\n'
+syntax_pattern cpp_comment normal java_comment '(\r\n|\r|\n)$'
+syntax_pattern cpp_comment cpp_comment java_comment '\\(\r\n|\r|\n)$'
 syntax_pattern cpp_comment cpp_comment java_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern cpp_comment cpp_comment java_comment '.[^\\TFX\n]*'
+syntax_pattern cpp_comment cpp_comment java_comment '.[^\\TFX\r\n]*'
 
 # C style comments
 syntax_pattern normal comment java_comment '/\*'

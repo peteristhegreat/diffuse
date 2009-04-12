@@ -13,16 +13,16 @@ syntax_pattern op op octave_punctuation "'+"
 syntax_pattern op normal octave_punctuation ''
 
 # block comments
-syntax_pattern normal block_comment octave_comment '^%\{\r?\n'
-syntax_pattern block_comment normal octave_comment '^%\}\r?\n'
+syntax_pattern normal block_comment octave_comment '^%\{(\r\n|\r|\n)$'
+syntax_pattern block_comment normal octave_comment '^%\}(\r\n|\r|\n)$'
 syntax_pattern block_comment block_comment octave_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern block_comment block_comment octave_comment '.[^TFX]*'
 
 # comments
 syntax_pattern normal comment octave_comment '[#%]'
-syntax_pattern comment normal octave_comment '\n'
+syntax_pattern comment normal octave_comment '(\r\n|\r|\n)$'
 syntax_pattern comment comment octave_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern comment comment octave_comment '.[^TFX\n]*'
+syntax_pattern comment comment octave_comment '.[^TFX\r\n]*'
 
 # char
 syntax_pattern normal char octave_string "'"

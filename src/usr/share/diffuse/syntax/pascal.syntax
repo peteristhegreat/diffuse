@@ -1,5 +1,5 @@
 # Pascal syntax file for Diffuse
-# Copyright (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax Pascal normal text
 syntax_files Pascal '\.pas$'
 
@@ -25,9 +25,9 @@ syntax_pattern new_comment new_comment pascal_comment '.[^\}TFX]*'
 
 # delphi style comments
 syntax_pattern normal delphi_comment pascal_comment '//'
-syntax_pattern delphi_comment normal pascal_comment '\n'
+syntax_pattern delphi_comment normal pascal_comment '(\r\n|\r|\n)$'
 syntax_pattern delphi_comment delphi_comment pascal_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern delphi_comment delphi_comment pascal_comment '.[^TFX\n]*'
+syntax_pattern delphi_comment delphi_comment pascal_comment '.[^TFX\r\n]*'
 
 # string
 syntax_pattern normal string pascal_string "'"

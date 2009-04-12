@@ -1,13 +1,13 @@
 # INI syntax file for Diffuse
-# (C) 2008 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax INI normal text
 syntax_files INI '\.(cfg|conf|desktop|ini|properties|url)$'
 
 # comments
 syntax_pattern normal comment ini_comment '^[#;]'
-syntax_pattern comment normal ini_comment '\n'
+syntax_pattern comment normal ini_comment '(\r\n|\r|\n)$'
 syntax_pattern comment comment ini_fixme '\b(TODO|FIXME|XXX)\b'
-syntax_pattern comment comment ini_comment '.[^TFX\n]*'
+syntax_pattern comment comment ini_comment '.[^TFX\r\n]*'
 
 # variable-value
 syntax_pattern normal normal ini_section '\[.*\]' ignorecase
