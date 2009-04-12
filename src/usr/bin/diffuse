@@ -70,6 +70,7 @@ General Options:
 Display Options:
   ( -b | --ignore-space-change )   Ignore changes to white space
   ( -B | --ignore-blank-lines )    Ignore changes in blank lines
+  ( -E | --ignore-end-of-line )    Ignore end of line differences
   ( -i | --ignore-case )           Ignore case differences
   ( -w | --ignore-all-space )      Ignore white space differences
 
@@ -197,6 +198,23 @@ class SyntaxParser:
             start = end
         return state_name, blocks
 
+# also recognise old Mac OS line endings
+def readlines(fd):
+    ss = []
+    for s in fd.readlines():
+        i, n = 0, len(s)
+        while i < n:
+            j = s.find('\r', i)
+            if j < 0:
+                ss.append(s[i:])
+                break
+            j += 1
+            if j < n and s[j] == '\n':
+                j += 1
+            ss.append(s[i:j])
+            i = j
+    return ss
+
 # This class to hold all customisable behaviour not exposed in the preferences
 # dialogue: hotkey assignment, colours, syntax highlighting, etc.
 # Syntax highlighting is implemented in supporting '*.syntax' files normally
@@ -234,6 +252,7 @@ class Resources:
         set_binding('menu', 'decrease_indenting', 'Shift+Ctrl+less')
         set_binding('menu', 'increase_indenting', 'Shift+Ctrl+greater')
         set_binding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
+        set_binding('menu', 'convert_to_mac', 'Shift+Ctrl+C')
         set_binding('menu', 'convert_to_unix', 'Ctrl+e')
         set_binding('menu', 'realign_all', 'Ctrl+l')
         set_binding('menu', 'isolate', 'Ctrl+i')
@@ -506,7 +525,7 @@ class Resources:
             self.resource_files[file_name] = None
             try:
                 f = open(file_name, 'r')
-                ss = f.readlines()
+                ss = readlines(f)
                 f.close()
             except IOError:
                 logError(_('Error reading "%s".') % (file_name, ))
@@ -690,10 +709,11 @@ class Preferences:
             [ 'List',
               [ 'Font', 'display_font', font, _('Font') ],
               [ 'Integer', 'display_tab_width', 8, _('Tab width'), 1, 1024 ],
-              [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore white space') ],
+              [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore white space differences') ],
               [ 'Boolean', 'display_ignore_whitespace_changes', False, _('Ignore changes to white space') ],
               [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore blank lines') ],
               [ 'Boolean', 'display_ignore_case', False, _('Ignore case') ],
+              [ 'Boolean', 'display_ignore_endofline', False, _('Ignore end of line differences') ],
               [ 'Boolean', 'display_hide_endofline', True, _('Hide end of line characters') ]
             ],
             _('Alignment'),
@@ -701,6 +721,7 @@ class Preferences:
               [ 'Boolean', 'align_ignore_whitespace', True, _('Ignore white space') ],
               [ 'Boolean', 'align_ignore_whitespace_changes', False, _('Ignore changes to white space') ],
               [ 'Boolean', 'align_ignore_blanklines', False, _('Ignore blank lines') ],
+              [ 'Boolean', 'align_ignore_endofline', True, _('Ignore end of line characters') ],
               [ 'Boolean', 'align_ignore_case', False, _('Ignore case') ]
             ],
             _('Editor'),
@@ -764,7 +785,7 @@ class Preferences:
         if os.path.isfile(self.path):
             try:
                 f = open(self.path, 'r')
-                ss = f.readlines()
+                ss = readlines(f)
                 f.close()
                 for j, s in enumerate(ss):
                     try:
@@ -1034,64 +1055,77 @@ def appendButtons(box, size, specs):
             box.pack_start(separator, False, False, 5)
             separator.show()
 
+# masks used to indicate the presence of particular line endings
+DOS_FORMAT = 1
+MAC_FORMAT = 2
+UNIX_FORMAT = 4
+
 # True if the string ends with '\r\n'
 def has_dos_line_ending(s):
-    return s is not None and s.endswith('\r\n')
+    return s.endswith('\r\n')
+
+# True if the string ends with '\r'
+def has_mac_line_ending(s):
+    return s.endswith('\r')
 
 # True if the string ends with '\n' but not '\r\n'
 def has_unix_line_ending(s):
-    return s is not None and s.endswith('\n') and not s.endswith('\r\n')
-
-# masks used to indicate the presence of DOS line endings and Unix line endings
-# 0 indicates no line endings, while 3 indicates mixed line endings
-DOS_FORMAT = 1
-UNIX_FORMAT = 2
+    return s.endswith('\n') and not s.endswith('\r\n')
 
 # returns the format mask for a list of strings
 def getFormat(ss):
     flags = 0
     for s in ss:
-        if has_dos_line_ending(s):
-            flags |= DOS_FORMAT
-        elif has_unix_line_ending(s):
-            flags |= UNIX_FORMAT
+        if s is not None:
+            if has_dos_line_ending(s):
+                flags |= DOS_FORMAT
+            elif has_mac_line_ending(s):
+                flags |= MAC_FORMAT
+            elif has_unix_line_ending(s):
+                flags |= UNIX_FORMAT
     return flags
 
 # returns the number of characters in the string excluding any line ending
 # characters
-def len_minus_line_ending(format, s):
+def len_minus_line_ending(s):
     if s is None:
         return 0
     n = len(s)
-    if n > 0 and s[-1] == '\n':
-        if format == DOS_FORMAT and n > 1 and s[-2] == '\r':
-            n -= 2
-        else:
-            n -= 1
+    if s.endswith('\r\n'):
+        n -= 2
+    elif s.endswith('\r') or s.endswith('\n'):
+        n -= 1
     return n
 
 # returns the string without the line ending characters
-def strip_line_ending(format, s):
+def strip_eol(s):
     if s is not None:
-        return s[:len_minus_line_ending(format, s)]
+        return s[:len_minus_line_ending(s)]
 
-# the following are convenience methods to change the line ending of a string
-def convert_to_dos(s):
-    if has_unix_line_ending(s):
-        s = s[:-1] + '\r\n'
-    return s
+# returns the list of strings without line ending characters
+def strip_eols(ss):
+    return [ strip_eol(s) for s in ss ]
 
-def convert_to_unix(s):
-    if has_dos_line_ending(s):
-        s = s[:-2] + '\n'
-    return s
-
+# convenience method to change the line ending of a string
 def convert_to_format(s, format):
-   if format == DOS_FORMAT:
-       s = convert_to_dos(s)
-   elif format == UNIX_FORMAT:
-       s = convert_to_unix(s)
-   return s
+    if s is not None and format != 0:
+        old_format = getFormat([ s ])
+        if old_format != 0 and (old_format & format) == 0:
+            s = strip_eol(s)
+            # prefer the host line ending style
+            if (format & DOS_FORMAT) and os.linesep == '\r\n':
+                s += os.linesep
+            elif (format & MAC_FORMAT) and os.linesep == '\r':
+                s += os.linesep
+            elif (format & UNIX_FORMAT) and os.linesep == '\n':
+                s += os.linesep
+            elif format & UNIX_FORMAT:
+                s += '\n'
+            elif format & DOS_FORMAT:
+                s += '\r\n'
+            elif format & MAC_FORMAT:
+                s += '\r'
+    return s
 
 # returns the Windows drive or share from a from an absolute path
 def drive_from_path(s):
@@ -1147,22 +1181,11 @@ def popenReadLines(dn, cmd, prefs, bash_pref):
     proc.stderr.close()
     fd = proc.stdout
     # read the command's output
-    ss = fd.readlines()
+    ss = readlines(fd)
     fd.close()
     if proc.wait() != 0:
         raise IOError('Command failed.')
     return ss
-
-# returns the list of strings without EOL characters
-def strip_eol(ss):
-    r = []
-    for s in ss:
-        if s.endswith('\r\n'):
-            s = s[:-2]
-        elif s.endswith('\n'):
-            s = s[:-1]
-        r.append(s)
-    return r
 
 class VCSs:
     # Bazaar support
@@ -1187,7 +1210,7 @@ class VCSs:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'bzr_cygwin'))
             removed, modified, added, renamed = {}, {}, {}, {}
-            for s in strip_eol(popenReadLines(self.root, args, prefs, 'bzr_bash')):
+            for s in strip_eols(popenReadLines(self.root, args, prefs, 'bzr_bash')):
                 if len(s) > 4:
                     k = s[4:]
                     if s[1] == 'D':
@@ -1254,7 +1277,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'cvs_cygwin'))
-            for s in strip_eol(popenReadLines(self.root, args, prefs, 'cvs_bash')):
+            for s in strip_eols(popenReadLines(self.root, args, prefs, 'cvs_bash')):
                 if len(s) > 2 and s[0] in 'ACMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
                     if not isabs:
@@ -1290,7 +1313,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'darcs_cygwin'))
-            for s in strip_eol(popenReadLines(self.root, args, prefs, 'darcs_bash')):
+            for s in strip_eols(popenReadLines(self.root, args, prefs, 'darcs_bash')):
                 p = s.split(' ')
                 if len(p) >= 2 and s[0] in 'AMR':
                     k = prefs.convertToNativePath(p[1])
@@ -1327,7 +1350,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(os.path.join(os.curdir, relpath(self.root, os.path.abspath(name))).replace(os.sep, '/'))
-            ss = strip_eol(popenReadLines(self.root, args, prefs, 'git_bash'))
+            ss = strip_eols(popenReadLines(self.root, args, prefs, 'git_bash'))
             i = 0
             while i < len(ss):
                 s = ss[i]
@@ -1394,7 +1417,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
-            for s in strip_eol(popenReadLines(self.root, args, prefs, 'hg_bash')):
+            for s in strip_eols(popenReadLines(self.root, args, prefs, 'hg_bash')):
                 if len(s) > 2 and s[0] in 'ADM':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
                     if not isabs:
@@ -1430,7 +1453,7 @@ class VCSs:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'mtn_cygwin'))
             removed, modified, added, renamed, old_name = {}, {}, {}, {}, None
-            for s in strip_eol(popenReadLines(self.root, args, prefs, 'mtn_bash')):
+            for s in strip_eols(popenReadLines(self.root, args, prefs, 'mtn_bash')):
                 if len(s) > 11:
                     k = os.path.join(self.root, prefs.convertToNativePath(s[11:]))
                     if not isabs:
@@ -1490,7 +1513,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'svn_cygwin'))
-            for s in strip_eol(popenReadLines(self.root, args, prefs, 'svn_bash')):
+            for s in strip_eols(popenReadLines(self.root, args, prefs, 'svn_bash')):
                 if len(s) > 7 and s[0] in 'ACDMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[7:]))
                     if not isabs:
@@ -1524,7 +1547,7 @@ class VCSs:
             try:
                 # find working copies by parsing the config file
                 f = open(self.svkconfig, 'r')
-                ss = strip_eol(f.readlines())
+                ss = strip_eols(readlines(f))
                 f.close()
                 projs, sep = {}, os.sep
                 # find the separator character
@@ -1593,7 +1616,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'svk_cygwin'))
-            for s in strip_eol(popenReadLines(self.root, args, prefs, 'svk_bash')):
+            for s in strip_eols(popenReadLines(self.root, args, prefs, 'svk_bash')):
                 if len(s) > 4 and s[0] in 'ACDMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[4:]))
                     if not isabs:
@@ -2116,7 +2139,7 @@ class FileDiffViewer(gtk.Table):
     # characters when tabs and other special characters are present
     def getStringColumnWidth(self, f, s):
         if self.prefs.getBool('display_hide_endofline'):
-            s = strip_line_ending(self.panes[f].format, s)
+            s = strip_eol(s)
         col = 0
         tab_width = self.prefs.getInt('display_tab_width')
         for c in s:
@@ -2165,7 +2188,7 @@ class FileDiffViewer(gtk.Table):
     # display of EOL characters
     def stringWidth(self, f, s):
         if self.prefs.getBool('display_hide_endofline'):
-            s = strip_line_ending(self.panes[f].format, s)
+            s = strip_eol(s)
         w, width = 0, self.characterWidth
         for c in s:
             w += width(w, c)
@@ -2175,7 +2198,7 @@ class FileDiffViewer(gtk.Table):
     # each character
     def expand(self, f, s):
         if self.prefs.getBool('display_hide_endofline'):
-            s = strip_line_ending(self.panes[f].format, s)
+            s = strip_eol(s)
         tab_width = self.prefs.getInt('display_tab_width')
         col = 0
         result = []
@@ -2661,6 +2684,8 @@ class FileDiffViewer(gtk.Table):
             return ''
         # hashes for non-null lines should start with '+' to distinguish them
         # from blank lines
+        if self.prefs.getBool('align_ignore_endofline'):
+            text = strip_eol(text)
         if self.prefs.getBool('align_ignore_blanklines') and isBlank(text):
             # consider all lines containing only white space as the same
             return '+'
@@ -3215,7 +3240,7 @@ class FileDiffViewer(gtk.Table):
             x, y = -1, 0
         i = min(y // self.font_height, len(self.panes[f].lines))
         if self.mode == CHAR_MODE and f == self.current_pane:
-            text = strip_line_ending(self.panes[f].format, self.getLineText(f, i))
+            text = strip_eol(self.getLineText(f, i))
             j = self._getPickedCharacter(f, text, x, True)
             self.setCurrentChar(i, j, extend)
         else:
@@ -3241,7 +3266,7 @@ class FileDiffViewer(gtk.Table):
                     self.button_press(f, x, y, False)
                 elif self.mode == CHAR_MODE and self.current_pane == f:
                     # select word
-                    text = strip_line_ending(self.panes[f].format, self.getLineText(f, i))
+                    text = strip_eol(self.getLineText(f, i))
                     if text is not None:
                         n = len(text)
                         j = self._getPickedCharacter(f, text, x, False)
@@ -3323,6 +3348,9 @@ class FileDiffViewer(gtk.Table):
                 s = s1
             else:
                 s = s2
+            if self.prefs.getBool('display_ignore_endofline'):
+                s = strip_eol(s)
+
             s1 = nullToEmpty(self.getCompareString(f, i))
             s2 = nullToEmpty(self.getCompareString(f + 1, i))
 
@@ -3391,6 +3419,8 @@ class FileDiffViewer(gtk.Table):
         # compute a new hash and cache it
         s = line.getText()
         if s is not None:
+            if self.prefs.getBool('display_ignore_endofline'):
+                s = strip_eol(s)
             if self.prefs.getBool('display_ignore_blanklines') and isBlank(s):
                 return None
             if self.prefs.getBool('display_ignore_whitespace'):
@@ -3488,14 +3518,14 @@ class FileDiffViewer(gtk.Table):
                         # compare with neighbour to the left
                         if self.getCompareString(f - 1, i) != comptext:
                             flags |= 1
-                        if text is not None:
-                            temp_diff = mergeRanges(temp_diff, self.getDiffRanges(f - 1, i, 1, 1))
+                            if text is not None:
+                                temp_diff = mergeRanges(temp_diff, self.getDiffRanges(f - 1, i, 1, 1))
                     if f + 1 < len(self.panes):
                         # compare with neighbour to the right
                         if self.getCompareString(f + 1, i) != comptext:
                             flags |= 2
-                        if text is not None:
-                            temp_diff = mergeRanges(temp_diff, self.getDiffRanges(f, i, 0, 2))
+                            if text is not None:
+                                temp_diff = mergeRanges(temp_diff, self.getDiffRanges(f, i, 0, 2))
 
                     chardiff = []
                     if text is not None:
@@ -3851,11 +3881,7 @@ class FileDiffViewer(gtk.Table):
     # returns the maximum valid offset for a cursor position
     # cursors cannot be moved to the right of line ending characters
     def getMaxCharPosition(self, i):
-        f = self.current_pane
-        text = self.getLineText(f, i)
-        if text is None:
-           return 0
-        return len_minus_line_ending(self.panes[f].format, text)
+        return len_minus_line_ending(self.getLineText(self.current_pane, i))
 
     # 'enter_align_mode' keybinding action
     def _line_mode_enter_align_mode(self):
@@ -4007,7 +4033,7 @@ class FileDiffViewer(gtk.Table):
                     # move the cursor to column 'col' if possible
                     s = self.getLineText(f, i)
                     if s is not None:
-                        s = strip_line_ending(self.panes[f].format, s)
+                        s = strip_eol(s)
                         idx = 0
                         for c in s:
                             w = self.characterWidth(idx, c)
@@ -4325,7 +4351,7 @@ class FileDiffViewer(gtk.Table):
             self.recordEditMode()
             for i in range(start, end):
                 text = self.getLineText(f, i)
-                if text is not None and len(strip_line_ending(self.panes[f].format, text)) > 0:
+                if text is not None and len_minus_line_ending(text) > 0:
                     # count spacing before the first non-whitespace character
                     j, w = 0, 0
                     while j < len(text) and text[j] in ' \t':
@@ -4357,37 +4383,32 @@ class FileDiffViewer(gtk.Table):
     def increase_indenting_cb(self, widget, data):
         self._adjust_indenting(1)
 
-    # callback for convert to DOS format menu item
-    def convert_to_dos_cb(self, widget, data):
+    def convert_format(self, format):
         self.setLineMode()
         self.openUndoBlock()
         self.recordEditMode()
         f = self.current_pane
         for i in range(len(self.panes[f].lines)):
             text = self.getLineText(f, i)
-            s = convert_to_dos(text)
+            s = convert_to_format(text, format)
             # only modify lines that actually change
             if s != text:
                 self.updateLineText(f, i, True, s)
-        self.setFormat(f, DOS_FORMAT)
+        self.setFormat(f, format)
         self.recordEditMode()
         self.closeUndoBlock()
 
+    # callback for convert to DOS format menu item
+    def convert_to_dos_cb(self, widget, data):
+        self.convert_format(DOS_FORMAT)
+
+    # callback for convert to Mac format menu item
+    def convert_to_mac_cb(self, widget, data):
+        self.convert_format(MAC_FORMAT)
+
     # callback for convert to Unix format menu item
     def convert_to_unix_cb(self, widget, data):
-        self.setLineMode()
-        self.openUndoBlock()
-        self.recordEditMode()
-        f = self.current_pane
-        for i in range(len(self.panes[f].lines)):
-            text = self.getLineText(f, i)
-            s = convert_to_unix(text)
-            # only modify lines that actually change
-            if s != text:
-                self.updateLineText(f, i, True, s)
-        self.setFormat(f, UNIX_FORMAT)
-        self.recordEditMode()
-        self.closeUndoBlock()
+        self.convert_format(UNIX_FORMAT)
 
     # recompute viewport size and redraw as the display preferences may have
     # changed
@@ -5163,7 +5184,7 @@ class Diffuse(gtk.Window):
                     if rev is None:
                         # load the contents of a plain file
                         fd = open(name, 'rb')
-                        ss = fd.readlines()
+                        ss = readlines(fd)
                         fd.close()
                         # get the file's modification times so we can detect changes
                         stat = os.stat(name)
@@ -5493,6 +5514,7 @@ class Diffuse(gtk.Window):
                      [_('_Increase Indenting'), self.increase_indenting_cb, None, gtk.STOCK_INDENT, 'increase_indenting'],
                      [],
                      [_('Convert to _DOS Format'), self.convert_to_dos_cb, None, None, 'convert_to_dos'],
+                     [_('Convert to _Mac Format'), self.convert_to_mac_cb, None, None, 'convert_to_mac'],
                      [_('Convert to Uni_x Format'), self.convert_to_unix_cb, None, None, 'convert_to_unix'],
                      [],
                      [_('Pr_eferences...'), self.preferences_cb, None, gtk.STOCK_PREFERENCES, 'preferences'] ] ])
@@ -5600,7 +5622,7 @@ class Diffuse(gtk.Window):
         if os.path.isfile(configpath):
             try:
                 f = open(configpath, 'r')
-                ss = f.readlines()
+                ss = readlines(f)
                 f.close()
                 for j, s in enumerate(ss):
                     try:
@@ -5970,6 +5992,10 @@ class Diffuse(gtk.Window):
         self.getCurrentViewer().convert_to_dos_cb(widget, data)
 
     # callback for the convert to Unix menu item
+    def convert_to_mac_cb(self, widget, data):
+        self.getCurrentViewer().convert_to_mac_cb(widget, data)
+
+    # callback for the convert to Unix menu item
     def convert_to_unix_cb(self, widget, data):
         self.getCurrentViewer().convert_to_unix_cb(widget, data)
 
@@ -6212,6 +6238,10 @@ if __name__ == '__main__':
             elif arg in [ '-B', '--ignore-blank-lines' ]:
                 diff.prefs.setBool('display_ignore_blanklines', True)
                 diff.prefs.setBool('align_ignore_blanklines', True)
+                diff.preferences_updated()
+            elif arg in [ '-E', '--ignore-end-of-line' ]:
+                diff.prefs.setBool('display_ignore_endofline', True)
+                diff.prefs.setBool('align_ignore_endofline', True)
                 diff.preferences_updated()
             elif arg in [ '-i', '--ignore-case' ]:
                 diff.prefs.setBool('display_ignore_case', True)

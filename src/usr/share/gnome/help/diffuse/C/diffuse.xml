@@ -253,6 +253,15 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>-E</userinput>, <userinput>--ignore-end-of-line</userinput></term>
+            <listitem>
+              <para>
+                Ignore end of line differences.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>-i</userinput>, <userinput>--ignore-case</userinput></term>
             <listitem>
               <para>
@@ -670,6 +679,14 @@
             <listitem>
               <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert to DOS Format</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+E</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>convert_to_mac</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert to Mac Format</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+C</para>
             </listitem>
           </varlistentry>
 

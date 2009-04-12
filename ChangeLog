@@ -8,6 +8,8 @@
 - auto indent
 - 'Open File In New Tab...' and 'Open Modified Files...' menu items
 - 'Save All' menu item
+- mac-style line ending support
+- new end of line display behaviour
 - improved organisation of menu items
 - button bar no longer grabs keyboard focus
 - removed dependence on urllib module
