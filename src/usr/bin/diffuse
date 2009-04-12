@@ -210,7 +210,8 @@ class Resources:
         self.keybindings_lookup = {}
         set_binding = self.setKeyBinding
         set_binding('menu', 'open_file', 'Ctrl+o')
-        set_binding('menu', 'open_file_in_new_tab', 'Shift+Ctrl+O')
+        set_binding('menu', 'open_file_in_new_tab', 'Ctrl+t')
+        set_binding('menu', 'open_modified_files', 'Shift+Ctrl+O')
         set_binding('menu', 'reload_file', 'Shift+Ctrl+R')
         set_binding('menu', 'save_file', 'Ctrl+s')
         set_binding('menu', 'save_file_as', 'Shift+Ctrl+A')
@@ -234,7 +235,6 @@ class Resources:
         set_binding('menu', 'increase_indenting', 'Shift+Ctrl+greater')
         set_binding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
         set_binding('menu', 'convert_to_unix', 'Ctrl+e')
-        set_binding('menu', 'preferences', 'Ctrl+p')
         set_binding('menu', 'realign_all', 'Ctrl+l')
         set_binding('menu', 'isolate', 'Ctrl+i')
         set_binding('menu', 'first_difference', 'Shift+Ctrl+Up')
@@ -689,7 +689,7 @@ class Preferences:
             _('Display'),
             [ 'List',
               [ 'Font', 'display_font', font, _('Font') ],
-              [ 'Integer', 'display_tab_width', 8, _('Tab width'), 1, 128 ],
+              [ 'Integer', 'display_tab_width', 8, _('Tab width'), 1, 1024 ],
               [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore white space') ],
               [ 'Boolean', 'display_ignore_whitespace_changes', False, _('Ignore changes to white space') ],
               [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore blank lines') ],
@@ -705,7 +705,7 @@ class Preferences:
             ],
             _('Editor'),
             [ 'List',
-              [ 'Integer', 'editor_soft_tab_width', 8, _('Soft tab width'), 1, 128 ],
+              [ 'Integer', 'editor_soft_tab_width', 8, _('Soft tab width'), 1, 1024 ],
               [ 'Boolean', 'editor_expand_tabs', False, _('Expand tabs to spaces') ],
               [ 'Boolean', 'editor_auto_indent', False, _('Auto indent') ]
             ],
@@ -1114,10 +1114,6 @@ def relpath(a, b):
     r.extend(c2[i:])
     return os.sep.join(r)
 
-# constructs a relative path from 'a' to join(b1, b2).
-def relpath2(a, b1, b2):
-    return relpath(a, os.path.abspath(os.path.join(b1, b2)))
-
 # helper function prevent files from being confused with command line options
 # by prepending './' to the basename
 def safeRelativePath(abspath1, name, prefs, cygwin_pref):
@@ -1185,9 +1181,10 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, names):
             result = []
-            pwd = os.path.abspath(os.curdir)
+            pwd, isabs = os.path.abspath(os.curdir), False
             args = [ prefs.getString('bzr_bin'), 'status', '-SV' ]
             for name in names:
+                isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'bzr_cygwin'))
             removed, modified, added, renamed = {}, {}, {}, {}
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'bzr_bash')):
@@ -1196,18 +1193,24 @@ class VCSs:
                     if s[1] == 'D':
                         k = prefs.convertToNativePath(k)
                         if not k.endswith(os.sep):
-                            k = relpath(pwd, os.path.abspath(os.path.join(self.root, k)))
+                            k = os.path.join(self.root, k)
+                            if not isabs:
+                                k = relpath(pwd, k)
                             removed[k] = [ (k, prefs.getString('bzr_default_revision')), (None, None) ]
                     elif s[1] == 'N':
                         k = prefs.convertToNativePath(k)
                         if not k.endswith(os.sep):
-                            k = relpath(pwd, os.path.abspath(os.path.join(self.root, k)))
+                            k = os.path.join(self.root, k)
+                            if not isabs:
+                                k = relpath(pwd, k)
                             added[k] = [ (None, None), (k, None) ]
                     elif s[1] == 'M':
                         # also conflict
                         k = prefs.convertToNativePath(k)
                         if not k.endswith(os.sep):
-                            k = relpath(pwd, os.path.abspath(os.path.join(self.root, k)))
+                            k = os.path.join(self.root, k)
+                            if not isabs:
+                                k = relpath(pwd, k)
                             modified[k] = [ (k, None) ]
                     elif s[0] == 'R':
                         k = k.split(' => ')
@@ -1215,8 +1218,11 @@ class VCSs:
                             k0 = prefs.convertToNativePath(k[0])
                             k1 = prefs.convertToNativePath(k[1])
                             if not k0.endswith(os.sep) and not k1.endswith(os.sep):
-                                k0 = relpath(pwd, os.path.abspath(os.path.join(self.root, k0)))
-                                k1 = relpath(pwd, os.path.abspath(os.path.join(self.root, k1)))
+                                k0 = os.path.join(self.root, k0)
+                                k1 = os.path.join(self.root, k1)
+                                if not isabs:
+                                    k0 = relpath(pwd, k0)
+                                    k1 = relpath(pwd, k1)
                                 renamed[k1] = [ (k0, prefs.getString('bzr_default_revision')), (k1, None) ]
             # sort the results
             r = {}
@@ -1242,14 +1248,18 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, names):
             result = []
-            pwd = os.path.abspath(os.curdir)
+            pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
             args = [ prefs.getString('cvs_bin'), '-nq', 'update', '-R' ]
             for name in names:
+                isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'cvs_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'cvs_bash')):
                 if len(s) > 2 and s[0] in 'ACMR':
-                    r[relpath2(pwd, self.root, prefs.convertToNativePath(s[2:]))] = s[0]
+                    k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
+                    if not isabs:
+                        k = replpath(pwd, k)
+                    r[k] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'R':
@@ -1274,17 +1284,21 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, names):
             result = []
-            pwd = os.path.abspath(os.curdir)
+            pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
             args = [ prefs.getString('darcs_bin'), 'whatsnew', '-l' ]
             for name in names:
+                isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'darcs_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'darcs_bash')):
                 p = s.split(' ')
                 if len(p) >= 2 and s[0] in 'AMR':
                     k = prefs.convertToNativePath(p[1])
                     if not k.endswith(os.sep):
-                        r[relpath(pwd, os.path.abspath(os.path.join(self.root, k)))] = s[0]
+                        k = os.path.join(self.root, k)
+                        if not isabs:
+                            k = relpath(pwd, k)
+                        r[k] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'R':
@@ -1308,9 +1322,10 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, names):
             result = []
-            pwd = os.path.abspath(os.curdir)
+            pwd, isabs = os.path.abspath(os.curdir), False
             args = [ prefs.getString('git_bin'), 'status' ]
             for name in names:
+                isabs |= os.path.isabs(name)
                 args.append(os.path.join(os.curdir, relpath(self.root, os.path.abspath(name))).replace(os.sep, '/'))
             ss = strip_eol(popenReadLines(self.root, args, prefs, 'git_bash'))
             i = 0
@@ -1324,19 +1339,28 @@ class VCSs:
                 s = ss[i]
                 i += 1
                 if s.startswith('#\tdeleted:    '):
-                    k = relpath2(pwd, self.root, prefs.convertToNativePath(s[14:]))
+                    k = os.path.join(self.root, prefs.convertToNativePath(s[14:]))
+                    if not isabs:
+                        k = relpath(pwd, k)
                     removed[k] = [ (k, prefs.getString('git_default_revision')), (None, None) ]
                 elif s.startswith('#\tnew file:   '):
-                    k = relpath2(pwd, self.root, prefs.convertToNativePath(s[14:]))
+                    k = os.path.join(self.root, prefs.convertToNativePath(s[14:]))
+                    if not isabs:
+                        k = relpath(pwd, k)
                     added[k] = [ (None, None), (k, None) ]
                 elif s.startswith('#\tmodified:   '):
-                    k = relpath2(pwd, self.root, prefs.convertToNativePath(s[14:]))
+                    k = os.path.join(self.root, prefs.convertToNativePath(s[14:]))
+                    if not isabs:
+                        k = relpath(pwd, k)
                     modified[k] = [ (k, None) ]
                 elif s.startswith('#\trenamed:    '):
                     keys = s[14:].split(' -> ')
                     if len(keys) == 2:
-                        k0 = relpath2(pwd, self.root, prefs.convertToNativePath(keys[0]))
-                        k1 = relpath2(pwd, self.root, prefs.convertToNativePath(keys[1]))
+                        k0 = os.path.join(self.root, prefs.convertToNativePath(keys[0]))
+                        k1 = os.path.join(self.root, prefs.convertToNativePath(keys[1]))
+                        if not isabs:
+                            k0 = relpath(pwd, k0)
+                            k1 = relpath(pwd, k1)
                         renamed[k1] = [ (k0, prefs.getString('git_default_revision')), (k1, None) ]
                 elif not s.startswith('#  ') and s != '#':
                     break
@@ -1364,14 +1388,18 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, names):
             result = []
-            pwd = os.path.abspath(os.curdir)
+            pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
             args = [ prefs.getString('hg_bin'), 'status', '-q' ]
             for name in names:
+                isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'hg_bash')):
                 if len(s) > 2 and s[0] in 'ADM':
-                    r[relpath2(pwd, self.root, prefs.convertToNativePath(s[2:]))] = s[0]
+                    k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
+                    if not isabs:
+                        k = relpath(pwd, k)
+                    r[k] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'D':
@@ -1396,17 +1424,19 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, names):
             result = []
-            pwd = os.path.abspath(os.curdir)
+            pwd, isabs = os.path.abspath(os.curdir), False
             args = [ prefs.getString('mtn_bin'), 'status' ]
             for name in names:
+                isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'mtn_cygwin'))
             removed, modified, added, renamed, old_name = {}, {}, {}, {}, None
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'mtn_bash')):
                 if len(s) > 11:
-                    k = os.path.abspath(os.path.join(self.root, prefs.convertToNativePath(s[11:])))
+                    k = os.path.join(self.root, prefs.convertToNativePath(s[11:]))
+                    if not isabs:
+                        k = relpath(pwd, k)
                     # FIXME: prune dropped directories from results
                     if not os.path.isdir(k):
-                        k = relpath(pwd, k)
                         if s.startswith('  dropped  '):
                             removed[k] = [ (k, prefs.getString('mtn_default_revision')), (None, None) ]
                         elif s.startswith('  added    '):
@@ -1454,14 +1484,17 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, names):
             result = []
-            pwd = os.path.abspath(os.curdir)
+            pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
             args = [ prefs.getString('svn_bin'), 'status', '-q' ]
             for name in names:
+                isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'svn_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'svn_bash')):
                 if len(s) > 7 and s[0] in 'ACDMR':
-                    k = relpath2(pwd, self.root, prefs.convertToNativePath(s[7:]))
+                    k = os.path.join(self.root, prefs.convertToNativePath(s[7:]))
+                    if not isabs:
+                        k = relpath(pwd, k)
                     # FIXME: prune dropped directories from the results
                     if not os.path.isdir(k):
                         r[k] = s[0]
@@ -1554,14 +1587,17 @@ class VCSs:
 
         def getFolderTemplate(self, prefs, names):
             result = []
-            pwd = os.path.abspath(os.curdir)
+            pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
             args = [ prefs.getString('svk_bin'), 'status', '-q' ]
             for name in names:
+                isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'svk_cygwin'))
             for s in strip_eol(popenReadLines(self.root, args, prefs, 'svk_bash')):
                 if len(s) > 4 and s[0] in 'ACDMR':
-                    k = relpath2(pwd, self.root, prefs.convertToNativePath(s[4:]))
+                    k = os.path.join(self.root, prefs.convertToNativePath(s[4:]))
+                    if not isabs:
+                        k = relpath(pwd, k)
                     # FIXME: prune dropped directories from the results
                     if not os.path.isdir(k):
                         r[k] = s[0]
@@ -4840,7 +4876,7 @@ class FileChooserDialog(gtk.FileChooserDialog):
         self.encodings = prefs.getEncodings()
         for e in self.encodings:
             combobox.append_text(e)
-        if action == gtk.FILE_CHOOSER_ACTION_OPEN:
+        if action in [ gtk.FILE_CHOOSER_ACTION_OPEN, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER ]:
             self.encodings = self.encodings[:]
             self.encodings.insert(0, None)
             combobox.prepend_text('Auto Detect')
@@ -5424,7 +5460,9 @@ class Diffuse(gtk.Window):
         menuspecs.append([ _('_File'), [
                      [_('_Open File...'), self.open_file_cb, None, gtk.STOCK_OPEN, 'open_file'],
                      [_('Open File In New _Tab...'), self.open_file_in_new_tab_cb, None, None, 'open_file_in_new_tab'],
+                     [_('Open _Modified Files...'), self.open_modified_files_cb, None, None, 'open_modified_files'],
                      [_('_Reload File'), self.reload_file_cb, None, gtk.STOCK_REFRESH, 'reload_file'],
+                     [],
                      [_('_Save File'), self.save_file_cb, None, gtk.STOCK_SAVE, 'save_file'],
                      [_('Save File _As...'), self.save_file_as_cb, None, gtk.STOCK_SAVE_AS, 'save_file_as'],
                      [_('Save A_ll'), self.save_all_cb, None, None, 'save_all'],
@@ -5763,16 +5801,36 @@ class Diffuse(gtk.Window):
         specs = None
         dialog = FileChooserDialog(_('Open File In New Tab'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN)
         dialog.set_default_response(gtk.RESPONSE_OK)
-        if dialog.run() == gtk.RESPONSE_OK:
-            rev = dialog.get_revision().strip()
-            if rev == '':
-                rev = None
-            specs = [ (dialog.get_filename(), [ (rev, dialog.get_encoding()) ]) ]
+        accept = (dialog.run() == gtk.RESPONSE_OK)
+        name, encoding = dialog.get_filename(), dialog.get_encoding()
+        rev = dialog.get_revision().strip()
+        if rev == '':
+            rev = None
         dialog.destroy()
-        if specs is not None:
-            viewer = self.newLoadedFileDiffViewer(specs)
+        if accept:
+            viewer = self.newLoadedFileDiffViewer([ (name, [ (rev, encoding) ]) ])
             self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
             viewer.grab_focus()
+
+    # callback for the open file menu item
+    def open_modified_files_cb(self, widget, data):
+        parent = self.get_toplevel()
+        dialog = FileChooserDialog(_('Choose Folder With Modified Files'), parent, self.prefs, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, gtk.STOCK_OPEN)
+        dialog.set_default_response(gtk.RESPONSE_OK)
+        accept = (dialog.run() == gtk.RESPONSE_OK)
+        name, encoding = dialog.get_filename(), dialog.get_encoding()
+        dialog.destroy()
+        if accept:
+            n = self.notebook.get_n_pages()
+            self.createModifiedFileTabs([ (name, [ (None, encoding) ]) ])
+            if self.notebook.get_n_pages() > n:
+                # we added some new tabs, focus on the first one
+                self.notebook.set_current_page(n)
+                self.getCurrentViewer().grab_focus()
+            else:
+                m = MessageDialog(parent, gtk.MESSAGE_ERROR, _('No modified files found.'))
+                m.run()
+                m.destroy()
 
     # callback for the reload file menu item
     def reload_file_cb(self, widget, data):

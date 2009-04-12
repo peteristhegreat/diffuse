@@ -485,6 +485,14 @@
             <term><userinput>open_file_in_new_tab</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>File</guimenu><guimenuitem>Open File In New Tab...</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+t</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>open_modified_files</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>File</guimenu><guimenuitem>Open Modified Files...</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+O</para>
             </listitem>
           </varlistentry>
@@ -677,7 +685,7 @@
             <term><userinput>preferences</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Preferences</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+p</para>
+              <para>Default: None</para>
             </listitem>
           </varlistentry>
 

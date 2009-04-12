@@ -1,12 +1,13 @@
-- new POSIX installer with '--destdir=' and '--files-only' options for packagers
+- POSIX installer with '--destdir=' and '--files-only' options for packagers
 - vi-like keybindings for line mode
-- new '-m' option to open modified files in separate tabs
-- new 'Merge From Left Then Right' and 'Merge From Right Then Left' menu items
+- '-m' option to open modified files in separate tabs
+- 'Merge From Left Then Right' and 'Merge From Right Then Left' menu items
 - drag-n-drop support
-- new preferences for behaviour of tabs
-- '*' now used to tag files with edits
+- preferences for behaviour of tabs
+- files with edits now tagged with '*'
 - auto indent
-- new 'Open File In New Tab', 'Save All' menu items
+- 'Open File In New Tab...' and 'Open Modified Files...' menu items
+- 'Save All' menu item
 - improved organisation of menu items
 - button bar no longer grabs keyboard focus
 - removed dependence on urllib module
