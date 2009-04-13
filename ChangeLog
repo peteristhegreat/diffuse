@@ -1,3 +1,6 @@
+Diffuse 0.3.3 - 2009-04-13
+- fixed a bug handling the backspace key with the cursor in the first column
+
 Diffuse 0.3.2 - 2009-04-13
 - POSIX installer with '--destdir=' and '--files-only' options for packagers
 - vi-like keybindings for line mode
