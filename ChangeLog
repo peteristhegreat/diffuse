@@ -1,3 +1,4 @@
+Diffuse 0.3.2 - 2009-04-13
 - POSIX installer with '--destdir=' and '--files-only' options for packagers
 - vi-like keybindings for line mode
 - '-m' option to open modified files in separate tabs
