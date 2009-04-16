@@ -1296,7 +1296,7 @@ class VCSs:
                 if len(s) > 2 and s[0] in 'ACMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
                     if not isabs:
-                        k = replpath(pwd, k)
+                        k = relpath(pwd, k)
                     r[k] = s[0]
             for k in sorted(r.keys()):
                 v = r[k]
