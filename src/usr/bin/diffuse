@@ -20,10 +20,30 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gettext
+import os
 import sys
+
+# use the program's location as a starting place to search for supporting files
+# such as icon and help documentation
+if hasattr(sys, 'frozen'):
+    app_path = sys.executable
+else:
+    app_path = sys.argv[0]
+bin_dir = os.path.dirname(app_path)
+
+# platform test
+def isWindows():
+    return os.name == 'nt'
 
 # translation location: '../share/locale/<LANG>/LC_MESSAGES/diffuse.mo'
 # where '<LANG>' is the language key
+if isWindows():
+    locale_dir = 'locale'
+else:
+    locale_dir = '../share/locale'
+locale_dir = os.path.join(bin_dir, locale_dir)
+gettext.bindtextdomain('diffuse', locale_dir)
+
 gettext.textdomain('diffuse')
 _ = gettext.gettext
 
@@ -95,7 +115,6 @@ import encodings
 import glob
 import gobject
 import locale
-import os
 import pango
 import re
 import shlex
@@ -104,21 +123,9 @@ import string
 import subprocess
 import webbrowser
 
-# platform tests
-def isWindows():
-    return os.name == 'nt'
-
 if not hasattr(__builtins__, 'WindowsError'):
     # define 'WindowsError' so 'except' statements will work on all platforms
     WindowsError = IOError
-
-# use the program's location as a starting place to search for supporting files
-# such as icon and help documentation
-if hasattr(sys, 'frozen'):
-    app_path = sys.executable
-else:
-    app_path = sys.argv[0]
-bin_dir = os.path.dirname(app_path)
 
 # avoid some dictionary lookups when string.whitespace is used in loops
 whitespace = string.whitespace
@@ -543,7 +550,7 @@ class Resources:
                 ss = readlines(f)
                 f.close()
             except IOError:
-                logError(_('Error reading "%s".') % (file_name, ))
+                logError(_('Error reading %s.') % (file_name, ))
                 return
 
             # FIXME: improve validation
@@ -626,7 +633,7 @@ class Resources:
                            raise ValueError()
                    except: # Grr... the 're' module throws weird errors
                    #except ValueError:
-                       logError(_('Error parsing line %(line)d of "%(file)s".') % { 'line': i + 1, 'file': file_name })
+                       logError(_('Error parsing line %(line)d of %(file)s.') % { 'line': i + 1, 'file': file_name })
 
 theResources = Resources()
 
@@ -726,8 +733,8 @@ class Preferences:
               [ 'Integer', 'display_tab_width', 8, _('Tab width'), 1, 1024 ],
               [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore white space differences') ],
               [ 'Boolean', 'display_ignore_whitespace_changes', False, _('Ignore changes to white space') ],
-              [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore blank lines') ],
-              [ 'Boolean', 'display_ignore_case', False, _('Ignore case') ],
+              [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore blank line differences') ],
+              [ 'Boolean', 'display_ignore_case', False, _('Ignore case differences') ],
               [ 'Boolean', 'display_ignore_endofline', False, _('Ignore end of line differences') ],
               [ 'Boolean', 'display_hide_endofline', True, _('Hide end of line characters') ]
             ],
@@ -815,9 +822,9 @@ class Preferences:
                             else:
                                 raise ValueError()
                     except ValueError:
-                        logError(_('Error parsing line %(line)d of "%(file)s".') % { 'line': j + 1, 'file': self.path })
+                        logError(_('Error parsing line %(line)d of %(file)s.') % { 'line': j + 1, 'file': self.path })
             except IOError:
-                logError(_('Error reading "%s".') % (self.path, ))
+                logError(_('Error reading %s.') % (self.path, ))
 
     # recursively traverses 'template' to discover the preferences and
     # initialise their default values in self.bool_prefs, self.int_prefs, and
@@ -866,8 +873,7 @@ class Preferences:
                     f.write(s)
                 f.close()
             except IOError:
-                logError(_('Error writing "%s".') % (self.path, ))
-                m = MessageDialog(parent, gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(self.path), ))
+                m = MessageDialog(parent, gtk.MESSAGE_ERROR, _('Error writing %s.') % (self.path, ))
                 m.run()
                 m.destroy()
             for k in self.bool_prefs.keys():
@@ -1613,7 +1619,7 @@ class VCSs:
                         break
                     name = newname
             except IOError:
-                logError(_('Error parsing "%s".') % (config, ))
+                logError(_('Error parsing %s.') % (config, ))
         return False
 
     class Svk:
@@ -5220,9 +5226,9 @@ class Diffuse(gtk.Window):
                 except (IOError, OSError, UnicodeDecodeError, WindowsError):
                     # FIXME: this can occur before the toplevel window is drawn
                     if rev is not None:
-                        msg = _('Error reading revision %(rev)s of "%(file)s".') % { 'rev': rev, 'file': name }
+                        msg = _('Error reading revision %(rev)s of %(file)s.') % { 'rev': rev, 'file': name }
                     else:
-                        msg = _('Error reading %s.') % (repr(name), )
+                        msg = _('Error reading %s.') % (name, )
                     dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, msg)
                     dialog.run()
                     dialog.destroy()
@@ -5298,7 +5304,7 @@ class Diffuse(gtk.Window):
                         if info.last_stat[stat.ST_MTIME] < new_stat[stat.ST_MTIME]:
                             # update our notion of the most recent modification
                             info.last_stat = new_stat
-                            msg = _('The file "%s" changed on disk.  Do you want to reload the file?') % (info.name, )
+                            msg = _('The file %s changed on disk.  Do you want to reload the file?') % (info.name, )
                             dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
                             ok = (dialog.run() == gtk.RESPONSE_OK)
                             dialog.destroy()
@@ -5335,12 +5341,12 @@ class Diffuse(gtk.Window):
                 # warn if we are about to overwrite an existing file
                 if save_as:
                     if os.path.exists(name):
-                        msg = _('A file named "%s" already exists.  Do you want to overwrite it?') % (name, )
+                        msg = _('A file named %s already exists.  Do you want to overwrite it?') % (name, )
                 # warn if we are about to overwrite a file that has changed
                 # since we last read it
                 elif info.stat is not None:
                     if info.stat[stat.ST_MTIME] < os.stat(name)[stat.ST_MTIME]:
-                        msg = _('The file "%s" has been modified by another process since reading it.  If you save, all the external changes could be lost.  Save anyways?') % (name, )
+                        msg = _('The file %s has been modified by another process since reading it.  If you save, all the external changes could be lost.  Save anyways?') % (name, )
                 if msg is not None:
                     dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
                     end = (dialog.run() != gtk.RESPONSE_OK)
@@ -5378,11 +5384,11 @@ class Diffuse(gtk.Window):
                 if syntax is not None:
                     self.setSyntax(syntax)
             except UnicodeEncodeError:
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error encoding to %s.') % (repr(encoding), ))
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error encoding to %s.') % (encoding, ))
                 dialog.run()
                 dialog.destroy()
             except IOError:
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (repr(name), ))
+                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (name, ))
                 dialog.run()
                 dialog.destroy()
 
@@ -5592,6 +5598,8 @@ class Diffuse(gtk.Window):
            [ DIFFUSE_STOCK_LEFT_RIGHT, self.merge_from_left_then_right_cb, None, _('Merge From Left Then Right') ],
            [ DIFFUSE_STOCK_RIGHT_LEFT, self.merge_from_right_then_left_cb, None, _('Merge From Right Then Left') ],
            [],
+           [ gtk.STOCK_UNDO, self.undo_cb, None, _('Undo') ],
+           [ gtk.STOCK_REDO, self.redo_cb, None, _('Redo') ],
            [ gtk.STOCK_CUT, self.cut_cb, None, _('Cut') ],
            [ gtk.STOCK_COPY, self.copy_cb, None, _('Copy') ],
            [ gtk.STOCK_PASTE, self.paste_cb, None, _('Paste') ],
@@ -5653,9 +5661,9 @@ class Diffuse(gtk.Window):
                             else:
                                 raise ValueError()
                     except ValueError:
-                        logError(_('Error parsing line %(line)d of "%(file)s".') % { 'line': j + 1, 'file': configpath })
+                        logError(_('Error parsing line %(line)d of %(file)s.') % { 'line': j + 1, 'file': configpath })
             except IOError:
-                logError(_('Error reading "%s".') % (configpath, ))
+                logError(_('Error reading %s.') % (configpath, ))
 
         self.move(self.int_state['window_x'], self.int_state['window_y'])
         self.resize(self.int_state['window_width'], self.int_state['window_height'])
@@ -5677,7 +5685,7 @@ class Diffuse(gtk.Window):
                 f.write(s)
             f.close()
         except IOError:
-            logError(_('Error writing "%s".') % (configpath, ))
+            logError(_('Error writing %s.') % (configpath, ))
 
     # callback for the close button on each tab
     def remove_tab_cb(self, widget, data):
@@ -5809,7 +5817,7 @@ class Diffuse(gtk.Window):
                     for template in vcs.getFolderTemplate(self.prefs, names):
                         self.newLoadedFileDiffViewer([ (name, [ (rev, encoding) ]) for name, rev in template ])
                 except (IOError, OSError, WindowsError):
-                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving modifications for "%s".') % (dn, ))
+                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving modifications for %s.') % (dn, ))
                     dialog.run()
                     dialog.destroy()
 
@@ -6221,7 +6229,7 @@ if __name__ == '__main__':
                     r[-1] = str(int(r[-1]) - 1)
                     prev = '.'.join(r)
                 except:
-                    logError(_('Error parsing revision "%s".') % (rev, ))
+                    logError(_('Error parsing revision %s.') % (rev, ))
                 revs.append((prev, encoding))
                 revs.append((rev, encoding))
             elif arg in [ '-D', '--close-if-same' ]:
@@ -6277,7 +6285,7 @@ if __name__ == '__main__':
                 if len(specs) > 0:
                     filename = os.path.join(filename, os.path.basename(specs[-1][0]))
                 else:
-                    logError(_('Unexpected directory "%s".') % (args[i], ))
+                    logError(_('Unexpected directory %s.') % (args[i], ))
                     filename = None
             if filename is not None:
                 if len(revs) == 0:
