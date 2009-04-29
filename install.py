@@ -169,6 +169,8 @@ for s in 'sysconfdir', 'examplesdir', 'mandir':
             options[s] = options[s].replace('${%s}' % (k, ), options[k])
 
 # validate inputs
+if options['destdir'] == '':
+    options['destdir'] = '/'
 for opt in 'prefix', 'sysconfdir', 'examplesdir', 'mandir':
     p = options[opt]
     c = components(p)
