@@ -15,11 +15,14 @@ OutputDir=.
 [Files]
 Source: "dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+[Components]
+Name: main; Description: "Main Files"; Types: full compact custom; Flags: fixed
+Name: shellintegration; Description: "Windows Shell Integration"; Types: full
+
 [Registry]
-Root: HKCR; Subkey: "*\shell"; Flags: uninsdeletekeyifempty
-Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool\command"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool\command"; ValueType: string; ValueData: "{code:GetOpenWithCommand|dummy}"
+Root: HKCR; Subkey: "*\shell"; Flags: uninsdeletekeyifempty; Components: shellintegration
+Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool"; Flags: uninsdeletekey; Components: shellintegration
+Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool\command"; ValueType: string; ValueData: "{code:GetOpenWithCommand|dummy}"; Flags: uninsdeletekey; Components: shellintegration
 
 [Icons]
 Name: "{group}\Diffuse Merge Tool"; Filename: "{app}\diffusew.exe"
