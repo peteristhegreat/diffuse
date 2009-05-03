@@ -1536,7 +1536,11 @@ class VCSs:
                 args.append(safeRelativePath(self.root, name, prefs, 'svn_cygwin'))
             for s in strip_eols(popenReadLines(self.root, args, prefs, 'svn_bash')):
                 if len(s) > 7 and s[0] in 'ACDMR':
-                    k = os.path.join(self.root, prefs.convertToNativePath(s[7:]))
+                    # subversion 1.6 adds new columns
+                    k = 7
+                    while k < len(s) and s[k] == ' ':
+                        k += 1
+                    k = os.path.join(self.root, prefs.convertToNativePath(s[k:]))
                     if not isabs:
                         k = relpath(pwd, k)
                     # FIXME: prune dropped directories from the results
