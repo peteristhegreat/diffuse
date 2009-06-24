@@ -1536,9 +1536,9 @@ class VCSs:
                 args.append(safeRelativePath(self.root, name, prefs, 'svn_cygwin'))
             for s in strip_eols(popenReadLines(self.root, args, prefs, 'svn_bash')):
                 if len(s) > 7 and s[0] in 'ACDMR':
-                    # subversion 1.6 adds new columns
+                    # subversion 1.6 adds a new column
                     k = 7
-                    while k < len(s) and s[k] == ' ':
+                    if k < len(s) and s[k] == ' ':
                         k += 1
                     k = os.path.join(self.root, prefs.convertToNativePath(s[k:]))
                     if not isabs:
@@ -2232,9 +2232,9 @@ class FileDiffViewer(gtk.Table):
             if v < 32:
                 if c == '\t':
                     width = tab_width - col % tab_width
-                    result.append(width * ' ')
+                    result.append(width * u' ')
                 else:
-                    result.append('^' + chr(v + 64))
+                    result.append(u'^' + chr(v + 64))
             else:
                 result.append(c)
             col += self.characterWidth(col, c)
