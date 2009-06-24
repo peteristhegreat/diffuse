@@ -22,6 +22,7 @@
 import glob
 import os
 import stat
+import subprocess
 import sys
 
 app_path = sys.argv[0]
@@ -112,20 +113,28 @@ def replace(s, rules, i=0):
         s = v.join(a)
     return s
 
+# create directories
+def createDirs(d):
+    p = os.sep
+    for c in components(d):
+        p = os.path.join(p, c)
+        if not os.path.isdir(p):
+            os.mkdir(p)
+
+# remove a file
+def removeFile(f):
+    try:
+        os.unlink(f)
+    except OSError:
+        logError('Error removing "%s".' % (f, ))
+
 # install/remove sets of files
-def processFiles(install, target, dst, src, template):
+def processFiles(install, dst, src, template):
     for k, v in template.items():
-        fn, dn = os.path.basename(k), os.path.dirname(k)
-        srcdir, dstdir = os.path.join(src, dn), target
-        dstdir = target
-        for s in components(os.path.join(dst, dn)):
-            dstdir = os.path.join(dstdir, s)
-            # create sub-directories as needed
-            if install and not os.path.isdir(dstdir):
-                os.mkdir(dstdir)
-        for s in glob.glob(os.path.join(srcdir, fn)):
-            d = os.path.join(dstdir, os.path.basename(s))
+        for s in glob.glob(os.path.join(src, k)):
+            d = s.replace(src, dst, 1)
             if install:
+                createDirs(os.path.dirname(d))
                 # install file
                 f = open(s, 'rb')
                 c = f.read()
@@ -141,10 +150,22 @@ def processFiles(install, target, dst, src, template):
                     os.chmod(d, 0755)
             else:
                 # remove file
-                try:
-                    os.unlink(d)
-                except OSError:
-                    logError('Error removing "%s".' % (d, ))
+                removeFile(d)
+
+# compile .po files and install
+def processTranslations(install, dst):
+    for s in glob.glob('translations/*.po'):
+        lang = s[13:-3]
+        d = os.path.join(dst, 'share/locale/%s/LC_MESSAGES/diffuse.mo' % (lang, ))
+        print 'Installing %s' % (d, )
+        if install:
+            # install file
+            createDirs(os.path.dirname(d))
+            if subprocess.Popen(['msgfmt', '-o', d, s]).wait() != 0:
+                raise OSError('Failed to compile "%s" into "%s".' % (s, d))
+        else:
+            # remove file
+            removeFile(d)
 
 # parse command line arguments
 for arg in sys.argv[1:]:
@@ -202,7 +223,7 @@ print '''Performing %s with:
     pythonbin=%s''' % (stage, destdir, prefix, sysconfdir, examplesdir, mandir, pythonbin)
 
 # install files to prefix
-processFiles(install, destdir, prefix, 'src/usr', {
+processFiles(install, os.path.join(destdir, prefix), 'src/usr/', {
         'bin/diffuse': [ ("'../../etc/diffuserc'", repr(relpath(os.path.join(prefix, 'bin'), os.path.join(sysconfdir, 'diffuserc')))), ('/usr/bin/env python', pythonbin) ],
         'share/applications/diffuse.desktop': None,
         'share/diffuse/syntax/*.syntax': None,
@@ -212,16 +233,19 @@ processFiles(install, destdir, prefix, 'src/usr', {
     })
 
 # install manual
-processFiles(install, destdir, mandir, 'src/usr/share/man', {
+processFiles(install, os.path.join(destdir, mandir), 'src/usr/share/man/', {
         'man1/diffuse.1': [ ('/usr/', prefix), ('/etc/', sysconfdir) ]
     })
 
 # install files to sysconfdir
-processFiles(install, destdir, examplesdir, 'src/etc', { 'diffuserc': [ ('/etc/', sysconfdir), ('../usr', relpath(sysconfdir, prefix)) ] })
+processFiles(install, os.path.join(destdir, examplesdir), 'src/etc/', { 'diffuserc': [ ('/etc/', sysconfdir), ('../usr', relpath(sysconfdir, prefix)) ] })
+
+# install translations
+processTranslations(install, os.path.join(destdir, prefix))
 
 if not install:
     # remove directories we own
-    for s in [ 'share/omf/diffuse', 'share/gnome/help/diffuse/C', 'share/gnome/help/diffuse', 'share/diffuse/syntax', 'share/diffuse' ]:
+    for s in 'share/omf/diffuse', 'share/gnome/help/diffuse/C', 'share/gnome/help/diffuse', 'share/diffuse/syntax', 'share/diffuse':
         d = os.path.join(destdir, os.path.join(prefix, s)[1:])
         try:
             os.rmdir(d)

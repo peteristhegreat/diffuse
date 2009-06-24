@@ -1,0 +1,55 @@
+Below are basic instructions for adding and maintaining Gettext translations
+for Diffuse.  The installer will discover .po files in this directory and
+compile them into the corresponding .mo files.
+
+The example command show how to create and manage the Japanese translations.
+Replace all instances of "ja" with the code for the desired language.
+
+----
+
+Creating a new translation:
+
+1. Create a .pot file for Diffuse:
+
+  $ xgettext -s -o diffuse.pot -L Python ../src/usr/bin/diffuse
+
+2. Create a .po file for the translation:
+
+  $ msginit -l ja -o ja.po -i diffuse.pot 
+
+3. Manually complete in the translations in the .po file:
+
+  $ vi ja.po
+
+----
+
+Updating an existing translation:
+
+1. Move the existing .po file:
+
+  $ mv ja.po old.po
+
+2. Create an empty .po file for the translation:
+
+  $ xgettext -s -o diffuse.pot -l Python ../src/usr/bin/diffuse
+  $ msginit -l ja -o empty.po -i diffuse.pot 
+
+3. Merge the old translations:
+
+  $ msgmerge old.po empty.po -o ja.po
+
+4. Clean up:
+
+  $ rm old.po empty.po
+
+5. Manually complete in the translations in the .po file:
+
+  $ vi ja.po
+
+----
+
+Validate a translation:
+
+1. Attempt to compile the .po file and note any warnings:
+
+  $ msgfmt -c -v ja.po
