@@ -538,7 +538,7 @@ class Resources:
         name = os.path.basename(name)
         for key in self.syntax_file_patterns.keys():
             if self.syntax_file_patterns[key].search(name):
-                return self.getSyntax(key)
+                return key
 
     # parse resource files
     def parse(self, file_name):
@@ -756,7 +756,7 @@ class Preferences:
             [ 'List',
               [ 'Integer', 'tabs_default_panes', 2, _('Default panes'), 2, 16 ],
               [ 'Boolean', 'tabs_always_show', False, _('Always show the tab bar') ],
-              [ 'Boolean', 'tabs_closing_last_quits', False, _('Closing the last tab quits %s' % APP_NAME) ]
+              [ 'Boolean', 'tabs_closing_last_quits', False, _('Closing the last tab quits %s') % APP_NAME ]
             ],
             _('Regional Settings'),
             [ 'List',
@@ -2300,12 +2300,13 @@ class FileDiffViewer(gtk.Table):
         self.updatePrompt()
 
     # sets the syntax hightlighting rules
-    def setSyntax(self, syntax):
-        if self.syntax is not syntax:
-            self.syntax = syntax
+    def setSyntax(self, s):
+        if self.syntax is not s:
+            self.syntax = s
             # invalidate the syntax caches
             for pane in self.panes:
                 pane.syntax_cache = []
+            self.emit('syntax_changed', s)
             # force all panes to redraw
             for darea in self.dareas:
                 darea.queue_draw()
@@ -3192,7 +3193,7 @@ class FileDiffViewer(gtk.Table):
                 j = self.stringWidth(self.current_pane, text)
             s = _('Column %d') % (j, )
         else:
-            s = ''
+            s = None
         self.emit('status_changed', s)
 
     # change the current selection in CHAR_MODE
@@ -3514,7 +3515,7 @@ class FileDiffViewer(gtk.Table):
     # draw the text viewport
     def darea_expose_cb(self, widget, event, f):
         pane = self.panes[f]
-        syntax = self.syntax
+        syntax = theResources.getSyntax(self.syntax)
 
         offset_x, offset_y, width, height = event.area
         x = offset_x + int(self.hadj.get_value())
@@ -4813,6 +4814,7 @@ class FileDiffViewer(gtk.Table):
 gobject.signal_new('swapped_panes', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, int))
 gobject.signal_new('num_edits_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, ))
 gobject.signal_new('status_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
+gobject.signal_new('syntax_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
 
 # dialogue used to search for text
 class SearchDialog(gtk.Dialog):
@@ -5024,6 +5026,34 @@ class FileInfo:
         # most recent 'stat' for files read from disk -- used on focus change
         # to warn about changes to file on disk
         self.last_stat = None
+
+# custom statusbar widget information about syntax highlighting
+class Statusbar(gtk.Statusbar):
+    def __init__(self):
+        gtk.Statusbar.__init__(self)
+        self.syntax = syntax = gtk.Label()
+        self.pack_end(syntax, False, False, 10)
+        syntax.show()
+        # initialise
+        self.setSyntax(None)
+
+        separator = gtk.VSeparator()
+        self.pack_end(separator, False, False, 0)
+        separator.show()
+        self.context = self.get_context_id('Message')
+
+    # set the status bar text
+    def setText(self, s):
+        if s is None:
+            s = ''
+        self.pop(self.context)
+        self.push(self.context, s)
+
+    # set the syntax highlighting label
+    def setSyntax(self, s):
+        if s is None:
+            s = _('None')
+        self.syntax.set_text(s)
 
 # the main application class containing a set of file viewers
 # this class displays tab for switching between viewers and dispatches menu
@@ -5416,6 +5446,10 @@ class Diffuse(gtk.Window):
         def getStatus(self):
             return self.status
 
+        # gets the syntax
+        def getSyntax(self):
+            return self.syntax
+
     def __init__(self, rc_dir):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
 
@@ -5581,8 +5615,7 @@ class Diffuse(gtk.Window):
         notebook.show()
 
         # Add a status bar to the botton
-        self.statusbar = statusbar = gtk.Statusbar()
-        self.status_context = statusbar.get_context_id('Message')
+        self.statusbar = statusbar = Statusbar()
         vbox.pack_start(statusbar, False, False, 0)
         statusbar.show()
 
@@ -5670,15 +5703,19 @@ class Diffuse(gtk.Window):
         self.set_title('%s - %s' % (title, APP_NAME))
 
     # update the message in the status bar
-    def setStatus(self, status):
-        self.statusbar.pop(self.status_context)
-        self.statusbar.push(self.status_context, status)
+    def setStatus(self, s):
+        self.statusbar.setText(s)
+
+    # update the label in the status bar
+    def setSyntax(self, s):
+        self.statusbar.setSyntax(s)
 
     # callback used when switching notebook pages
     def switch_page_cb(self, widget, ptr, page_num):
         viewer = widget.get_nth_page(page_num)
         self.updateTitle(viewer)
         self.setStatus(viewer.getStatus())
+        self.setSyntax(viewer.getSyntax())
 
     # callback used when a viewer's title changes
     def title_changed_cb(self, widget, title):
@@ -5688,10 +5725,16 @@ class Diffuse(gtk.Window):
             self.updateTitle(widget)
 
     # callback used when a viewer's status changes
-    def status_changed_cb(self, widget, status):
+    def status_changed_cb(self, widget, s):
         # update the label in the notebook's tab
         if widget is self.getCurrentViewer():
-            self.setStatus(status)
+            self.setStatus(s)
+
+    # callback used when a viewer's syntax changes
+    def syntax_changed_cb(self, widget, s):
+        # update the label
+        if widget is self.getCurrentViewer():
+            self.setSyntax(s)
 
     # create an empty viewer with 'n' panes
     def newFileDiffViewer(self, n):
@@ -5709,6 +5752,7 @@ class Diffuse(gtk.Window):
         self.notebook.set_show_tabs(self.prefs.getBool('tabs_always_show') or self.notebook.get_n_pages() > 1)
         viewer.connect('title_changed', self.title_changed_cb)
         viewer.connect('status_changed', self.status_changed_cb)
+        viewer.connect('syntax_changed', self.syntax_changed_cb)
         return viewer
 
     # create a new viewer to display 'items'
@@ -5958,7 +6002,7 @@ class Diffuse(gtk.Window):
 
     # callback for all of the syntax highlighting menu items
     def syntax_cb(self, widget, data):
-        self.getCurrentViewer().setSyntax(theResources.getSyntax(data))
+        self.getCurrentViewer().setSyntax(data)
 
     # callback for the previous tab menu item
     def previous_tab_cb(self, widget, data):
