@@ -2052,49 +2052,74 @@ class FileDiffViewer(gtk.Table):
 
         # keybindings
         self._line_mode_actions = {
-                'enter_align_mode': self._line_mode_enter_align_mode,
-                'enter_character_mode': self.setCharMode,
-                'first_line': self._first_line,
-                'extend_first_line': self._extend_first_line,
-                'last_line': self._last_line,
-                'extend_last_line': self._extend_last_line,
-                'up': self._line_mode_up,
-                'extend_up': self._line_mode_extend_up,
-                'down': self._line_mode_down,
-                'extend_down': self._line_mode_extend_down,
-                'left': self._line_mode_left,
-                'extend_left': self._line_mode_extend_left,
-                'right': self._line_mode_right,
-                'extend_right': self._line_mode_extend_right,
-                'page_up': self._line_mode_page_up,
-                'extend_page_up': self._line_mode_extend_page_up,
-                'page_down': self._line_mode_page_down,
-                'extend_page_down': self._line_mode_extend_page_down,
-                'delete_text': self._delete_text,
-                'clear_edits': self._clear_edits,
-                'isolate': self._isolate,
-                'first_difference': self._first_difference,
-                'previous_difference': self._previous_difference,
-                'next_difference': self._next_difference,
-                'last_difference': self._last_difference,
-                'merge_from_left': self._merge_from_left,
-                'merge_from_right': self._merge_from_right,
-                'merge_from_left_then_right': self._merge_from_left_then_right,
-                'merge_from_right_then_left': self._merge_from_right_then_left }
+            'enter_align_mode': self._line_mode_enter_align_mode,
+            'enter_character_mode': self.setCharMode,
+            'first_line': self._first_line,
+            'extend_first_line': self._extend_first_line,
+            'last_line': self._last_line,
+            'extend_last_line': self._extend_last_line,
+            'up': self._line_mode_up,
+            'extend_up': self._line_mode_extend_up,
+            'down': self._line_mode_down,
+            'extend_down': self._line_mode_extend_down,
+            'left': self._line_mode_left,
+            'extend_left': self._line_mode_extend_left,
+            'right': self._line_mode_right,
+            'extend_right': self._line_mode_extend_right,
+            'page_up': self._line_mode_page_up,
+            'extend_page_up': self._line_mode_extend_page_up,
+            'page_down': self._line_mode_page_down,
+            'extend_page_down': self._line_mode_extend_page_down,
+            'delete_text': self._delete_text,
+            'clear_edits': self.clear_edits,
+            'isolate': self.isolate,
+            'first_difference': self.first_difference,
+            'previous_difference': self.previous_difference,
+            'next_difference': self.next_difference,
+            'last_difference': self.last_difference,
+            'merge_from_left': self.merge_from_left,
+            'merge_from_right': self.merge_from_right,
+            'merge_from_left_then_right': self.merge_from_left_then_right,
+            'merge_from_right_then_left': self.merge_from_right_then_left }
         self._align_mode_actions = {
-                'enter_line_mode': self._align_mode_enter_line_mode,
-                'enter_character_mode': self.setCharMode,
-                'first_line': self._first_line,
-                'last_line': self._last_line,
-                'up': self._line_mode_up,
-                'down': self._line_mode_down,
-                'left': self._line_mode_left,
-                'right': self._line_mode_right,
-                'page_up': self._line_mode_page_up,
-                'page_down': self._line_mode_page_down,
-                'align': self._align_text }
+            'enter_line_mode': self._align_mode_enter_line_mode,
+            'enter_character_mode': self.setCharMode,
+            'first_line': self._first_line,
+            'last_line': self._last_line,
+            'up': self._line_mode_up,
+            'down': self._line_mode_down,
+            'left': self._line_mode_left,
+            'right': self._line_mode_right,
+            'page_up': self._line_mode_page_up,
+            'page_down': self._line_mode_page_down,
+            'align': self._align_text }
         self._character_mode_actions = {
-                'enter_line_mode': self.setLineMode }
+            'enter_line_mode': self.setLineMode }
+        self._button_actions = {
+            'undo': self.undo,
+            'redo': self.redo,
+            'cut': self.cut,
+            'copy': self.copy,
+            'paste': self.paste,
+            'select_all': self.select_all,
+            'clear_edits': self.clear_edits,
+            'decrease_indenting': self.decrease_indenting,
+            'increase_indenting': self.increase_indenting,
+            'convert_to_dos': self.convert_to_dos,
+            'convert_to_mac': self.convert_to_mac,
+            'convert_to_unix': self.convert_to_unix,
+            'realign_all': self.realign_all,
+            'isolate': self.isolate,
+            'first_difference': self.first_difference,
+            'previous_difference': self.previous_difference,
+            'next_difference': self.next_difference,
+            'last_difference': self.last_difference,
+            'shift_pane_left': self.shift_pane_left,
+            'shift_pane_right': self.shift_pane_right,
+            'merge_from_left': self.merge_from_left,
+            'merge_from_right': self.merge_from_right,
+            'merge_from_left_then_right': self.merge_from_left_then_right,
+            'merge_from_right_then_left': self.merge_from_right_then_left }
 
         # create panes
         self.dareas = []
@@ -2149,7 +2174,13 @@ class FileDiffViewer(gtk.Table):
     # this must be connected with 'connect_after()' so the final widget sizes
     # are known and the scroll bar can be moved to the first difference
     def _realise_cb(self, widget):
-        self._first_difference()
+        self.first_difference()
+
+    # callback for most menu items and buttons
+    def button_cb(self, widget, data):
+        self.openUndoBlock()
+        self._button_actions[data]()
+        self.closeUndoBlock()
 
     # updates the display font and resizes viewports as necessary
     def setFont(self, font):
@@ -2314,8 +2345,9 @@ class FileDiffViewer(gtk.Table):
             self.undos.append(self.undoblock)
         self.undoblock = None
 
-    # undo the last block of changes on the undo stack
+    # 'undo' action
     def undo(self):
+        self.undoblock, old_block = None, self.undoblock
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             if len(self.undos) > 0:
                 # move the block to the redo stack
@@ -2324,9 +2356,11 @@ class FileDiffViewer(gtk.Table):
                 # undo all changes in the block in reverse order
                 for u in block[::-1]:
                     u.undo(self)
+        self.undoblock = old_block
 
-    # re-apply the block of changes on the redo stack
+    # 'redo' action
     def redo(self):
+        self.undoblock, old_block = None, self.undoblock
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             if len(self.redos) > 0:
                 # move the block to the undo stack
@@ -2335,6 +2369,7 @@ class FileDiffViewer(gtk.Table):
                 # re-apply all changes in the block
                 for u in block:
                     u.redo(self)
+        self.undoblock = old_block
 
     # returns the width of the viewport's line number column in pango units
     def getLineNumberWidth(self):
@@ -3098,7 +3133,8 @@ class FileDiffViewer(gtk.Table):
     # this should be called before and after actions that also change the
     # selection
     def recordEditMode(self):
-        self.addUndo(FileDiffViewer.EditModeUndo(self.mode, self.current_pane, self.current_line, self.current_char, self.selection_line, self.selection_char, self.cursor_column))
+        if self.undoblock is not None:
+            self.addUndo(FileDiffViewer.EditModeUndo(self.mode, self.current_pane, self.current_line, self.current_char, self.selection_line, self.selection_char, self.cursor_column))
 
     # change the selection mode
     def setEditMode(self, mode, f, current_line, current_char, selection_line, selection_char, cursor_column):
@@ -3232,7 +3268,7 @@ class FileDiffViewer(gtk.Table):
         return ''.join([ s for s in ss if s is not None ])
 
     # expands the selection to include everything
-    def selectAll(self):
+    def select_all(self):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             f = self.current_pane
             self.selection_line = 0
@@ -3335,15 +3371,15 @@ class FileDiffViewer(gtk.Table):
 
             menu = createMenu(
                       [ [_('Align to Selection'), self.align_to_selection_cb, [f, i], gtk.STOCK_EXECUTE, None, can_align],
-                      [_('Isolate'), self.isolate_cb, None, None, None, can_isolate ],
+                      [_('Isolate'), self.button_cb, 'isolate', None, None, can_isolate ],
                       [_('Merge'), self.merge_lines_cb, f, None, None, can_merge],
                       [],
-                      [_('Cut'), self.cut_cb, None, gtk.STOCK_CUT, None, can_select],
-                      [_('Copy'), self.copy_cb, None, gtk.STOCK_COPY, None, can_select],
-                      [_('Paste'), self.paste_cb, None, gtk.STOCK_PASTE, None, can_select],
+                      [_('Cut'), self.button_cb, 'cut', gtk.STOCK_CUT, None, can_select],
+                      [_('Copy'), self.button_cb, 'copy', gtk.STOCK_COPY, None, can_select],
+                      [_('Paste'), self.button_cb, 'paste', gtk.STOCK_PASTE, None, can_select],
                       [],
-                      [_('Select All'), self.select_all_cb, None, None, None, can_select],
-                      [_('Clear Edits'), self.clear_edits_cb, None, gtk.STOCK_CLEAR, None, can_isolate],
+                      [_('Select All'), self.button_cb, 'select_all', None, None, can_select],
+                      [_('Clear Edits'), self.button_cb, 'clear_edits', gtk.STOCK_CLEAR, None, can_isolate],
                       [],
                       [_('Swap with Selected Pane'), self.swap_panes_cb, f, None, None, can_swap] ])
             menu.popup(None, None, None, event.button, event.time)
@@ -4236,37 +4272,28 @@ class FileDiffViewer(gtk.Table):
         self.closeUndoBlock()
         return retval
 
-    # callback for copy menu item
-    def copy_cb(self, widget, data):
+    # 'copy' action
+    def copy(self):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD).set_text(self.getSelectedText())
 
-    # callback for cut menu item
-    def cut_cb(self, widget, data):
+    # 'cut' action
+    def cut(self):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
-            self.copy_cb(widget, data)
-            self.openUndoBlock()
+            self.copy()
             self.replaceText('')
-            self.closeUndoBlock()
 
     # callback used when receiving clipboard text
     def receive_clipboard_text_cb(self, clipboard, text, data):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
-            self.openUndoBlock()
             self.replaceText(self.prefs.convertToUnicode([ text ])[0][0])
-            self.closeUndoBlock()
 
-    # callback for paste menu item
-    def paste_cb(self, widget, data):
+    # 'paste' action
+    def paste(self):
          gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD).request_text(self.receive_clipboard_text_cb)
 
-    # callback for select all menu item
-    def select_all_cb(self, widget, data):
-        if self.mode == LINE_MODE or self.mode == CHAR_MODE:
-            self.selectAll()
-
-    # 'clear_edits' keybinding action
-    def _clear_edits(self):
+    # 'clear_edits' action
+    def clear_edits(self):
         self.setLineMode()
         self.recordEditMode()
         f = self.current_pane
@@ -4283,12 +4310,6 @@ class FileDiffViewer(gtk.Table):
                     # remove the line so it doesn't persist as a spacer
                     self.instanceLine(f, i, True)
         self.recordEditMode()
-
-    # callback for clear edits menu item
-    def clear_edits_cb(self, widget, data):
-        self.openUndoBlock()
-        self._clear_edits()
-        self.closeUndoBlock()
 
     # callback for find menu item
     def find(self, pattern, match_case, backwards, from_start):
@@ -4375,7 +4396,6 @@ class FileDiffViewer(gtk.Table):
                 start, end = end, start
             end += 1
 
-            self.openUndoBlock()
             self.recordEditMode()
             for i in range(start, end):
                 text = self.getLineText(f, i)
@@ -4401,19 +4421,17 @@ class FileDiffViewer(gtk.Table):
                 self.setCurrentChar(self.selection_line, 0)
                 self.setCurrentChar(i, 0, True)
             self.recordEditMode()
-            self.closeUndoBlock()
 
-    # callback for decrease indenting menu item
-    def decrease_indenting_cb(self, widget, data):
+    # 'decrease_indenting' action
+    def decrease_indenting(self):
         self._adjust_indenting(-1)
 
-    # callback for increase indenting menu item
-    def increase_indenting_cb(self, widget, data):
+    # 'increase_indenting' action
+    def increase_indenting(self):
         self._adjust_indenting(1)
 
     def convert_format(self, format):
         self.setLineMode()
-        self.openUndoBlock()
         self.recordEditMode()
         f = self.current_pane
         for i in range(len(self.panes[f].lines)):
@@ -4424,18 +4442,17 @@ class FileDiffViewer(gtk.Table):
                 self.updateLineText(f, i, True, s)
         self.setFormat(f, format)
         self.recordEditMode()
-        self.closeUndoBlock()
 
-    # callback for convert to DOS format menu item
-    def convert_to_dos_cb(self, widget, data):
+    # 'convert_to_dos' action
+    def convert_to_dos(self):
         self.convert_format(DOS_FORMAT)
 
-    # callback for convert to Mac format menu item
-    def convert_to_mac_cb(self, widget, data):
+    # 'convert_to_mac' action
+    def convert_to_mac(self):
         self.convert_format(MAC_FORMAT)
 
-    # callback for convert to Unix format menu item
-    def convert_to_unix_cb(self, widget, data):
+    # 'convert_to_unix' action
+    def convert_to_unix(self):
         self.convert_format(UNIX_FORMAT)
 
     # recompute viewport size and redraw as the display preferences may have
@@ -4450,11 +4467,10 @@ class FileDiffViewer(gtk.Table):
         self.map.queue_draw()
         self.updatePrompt()
 
-    # 'realign_all' keybinding action
-    def realign_all_cb(self, widget, data):
+    # 'realign_all' action
+    def realign_all(self):
         self.setLineMode()
         f = self.current_pane
-        self.openUndoBlock()
         self.recordEditMode()
         lines = []
         blocks = []
@@ -4473,7 +4489,6 @@ class FileDiffViewer(gtk.Table):
         self.updateBlocks(blocks)
         self.setCurrentLine(f, min(self.current_line, len(self.panes[f].lines)))
         self.recordEditMode()
-        self.closeUndoBlock()
 
     # callback for the align to selection menu item
     def align_to_selection_cb(self, widget, data):
@@ -4491,9 +4506,10 @@ class FileDiffViewer(gtk.Table):
         self.recordEditMode()
         self.closeUndoBlock()
 
-    # 'isolate' keybinding action
-    def _isolate(self):
+    # 'isolate' action
+    def isolate(self):
         self.setLineMode()
+        self.recordEditMode()
         f = self.current_pane
         start, end = self.selection_line, self.current_line
         if end < start:
@@ -4529,14 +4545,7 @@ class FileDiffViewer(gtk.Table):
             pre.extend(middle)
             pre.extend(post)
             self.updateBlocks(pre)
-
-    # callback for the isolate menu item
-    def isolate_cb(self, widget, data):
-        self.openUndoBlock()
         self.recordEditMode()
-        self._isolate()
-        self.recordEditMode()
-        self.closeUndoBlock()
 
     # returns True if line 'i' in pane 'f' has an edit or is different from its
     # neighbour
@@ -4591,45 +4600,28 @@ class FileDiffViewer(gtk.Table):
             self.selection_line = i
             self.setCurrentLine(f, start, True)
 
-    # 'first_difference' keybinding action
-    def _first_difference(self):
+    # 'first_difference' action
+    def first_difference(self):
         self.setLineMode()
         self.goto_difference(0, 1)
 
-    # callback for the first difference menu item
-    def first_difference_cb(self, widget, data):
-        self._first_difference()
-
-    # 'previous_difference' keybinding action
-    def _previous_difference(self):
+    # 'previous_difference' action
+    def previous_difference(self):
         self.setLineMode()
         i = min(self.current_line, self.selection_line) - 1
         self.goto_difference(i, -1)
 
-    # callback for the previous difference menu item
-    def previous_difference_cb(self, widget, data):
-        self._previous_difference()
-
-    # 'next_difference' keybinding action
-    def _next_difference(self):
+    # 'next_difference' action
+    def next_difference(self):
         self.setLineMode()
         i = max(self.current_line, self.selection_line) + 1
         self.goto_difference(i, 1)
 
-    # callback for the next difference menu item
-    def next_difference_cb(self, widget, data):
-        self._next_difference()
-
-    # 'last_difference' keybinding action
-    def _last_difference(self):
+    # 'last_difference' action
+    def last_difference(self):
         self.setLineMode()
-        f = self.current_pane
-        i = len(self.panes[f].lines)
+        i = len(self.panes[self.current_pane].lines)
         self.goto_difference(i, -1)
-
-    # callback for the last difference menu item
-    def last_difference_cb(self, widget, data):
-        self._last_difference()
 
     # Undo for changes to the pane ordering
     class SwapPanesUndo:
@@ -4670,28 +4662,29 @@ class FileDiffViewer(gtk.Table):
         if f_dst >= 0 and f_dst < len(self.panes):
             if self.mode == ALIGN_MODE:
                 self.setLineMode()
-            self.openUndoBlock()
             self.recordEditMode()
             self.swapPanes(f_dst, f_src)
             self.recordEditMode()
-            self.closeUndoBlock()
 
     # callback for swap panes menu item
     def swap_panes_cb(self, widget, data):
+        self.openUndoBlock()
         self.swap_panes(data, self.current_pane)
+        self.closeUndoBlock()
 
-    # callback for shift pane left menu item
-    def shift_pane_left_cb(self, widget, data):
+    # 'shift_pane_left' action
+    def shift_pane_left(self):
         f = self.current_pane
         self.swap_panes(f - 1, f)
 
-    # callback for shift pane right menu item
-    def shift_pane_right_cb(self, widget, data):
+    # 'shift_pane_right' action
+    def shift_pane_right(self):
         f = self.current_pane
         self.swap_panes(f + 1, f)
 
     # copies the selected range of lines from pane 'f_src' to 'f_dst'
     def merge_lines(self, f_dst, f_src):
+        self.recordEditMode()
         self.setLineMode()
         pane = self.panes[f_dst]
         start, end = self.selection_line, self.current_line
@@ -4705,45 +4698,29 @@ class FileDiffViewer(gtk.Table):
             self.setFormat(f_dst, getFormat(ss))
         for i, s in enumerate(ss):
             self.updateText(f_dst, start + i, convert_to_format(s, pane.format))
+        self.recordEditMode()
 
     # callback for merge lines menu item
     def merge_lines_cb(self, widget, data):
         self.openUndoBlock()
-        self.recordEditMode()
         self.merge_lines(data, self.current_pane)
-        self.recordEditMode()
         self.closeUndoBlock()
 
-    # 'merge_from_left' keybinding action
-    def _merge_from_left(self):
+    # 'merge_from_left' action
+    def merge_from_left(self):
         f = self.current_pane
         if f > 0:
             self.merge_lines(f, f - 1)
 
-    # callback for merge from left menu item
-    def merge_from_left_cb(self, widget, data):
-        self.openUndoBlock()
-        self.recordEditMode()
-        self._merge_from_left()
-        self.recordEditMode()
-        self.closeUndoBlock()
-
-    # 'merge_from_right' keybinding action
-    def _merge_from_right(self):
+    # 'merge_from_right' action
+    def merge_from_right(self):
         f = self.current_pane
         if f + 1 < len(self.panes):
             self.merge_lines(f, f + 1)
 
-    # callback for merge from right menu item
-    def merge_from_right_cb(self, widget, data):
-        self.openUndoBlock()
-        self.recordEditMode()
-        self._merge_from_right()
-        self.recordEditMode()
-        self.closeUndoBlock()
-
     # merge from both left and right into the current pane
     def _mergeBoth(self, right_first):
+        self.recordEditMode()
         self.setLineMode()
         f = self.current_pane
         start, end = self.selection_line, self.current_line
@@ -4822,30 +4799,15 @@ class FileDiffViewer(gtk.Table):
                 end -= 1
             self.selection_line = start
             self.setCurrentLine(f, end, True)
+        self.recordEditMode()
 
     # 'merge_from_left_then_right' keybinding action
-    def _merge_from_left_then_right(self):
+    def merge_from_left_then_right(self):
         self._mergeBoth(False)
 
     # 'merge_from_right_then_left' keybinding action
-    def _merge_from_right_then_left(self):
+    def merge_from_right_then_left(self):
         self._mergeBoth(True)
-
-    # callback for merge from left then right menu item
-    def merge_from_left_then_right_cb(self, widget, data):
-        self.openUndoBlock()
-        self.recordEditMode()
-        self._merge_from_left_then_right()
-        self.recordEditMode()
-        self.closeUndoBlock()
-
-    # callback for merge from right then left menu item
-    def merge_from_right_then_left_cb(self, widget, data):
-        self.openUndoBlock()
-        self.recordEditMode()
-        self._merge_from_right_then_left()
-        self.recordEditMode()
-        self.closeUndoBlock()
 
 # create 'title_changed' signal for FileDiffViewer
 gobject.signal_new('swapped_panes', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, int))
@@ -5524,27 +5486,27 @@ class Diffuse(gtk.Window):
                      [_('_Quit'), self.quit_cb, None, gtk.STOCK_QUIT, 'quit'] ] ])
 
         menuspecs.append([ _('_Edit'), [
-                     [_('_Undo'), self.undo_cb, None, gtk.STOCK_UNDO, 'undo'],
-                     [_('_Redo'), self.redo_cb, None, gtk.STOCK_REDO, 'redo'],
+                     [_('_Undo'), self.button_cb, 'undo', gtk.STOCK_UNDO, 'undo'],
+                     [_('_Redo'), self.button_cb, 'redo', gtk.STOCK_REDO, 'redo'],
                      [],
-                     [_('Cu_t'), self.cut_cb, None, gtk.STOCK_CUT, 'cut'],
-                     [_('_Copy'), self.copy_cb, None, gtk.STOCK_COPY, 'copy'],
-                     [_('_Paste'), self.paste_cb, None, gtk.STOCK_PASTE, 'paste'],
+                     [_('Cu_t'), self.button_cb, 'cut', gtk.STOCK_CUT, 'cut'],
+                     [_('_Copy'), self.button_cb, 'copy', gtk.STOCK_COPY, 'copy'],
+                     [_('_Paste'), self.button_cb, 'paste', gtk.STOCK_PASTE, 'paste'],
                      [],
-                     [_('Select _All'), self.select_all_cb, None, None, 'select_all'],
-                     [_('C_lear Edits'), self.clear_edits_cb, None, gtk.STOCK_CLEAR, 'clear_edits'],
+                     [_('Select _All'), self.button_cb, 'select_all', None, 'select_all'],
+                     [_('C_lear Edits'), self.button_cb, 'clear_edits', gtk.STOCK_CLEAR, 'clear_edits'],
                      [],
                      [_('_Find...'), self.find_cb, None, gtk.STOCK_FIND, 'find'],
                      [_('Find _Next'), self.find_next_cb, None, None, 'find_next'],
                      [_('Find Pre_vious'), self.find_previous_cb, None, None, 'find_previous'],
                      [_('_Go To Line...'), self.go_to_line_cb, None, gtk.STOCK_JUMP_TO, 'go_to_line'],
                      [],
-                     [_('Decrea_se Indenting'), self.decrease_indenting_cb, None, gtk.STOCK_UNINDENT, 'decrease_indenting'],
-                     [_('_Increase Indenting'), self.increase_indenting_cb, None, gtk.STOCK_INDENT, 'increase_indenting'],
+                     [_('Decrea_se Indenting'), self.button_cb, 'decrease_indenting', gtk.STOCK_UNINDENT, 'decrease_indenting'],
+                     [_('_Increase Indenting'), self.button_cb, 'increase_indenting', gtk.STOCK_INDENT, 'increase_indenting'],
                      [],
-                     [_('Convert to _DOS Format'), self.convert_to_dos_cb, None, None, 'convert_to_dos'],
-                     [_('Convert to _Mac Format'), self.convert_to_mac_cb, None, None, 'convert_to_mac'],
-                     [_('Convert to Uni_x Format'), self.convert_to_unix_cb, None, None, 'convert_to_unix'],
+                     [_('Convert to _DOS Format'), self.button_cb, 'convert_to_dos', None, 'convert_to_dos'],
+                     [_('Convert to _Mac Format'), self.button_cb, 'convert_to_mac', None, 'convert_to_mac'],
+                     [_('Convert to Uni_x Format'), self.button_cb, 'convert_to_unix', None, 'convert_to_unix'],
                      [],
                      [_('Pr_eferences...'), self.preferences_cb, None, gtk.STOCK_PREFERENCES, 'preferences'] ] ])
 
@@ -5559,25 +5521,25 @@ class Diffuse(gtk.Window):
         menuspecs.append([ _('_View'), [
                      [_('_Syntax Highlighting'), None, None, None, None, True, submenudef],
                      [],
-                     [_('Re_align All'), self.realign_all_cb, None, gtk.STOCK_EXECUTE, 'realign_all'],
-                     [_('_Isolate'), self.isolate_cb, None, None, 'isolate'],
+                     [_('Re_align All'), self.button_cb, 'realign_all', gtk.STOCK_EXECUTE, 'realign_all'],
+                     [_('_Isolate'), self.button_cb, 'isolate', None, 'isolate'],
                      [],
-                     [_('_First Difference'), self.first_difference_cb, None, gtk.STOCK_GOTO_TOP, 'first_difference'],
-                     [_('_Previous Difference'), self.previous_difference_cb, None, gtk.STOCK_GO_UP, 'previous_difference'],
-                     [_('_Next Difference'), self.next_difference_cb, None, gtk.STOCK_GO_DOWN, 'next_difference'],
-                     [_('_Last Difference'), self.last_difference_cb, None, gtk.STOCK_GOTO_BOTTOM, 'last_difference'],
+                     [_('_First Difference'), self.button_cb, 'first_difference', gtk.STOCK_GOTO_TOP, 'first_difference'],
+                     [_('_Previous Difference'), self.button_cb, 'previous_difference', gtk.STOCK_GO_UP, 'previous_difference'],
+                     [_('_Next Difference'), self.button_cb, 'next_difference', gtk.STOCK_GO_DOWN, 'next_difference'],
+                     [_('_Last Difference'), self.button_cb, 'last_difference', gtk.STOCK_GOTO_BOTTOM, 'last_difference'],
                      [],
                      [_('Pre_vious Tab'), self.previous_tab_cb, None, None, 'previous_tab'],
                      [_('Next _Tab'), self.next_tab_cb, None, None, 'next_tab'],
                      [],
-                     [_('Shift Pane _Left'), self.shift_pane_left_cb, None, None, 'shift_pane_left'],
-                     [_('Shift Pane _Right'), self.shift_pane_right_cb, None, None, 'shift_pane_right'] ] ])
+                     [_('Shift Pane _Left'), self.button_cb, 'shift_pane_left', None, 'shift_pane_left'],
+                     [_('Shift Pane _Right'), self.button_cb, 'shift_pane_right', None, 'shift_pane_right'] ] ])
 
         menuspecs.append([ _('_Merge'), [
-                     [_('Merge From _Left'), self.merge_from_left_cb, None, gtk.STOCK_GO_FORWARD, 'merge_from_left'],
-                     [_('Merge From _Right'), self.merge_from_right_cb, None, gtk.STOCK_GO_BACK, 'merge_from_right'],
-                     [_('Merge From Left _Then Right'), self.merge_from_left_then_right_cb, None, DIFFUSE_STOCK_LEFT_RIGHT, 'merge_from_left_then_right'],
-                     [_('Merge From Right T_hen Left'), self.merge_from_right_then_left_cb, None, DIFFUSE_STOCK_RIGHT_LEFT, 'merge_from_right_then_left'] ] ])
+                     [_('Merge From _Left'), self.button_cb, 'merge_from_left', gtk.STOCK_GO_FORWARD, 'merge_from_left'],
+                     [_('Merge From _Right'), self.button_cb, 'merge_from_right', gtk.STOCK_GO_BACK, 'merge_from_right'],
+                     [_('Merge From Left _Then Right'), self.button_cb, 'merge_from_left_then_right', DIFFUSE_STOCK_LEFT_RIGHT, 'merge_from_left_then_right'],
+                     [_('Merge From Right T_hen Left'), self.button_cb, 'merge_from_right_then_left', DIFFUSE_STOCK_RIGHT_LEFT, 'merge_from_right_then_left'] ] ])
 
         menuspecs.append([ _('_Help'), [
                      [_('_Help Contents...'), self.help_contents_cb, None, gtk.STOCK_HELP, 'help_contents'],
@@ -5591,24 +5553,24 @@ class Diffuse(gtk.Window):
         # create button bar
         hbox = gtk.HBox()
         appendButtons(hbox, gtk.ICON_SIZE_LARGE_TOOLBAR, [
-           [ gtk.STOCK_EXECUTE, self.realign_all_cb, None, _('Realign All') ],
+           [ gtk.STOCK_EXECUTE, self.button_cb, 'realign_all', _('Realign All') ],
            [],
-           [ gtk.STOCK_GOTO_TOP, self.first_difference_cb, None, _('First Difference') ],
-           [ gtk.STOCK_GO_UP, self.previous_difference_cb, None, _('Previous Difference') ],
-           [ gtk.STOCK_GO_DOWN, self.next_difference_cb, None, _('Next Difference') ],
-           [ gtk.STOCK_GOTO_BOTTOM, self.last_difference_cb, None, _('Last Difference') ],
+           [ gtk.STOCK_GOTO_TOP, self.button_cb, 'first_difference', _('First Difference') ],
+           [ gtk.STOCK_GO_UP, self.button_cb, 'previous_difference', _('Previous Difference') ],
+           [ gtk.STOCK_GO_DOWN, self.button_cb, 'next_difference', _('Next Difference') ],
+           [ gtk.STOCK_GOTO_BOTTOM, self.button_cb, 'last_difference', _('Last Difference') ],
            [],
-           [ gtk.STOCK_GO_FORWARD, self.merge_from_left_cb, None, _('Merge From Left') ],
-           [ gtk.STOCK_GO_BACK, self.merge_from_right_cb, None, _('Merge From Right') ],
-           [ DIFFUSE_STOCK_LEFT_RIGHT, self.merge_from_left_then_right_cb, None, _('Merge From Left Then Right') ],
-           [ DIFFUSE_STOCK_RIGHT_LEFT, self.merge_from_right_then_left_cb, None, _('Merge From Right Then Left') ],
+           [ gtk.STOCK_GO_FORWARD, self.button_cb, 'merge_from_left', _('Merge From Left') ],
+           [ gtk.STOCK_GO_BACK, self.button_cb, 'merge_from_right', _('Merge From Right') ],
+           [ DIFFUSE_STOCK_LEFT_RIGHT, self.button_cb, 'merge_from_left_then_right', _('Merge From Left Then Right') ],
+           [ DIFFUSE_STOCK_RIGHT_LEFT, self.button_cb, 'merge_from_right_then_left', _('Merge From Right Then Left') ],
            [],
-           [ gtk.STOCK_UNDO, self.undo_cb, None, _('Undo') ],
-           [ gtk.STOCK_REDO, self.redo_cb, None, _('Redo') ],
-           [ gtk.STOCK_CUT, self.cut_cb, None, _('Cut') ],
-           [ gtk.STOCK_COPY, self.copy_cb, None, _('Copy') ],
-           [ gtk.STOCK_PASTE, self.paste_cb, None, _('Paste') ],
-           [ gtk.STOCK_CLEAR, self.clear_edits_cb, None, _('Clear Edits') ] ])
+           [ gtk.STOCK_UNDO, self.button_cb, 'undo', _('Undo') ],
+           [ gtk.STOCK_REDO, self.button_cb, 'redo', _('Redo') ],
+           [ gtk.STOCK_CUT, self.button_cb, 'cut', _('Cut') ],
+           [ gtk.STOCK_COPY, self.button_cb, 'copy', _('Copy') ],
+           [ gtk.STOCK_PASTE, self.button_cb, 'paste', _('Paste') ],
+           [ gtk.STOCK_CLEAR, self.button_cb, 'clear_edits', _('Clear Edits') ] ])
         vbox.pack_start(hbox, False, False, 0)
         hbox.show()
 
@@ -5923,34 +5885,6 @@ class Diffuse(gtk.Window):
         if self.confirmQuit():
             gtk.main_quit()
 
-    # callback for the undo menu item
-    def undo_cb(self, widget, data):
-        self.getCurrentViewer().undo()
-
-    # callback for the redo menu item
-    def redo_cb(self, widget, data):
-        self.getCurrentViewer().redo()
-
-    # callback for the cut menu item
-    def cut_cb(self, widget, data):
-        self.getCurrentViewer().cut_cb(widget, data)
-
-    # callback for the copy menu item
-    def copy_cb(self, widget, data):
-        self.getCurrentViewer().copy_cb(widget, data)
-
-    # callback for the paste menu item
-    def paste_cb(self, widget, data):
-        self.getCurrentViewer().paste_cb(widget, data)
-
-    # callback for the select all menu item
-    def select_all_cb(self, widget, data):
-        self.getCurrentViewer().select_all_cb(widget, data)
-
-    # callback for the clear edits menu item
-    def clear_edits_cb(self, widget, data):
-        self.getCurrentViewer().clear_edits_cb(widget, data)
-
     # request search parameters if force=True and then perform a search in the
     # current viewer pane
     def find(self, force, reverse):
@@ -6010,26 +5944,6 @@ class Diffuse(gtk.Window):
     def go_to_line_cb(self, widget, data):
         self.getCurrentViewer().go_to_line_cb(widget, data)
 
-    # callback for the decrease indenting menu item
-    def decrease_indenting_cb(self, widget, data):
-        self.getCurrentViewer().decrease_indenting_cb(widget, data)
-
-    # callback for the increase indenting menu item
-    def increase_indenting_cb(self, widget, data):
-        self.getCurrentViewer().increase_indenting_cb(widget, data)
-
-    # callback for the convert to DOS menu item
-    def convert_to_dos_cb(self, widget, data):
-        self.getCurrentViewer().convert_to_dos_cb(widget, data)
-
-    # callback for the convert to Unix menu item
-    def convert_to_mac_cb(self, widget, data):
-        self.getCurrentViewer().convert_to_mac_cb(widget, data)
-
-    # callback for the convert to Unix menu item
-    def convert_to_unix_cb(self, widget, data):
-        self.getCurrentViewer().convert_to_unix_cb(widget, data)
-
     # notify all viewers of changes to the preferences
     def preferences_updated(self):
         n = self.notebook.get_n_pages()
@@ -6046,30 +5960,6 @@ class Diffuse(gtk.Window):
     def syntax_cb(self, widget, data):
         self.getCurrentViewer().setSyntax(theResources.getSyntax(data))
 
-    # callback for the realign all menu item
-    def realign_all_cb(self, widget, data):
-        self.getCurrentViewer().realign_all_cb(widget, data)
-
-    # callback for the isolate menu item
-    def isolate_cb(self, widget, data):
-        self.getCurrentViewer().isolate_cb(widget, data)
-
-    # callback for the first difference menu item
-    def first_difference_cb(self, widget, data):
-        self.getCurrentViewer().first_difference_cb(widget, data)
-
-    # callback for the previous difference menu item
-    def previous_difference_cb(self, widget, data):
-        self.getCurrentViewer().previous_difference_cb(widget, data)
-
-    # callback for the next difference menu item
-    def next_difference_cb(self, widget, data):
-        self.getCurrentViewer().next_difference_cb(widget, data)
-
-    # callback for the last difference menu item
-    def last_difference_cb(self, widget, data):
-        self.getCurrentViewer().last_difference_cb(widget, data)
-
     # callback for the previous tab menu item
     def previous_tab_cb(self, widget, data):
         i = self.notebook.get_current_page() - 1
@@ -6083,29 +5973,9 @@ class Diffuse(gtk.Window):
         if i < n:
             self.notebook.set_current_page(i)
 
-    # callback for the shift pane left menu item
-    def shift_pane_left_cb(self, widget, data):
-        self.getCurrentViewer().shift_pane_left_cb(widget, data)
-
-    # callback for the shift pane right menu item
-    def shift_pane_right_cb(self, widget, data):
-        self.getCurrentViewer().shift_pane_right_cb(widget, data)
-
-    # callback for the merge from left menu item
-    def merge_from_left_cb(self, widget, data):
-        self.getCurrentViewer().merge_from_left_cb(widget, data)
-
-    # callback for the merge from right menu item
-    def merge_from_right_cb(self, widget, data):
-        self.getCurrentViewer().merge_from_right_cb(widget, data)
-
-    # callback for the merge from left then right menu item
-    def merge_from_left_then_right_cb(self, widget, data):
-        self.getCurrentViewer().merge_from_left_then_right_cb(widget, data)
-
-    # callback for the merge from right then left menu item
-    def merge_from_right_then_left_cb(self, widget, data):
-        self.getCurrentViewer().merge_from_right_then_left_cb(widget, data)
+    # callback for most menu items and buttons
+    def button_cb(self, widget, data):
+        self.getCurrentViewer().button_cb(widget, data)
 
     # display help documenation
     def help_contents_cb(self, widget, data):
