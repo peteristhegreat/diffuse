@@ -31,7 +31,7 @@ Updating an existing translation:
 
 2. Create an empty .po file for the translation:
 
-  $ xgettext -s -o diffuse.pot -l Python ../src/usr/bin/diffuse
+  $ xgettext -s -o diffuse.pot -L Python ../src/usr/bin/diffuse
   $ msginit -l ja -o empty.po -i diffuse.pot 
 
 3. Merge the old translations:
