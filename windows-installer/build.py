@@ -83,7 +83,7 @@ for p in 'temp\\diffuse.py', 'temp\\diffusew.pyw':
 # build executable in 'dist' from diffuse.py and diffusew.pyw
 args = [ sys.executable, 'setup.py', 'py2exe' ]
 if os.spawnv(os.P_WAIT, args[0], args) != 0:
-    raise IOError('Could not run setup.py')
+    raise OSError('Could not run setup.py')
 
 # include Python 2.6 specific DLLs and manifests
 if platform.python_version_tuple()[:2] == (2, 6):
@@ -111,6 +111,18 @@ copyFile('diffuserc', 'dist\\diffuserc')
 # application icon
 copyFile('diffuse.ico', 'dist\\diffuse.ico')
 
+# translations
+for s in glob.glob('..\\translations\\*.po'):
+    lang = s[16:-3]
+    print 'Compiling %s translation' % (lang, )
+    d = 'dist'
+    for p in [ 'locale', lang, 'LC_MESSAGES' ]:
+        d = os.path.join(d, p)
+        mkdir(d)
+    d = os.path.join(d, 'diffuse.mo')
+    if subprocess.Popen(['msgfmt', '-o', d, s]).wait() != 0:
+        raise OSError('Failed to compile "%s" into "%s".' % (s, d))
+
 #
 # Add all documentation.
 #
@@ -133,7 +145,7 @@ fd = proc.stdout
 s = fd.read()
 fd.close()
 if proc.wait() != 0:
-    raise IOError('Could not run xsltproc')
+    raise OSError('Could not run xsltproc')
 # add link to style sheet
 s = s.replace('</head>', '<link rel="stylesheet" href="style.css" type="text/css"/></head>')
 # save HTML version of the manual
@@ -149,7 +161,7 @@ copyFile('style.css', 'dist\\style.css')
 # build binary installer 
 copyFile(os.path.join(os.environ['ADD_PATH_HOME'], 'add_path.exe'), 'dist\\add_path.exe')
 if os.system('iscc diffuse.iss /F%s' % (INSTALLER, )) != 0:
-    raise IOError('Could not run iscc')
+    raise OSError('Could not run iscc')
 
 #
 # Declare success.

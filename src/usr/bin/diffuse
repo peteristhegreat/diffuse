@@ -20,6 +20,7 @@
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import gettext
+import locale
 import os
 import sys
 
@@ -38,6 +39,16 @@ def isWindows():
 # translation location: '../share/locale/<LANG>/LC_MESSAGES/diffuse.mo'
 # where '<LANG>' is the language key
 if isWindows():
+    # gettext looks for the language using environment variables which
+    # are normally not set on Windows so we try setting it for them
+    for lang in 'LANGUAGE', 'LC_ALL', 'LC_MESSAGES', 'LANG':
+       if os.environ.has_key(lang):
+           break
+    else:
+       lang = locale.getdefaultlocale()[0]
+       if lang is not None:
+           os.environ['LANG'] = lang
+    del lang
     locale_dir = 'locale'
 else:
     locale_dir = '../share/locale'
@@ -114,7 +125,6 @@ import difflib
 import encodings
 import glob
 import gobject
-import locale
 import pango
 import re
 import shlex
