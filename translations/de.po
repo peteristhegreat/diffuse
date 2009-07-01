@@ -54,6 +54,10 @@ msgstr "Ordner mit bearbeiteten Dateien auswählen"
 msgid "Clear Edits"
 msgstr "Alle Änderungen rückgängig"
 
+#: ../src/usr/bin/diffuse:5025
+msgid "Close Tab"
+msgstr "Reiter schließen"
+
 #: ../src/usr/bin/diffuse:759
 #, python-format
 msgid "Closing the last tab quits %s"

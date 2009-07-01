@@ -103,17 +103,7 @@ Display Options:
   ( -B | --ignore-blank-lines )    Ignore changes in blank lines
   ( -E | --ignore-end-of-line )    Ignore end of line differences
   ( -i | --ignore-case )           Ignore case differences
-  ( -w | --ignore-all-space )      Ignore white space differences
-
-Interactive Mode Navigation:
-  Line Editing Mode
-    <enter>   - Enter character editing mode
-    <space>   - Enter alignment editing mode
-  Character Editing Mode
-    <escape>  - Return to line editing mode
-  Alignment Editing Mode
-    <space>   - Align and return to line editing mode
-    <escape>  - Return to line editing mode""")
+  ( -w | --ignore-all-space )      Ignore white space differences""")
         sys.exit(0)
 
 import pygtk
@@ -2027,13 +2017,13 @@ class FileDiffViewer(gtk.Table):
                 return self.modified_text
             return self.text
 
-    def __init__(self, headers, prefs):
+    def __init__(self, headers, footers, prefs):
         # figure out how many pane panes we should have
         n = len(headers)
         if n < 2:
             raise ValueError('Invalid number of panes')
 
-        gtk.Table.__init__(self, 2, n + 1)
+        gtk.Table.__init__(self, 3, n + 1)
         self.set_flags(gtk.CAN_FOCUS)
         self.prefs = prefs
 
@@ -2159,6 +2149,10 @@ class FileDiffViewer(gtk.Table):
                 sw.set_vadjustment(self.vadj)
             self.attach(sw, i, i + 1, 1, 2)
             sw.show()
+
+            # pane footer
+            self.attach(footers[i], i, i + 1, 2, 3, gtk.FILL, gtk.FILL)
+
         self.vadj.connect('value_changed', self.map_vadj_changed_cb)
 
         # add diff map
@@ -2283,31 +2277,35 @@ class FileDiffViewer(gtk.Table):
 
     # changes the viewer's mode to LINE_MODE
     def setLineMode(self):
-        if self.mode == CHAR_MODE:
-            self.dareas[self.current_pane].queue_draw()
-            self.current_char = 0
-            self.selection_char = 0
-        elif self.mode == ALIGN_MODE:
-            self.dareas[self.align_pane].queue_draw()
-            self.dareas[self.current_pane].queue_draw()
-            self.align_pane = 0
-            self.align_line = 0
-        self.mode = LINE_MODE
-        self.updatePrompt()
+        if self.mode != LINE_MODE:
+            if self.mode == CHAR_MODE:
+                self.dareas[self.current_pane].queue_draw()
+                self.current_char = 0
+                self.selection_char = 0
+            elif self.mode == ALIGN_MODE:
+                self.dareas[self.align_pane].queue_draw()
+                self.dareas[self.current_pane].queue_draw()
+                self.align_pane = 0
+                self.align_line = 0
+            self.mode = LINE_MODE
+            self.emit('cursor_changed')
+            self.emit('mode_changed')
 
     # changes the viewer's mode to CHAR_MODE
     def setCharMode(self):
-        if self.mode == LINE_MODE:
-            self.cursor_column = -1
-            self.setCurrentChar(self.current_line, 0)
-        elif self.mode == ALIGN_MODE:
-            self.dareas[self.align_pane].queue_draw()
-            self.cursor_column = -1
-            self.align_pane = 0
-            self.align_line = 0
-            self.setCurrentChar(self.current_line, 0)
-        self.mode = CHAR_MODE
-        self.updatePrompt()
+        if self.mode != CHAR_MODE:
+            if self.mode == LINE_MODE:
+                self.cursor_column = -1
+                self.setCurrentChar(self.current_line, 0)
+            elif self.mode == ALIGN_MODE:
+                self.dareas[self.align_pane].queue_draw()
+                self.cursor_column = -1
+                self.align_pane = 0
+                self.align_line = 0
+                self.setCurrentChar(self.current_line, 0)
+            self.mode = CHAR_MODE
+            self.emit('cursor_changed')
+            self.emit('mode_changed')
 
     # sets the syntax hightlighting rules
     def setSyntax(self, s):
@@ -2320,6 +2318,10 @@ class FileDiffViewer(gtk.Table):
             # force all panes to redraw
             for darea in self.dareas:
                 darea.queue_draw()
+
+    # gets the syntax
+    def getSyntax(self):
+        return self.syntax
 
     # returns True if any pane contains edits
     def hasEdits(self):
@@ -2470,6 +2472,7 @@ class FileDiffViewer(gtk.Table):
             # create an Undo object for the action
             self.addUndo(FileDiffViewer.SetFormatUndo(f, format, pane.format))
         pane.format = format
+        self.emit('format_changed', f, format)
 
     # Undo for the creation of Line objects
     class InstanceLineUndo:
@@ -3162,8 +3165,8 @@ class FileDiffViewer(gtk.Table):
             self.setCurrentChar(self.current_line, self.current_char, True)
         else:
             self.setCurrentLine(self.current_pane, self.current_line, True)
-        # some selections display information in the status bar
-        self.updatePrompt()
+        self.emit('cursor_changed')
+        self.emit('mode_changed')
         # queue a redraw to show the updated selection
         self.dareas[old_f].queue_draw()
 
@@ -3190,21 +3193,10 @@ class FileDiffViewer(gtk.Table):
             vadj.set_value(lower)
         elif upper > v + ps:
             vadj.set_value(upper - ps)
+        self.emit('cursor_changed')
         # queue redraw
         self.dareas[old_f].queue_draw()
         self.dareas[f].queue_draw()
-
-    # display the cursor's column position
-    def updatePrompt(self):
-        if self.mode == CHAR_MODE:
-            j = self.current_char
-            if j > 0:
-                text = self.getLineText(self.current_pane, self.current_line)[:j]
-                j = self.stringWidth(self.current_pane, text)
-            s = _('Column %d') % (j, )
-        else:
-            s = None
-        self.emit('status_changed', s)
 
     # change the current selection in CHAR_MODE
     # use extend=True to extend the selection
@@ -3247,9 +3239,9 @@ class FileDiffViewer(gtk.Table):
             hadj.set_value(lower)
         elif upper > v + ps:
             hadj.set_value(upper - ps)
+        self.emit('cursor_changed')
         # queue redraw
         self.dareas[f].queue_draw()
-        self.updatePrompt()
 
     # returns the currently selected text
     def getSelectedText(self):
@@ -3319,7 +3311,10 @@ class FileDiffViewer(gtk.Table):
             j = self._getPickedCharacter(f, text, x, True)
             self.setCurrentChar(i, j, extend)
         else:
-            self.setLineMode()
+            if self.mode == ALIGN_MODE:
+                extend = False
+            elif self.mode == CHAR_MODE:
+                self.setLineMode()
             self.setCurrentLine(f, i, extend and f == self.current_pane)
 
     # callback for mouse button presses in the text window
@@ -3333,12 +3328,15 @@ class FileDiffViewer(gtk.Table):
             # left mouse button
             if event.type == gtk.gdk._2BUTTON_PRESS:
                 # double click
+                if self.mode == ALIGN_MODE:
+                    self.setLineMode()
                 if self.mode == LINE_MODE:
                     # change to CHAR_MODE
                     self.setCurrentLine(f, i)
                     # silently switch mode so the viewer does not scroll yet.
                     self.mode = CHAR_MODE
                     self.button_press(f, x, y, False)
+                    self.emit('mode_changed')
                 elif self.mode == CHAR_MODE and self.current_pane == f:
                     # select word
                     text = strip_eol(self.getLineText(f, i))
@@ -3964,6 +3962,7 @@ class FileDiffViewer(gtk.Table):
         self.selection_line = self.current_line
         self.align_pane = self.current_pane
         self.align_line = self.current_line
+        self.emit('mode_changed')
         self.dareas[self.align_pane].queue_draw()
 
     # 'first_line' keybinding action
@@ -4472,11 +4471,12 @@ class FileDiffViewer(gtk.Table):
         self.setFont(pango.FontDescription(self.prefs.getString('display_font')))
         for pane in self.panes:
             del pane.diff_cache[:]
+        # tab width may have changed
+        self.emit('cursor_changed')
         for darea in self.dareas:
             darea.queue_draw()
         self.map_cache = None
         self.map.queue_draw()
-        self.updatePrompt()
 
     # 'realign_all' action
     def realign_all(self):
@@ -4823,8 +4823,10 @@ class FileDiffViewer(gtk.Table):
 # create 'title_changed' signal for FileDiffViewer
 gobject.signal_new('swapped_panes', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, int))
 gobject.signal_new('num_edits_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, ))
-gobject.signal_new('status_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
+gobject.signal_new('mode_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
+gobject.signal_new('cursor_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
 gobject.signal_new('syntax_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
+gobject.signal_new('format_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, int))
 
 # dialogue used to search for text
 class SearchDialog(gtk.Dialog):
@@ -5010,6 +5012,9 @@ class NotebookTab(gtk.HBox):
         image.set_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_MENU)
         button.add(image)
         image.show()
+        if hasattr(button, 'set_tooltip_text'):
+            # only available in pygtk >= 2.12
+            button.set_tooltip_text(_('Close Tab'))
         self.pack_start(button, False, False, 0)
         button.show()
 
@@ -5041,16 +5046,19 @@ class FileInfo:
 class Statusbar(gtk.Statusbar):
     def __init__(self):
         gtk.Statusbar.__init__(self)
-        self.syntax = syntax = gtk.Label()
-        self.pack_end(syntax, False, False, 10)
-        syntax.show()
-        # initialise
-        self.setSyntax(None)
+        self.context = self.get_context_id('Message')
 
         separator = gtk.VSeparator()
-        self.pack_end(separator, False, False, 0)
+        self.pack_end(separator, False, False, 10)
         separator.show()
-        self.context = self.get_context_id('Message')
+
+        self.syntax = syntax = gtk.Label()
+        self.pack_end(syntax, False, False, 0)
+        syntax.show()
+
+        separator = gtk.VSeparator()
+        self.pack_end(separator, False, False, 10)
+        separator.show()
 
     # set the status bar text
     def setText(self, s):
@@ -5062,7 +5070,7 @@ class Statusbar(gtk.Statusbar):
     # set the syntax highlighting label
     def setSyntax(self, s):
         if s is None:
-            s = _('None')
+            s = ''
         self.syntax.set_text(s)
 
 # the main application class containing a set of file viewers
@@ -5115,15 +5123,76 @@ class Diffuse(gtk.Window):
                     self.has_edits = has_edits
                     self.updateTitle()
 
+        # pane footer
+        class PaneFooter(gtk.HBox):
+            def __init__(self):
+                gtk.HBox.__init__(self)
+
+                self.cursor = label = gtk.Label()
+                self.pack_start(label, False, False, 0)
+                label.show()
+
+                separator = gtk.VSeparator()
+                self.pack_end(separator, False, False, 10)
+                separator.show()
+
+                self.encoding = label = gtk.Label()
+                self.pack_end(label, False, False, 0)
+                label.show()
+
+                separator = gtk.VSeparator()
+                self.pack_end(separator, False, False, 10)
+                separator.show()
+
+                self.format = label = gtk.Label()
+                self.pack_end(label, False, False, 0)
+                label.show()
+
+                separator = gtk.VSeparator()
+                self.pack_end(separator, False, False, 10)
+                separator.show()
+
+                self.set_size_request(0, self.get_size_request()[1])
+
+            # set the cursor label
+            def updateCursor(self, viewer, f):
+                if viewer.mode == CHAR_MODE and viewer.current_pane == f:
+                    j = viewer.current_char
+                    if j > 0:
+                        text = viewer.getLineText(viewer.current_pane, viewer.current_line)[:j]
+                        j = viewer.stringWidth(viewer.current_pane, text)
+                    s = _('Column %d') % (j, )
+                else:
+                    s = ''
+                self.cursor.set_text(s)
+
+            # set the format label
+            def setFormat(self, s):
+                v = []
+                if s & DOS_FORMAT:
+                    v.append('DOS')
+                if s & MAC_FORMAT:
+                    v.append('Mac')
+                if s & UNIX_FORMAT:
+                    v.append('Unix')
+                self.format.set_text('/'.join(v))
+
+            # set the format label
+            def setEncoding(self, s):
+                if s is None:
+                    s = ''
+                self.encoding.set_text(s)
+
         def __init__(self, n, prefs, title):
             self.headers = headers = [ Diffuse.FileDiffViewer.PaneHeader() for i in range(n) ]
-            FileDiffViewer.__init__(self, headers, prefs)
+            self.footers = footers = [ Diffuse.FileDiffViewer.PaneFooter() for i in range(n) ]
+            FileDiffViewer.__init__(self, headers, footers, prefs)
             self.title = title
             self.status = ''
 
             self.connect('swapped_panes', self.swapped_panes_cb)
             self.connect('num_edits_changed', self.num_edits_changed_cb)
-            self.connect('status_changed', self.status_changed_cb)
+            self.connect('mode_changed', self.mode_changed_cb)
             for i, h in enumerate(headers):
                 h.connect('title_changed', self.title_changed_cb)
                 h.connect('open', self.open_file_button_cb, i)
@@ -5131,9 +5200,15 @@ class Diffuse(gtk.Window):
                 h.connect('save', self.save_file_button_cb, i)
                 h.connect('save_as', self.save_file_as_button_cb, i)
                 h.show()
+            for footer in footers:
+                self.connect('cursor_changed', self.cursor_changed_cb)
+                self.connect('format_changed', self.format_changed_cb)
+                footer.show()
             for i, darea in enumerate(self.dareas):
                 darea.drag_dest_set(gtk.DEST_DEFAULT_ALL, [ ('text/uri-list', 0, 0) ], gtk.gdk.ACTION_COPY)
                 darea.connect('drag_data_received', self.drag_data_received_cb, i)
+            # initialise status
+            self.updateStatus()
 
         # callback used when receiving drag-n-drop data
         def drag_data_received_cb(self, widget, context, x, y, selection, targettype, eventtime, f):
@@ -5171,9 +5246,12 @@ class Diffuse(gtk.Window):
 
         # change the file info for pane 'f' to 'info'
         def setFileInfo(self, f, info):
-            h = self.headers[f]
+            h, footer = self.headers[f], self.footers[f]
             h.info = info
             h.updateTitle()
+            footer.setFormat(self.panes[f].format)
+            footer.setEncoding(info.encoding)
+            footer.updateCursor(self, f)
 
         # callback used when a pane header's title changes
         def title_changed_cb(self, widget):
@@ -5198,6 +5276,11 @@ class Diffuse(gtk.Window):
             if has_edits:
                 s += ' *'
             self.emit('title_changed', s)
+
+        def setEncoding(self, f, encoding):
+            h = self.headers[f]
+            h.info.encoding = encoding
+            self.footers[f].setEncoding(encoding)
 
         # load a new file into pane 'f'
         # 'info' indicates the name of the file and how to retrieve it from the
@@ -5439,26 +5522,44 @@ class Diffuse(gtk.Window):
         # callback to receive notification when the name of a file changes
         def swapped_panes_cb(self, widget, f_dst, f_src):
             f0, f1 = self.headers[f_dst], self.headers[f_src]
-            f0.info, f1.info = f1.info, f0.info
             f0.has_edits, f1.has_edits = f1.has_edits, f0.has_edits
-            f0.updateTitle()
-            f1.updateTitle()
+            info0, info1 = f1.info, f0.info
+            self.setFileInfo(f_dst, info0)
+            self.setFileInfo(f_src, info1)
 
         # callback to receive notification when the name of a file changes
         def num_edits_changed_cb(self, widget, f):
             self.headers[f].setEdits(self.panes[f].num_edits > 0)
 
-        # callback to record the viewer's current status message
-        def status_changed_cb(self, widget, s):
+        # callback to record changes to the viewer's mode
+        def mode_changed_cb(self, widget):
+            self.updateStatus()
+
+        # update the viewer's current status message
+        def updateStatus(self):
+            if self.mode == LINE_MODE:
+                s = _('Press the enter key or double click to edit.  Press the space bar or use the RMB menu to manually align.')
+            elif self.mode == CHAR_MODE:
+                s = _('Press the escape key to finish editing.')
+            elif self.mode == ALIGN_MODE:
+                s = _('Select target line and press the space bar to align.  Press the escape key to cancel.')
+            else:
+                s = None
             self.status = s
+            self.emit('status_changed', s)
 
         # gets the status bar text
         def getStatus(self):
             return self.status
 
-        # gets the syntax
-        def getSyntax(self):
-            return self.syntax
+        # callback to display the cursor in a pane
+        def cursor_changed_cb(self, widget):
+            for f, footer in enumerate(self.footers):
+                footer.updateCursor(self, f)
+
+        # callback to display the format of a pane
+        def format_changed_cb(self, widget, f, format):
+            self.footers[f].setFormat(format)
 
     def __init__(self, rc_dir):
         gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
@@ -6089,6 +6190,7 @@ class Diffuse(gtk.Window):
         dialog.destroy()
 
 gobject.signal_new('title_changed', Diffuse.FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
+gobject.signal_new('status_changed', Diffuse.FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
 gobject.signal_new('title_changed', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
 gobject.signal_new('open', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
 gobject.signal_new('reload', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
