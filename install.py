@@ -223,7 +223,7 @@ print '''Performing %s with:
     pythonbin=%s''' % (stage, destdir, prefix, sysconfdir, examplesdir, mandir, pythonbin)
 
 # install files to prefix
-processFiles(install, os.path.join(destdir, prefix), 'src/usr/', {
+processFiles(install, os.path.join(destdir, prefix[1:]), 'src/usr/', {
         'bin/diffuse': [ ("'../../etc/diffuserc'", repr(relpath(os.path.join(prefix, 'bin'), os.path.join(sysconfdir, 'diffuserc')))), ('/usr/bin/env python', pythonbin) ],
         'share/applications/diffuse.desktop': None,
         'share/diffuse/syntax/*.syntax': None,
@@ -233,15 +233,15 @@ processFiles(install, os.path.join(destdir, prefix), 'src/usr/', {
     })
 
 # install manual
-processFiles(install, os.path.join(destdir, mandir), 'src/usr/share/man/', {
+processFiles(install, os.path.join(destdir, mandir[1:]), 'src/usr/share/man/', {
         'man1/diffuse.1': [ ('/usr/', prefix), ('/etc/', sysconfdir) ]
     })
 
 # install files to sysconfdir
-processFiles(install, os.path.join(destdir, examplesdir), 'src/etc/', { 'diffuserc': [ ('/etc/', sysconfdir), ('../usr', relpath(sysconfdir, prefix)) ] })
+processFiles(install, os.path.join(destdir, examplesdir[1:]), 'src/etc/', { 'diffuserc': [ ('/etc/', sysconfdir), ('../usr', relpath(sysconfdir, prefix)) ] })
 
 # install translations
-processTranslations(install, os.path.join(destdir, prefix))
+processTranslations(install, os.path.join(destdir, prefix[1:]))
 
 if not install:
     # remove directories we own
