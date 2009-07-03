@@ -1,6 +1,8 @@
 [Desktop Entry]
 Name=Diffuse Merge Tool
+Name[de]=Diffuse Mischwerkzeug
 Comment=Graphical tool for merging and comparing text files
+Comment[de]=Werzeug zum Mischen und Vergleichen von Textdateien
 Exec=diffuse -s %F
 Icon=diffuse
 Terminal=false
