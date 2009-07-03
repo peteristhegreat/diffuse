@@ -735,5 +735,4 @@ msgstr "_Ansicht"
 #: ../src/usr/bin/diffuse:4981
 msgid "translator_credits"
 msgstr ""
-"German:\n"
 "Henri Menke <henrimenke4@aim.com>"

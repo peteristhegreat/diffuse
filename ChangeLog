@@ -1,10 +1,12 @@
+Diffuse 0.3.4 - 2009-07-03
+- syntax highlighting for .plist, GLSL, SConscript, and SConstruct files
 - status bar now explains how to navigate between modes
 - added labels to indicate syntax highlighting rules, encoding, and format
-- fixed bug that broke CVS support
 - Subversion 1.6 support
 - added Henri Menke's German translation
 - added '--examplesdir=' and '--mandir=' options to install.py
 - renamed the '--python-interpreter=' installer option to '--pythonbin='
+- minor bug fixes
 
 Diffuse 0.3.3 - 2009-04-13
 - fixed a bug handling the backspace key with the cursor in the first column

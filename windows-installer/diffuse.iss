@@ -4,13 +4,18 @@
 
 [Setup]
 AppName=Diffuse Merge Tool
-AppVerName=Diffuse 0.3.3
+AppVerName=Diffuse 0.3.4
 DefaultDirName={pf}\Diffuse
 DefaultGroupName=Diffuse
 UninstallDisplayIcon={app}\diffusew.exe
 Compression=lzma
 SolidCompression=yes
 OutputDir=.
+ShowLanguageDialog=auto
+
+[Languages]
+Name: "en"; MessagesFile: "compiler:Default.isl"
+Name: "de"; MessagesFile: "compiler:Languages\German.isl"
 
 [Files]
 Source: "dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
