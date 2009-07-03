@@ -3371,8 +3371,7 @@ class FileDiffViewer(gtk.Table):
                 gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).request_text(self.receive_clipboard_text_cb)
         elif event.button == 3:
             # right mouse button, raise context sensitive menu
-            flag = (self.mode == LINE_MODE and (f == self.current_pane + 1 or f == self.current_pane - 1))
-            can_align = (flag or self.mode == ALIGN_MODE)
+            can_align = (self.mode == LINE_MODE and (f == self.current_pane + 1 or f == self.current_pane - 1))
             can_isolate = (self.mode == LINE_MODE and f == self.current_pane)
             can_merge = (self.mode == LINE_MODE and f != self.current_pane)
             can_select = ((self.mode == LINE_MODE or self.mode == CHAR_MODE) and f == self.current_pane)
