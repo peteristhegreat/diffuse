@@ -78,7 +78,8 @@ syntax_pattern translate_replace translate_replace perl_escapedchar '(\\([0-7]{1
 syntax_pattern translate_replace translate_replace perl_regex '.[^\\/]*'
 
 # punctuation
-syntax_pattern normal normal perl_punctuation '[=\(,~!&\|\^;\[\{\}<>\+\-\*\.:]+'
+syntax_pattern normal normal perl_punctuation '[=\(,~!&\|\^;\[\{\}<>\+\-\*:]+'
+syntax_pattern normal normal perl_punctuation '\.'
 syntax_pattern normal expr perl_punctuation '[\)\]]+'
 syntax_pattern expr normal perl_punctuation '/'
 

@@ -55,8 +55,8 @@ syntax_pattern normal normal objc_keyword '@(catch|class|dynamic|encode|end|fina
 syntax_pattern normal normal objc_keyword '\b(_cmd|asm|break|case|catch|const_cast|continue|default|delete|do|dynamic_cast|else|for|friend|goto|if|new|operator|private|protected|public|reinterpret_cast|return|self|sizeof|static_cast|super|switch|this|throw|try|typeid|using|while)\b'
 
 # punctuation
-syntax_pattern normal normal objc_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\.\?]+'
-syntax_pattern normal normal objc_punctuation '/'
+syntax_pattern normal normal objc_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\?]+'
+syntax_pattern normal normal objc_punctuation '[/\.]'
 
 # parsing optimisation
 syntax_pattern normal normal text '[a-z_][a-z_0-9]*' ignorecase

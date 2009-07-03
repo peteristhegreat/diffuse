@@ -1,7 +1,7 @@
 # Python syntax file for Diffuse
 # Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax Python normal text
-syntax_files Python '^(.*\.pyw?|Sconstruct)$'
+syntax_files Python '^(.*\.pyw?|Sconscript|(S[Cc]|sc)onstruct)$'
 
 # whitespace/comments
 syntax_pattern normal normal text '[ \t\r\n]+'
@@ -56,7 +56,8 @@ syntax_pattern declaration normal python_function '\b[a-z_][a-z_0-9]*\b' ignorec
 syntax_pattern declaration normal text ''
 
 # punctuation
-syntax_pattern normal normal python_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\.\/]+'
+syntax_pattern normal normal python_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\/]+'
+syntax_pattern normal normal python_punctuation '\.'
 
 # parsing optimisation
 syntax_pattern normal normal text '[a-z_][a-z_0-9]*' ignorecase

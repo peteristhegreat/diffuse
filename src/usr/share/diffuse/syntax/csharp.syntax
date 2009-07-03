@@ -45,8 +45,8 @@ syntax_pattern normal normal csharp_type '\b(abstract|bool|byte|char|class|const
 syntax_pattern normal normal csharp_keyword '\b(as|base|break|case|catch|checked|continue|default|do|else|explicit|finally|fixed|for|foreach|goto|if|implicit|in|is|lock|new|operator|ref|return|sizeof|stackalloc|switch|this|throw|try|typeof|unchecked|unsafe|while)\b'
 
 # punctuation
-syntax_pattern normal normal csharp_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\.\?]+'
-syntax_pattern normal normal csharp_punctuation '/'
+syntax_pattern normal normal csharp_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\?]+'
+syntax_pattern normal normal csharp_punctuation '[/\.]'
 
 # parsing optimisation
 syntax_pattern normal normal text '@?[a-z_][a-z_0-9]*' ignorecase

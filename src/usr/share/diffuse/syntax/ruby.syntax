@@ -71,8 +71,8 @@ syntax_pattern optional optional ruby_optional '.[^\|]*'
 
 # punctuation
 syntax_pattern normal normal ruby_punctuation '[\[\{\}<>;=\(,~!&\^%\?\+\-\*\.]+'
+syntax_pattern normal normal ruby_punctuation '(\.|:+)'
 syntax_pattern normal expr ruby_punctuation '[\)\]]+'
-syntax_pattern normal normal ruby_punctuation '[:]+'
 syntax_pattern expr normal ruby_punctuation '[/\|]+'
 
 # constants

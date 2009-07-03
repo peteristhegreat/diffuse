@@ -52,8 +52,8 @@ syntax_pattern jsp jsp jsp_type '\b(abstract|boolean|byte|char|class|const|doubl
 syntax_pattern jsp jsp jsp_keyword '\b(assert|break|case|catch|continue|default|do|else|extends|finally|for|goto|if|implements|instanceof|new|return|strictfp|super|switch|this|throw|throws|try|while)\b'
 
 # punctuation
-syntax_pattern jsp jsp jsp_punctuation '[!~\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\.\?]+'
-syntax_pattern jsp jsp jsp_punctuation '[%/]'
+syntax_pattern jsp jsp jsp_punctuation '[!~\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\?]+'
+syntax_pattern jsp jsp jsp_punctuation '[%/\.]'
 
 # parsing optimisation
 syntax_pattern jsp jsp text '[a-z_][a-z_0-9]*' ignorecase

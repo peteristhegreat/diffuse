@@ -49,8 +49,8 @@ syntax_pattern php php php_type '\b(abstract|array|bool|boolean|class|const|doub
 syntax_pattern php php php_variable '\$+[a-z_\x7f-\xff][a-z0-9_\x7f-\xff]*' ignorecase
 
 # punctuation
-syntax_pattern php php php_punctuation '[@!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\.]+'
-syntax_pattern php php php_punctuation '[/\?]'
+syntax_pattern php php php_punctuation '[@!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,]+'
+syntax_pattern php php php_punctuation '[/\?\.]'
 
 # optimisation
 syntax_pattern php php text '[a-z_0-9]+' ignorecase

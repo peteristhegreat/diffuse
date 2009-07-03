@@ -45,8 +45,8 @@ syntax_pattern normal normal verilog_type '\b(defparam|inout|input|integer|outpu
 syntax_pattern normal normal verilog_keyword '\b(always|and|assign|attribute|begin|buf|bufif0|bufif1|case|casex|casez|cmos|deassign|default|disable|edge|else|end|endattribute|endcase|endfunction|endmodule|endprimitive|endspecify|endtable|endtask|event|for|force|forever|fork|function|highz0|highz1|if|ifnone|initial|join|medium|module|large|macromodule|nand|negedge|nmos|nor|not|notif0|notif1|or|pmos|posedge|primitive|pull0|pull1|pulldown|pullup|rcmos|realtime|release|repeat|rnmos|rpmos|rtran|rtranif0|rtranif1|scalared|signed|small|specify|specparam|strength|strong0|strong1|table|task|tran|tranif0|tranif1|unsigned|vectored|wait|weak0|weak1|while|xnor|xor)\b'
 
 # punctuation
-syntax_pattern normal normal verilog_punctuation '[\[\]\(\)!~&\|\^\+\-\{\}\*%<=>\?:,;@#\.]+'
-syntax_pattern normal normal verilog_punctuation '/'
+syntax_pattern normal normal verilog_punctuation '[\[\]\(\)!~&\|\^\+\-\{\}\*%<=>\?:,;@#]+'
+syntax_pattern normal normal verilog_punctuation '[/\.]'
 
 # parsing optimisation
 syntax_pattern normal normal verilog_variable '\$[a-z_0-9\$]*' ignorecase
