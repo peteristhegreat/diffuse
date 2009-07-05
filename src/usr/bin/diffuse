@@ -4294,8 +4294,10 @@ class FileDiffViewer(gtk.Table):
 
     # callback used when receiving clipboard text
     def receive_clipboard_text_cb(self, clipboard, text, data):
+        self.openUndoBlock()
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             self.replaceText(self.prefs.convertToUnicode([ text ])[0][0])
+        self.closeUndoBlock()
 
     # 'paste' action
     def paste(self):
