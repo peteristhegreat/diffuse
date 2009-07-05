@@ -2017,9 +2017,8 @@ class FileDiffViewer(gtk.Table):
                 return self.modified_text
             return self.text
 
-    def __init__(self, headers, footers, prefs):
-        # figure out how many pane panes we should have
-        n = len(headers)
+    def __init__(self, n, prefs):
+        # verify we have a valid number of panes
         if n < 2:
             raise ValueError('Invalid number of panes')
 
@@ -2130,9 +2129,6 @@ class FileDiffViewer(gtk.Table):
             pane = FileDiffViewer.Pane()
             self.panes.append(pane)
 
-            # pane header
-            self.attach(headers[i], i, i + 1, 0, 1, gtk.FILL, gtk.FILL)
-
             # pane contents
             sw = ScrolledWindow()
             darea = sw.darea
@@ -2149,9 +2145,6 @@ class FileDiffViewer(gtk.Table):
                 sw.set_vadjustment(self.vadj)
             self.attach(sw, i, i + 1, 1, 2)
             sw.show()
-
-            # pane footer
-            self.attach(footers[i], i, i + 1, 2, 3, gtk.FILL, gtk.FILL)
 
         self.vadj.connect('value_changed', self.map_vadj_changed_cb)
 
@@ -5185,26 +5178,37 @@ class Diffuse(gtk.Window):
                 self.encoding.set_text(s)
 
         def __init__(self, n, prefs, title):
-            self.headers = headers = [ Diffuse.FileDiffViewer.PaneHeader() for i in range(n) ]
-            self.footers = footers = [ Diffuse.FileDiffViewer.PaneFooter() for i in range(n) ]
-            FileDiffViewer.__init__(self, headers, footers, prefs)
+            FileDiffViewer.__init__(self, n, prefs)
+
             self.title = title
             self.status = ''
+
+            self.headers = []
+            self.footers = []
+            for i in range(n):
+                # pane header
+                w = Diffuse.FileDiffViewer.PaneHeader()
+                self.headers.append(w)
+                self.attach(w, i, i + 1, 0, 1, gtk.FILL, gtk.FILL)
+                w.connect('title_changed', self.title_changed_cb)
+                w.connect('open', self.open_file_button_cb, i)
+                w.connect('reload', self.reload_file_button_cb, i)
+                w.connect('save', self.save_file_button_cb, i)
+                w.connect('save_as', self.save_file_as_button_cb, i)
+                w.show()
+
+                # pane footer
+                w = Diffuse.FileDiffViewer.PaneFooter()
+                self.footers.append(w)
+                self.attach(w, i, i + 1, 2, 3, gtk.FILL, gtk.FILL)
+                w.show()
 
             self.connect('swapped_panes', self.swapped_panes_cb)
             self.connect('num_edits_changed', self.num_edits_changed_cb)
             self.connect('mode_changed', self.mode_changed_cb)
-            for i, h in enumerate(headers):
-                h.connect('title_changed', self.title_changed_cb)
-                h.connect('open', self.open_file_button_cb, i)
-                h.connect('reload', self.reload_file_button_cb, i)
-                h.connect('save', self.save_file_button_cb, i)
-                h.connect('save_as', self.save_file_as_button_cb, i)
-                h.show()
-            for footer in footers:
-                self.connect('cursor_changed', self.cursor_changed_cb)
-                self.connect('format_changed', self.format_changed_cb)
-                footer.show()
+            self.connect('cursor_changed', self.cursor_changed_cb)
+            self.connect('format_changed', self.format_changed_cb)
+
             for i, darea in enumerate(self.dareas):
                 darea.drag_dest_set(gtk.DEST_DEFAULT_ALL, [ ('text/uri-list', 0, 0) ], gtk.gdk.ACTION_COPY)
                 darea.connect('drag_data_received', self.drag_data_received_cb, i)
