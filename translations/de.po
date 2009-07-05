@@ -331,6 +331,14 @@ msgstr "Neues _2-Wege-Datei-Mischen"
 msgid "New _3-Way File Merge"
 msgstr "Neues _3-Wege-Datei-Mischen"
 
+#: ../src/usr/bin/diffuse:5740
+msgid "New 2-Way File Merge"
+msgstr "Neues 2-Wege-Datei-Mischen"
+
+#: ../src/usr/bin/diffuse:5741
+msgid "New 3-Way File Merge"
+msgstr "Neues 3-Wege-Datei-Mischen"
+
 #: ../src/usr/bin/diffuse:5705
 msgid "Next Difference"
 msgstr "Nächster Unterschied"

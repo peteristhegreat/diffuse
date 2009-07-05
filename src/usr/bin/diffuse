@@ -5590,10 +5590,38 @@ class Diffuse(gtk.Window):
         vbox = gtk.VBox()
 
         # create some custom icons for merging
+        DIFFUSE_STOCK_NEW_2WAY_MERGE = 'diffuse-new-2way-merge'
+        DIFFUSE_STOCK_NEW_3WAY_MERGE = 'diffuse-new-3way-merge'
         DIFFUSE_STOCK_LEFT_RIGHT = 'diffuse-left-right'
         DIFFUSE_STOCK_RIGHT_LEFT = 'diffuse-right-left'
 
         factory = gtk.IconFactory()
+        # render the base item used to indicate a new document
+        p0 = self.render_icon(gtk.STOCK_NEW, gtk.ICON_SIZE_LARGE_TOOLBAR)
+        w, h = p0.get_width(), p0.get_height()
+
+        # render new 2-way merge icon
+        s = 0.8
+        sw, sh = int(s * w), int(s * h)
+        w1, h1 = w - sw, h - sh
+        p = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, w, h)
+        p.fill(0)
+        p0.composite(p, 0, 0, sw, sh, 0, 0, s, s, gtk.gdk.INTERP_BILINEAR, 255)
+        p0.composite(p, w1, h1, sw, sh, w1, h1, s, s, gtk.gdk.INTERP_BILINEAR, 255)
+        factory.add(DIFFUSE_STOCK_NEW_2WAY_MERGE, gtk.IconSet(p))
+
+        # render new 3-way merge icon
+        s = 0.7
+        sw, sh = int(s * w), int(s * h)
+        w1, h1 = (w - sw) / 2, (h - sh) / 2
+        w2, h2 = w - sw, h - sh
+        p = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, w, h)
+        p.fill(0)
+        p0.composite(p, 0, 0, sw, sh, 0, 0, s, s, gtk.gdk.INTERP_BILINEAR, 255)
+        p0.composite(p, w1, h1, sw, sh, w1, h1, s, s, gtk.gdk.INTERP_BILINEAR, 255)
+        p0.composite(p, w2, h2, sw, sh, w2, h2, s, s, gtk.gdk.INTERP_BILINEAR, 255)
+        factory.add(DIFFUSE_STOCK_NEW_3WAY_MERGE, gtk.IconSet(p))
+
         # render the left and right arrow we will use in our custom icons
         p0 = self.render_icon(gtk.STOCK_GO_FORWARD, gtk.ICON_SIZE_LARGE_TOOLBAR)
         p1 = self.render_icon(gtk.STOCK_GO_BACK, gtk.ICON_SIZE_LARGE_TOOLBAR)
@@ -5604,7 +5632,7 @@ class Diffuse(gtk.Window):
         # create merge from left then right icon
         p = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, w, h)
         p.fill(0)
-        p1.composite(p, w1, h1, sw, sh, w1, w - sh, s, s, gtk.gdk.INTERP_BILINEAR, 255)
+        p1.composite(p, w1, h1, sw, sh, w1, h1, s, s, gtk.gdk.INTERP_BILINEAR, 255)
         p0.composite(p, 0, 0, sw, sh, 0, 0, s, s, gtk.gdk.INTERP_BILINEAR, 255)
         factory.add(DIFFUSE_STOCK_LEFT_RIGHT, gtk.IconSet(p))
 
@@ -5703,6 +5731,8 @@ class Diffuse(gtk.Window):
         # create button bar
         hbox = gtk.HBox()
         appendButtons(hbox, gtk.ICON_SIZE_LARGE_TOOLBAR, [
+           [ DIFFUSE_STOCK_NEW_2WAY_MERGE, self.new_2way_file_merge_cb, None, _('New 2-Way File Merge') ],
+           [ DIFFUSE_STOCK_NEW_3WAY_MERGE, self.new_3way_file_merge_cb, None, _('New 3-Way File Merge') ],
            [ gtk.STOCK_EXECUTE, self.button_cb, 'realign_all', _('Realign All') ],
            [],
            [ gtk.STOCK_GOTO_TOP, self.button_cb, 'first_difference', _('First Difference') ],
