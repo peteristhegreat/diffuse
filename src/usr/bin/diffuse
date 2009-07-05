@@ -3361,7 +3361,9 @@ class FileDiffViewer(gtk.Table):
             # middle mouse button, paste primary selection
             if self.mode == CHAR_MODE and f == self.current_pane:
                 self.button_press(f, x, y, False)
+                self.openUndoBlock()
                 gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).request_text(self.receive_clipboard_text_cb)
+                self.closeUndoBlock()
         elif event.button == 3:
             # right mouse button, raise context sensitive menu
             can_align = (self.mode == LINE_MODE and (f == self.current_pane + 1 or f == self.current_pane - 1))
@@ -4287,10 +4289,8 @@ class FileDiffViewer(gtk.Table):
 
     # callback used when receiving clipboard text
     def receive_clipboard_text_cb(self, clipboard, text, data):
-        self.openUndoBlock()
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             self.replaceText(self.prefs.convertToUnicode([ text ])[0][0])
-        self.closeUndoBlock()
 
     # 'paste' action
     def paste(self):
