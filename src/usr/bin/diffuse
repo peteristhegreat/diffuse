@@ -703,11 +703,9 @@ class Preferences:
 
         if isWindows():
             font = 'Courier 10'
-            git_bin = 'git.cmd'
             svk_bin = 'svk.bat'
         else:
             font = 'Monospace 10'
-            git_bin = 'git'
             svk_bin = 'svk'
 
         # self.template describes how preference dialogue layout
@@ -782,7 +780,7 @@ class Preferences:
         vcs = [ ('bzr', 'Bazaar', 'bzr', '-1'),
                 ('cvs', 'CVS', 'cvs', 'BASE'),
                 ('darcs', 'Darcs', 'darcs', ''),
-                ('git', 'Git', git_bin, 'HEAD'),
+                ('git', 'Git', 'git', 'HEAD'),
                 ('hg', 'Mercurial', 'hg', 'tip'),
                 ('mtn', 'Monotone', 'mtn', 'h:'),
                 ('svn', 'Subversion', 'svn', 'BASE'),
@@ -1185,7 +1183,9 @@ def bashEscape(s):
     return "'" + s.replace("'", "'\\''") + "'"
 
 # use popen to read the output of a command
-def popenReadLines(dn, cmd, prefs, bash_pref):
+def popenReadLines(dn, cmd, prefs, bash_pref, success_results=None):
+    if success_results is None:
+        success_results = [ 0 ]
     if isWindows() and prefs.getBool(bash_pref):
         # launch the command from a bash shell is requested
         cmd = [ prefs.convertToNativePath('/bin/bash.exe'), '-l', '-c', 'cd %s; %s' % (bashEscape(dn), ' '.join([ bashEscape(arg) for arg in cmd ])) ]
@@ -1204,10 +1204,43 @@ def popenReadLines(dn, cmd, prefs, bash_pref):
     # read the command's output
     ss = readlines(fd)
     fd.close()
-    if proc.wait() != 0:
+    if proc.wait() not in success_results:
         raise IOError('Command failed.')
     return ss
 
+# utility class to help support Git
+# represents a set of files and folders of interest for "git status"
+class _GitFolderSet:
+    def __init__(self, names):
+        self.folders = [ os.path.abspath(name) for name in names ]
+
+    # returns True if the given abspath is a file that should be included in
+    # the interesting "git status" subset
+    def contains(self, abspath):
+        for f in self.folders:
+            if abspath == f:
+                return True
+            if not f.endswith(os.sep):
+                f += os.sep
+            if abspath.startswith(f):
+                return True
+        return False
+
+# This class holds the set of supported version control systems.  Each version
+# control system should implement:
+#
+#   __init__():
+#       the object will initialised with the repository's root folder
+#
+#   getFileTemplate():
+#       indicates which revisions to display for a file when none were
+#       explicitly requested
+#
+#   getFolderTemplate():
+#       indicates which file revisions to display for a set of folders
+#
+#   getRevision():
+#       returns the contents of the specified file revision
 class VCSs:
     # Bazaar support
     class Bzr:
@@ -1364,59 +1397,70 @@ class VCSs:
         def getFileTemplate(self, prefs, name):
             return [ (name, prefs.getString('git_default_revision')), (name, None) ]
 
+        def _extractPath(self, s, prefs):
+            return os.path.join(self.root, prefs.convertToNativePath(s.strip()))
+
         def getFolderTemplate(self, prefs, names):
+            fs = _GitFolderSet(names)
             result = []
             pwd, isabs = os.path.abspath(os.curdir), False
             args = [ prefs.getString('git_bin'), 'status' ]
             for name in names:
                 isabs |= os.path.isabs(name)
-                args.append(os.path.join(os.curdir, relpath(self.root, os.path.abspath(name))).replace(os.sep, '/'))
-            ss = strip_eols(popenReadLines(self.root, args, prefs, 'git_bash'))
+            # 'git status' will return 1 when a commit would fail
+            ss = strip_eols(popenReadLines(self.root, args, prefs, 'git_bash', [0, 1]))
             i = 0
+            unmerged, removed, added, modified, renamed = {}, {}, {}, {}, {}
             while i < len(ss):
                 s = ss[i]
                 i += 1
-                if s.startswith('# Changes to be committed:'):
+                if s.startswith('# Untracked files:'):
                     break
-            removed, modified, added, renamed = {}, {}, {}, {}
-            while i < len(ss):
-                s = ss[i]
-                i += 1
-                if s.startswith('#\tdeleted:    '):
-                    k = os.path.join(self.root, prefs.convertToNativePath(s[14:]))
-                    if not isabs:
-                        k = relpath(pwd, k)
-                    removed[k] = [ (k, prefs.getString('git_default_revision')), (None, None) ]
-                elif s.startswith('#\tnew file:   '):
-                    k = os.path.join(self.root, prefs.convertToNativePath(s[14:]))
-                    if not isabs:
-                        k = relpath(pwd, k)
-                    added[k] = [ (None, None), (k, None) ]
-                elif s.startswith('#\tmodified:   '):
-                    k = os.path.join(self.root, prefs.convertToNativePath(s[14:]))
-                    if not isabs:
-                        k = relpath(pwd, k)
-                    modified[k] = [ (k, None) ]
-                elif s.startswith('#\trenamed:    '):
-                    keys = s[14:].split(' -> ')
-                    if len(keys) == 2:
-                        k0 = os.path.join(self.root, prefs.convertToNativePath(keys[0]))
-                        k1 = os.path.join(self.root, prefs.convertToNativePath(keys[1]))
+                elif s.startswith('#\tunmerged:'):
+                    k = self._extractPath(s[11:], prefs)
+                    if fs.contains(k):
                         if not isabs:
-                            k0 = relpath(pwd, k0)
-                            k1 = relpath(pwd, k1)
-                        renamed[k1] = [ (k0, prefs.getString('git_default_revision')), (k1, None) ]
-                elif not s.startswith('#  ') and s != '#':
-                    break
+                            k = relpath(pwd, k)
+                        unmerged[k] = [ (k, 'MERGE_HEAD'), (k, None), (k, prefs.getString('git_default_revision')) ]
+                elif s.startswith('#\tdeleted:'):
+                    k = self._extractPath(s[10:], prefs)
+                    if fs.contains(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
+                        removed[k] = [ (k, prefs.getString('git_default_revision')), (None, None) ]
+                elif s.startswith('#\tnew file:'):
+                    k = self._extractPath(s[11:], prefs)
+                    if fs.contains(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
+                        added[k] = [ (None, None), (k, None) ]
+                elif s.startswith('#\tmodified:'):
+                    k = self._extractPath(s[11:], prefs)
+                    if fs.contains(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
+                        modified[k] = [ (k, None) ]
+                elif s.startswith('#\trenamed:'):
+                    keys = s[10:].split(' -> ')
+                    if len(keys) == 2:
+                        k0 = self._extractPath(keys[0], prefs)
+                        k1 = self._extractPath(keys[1], prefs)
+                        if fs.contains(k0) or fs.contains(k1):
+                            if not isabs:
+                                k0 = relpath(pwd, k0)
+                                k1 = relpath(pwd, k1)
+                            renamed[k1] = [ (k0, prefs.getString('git_default_revision')), (k1, None) ]
             # sort the results
             r = {}
-            for m in removed, modified, added, renamed:
+            for m in unmerged, removed, added, modified, renamed:
                 for k in m.keys():
                     r[k] = None
             for k in sorted(r.keys()):
-                for m in removed, modified, added, renamed:
+                for m in unmerged, removed, added, modified, renamed:
                     if m.has_key(k):
                         result.append(m[k])
+                        # break so we open no more than one tab per file
+                        break
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -5733,8 +5777,8 @@ class Diffuse(gtk.Window):
         appendButtons(hbox, gtk.ICON_SIZE_LARGE_TOOLBAR, [
            [ DIFFUSE_STOCK_NEW_2WAY_MERGE, self.new_2way_file_merge_cb, None, _('New 2-Way File Merge') ],
            [ DIFFUSE_STOCK_NEW_3WAY_MERGE, self.new_3way_file_merge_cb, None, _('New 3-Way File Merge') ],
-           [ gtk.STOCK_EXECUTE, self.button_cb, 'realign_all', _('Realign All') ],
            [],
+           [ gtk.STOCK_EXECUTE, self.button_cb, 'realign_all', _('Realign All') ],
            [ gtk.STOCK_GOTO_TOP, self.button_cb, 'first_difference', _('First Difference') ],
            [ gtk.STOCK_GO_UP, self.button_cb, 'previous_difference', _('Previous Difference') ],
            [ gtk.STOCK_GO_DOWN, self.button_cb, 'next_difference', _('Next Difference') ],
@@ -5751,6 +5795,8 @@ class Diffuse(gtk.Window):
            [ gtk.STOCK_COPY, self.button_cb, 'copy', _('Copy') ],
            [ gtk.STOCK_PASTE, self.button_cb, 'paste', _('Paste') ],
            [ gtk.STOCK_CLEAR, self.button_cb, 'clear_edits', _('Clear Edits') ] ])
+        # avoid the button bar from dictating the minimum window size
+        hbox.set_size_request(0, hbox.get_size_request()[1])
         vbox.pack_start(hbox, False, False, 0)
         hbox.show()
 
