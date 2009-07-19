@@ -410,8 +410,128 @@
     </sect1>
   </chapter>
 
+  <chapter id="version-control">
+    <title>Version Control</title>
+
+    <para>
+      Diffuse can retrieve file revisions from several version control systems
+      via their command line interface.  The Microsoft Windows build of Diffuse
+      is able to use both the Cygwin and native versions of the supported
+      version control systems.  When using Diffuse with Cygwin, ensure
+      Diffuse's Cygwin preferences correctly describe your system.  If the
+      <guilabel>Update paths for Cygwin</guilabel> preference exists for a
+      version control system, it must be enabled to use the Cygwin version.
+    </para>
+
+    <para>
+      Version control systems are sensitive to the system path and other
+      environment variable settings.  The <guilabel>Launch from a Bash login
+      shell</guilabel> preference may be used to easily set the environment for
+      Cygwin version control systems.
+    </para>
+
+    <sect1 id="version-control-uncommitted-modifications">
+      <title>Viewing Uncommitted Modifications</title>
+
+      <para>
+        The <userinput>-m</userinput> option will cause Diffuse to open
+        comparison tabs for each file the version control system indicates has
+        uncommitted modifications.  This is convenient for reviewing all
+        changes before commiting or resolving a merge conflict.  If no paths
+        are specified the current working directory will be used.  For example,
+        view all of your uncommitted modifications with this command line:
+      </para>
+
+      <para>
+        <screen><prompt>$</prompt> <userinput>diffuse -m</userinput></screen>
+      </para>
+
+      <para>
+        The default revision of a file will be used for comparison if only one
+        file is specified.  For example, this will display a 2-way merge
+        between the default revision of <filename>foo.C</filename> and the
+        local <filename>foo.C</filename> file:
+      </para>
+
+      <para>
+        <screen><prompt>$</prompt> <userinput>diffuse foo.C</userinput></screen>
+      </para>
+    </sect1>
+
+    <sect1 id="version-control-specifying-revisions">
+      <title>Specifying Revisions</title>
+
+      <para>
+        The <userinput>-r</userinput> option may also be used to explicitly
+        specify a particular file revision.  Any revision specifier understood
+        by the version control system may be used.  The local file will be used
+        for comparison if only one file revision is specified.  For example,
+        this will display a 2-way merge between revision 123 of
+        <filename>foo.C</filename> and the local <filename>foo.C</filename>
+        file:
+      </para>
+
+      <para>
+        <screen><prompt>$</prompt> <userinput>diffuse -r 123 foo.C</userinput></screen>
+      </para>
+
+      <para>
+        Multiple file revisions can be compared by specifying multiple
+        <userinput>-r</userinput> options.  For example, this will display a
+        2-way merge between revision 123 of <filename>foo.C</filename> and
+        revision 321 of <filename>foo.C</filename>:
+      </para>
+
+      <para>
+        <screen><prompt>$</prompt> <userinput>diffuse -r 123 -r 321 foo.C</userinput></screen>
+      </para>
+
+      <para>
+        Local files can be mixed with files from the version control system.
+        For example, this will display a 3-way merge between revision
+        MERGE_HEAD of <filename>foo.C</filename>, the local
+        <filename>foo.C</filename> file, and revision HEAD of
+        <filename>foo.C</filename>:
+      </para>
+
+      <para>
+        <screen><prompt>$</prompt> <userinput>diffuse -r MERGE_HEAD foo.C foo.C -r HEAD foo.C</userinput></screen>
+      </para>
+
+      <para>
+        For the <userinput>-c</userinput> option may be used to easily specify
+        a pair of numerically sequential revision numbers.  For example, this
+        will display a 2-way merge between revision 122 of
+        <filename>foo.C</filename> and revision 123 of
+        <filename>foo.C</filename>:
+      </para>
+
+      <para>
+        <screen><prompt>$</prompt> <userinput>diffuse -c 123 foo.C</userinput></screen>
+      </para>
+
+      <para>
+        Diffuse does not limit the number of panes that can be used for
+        comparing files.  The inputs to a Git octopus merge could be viewed
+        with a command line like this:
+      </para>
+
+      <para>
+        <screen><prompt>$</prompt> <userinput>diffuse -r HEAD^1 -r HEAD^2 -r HEAD^3 -r HEAD^4 -r HEAD^5 foo.C</userinput></screen>
+      </para>
+    </sect1>
+  </chapter>
+
   <chapter id="resources">
     <title>Resources</title>
+
+    <para>
+      Resources can be used to customise several aspects of Diffuse's
+      appearance and behaviour such as changing the colours used in the user
+      interface, customising the keyboard shortcuts, adding or replacing syntax
+      highlighting rules, or changing the mapping from file extensions to
+      syntax highlighting rules.
+    </para>
 
     <para>
       When &app; is started, it will read commands from the system wide

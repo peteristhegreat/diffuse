@@ -158,7 +158,118 @@ Redo
 menu items can be used to undo and redo the previously preformed operations\&. All changes to a set of lines can be reverted using the
 Clear Edits
 menu item regardless of the order the edits were performed\&.
+.SH "VERSION CONTROL"
+.PP
+Diffuse can retrieve file revisions from several version control systems via their command line interface\&. The Microsoft Windows build of Diffuse is able to use both the Cygwin and native versions of the supported version control systems\&. When using Diffuse with Cygwin, ensure Diffuse\'s Cygwin preferences correctly describe your system\&. If the
+Update paths for Cygwin
+preference exists for a version control system, it must be enabled to use the Cygwin version\&.
+.PP
+Version control systems are sensitive to the system path and other environment variable settings\&. The
+Launch from a Bash login shell
+preference may be used to easily set the environment for Cygwin version control systems\&.
+.SS "Viewing Uncommitted Modifications"
+.PP
+The
+\fB\-m\fR
+option will cause Diffuse to open comparison tabs for each file the version control system indicates has uncommitted modifications\&. This is convenient for reviewing all changes before commiting or resolving a merge conflict\&. If no paths are specified the current working directory will be used\&. For example, view all of your uncommitted modifications with this command line:
+.PP
+
+.sp
+.RS 4
+.nf
+$ \fBdiffuse \-m\fR
+.fi
+.RE
+.PP
+The default revision of a file will be used for comparison if only one file is specified\&. For example, this will display a 2\-way merge between the default revision of
+\fIfoo\&.C\fR
+and the local
+\fIfoo\&.C\fR
+file:
+.PP
+
+.sp
+.RS 4
+.nf
+$ \fBdiffuse foo\&.C\fR
+.fi
+.RE
+.sp
+.SS "Specifying Revisions"
+.PP
+The
+\fB\-r\fR
+option may also be used to explicitly specify a particular file revision\&. Any revision specifier understood by the version control system may be used\&. The local file will be used for comparison if only one file revision is specified\&. For example, this will display a 2\-way merge between revision 123 of
+\fIfoo\&.C\fR
+and the local
+\fIfoo\&.C\fR
+file:
+.PP
+
+.sp
+.RS 4
+.nf
+$ \fBdiffuse \-r 123 foo\&.C\fR
+.fi
+.RE
+.PP
+Multiple file revisions can be compared by specifying multiple
+\fB\-r\fR
+options\&. For example, this will display a 2\-way merge between revision 123 of
+\fIfoo\&.C\fR
+and revision 321 of
+\fIfoo\&.C\fR:
+.PP
+
+.sp
+.RS 4
+.nf
+$ \fBdiffuse \-r 123 \-r 321 foo\&.C\fR
+.fi
+.RE
+.PP
+Local files can be mixed with files from the version control system\&. For example, this will display a 3\-way merge between revision MERGE_HEAD of
+\fIfoo\&.C\fR, the local
+\fIfoo\&.C\fR
+file, and revision HEAD of
+\fIfoo\&.C\fR:
+.PP
+
+.sp
+.RS 4
+.nf
+$ \fBdiffuse \-r MERGE_HEAD foo\&.C foo\&.C \-r HEAD foo\&.C\fR
+.fi
+.RE
+.PP
+For the
+\fB\-c\fR
+option may be used to easily specify a pair of numerically sequential revision numbers\&. For example, this will display a 2\-way merge between revision 122 of
+\fIfoo\&.C\fR
+and revision 123 of
+\fIfoo\&.C\fR:
+.PP
+
+.sp
+.RS 4
+.nf
+$ \fBdiffuse \-c 123 foo\&.C\fR
+.fi
+.RE
+.PP
+Diffuse does not limit the number of panes that can be used for comparing files\&. The inputs to a Git octopus merge could be viewed with a command line like this:
+.PP
+
+.sp
+.RS 4
+.nf
+$ \fBdiffuse \-r HEAD^1 \-r HEAD^2 \-r HEAD^3 \-r HEAD^4 \-r HEAD^5 foo\&.C\fR
+.fi
+.RE
+.sp
 .SH "RESOURCES"
+.PP
+Resources can be used to customise several aspects of Diffuse\'s appearance and behaviour such as changing the colours used in the user interface, customising the keyboard shortcuts, adding or replacing syntax highlighting rules, or changing the mapping from file extensions to syntax highlighting rules\&.
 .PP
 When Diffuse is started, it will read commands from the system wide initialisation file
 \fI/etc/diffuserc\fR
