@@ -500,14 +500,14 @@
 
       <para>
         For the <userinput>-c</userinput> option may be used to easily specify
-        a pair of numerically sequential revision numbers.  For example, this
-        will display a 2-way merge between revision 122 of
-        <filename>foo.C</filename> and revision 123 of
+        a pair of numerically sequential revisions.  For example, this will
+        display a 2-way merge between revision 1.2.2 of
+        <filename>foo.C</filename> and revision 1.2.3 of
         <filename>foo.C</filename>:
       </para>
 
       <para>
-        <screen><prompt>$</prompt> <userinput>diffuse -c 123 foo.C</userinput></screen>
+        <screen><prompt>$</prompt> <userinput>diffuse -c 1.2.3 foo.C</userinput></screen>
       </para>
 
       <para>
