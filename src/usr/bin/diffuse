@@ -1208,14 +1208,15 @@ def popenReadLines(dn, cmd, prefs, bash_pref, success_results=None):
         raise IOError('Command failed.')
     return ss
 
-# utility class to help support Git
-# represents a set of files and folders of interest for "git status"
-class _GitFolderSet:
+# utility class to help support Git and Monotone
+# represents a set of files and folders of interest for "git status" or
+# "mtn automate inventory"
+class _VcsFolderSet:
     def __init__(self, names):
         self.folders = [ os.path.abspath(name) for name in names ]
 
     # returns True if the given abspath is a file that should be included in
-    # the interesting "git status" subset
+    # the interesting file subset
     def contains(self, abspath):
         for f in self.folders:
             if abspath == f:
@@ -1263,11 +1264,14 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'bzr_cygwin'))
+            # build list of interesting files
+            # files will not appear in more than one set
             removed, modified, added, renamed = {}, {}, {}, {}
             for s in strip_eols(popenReadLines(self.root, args, prefs, 'bzr_bash')):
                 if len(s) > 4:
                     k = s[4:]
                     if s[1] == 'D':
+                        # deleted file
                         k = prefs.convertToNativePath(k)
                         if not k.endswith(os.sep):
                             k = os.path.join(self.root, k)
@@ -1275,6 +1279,7 @@ class VCSs:
                                 k = relpath(pwd, k)
                             removed[k] = [ (k, prefs.getString('bzr_default_revision')), (None, None) ]
                     elif s[1] == 'N':
+                        # new file
                         k = prefs.convertToNativePath(k)
                         if not k.endswith(os.sep):
                             k = os.path.join(self.root, k)
@@ -1282,7 +1287,7 @@ class VCSs:
                                 k = relpath(pwd, k)
                             added[k] = [ (None, None), (k, None) ]
                     elif s[1] == 'M':
-                        # also conflict
+                        # modified file or merge conflict
                         k = prefs.convertToNativePath(k)
                         if not k.endswith(os.sep):
                             k = os.path.join(self.root, k)
@@ -1290,6 +1295,7 @@ class VCSs:
                                 k = relpath(pwd, k)
                             modified[k] = [ (k, None) ]
                     elif s[0] == 'R':
+                        # renamed file
                         k = k.split(' => ')
                         if len(k) == 2:
                             k0 = prefs.convertToNativePath(k[0])
@@ -1331,19 +1337,24 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'cvs_cygwin'))
+            # build list of interesting files
             for s in strip_eols(popenReadLines(self.root, args, prefs, 'cvs_bash')):
                 if len(s) > 2 and s[0] in 'ACMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
                     if not isabs:
                         k = relpath(pwd, k)
                     r[k] = s[0]
+            # sort the results
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'R':
+                    # deleted file
                     result.append( [ (k, 'HEAD'), (None, None) ] )
                 elif v == 'A':
+                    # new file
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'CM':
+                    # modified file or merge conflict
                     result.append( [ (k, None) ] )
             return result
 
@@ -1367,6 +1378,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'darcs_cygwin'))
+            # build list of interesting files
             for s in strip_eols(popenReadLines(self.root, args, prefs, 'darcs_bash')):
                 p = s.split(' ')
                 if len(p) >= 2 and s[0] in 'AMR':
@@ -1376,13 +1388,17 @@ class VCSs:
                         if not isabs:
                             k = relpath(pwd, k)
                         r[k] = s[0]
+            # sort the results
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'R':
+                    # deleted file
                     result.append( [ (k, prefs.getString('darcs_default_revision')), (None, None) ] )
                 elif v == 'A':
+                    # new file
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'M':
+                    # modified file or merge conflict
                     result.append( [ (k, None) ] )
             return result
 
@@ -1401,7 +1417,7 @@ class VCSs:
             return os.path.join(self.root, prefs.convertToNativePath(s.strip()))
 
         def getFolderTemplate(self, prefs, names):
-            fs = _GitFolderSet(names)
+            fs = _VcsFolderSet(names)
             result = []
             pwd, isabs = os.path.abspath(os.curdir), False
             args = [ prefs.getString('git_bin'), 'status' ]
@@ -1409,6 +1425,8 @@ class VCSs:
                 isabs |= os.path.isabs(name)
             # 'git status' will return 1 when a commit would fail
             ss = strip_eols(popenReadLines(self.root, args, prefs, 'git_bash', [0, 1]))
+            # build list of interesting files
+            # files may appear in more than one set
             i = 0
             unmerged, removed, added, modified, renamed = {}, {}, {}, {}, {}
             while i < len(ss):
@@ -1417,30 +1435,35 @@ class VCSs:
                 if s.startswith('# Untracked files:'):
                     break
                 elif s.startswith('#\tunmerged:'):
+                    # merge conflict
                     k = self._extractPath(s[11:], prefs)
                     if fs.contains(k):
                         if not isabs:
                             k = relpath(pwd, k)
                         unmerged[k] = [ (k, 'MERGE_HEAD'), (k, None), (k, prefs.getString('git_default_revision')) ]
                 elif s.startswith('#\tdeleted:'):
+                    # deleted file
                     k = self._extractPath(s[10:], prefs)
                     if fs.contains(k):
                         if not isabs:
                             k = relpath(pwd, k)
                         removed[k] = [ (k, prefs.getString('git_default_revision')), (None, None) ]
                 elif s.startswith('#\tnew file:'):
+                    # new file
                     k = self._extractPath(s[11:], prefs)
                     if fs.contains(k):
                         if not isabs:
                             k = relpath(pwd, k)
                         added[k] = [ (None, None), (k, None) ]
                 elif s.startswith('#\tmodified:'):
+                    # modified file
                     k = self._extractPath(s[11:], prefs)
                     if fs.contains(k):
                         if not isabs:
                             k = relpath(pwd, k)
                         modified[k] = [ (k, None) ]
                 elif s.startswith('#\trenamed:'):
+                    # renamed file
                     keys = s[10:].split(' -> ')
                     if len(keys) == 2:
                         k0 = self._extractPath(keys[0], prefs)
@@ -1482,19 +1505,24 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
+            # build list of interesting files
             for s in strip_eols(popenReadLines(self.root, args, prefs, 'hg_bash')):
                 if len(s) > 2 and s[0] in 'ADM':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
                     if not isabs:
                         k = relpath(pwd, k)
                     r[k] = s[0]
+            # sort the results
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'D':
+                    # deleted file
                     result.append( [ (k, prefs.getString('hg_default_revision')), (None, None) ] )
                 elif v == 'A':
+                    # new file
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'M':
+                    # modified file or merge conflict
                     result.append( [ (k, None) ] )
             return result
 
@@ -1511,38 +1539,69 @@ class VCSs:
             return [ (name, prefs.getString('mtn_default_revision')), (name, None) ]
 
         def getFolderTemplate(self, prefs, names):
+            fs = _VcsFolderSet(names)
             result = []
             pwd, isabs = os.path.abspath(os.curdir), False
-            args = [ prefs.getString('mtn_bin'), 'status' ]
+            args = [ prefs.getString('mtn_bin'), 'automate', 'inventory', '--no-ignored', '--no-unchanged', '--no-unknown' ]
             for name in names:
                 isabs |= os.path.isabs(name)
-                args.append(safeRelativePath(self.root, name, prefs, 'mtn_cygwin'))
-            removed, modified, added, renamed, old_name = {}, {}, {}, {}, None
-            for s in strip_eols(popenReadLines(self.root, args, prefs, 'mtn_bash')):
-                if len(s) > 11:
-                    k = os.path.join(self.root, prefs.convertToNativePath(s[11:]))
-                    if not isabs:
-                        k = relpath(pwd, k)
-                    # FIXME: prune dropped directories from results
-                    if not os.path.isdir(k):
-                        if s.startswith('  dropped  '):
+            # build list of interesting files
+            ss = strip_eols(popenReadLines(self.root, args, prefs, 'mtn_bash'))
+            removed, added, modified, renamed = {}, {}, {}, {}
+            i = 0
+            while i < len(ss):
+                # parse properties
+                m = {}
+                while i < len(ss):
+                    s = ss[i]
+                    i += 1
+                    # properties are terminated by a blank line
+                    if len(s) <= 8:
+                        break
+                    m[s[:8].strip()] = shlex.split(s[8:])
+                # scan the list of properties for files that interest us
+                if len(m.get('path', [])) > 0:
+                    p, s, processed = m['path'][0], m.get('status', []), False
+                    if 'dropped' in s and 'file' in m.get('old_type', []):
+                        # deleted file
+                        k = os.path.join(self.root, prefs.convertToNativePath(p))
+                        if fs.contains(k):
+                            if not isabs:
+                                k = relpath(pwd, k)
                             removed[k] = [ (k, prefs.getString('mtn_default_revision')), (None, None) ]
-                        elif s.startswith('  added    '):
+                        processed = True
+                    if 'added' in s and 'file' in m.get('new_type', []):
+                        # new file
+                        k = os.path.join(self.root, prefs.convertToNativePath(p))
+                        if fs.contains(k):
+                            if not isabs:
+                                k = relpath(pwd, k)
                             added[k] = [ (None, None), (k, None) ]
-                        elif s.startswith('  patched  '):
-                            modified[k] = [ (k, None) ]
-                        elif s.startswith('  renamed  '):
-                            old_name = k
-                        elif s.startswith('       to  ') and renamed is not None:
-                            renamed[k] = [ (old_name, prefs.getString('mtn_default_revision')), (k, None) ]
-                            old_name = None
+                        processed = True
+                    if 'rename_target' in s and 'file' in m.get('new_type', []) and len(m.get('old_path', [])) > 0:
+                        # renamed file
+                        k0 = os.path.join(self.root, prefs.convertToNativePath(m['old_path'][0]))
+                        k1 = os.path.join(self.root, prefs.convertToNativePath(p))
+                        if fs.contains(k0) or fs.contains(k1):
+                            if not isabs:
+                                k0 = relpath(pwd, k0)
+                                k1 = relpath(pwd, k1)
+                            renamed[k1] = [ (k0, prefs.getString('mtn_default_revision')), (k1, None) ]
+                        processed = True
+                    if not processed and 'file' in m.get('fs_type', []):
+                        # modified file or merge conflict
+                        k = os.path.join(self.root, prefs.convertToNativePath(p))
+                        if fs.contains(k):
+                            if not isabs:
+                                k = relpath(pwd, k)
+                            modified[k] = [ (k, prefs.getString('mtn_default_revision')), (k, None) ]
             # sort the results
             r = {}
-            for m in removed, modified, added, renamed:
+            for m in removed, added, modified, renamed:
                 for k in m.keys():
                     r[k] = None
             for k in sorted(r.keys()):
-                for m in removed, modified, added, renamed:
+                for m in removed, added, modified, renamed:
                     if m.has_key(k):
                         result.append(m[k])
             return result
@@ -1578,6 +1637,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'svn_cygwin'))
+            # build list of interesting files
             for s in strip_eols(popenReadLines(self.root, args, prefs, 'svn_bash')):
                 if len(s) > 7 and s[0] in 'ACDMR':
                     # subversion 1.6 adds a new column
@@ -1590,15 +1650,20 @@ class VCSs:
                     # FIXME: prune dropped directories from the results
                     if not os.path.isdir(k):
                         r[k] = s[0]
+            # sort the results
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'D':
+                    # deleted file
                     result.append( [ (k, prefs.getString('svn_default_revision')), (None, None) ] )
                 elif v == 'A':
+                    # new file
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'CM':
+                    # modified file or merge conflict
                     result.append( [ (k, None) ] )
                 elif v == 'R':
+                    # renamed file
                     result.append( [ (k + '@BASE', prefs.getString('svn_default_revision')), (None, None) ] )
                     result.append( [ (None, None), (k, None) ] )
             return result
@@ -1685,6 +1750,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'svk_cygwin'))
+            # build list of interesting files
             for s in strip_eols(popenReadLines(self.root, args, prefs, 'svk_bash')):
                 if len(s) > 4 and s[0] in 'ACDMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[4:]))
@@ -1693,14 +1759,17 @@ class VCSs:
                     # FIXME: prune dropped directories from the results
                     if not os.path.isdir(k):
                         r[k] = s[0]
-            result = []
+            # sort the results
             for k in sorted(r.keys()):
                 v = r[k]
                 if v == 'D':
+                    # deleted file
                     result.append( [ (k, prefs.getString('svk_default_revision')), (None, None) ] )
                 elif v == 'A':
+                    # new file
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'CMR':
+                    # modified file, merge conflict, or renamed file
                     result.append( [ (k, None) ] )
             return result
 
