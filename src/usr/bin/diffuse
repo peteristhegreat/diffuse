@@ -2273,6 +2273,8 @@ class FileDiffViewer(gtk.Table):
         map.show()
         map.set_size_request(16 * n, 0)
         self.add_events(gtk.gdk.KEY_PRESS_MASK | gtk.gdk.FOCUS_CHANGE)
+        self.im_context = im = gtk.IMContextSimple()
+        im.connect('commit', self.im_commit_cb)
         self.connect('key_press_event', self.key_press_cb)
 
         # font
@@ -2285,6 +2287,7 @@ class FileDiffViewer(gtk.Table):
     # this must be connected with 'connect_after()' so the final widget sizes
     # are known and the scroll bar can be moved to the first difference
     def _realise_cb(self, widget):
+        self.im_context.set_client_window(self.window)
         self.first_difference()
 
     # callback for most menu items and buttons
@@ -2394,6 +2397,7 @@ class FileDiffViewer(gtk.Table):
                 self.dareas[self.current_pane].queue_draw()
                 self.align_pane = 0
                 self.align_line = 0
+            self.im_context.reset()
             self.mode = LINE_MODE
             self.emit('cursor_changed')
             self.emit('mode_changed')
@@ -4067,6 +4071,7 @@ class FileDiffViewer(gtk.Table):
     # 'enter_align_mode' keybinding action
     def _line_mode_enter_align_mode(self):
         self.mode = ALIGN_MODE
+        self.im_context.reset()
         self.selection_line = self.current_line
         self.align_pane = self.current_pane
         self.align_line = self.current_line
@@ -4162,9 +4167,17 @@ class FileDiffViewer(gtk.Table):
         elif self.current_pane + 1 == f1:
             self.align(self.current_pane, line2, line1)
 
+    # input method callback for committed text
+    def im_commit_cb(self, im, s):
+        self.openUndoBlock()
+        self.replaceText(self.prefs.convertToUnicode([ s ])[0][0])
+        self.closeUndoBlock()
+
     # callback for keyboard events
     # only keypresses that are not handled by menu item accelerators reach here
     def key_press_cb(self, widget, event):
+        if self.mode == CHAR_MODE and self.im_context.filter_keypress(event):
+            return True
         retval = False
         # determine the modified keys used
         mask = event.state & (gtk.gdk.SHIFT_MASK | gtk.gdk.CONTROL_MASK)
