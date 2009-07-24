@@ -1556,9 +1556,10 @@ class VCSs:
                     s = ss[i]
                     i += 1
                     # properties are terminated by a blank line
-                    if len(s) <= 8:
+                    s = shlex.split(s)
+                    if len(s) == 0:
                         break
-                    m[s[:8].strip()] = shlex.split(s[8:])
+                    m[s[0]] = s[1:]
                 # scan the list of properties for files that interest us
                 if len(m.get('path', [])) > 0:
                     p, s, processed = m['path'][0], m.get('status', []), False
