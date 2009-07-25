@@ -2162,6 +2162,7 @@ class FileDiffViewer(gtk.Table):
         self.align_pane = 0
         self.align_line = 0
         self.cursor_column = -1
+        self._set_cursor_pos(0, 0)
 
         # keybindings
         self._line_mode_actions = {
@@ -2260,7 +2261,8 @@ class FileDiffViewer(gtk.Table):
             self.attach(sw, i, i + 1, 1, 2)
             sw.show()
 
-        self.vadj.connect('value_changed', self.map_vadj_changed_cb)
+        self.hadj.connect('value_changed', self.hadj_changed_cb)
+        self.vadj.connect('value_changed', self.vadj_changed_cb)
 
         # add diff map
         self.map = map = gtk.DrawingArea()
@@ -2273,8 +2275,9 @@ class FileDiffViewer(gtk.Table):
         map.show()
         map.set_size_request(16 * n, 0)
         self.add_events(gtk.gdk.KEY_PRESS_MASK | gtk.gdk.FOCUS_CHANGE)
-        self.im_context = im = gtk.IMContextSimple()
+        self.im_context = im = gtk.IMMulticontext()
         im.connect('commit', self.im_commit_cb)
+        im.connect('preedit_changed', self.im_preedit_changed_cb)
         self.connect('focus_in_event', self.focus_in_cb)
         self.connect('focus_out_event', self.focus_out_cb)
         self.connect('key_press_event', self.key_press_cb)
@@ -2394,12 +2397,13 @@ class FileDiffViewer(gtk.Table):
                 self.dareas[self.current_pane].queue_draw()
                 self.current_char = 0
                 self.selection_char = 0
+                self.im_context.focus_out()
+                self.im_context.reset()
             elif self.mode == ALIGN_MODE:
                 self.dareas[self.align_pane].queue_draw()
                 self.dareas[self.current_pane].queue_draw()
                 self.align_pane = 0
                 self.align_line = 0
-            self.im_context.reset()
             self.mode = LINE_MODE
             self.emit('cursor_changed')
             self.emit('mode_changed')
@@ -2416,6 +2420,8 @@ class FileDiffViewer(gtk.Table):
                 self.align_pane = 0
                 self.align_line = 0
                 self.setCurrentChar(self.current_line, 0)
+            self.im_context.focus_in()
+            self.im_context.reset()
             self.mode = CHAR_MODE
             self.emit('cursor_changed')
             self.emit('mode_changed')
@@ -3311,6 +3317,22 @@ class FileDiffViewer(gtk.Table):
         self.dareas[old_f].queue_draw()
         self.dareas[f].queue_draw()
 
+    # inform input method about cursor motion
+    def _notify_im_of_position_change(self):
+        if self.mode == CHAR_MODE:
+            # update input method
+            x, y = self.cursor_pos
+            x -= int(self.hadj.get_value())
+            y -= int(self.vadj.get_value())
+            # translate to a position relative to the window
+            x, y = self.dareas[self.current_pane].translate_coordinates(self.get_toplevel(), x, y)
+            self.im_context.set_cursor_location((x, y, 1, self.font_height))
+
+    # record a new position of the cursor
+    def _set_cursor_pos(self, x, y):
+        self.cursor_pos = (x, y)
+        self._notify_im_of_position_change()
+
     # change the current selection in CHAR_MODE
     # use extend=True to extend the selection
     def setCurrentChar(self, i, j, extend=False):
@@ -3326,6 +3348,7 @@ class FileDiffViewer(gtk.Table):
         # scroll vertically to current position
         h = self.font_height
         lower = i * h
+        cursor_y = lower
         upper = lower + h
         h = self.font_height
         vadj = self.vadj
@@ -3342,7 +3365,8 @@ class FileDiffViewer(gtk.Table):
             lower = self.getTextWidth(text)
         else:
             lower = 0
-        upper = lower + self.getLineNumberWidth() + self.digit_width
+        cursor_x = lower + self.getLineNumberWidth()
+        upper = cursor_x + self.digit_width
         lower = pixels(lower)
         upper = pixels(upper)
         hadj = self.hadj
@@ -3352,6 +3376,8 @@ class FileDiffViewer(gtk.Table):
             hadj.set_value(lower)
         elif upper > v + ps:
             hadj.set_value(upper - ps)
+
+        self._set_cursor_pos(pixels(cursor_x), cursor_y)
         self.emit('cursor_changed')
         # queue redraw
         self.dareas[f].queue_draw()
@@ -3892,10 +3918,34 @@ class FileDiffViewer(gtk.Table):
                             x_temp = layout.get_size()[0]
                         else:
                             x_temp = 0
-                        cr.move_to(x_start + pixels(x_temp) + 0.5, y_start)
-                        cr.rel_line_to(0, h)
-                        cr.stroke()
+                        x_pos = x_start + pixels(x_temp)
+                        # check for preedit text in the input method
+                        s, a, c = self.im_context.get_preedit_string()
+                        if len(s) > 0:
+                            # we have preedit text, draw that instead
+                            s = self.prefs.convertToUnicode([ s ])[0][0]
+                            layout = self.create_pango_layout(s)
+                            layout.set_font_description(self.font)
+                            layout.set_attributes(a)
+                            w = pixels(layout.get_size()[0])
+
+                            # clear the background
+                            colour = theResources.getColour('text_background')
+                            cr.set_source_rgb(colour.red, colour.green, colour.blue)
+                            cr.rectangle(x_pos, y_start, w, h)
+                            cr.fill()
+                            # draw the preedit text
+                            colour = theResources.getColour('text')
+                            cr.set_source_rgb(colour.red, colour.green, colour.blue)
+                            cr.move_to(x_pos, y_start)
+                            cr.show_layout(layout)
+                        else:
+                            # draw the character editing cursor
+                            cr.move_to(x_pos + 0.5, y_start)
+                            cr.rel_line_to(0, h)
+                            cr.stroke()
                     elif self.mode == LINE_MODE or self.mode == ALIGN_MODE:
+                        # draw the line editing cursor
                         cr.move_to(maxx, y_start + 0.5)
                         cr.line_to(x_start + 0.5, y_start + 0.5)
                         cr.line_to(x_start + 0.5, y_start + h - 0.5)
@@ -3910,8 +3960,13 @@ class FileDiffViewer(gtk.Table):
         gc = pixmap.new_gc()
         widget.window.draw_drawable(gc, pixmap, 0, 0, offset_x, offset_y, width, height)
 
-    # callback for update the overview map when the scroll position changes
-    def map_vadj_changed_cb(self, vadj):
+    # callback used when panes are scrolled horizontally
+    def hadj_changed_cb(self, adj):
+        self._notify_im_of_position_change()
+
+    # callback used when panes are scrolled vertically
+    def vadj_changed_cb(self, adj):
+        self._notify_im_of_position_change()
         self.map.queue_draw()
 
     # callback to handle button presses on the overview map
@@ -4001,8 +4056,8 @@ class FileDiffViewer(gtk.Table):
         modified_colour = theResources.getColour('modified')
 
         # get scroll position and total size
-        h = widget.get_allocation().height
-        w = widget.get_allocation().width
+        r = widget.get_allocation()
+        w, h = r.width, r.height
         vadj = self.vadj
         hmax = max(vadj.upper, h)
 
@@ -4072,8 +4127,10 @@ class FileDiffViewer(gtk.Table):
 
     # 'enter_align_mode' keybinding action
     def _line_mode_enter_align_mode(self):
+        if self.mode == CHAR_MODE:
+            self.im_context.focus_out()
+            self.im_context.reset()
         self.mode = ALIGN_MODE
-        self.im_context.reset()
         self.selection_line = self.current_line
         self.align_pane = self.current_pane
         self.align_line = self.current_line
@@ -4176,21 +4233,37 @@ class FileDiffViewer(gtk.Table):
             self.replaceText(self.prefs.convertToUnicode([ s ])[0][0])
             self.closeUndoBlock()
 
+    # queue a redraw for location of preedit text
+    def im_preedit_changed_cb(self, im):
+        if self.mode == CHAR_MODE:
+            x, y = self.cursor_pos
+            x -= int(self.hadj.get_value())
+            y -= int(self.vadj.get_value())
+            darea = self.dareas[self.current_pane]
+            r = darea.get_allocation()
+            w = r.width - x
+            if w > 0:
+                darea.queue_draw_area(x, y, w, self.font_height)
+
     # callback for 'focus_in_event'
     def focus_in_cb(self, widget, event):
-        # notify the input method of the focus change
-        self.im_context.focus_in()
+        if self.mode == CHAR_MODE:
+            # notify the input method of the focus change
+            self.im_context.focus_in()
 
     # callback for 'focus_out_event'
     def focus_out_cb(self, widget, event):
-        # notify the input method of the focus change
-        self.im_context.focus_out()
+        if self.mode == CHAR_MODE:
+            # notify the input method of the focus change
+            self.im_context.focus_out()
 
     # callback for keyboard events
     # only keypresses that are not handled by menu item accelerators reach here
     def key_press_cb(self, widget, event):
-        if self.mode == CHAR_MODE and self.im_context.filter_keypress(event):
-            return True
+        if self.mode == CHAR_MODE:
+            # update input method
+            if self.im_context.filter_keypress(event):
+                return True
         retval = False
         # determine the modified keys used
         mask = event.state & (gtk.gdk.SHIFT_MASK | gtk.gdk.CONTROL_MASK)
