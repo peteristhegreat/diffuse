@@ -1408,13 +1408,6 @@
             </listitem>
           </varlistentry>
 
-          <varlistentry>
-            <term><userinput>icon</userinput></term>
-            <listitem>
-              <para>icon for the about dialogue and window manager decoration</para>
-            </listitem>
-          </varlistentry>
-
         </variablelist>
       </sect2> 
     </sect1> 

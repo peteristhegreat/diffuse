@@ -130,9 +130,31 @@ if not hasattr(__builtins__, 'WindowsError'):
 # avoid some dictionary lookups when string.whitespace is used in loops
 whitespace = string.whitespace
 
-# prints a message to stderr
+# associate our icon with all of our windows
+if __name__ == '__main__':
+    # handle platform specific icon
+    if isWindows():
+        iconpath = os.path.join(bin_dir, 'diffuse.ico')
+    else:
+        iconpath = os.path.join(bin_dir, '../share/pixmaps/diffuse.png')
+    if os.path.isfile(iconpath):
+        gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(iconpath))
+
+# convenience class for displaying a message dialogue
+class MessageDialog(gtk.MessageDialog):
+    def __init__(self, parent, type, s):
+        if type == gtk.MESSAGE_QUESTION:
+           buttons = gtk.BUTTONS_OK_CANCEL
+        else:
+           buttons = gtk.BUTTONS_OK
+        gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, type, buttons, s)
+        self.set_title(APP_NAME)
+
+# report error messages 
 def logError(s):
-    sys.stderr.write('%s: %s\n' % (app_path, s))
+    m = MessageDialog(None, gtk.MESSAGE_ERROR, s)
+    m.run()
+    m.destroy()
 
 # colour resources
 class Colour:
@@ -388,17 +410,11 @@ class Resources:
         # list of unknown float resources we have already issued warnings for
         self.unknown_floats = {}
 
-        # handle platform specific icon
-        if isWindows():
-            iconpath = os.path.join(bin_dir, 'diffuse.ico')
-        else:
-            iconpath = os.path.join(bin_dir, '../share/pixmaps/diffuse.png')
         # default strings
         self.strings = {
            'help_browser': '',
            'help_file': '',
-           'help_url': WEBSITE + 'manual.html',
-           'icon': iconpath }
+           'help_url': WEBSITE + 'manual.html' }
 
         # list of unknown string resources we have already issued warnings for
         self.unknown_strings = {}
@@ -637,16 +653,6 @@ class Resources:
                        logError(_('Error parsing line %(line)d of %(file)s.') % { 'line': i + 1, 'file': file_name })
 
 theResources = Resources()
-
-# convenience class for displaying a message dialogue
-class MessageDialog(gtk.MessageDialog):
-    def __init__(self, parent, type, msg):
-        if type == gtk.MESSAGE_QUESTION:
-           buttons = gtk.BUTTONS_OK_CANCEL
-        else:
-           buttons = gtk.BUTTONS_OK
-        gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, type, buttons, msg)
-        self.set_title(APP_NAME)
 
 # text entry widget with a button to help pick file names
 class FileEntry(gtk.HBox):
@@ -6555,11 +6561,6 @@ if __name__ == '__main__':
         rc_file = os.path.join(rc_dir, 'diffuserc')
         if os.path.isfile(rc_file):
             theResources.parse(rc_file)
-
-    # associate our icon with all of our windows
-    icon = theResources.getString('icon')
-    if os.path.isfile(icon):
-        gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(icon))
 
     diff = Diffuse(rc_dir)
     # load state
