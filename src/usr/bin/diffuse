@@ -3821,8 +3821,14 @@ class FileDiffViewer(gtk.Table):
                     flags, chardiff = pane.diff_cache[i]
 
                 # draw background
+                has_preedit = (self.mode == CHAR_MODE and self.current_pane == f and self.current_line == i and self.preedit is not None)
                 colour = theResources.getColour('text_background')
                 alpha = theResources.getFloat('char_difference_alpha')
+                if has_preedit:
+                    if f > 0:
+                        flags |= 1
+                    if f + 1 < len(self.panes):
+                        flags |= 2
                 if flags != 0:
                     colour = (diffcolours[flags - 1] * theResources.getFloat('line_difference_alpha')).over(colour)
                 cr.set_source_rgb(colour.red, colour.green, colour.blue)
@@ -3830,11 +3836,6 @@ class FileDiffViewer(gtk.Table):
 
                 # make preedit text appear as a modified line that differs from
                 # both neighbours
-                flags = 0
-                if f > 0:
-                    flags |= 1
-                if f + 1 < len(self.panes):
-                    flags |= 2
                 preedit_bg_colour = (diffcolours[flags - 1] * alpha).over(colour)
 
                 if text is not None:
@@ -3844,7 +3845,6 @@ class FileDiffViewer(gtk.Table):
                         cr.rectangle(x_start + pixels(start), y_start, pixels(w), h)
                         cr.fill()
 
-                has_preedit = (self.mode == CHAR_MODE and self.current_pane == f and self.current_line == i and self.preedit is not None)
                 if has_preedit or (line is not None and line.is_modified):
                     # draw modified
                     colour = theResources.getColour('modified')
