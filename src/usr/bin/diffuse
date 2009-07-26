@@ -371,6 +371,7 @@ class Resources:
             'line_selection' : Colour(0.7, 0.7, 1.0),
             'map_background' : Colour(0.6, 0.6, 0.6),
             'modified' : Colour(0.5, 1.0, 0.5),
+            'preedit' : Colour(0.0, 0.0, 0.0),
             'text' : Colour(0.0, 0.0, 0.0),
             'text_background' : Colour(1.0, 1.0, 1.0) }
         # list of unknown colour resources we have already issued warnings for
@@ -2162,7 +2163,6 @@ class FileDiffViewer(gtk.Table):
         self.align_pane = 0
         self.align_line = 0
         self.cursor_column = -1
-        self._set_cursor_pos(0, 0)
 
         # keybindings
         self._line_mode_actions = {
@@ -2275,16 +2275,20 @@ class FileDiffViewer(gtk.Table):
         map.show()
         map.set_size_request(16 * n, 0)
         self.add_events(gtk.gdk.KEY_PRESS_MASK | gtk.gdk.FOCUS_CHANGE)
-        self.im_context = im = gtk.IMMulticontext()
-        im.connect('commit', self.im_commit_cb)
-        im.connect('preedit_changed', self.im_preedit_changed_cb)
-        im.connect('retrieve_surrounding', self.im_retrieve_surrounding_cb)
         self.connect('focus_in_event', self.focus_in_cb)
         self.connect('focus_out_event', self.focus_out_cb)
         self.connect('key_press_event', self.key_press_cb)
 
+        # input method
+        self.im_context = im = gtk.IMMulticontext()
+        im.connect('commit', self.im_commit_cb)
+        im.connect('preedit_changed', self.im_preedit_changed_cb)
+        im.connect('retrieve_surrounding', self.im_retrieve_surrounding_cb)
+        self.preedit = None
+
         # font
         self.setFont(pango.FontDescription(prefs.getString('display_font')))
+        self.cursor_pos = (0, 0, 1, self.font_height)
 
         # scroll to first difference when realised
         darea.connect_after('realize', self._realise_cb)
@@ -2372,7 +2376,7 @@ class FileDiffViewer(gtk.Table):
 
     # translates a string into an array of the printable representation for
     # each character
-    def expand(self, f, s):
+    def expand(self, s):
         if self.prefs.getBool('display_hide_endofline'):
             s = strip_eol(s)
         tab_width = self.prefs.getInt('display_tab_width')
@@ -2395,11 +2399,12 @@ class FileDiffViewer(gtk.Table):
     def setLineMode(self):
         if self.mode != LINE_MODE:
             if self.mode == CHAR_MODE:
-                self.dareas[self.current_pane].queue_draw()
-                self.current_char = 0
-                self.selection_char = 0
                 self.im_context.focus_out()
                 self.im_context.reset()
+                self._set_preedit(None)
+                self.current_char = 0
+                self.selection_char = 0
+                self.dareas[self.current_pane].queue_draw()
             elif self.mode == ALIGN_MODE:
                 self.dareas[self.align_pane].queue_draw()
                 self.dareas[self.current_pane].queue_draw()
@@ -2515,6 +2520,8 @@ class FileDiffViewer(gtk.Table):
 
     # returns the width of a string in pango units
     def getTextWidth(self, text):
+        if len(text) == 0:
+            return 0
         layout = self.create_pango_layout(text)
         layout.set_font_description(self.font)
         return layout.get_size()[0]
@@ -2548,6 +2555,9 @@ class FileDiffViewer(gtk.Table):
         for pane in self.panes:
             num_lines = max(num_lines, len(pane.lines))
             line_lengths = max(line_lengths, pane.line_lengths)
+        # account for any preedit text
+        if self.preedit is not None:
+            line_lengths = max(line_lengths, self._get_cursor_x_offset() + self._preedit_layout().get_size()[0])
         # the cursor can move one line past the last line of text, add it so we
         # can scroll to see this line
         num_lines += 1
@@ -2680,8 +2690,7 @@ class FileDiffViewer(gtk.Table):
             otherpane = self.panes[fn]
             if i < len(otherpane.diff_cache):
                 otherpane.diff_cache[i] = None
-            darea = self.dareas[fn]
-            darea.queue_draw_area(0, i * h - y, darea.get_allocation().width, h)
+            self._queue_draw_lines(fn, i)
         if i < len(pane.syntax_cache):
             del pane.syntax_cache[i:]
         if i < len(pane.diff_cache):
@@ -3272,7 +3281,6 @@ class FileDiffViewer(gtk.Table):
 
     # change the selection mode
     def setEditMode(self, mode, f, current_line, current_char, selection_line, selection_char, cursor_column):
-        # FIXME: this should also record the scroll spot
         old_f = self.current_pane
         self.mode = mode
         self.current_pane = f
@@ -3290,86 +3298,106 @@ class FileDiffViewer(gtk.Table):
         # queue a redraw to show the updated selection
         self.dareas[old_f].queue_draw()
 
+    # queue a range of lines for redrawing
+    def _queue_draw_lines(self, f, line0, line1=None):
+        if line1 is None:
+            line1 = line0
+        elif line0 > line1:
+            line0, line1 = line1, line0
+        darea = self.dareas[f]
+        w, h = darea.get_allocation().width, self.font_height
+        darea.queue_draw_area(0, line0 * h - int(self.vadj.get_value()), w, (line1 - line0 + 1) * h)
+
+    # scroll vertically to ensure the current line is visible
+    def _ensure_line_is_visible(self, i):
+        h = self.font_height
+        lower = i * h
+        upper = lower + h
+        vadj = self.vadj
+        v = vadj.get_value()
+        ps = vadj.page_size
+        if lower < v:
+            vadj.set_value(lower)
+        elif upper > v + ps:
+            vadj.set_value(upper - ps)
+
     # change the current selection in LINE_MODE
     # use extend=True to extend the selection
     def setCurrentLine(self, f, i, extend=False):
-        # update selection
+        # remember old cursor position so we can just redraw what is necessary
         old_f = self.current_pane
-        old_line = self.current_line
+        line0, line1 = self.current_line, self.selection_line
+
+        # clamp input values
         f = max(min(f, len(self.panes) - 1), 0)
         i = max(min(i, len(self.panes[f].lines)), 0)
+
+        # update cursor
         self.current_pane = f
         self.current_line = i
         if not extend:
             self.selection_line = i
-        # update size
-        h = self.font_height
-        vadj = self.vadj
-        v = vadj.get_value()
-        ps = vadj.page_size
-        lower = i * h
-        upper = lower + h
-        if lower < v:
-            vadj.set_value(lower)
-        elif upper > v + ps:
-            vadj.set_value(upper - ps)
+
         self.emit('cursor_changed')
-        # queue redraw
-        self.dareas[old_f].queue_draw()
-        self.dareas[f].queue_draw()
+
+        # invalidate old selection area
+        self._queue_draw_lines(old_f, line0, line1)
+        # invalidate new selection area
+        self._queue_draw_lines(f, i, self.selection_line)
+
+        # ensure the new cursor position is visible
+        self._ensure_line_is_visible(i)
+
+    # create a layout for the existing preedit text
+    def _preedit_layout(self, partial=False):
+        s, a, c = self.preedit
+        if partial:
+            s = s[:c]
+        layout = self.create_pango_layout(s)
+        layout.set_font_description(self.font)
+        layout.set_attributes(a)
+        return layout
 
     # inform input method about cursor motion
-    def _notify_im_of_position_change(self):
+    def _cursor_position_changed(self, recompute):
         if self.mode == CHAR_MODE:
             # update input method
-            x, y = self.cursor_pos
+            h, i = self.font_height, self.current_line
+            if recompute:
+                x, y = pixels(self._get_cursor_x_offset()), i * h
+                if self.preedit is None:
+                    w = 1
+                else:
+                    w = pixels(self._preedit_layout().get_size()[0])
+                self.cursor_pos = (x, y, w, h)
+            x, y, w, h = self.cursor_pos
             x -= int(self.hadj.get_value())
             y -= int(self.vadj.get_value())
             # translate to a position relative to the window
             x, y = self.dareas[self.current_pane].translate_coordinates(self.get_toplevel(), x, y)
-            self.im_context.set_cursor_location((x, y, 1, self.font_height))
+            self.im_context.set_cursor_location((x, y, w, h))
 
-    # record a new position of the cursor
-    def _set_cursor_pos(self, x, y):
-        self.cursor_pos = (x, y)
-        self._notify_im_of_position_change()
-
-    # change the current selection in CHAR_MODE
-    # use extend=True to extend the selection
-    def setCurrentChar(self, i, j, extend=False):
-        f = self.current_pane
-        self.cursor_column = -1
-        self.current_line = i
-        self.current_char = j
-        if extend:
-            gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).set_text(self.getSelectedText())
-        else:
-            self.selection_line = i
-            self.selection_char = j
-        # scroll vertically to current position
-        h = self.font_height
-        lower = i * h
-        cursor_y = lower
-        upper = lower + h
-        h = self.font_height
-        vadj = self.vadj
-        v = vadj.get_value()
-        ps = vadj.page_size
-        if lower < v:
-            vadj.set_value(lower)
-        elif upper > v + ps:
-            vadj.set_value(upper - ps)
-        # scroll horizontally to current position
-        # but try to keep the line numbers visible
+    # get the position of the cursor in pango units
+    def _get_cursor_x_offset(self):
+        j = self.current_char
         if j > 0:
-            text = ''.join(self.expand(f, self.getLineText(f, i)[:j]))
-            lower = self.getTextWidth(text)
-        else:
-            lower = 0
-        cursor_x = lower + self.getLineNumberWidth()
-        upper = cursor_x + self.digit_width
-        lower = pixels(lower)
-        upper = pixels(upper)
+            text = self.getLineText(self.current_pane, self.current_line)[:j]
+            return self.getTextWidth(''.join(self.expand(text)))
+        return 0
+
+    # scroll to ensure the current cursor position is visible
+    def _ensure_cursor_is_visible(self):
+        f, i, j = self.current_pane, self.current_line, self.current_char
+        h = self.font_height
+
+        # find the cursor's horizontal range
+        lower = self._get_cursor_x_offset()
+        if self.preedit is not None:
+            lower += self._preedit_layout(True).get_size()[0]
+        upper = lower + self.getLineNumberWidth() + self.digit_width
+        lower, upper = pixels(lower), pixels(upper)
+
+        # scroll horizontally
         hadj = self.hadj
         v = hadj.get_value()
         ps = hadj.page_size
@@ -3378,10 +3406,38 @@ class FileDiffViewer(gtk.Table):
         elif upper > v + ps:
             hadj.set_value(upper - ps)
 
-        self._set_cursor_pos(pixels(cursor_x), cursor_y)
+        # scroll vertically to current line
+        self._ensure_line_is_visible(i)
+
+    # change the current selection in CHAR_MODE
+    # use extend=True to extend the selection
+    def setCurrentChar(self, i, j, extend=False):
+        f = self.current_pane
+
+        # remember old cursor position so we can just redraw what is necessary
+        line0, line1 = self.current_line, self.selection_line
+
+        # clear remembered cursor column
+        self.cursor_column = -1
+        # update cursor and selection
+        self.current_line = i
+        self.current_char = j
+        if extend:
+            gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).set_text(self.getSelectedText())
+        else:
+            self.selection_line = i
+            self.selection_char = j
+
+        self._cursor_position_changed(True)
         self.emit('cursor_changed')
-        # queue redraw
-        self.dareas[f].queue_draw()
+
+        # invalidate old selection area
+        self._queue_draw_lines(f, line0, line1)
+        # invalidate new selection area
+        self._queue_draw_lines(f, i, self.selection_line)
+
+        # ensure the new cursor position is visible
+        self._ensure_cursor_is_visible()
 
     # returns the currently selected text
     def getSelectedText(self):
@@ -3424,12 +3480,12 @@ class FileDiffViewer(gtk.Table):
     # returns the index of the last character in text that should be left of
     # 'x' pixels from the edge of the darea widget
     # if partial=True, include characters only partially to the left of 'x'
-    def _getPickedCharacter(self, f, text, x, partial):
+    def _getPickedCharacter(self, text, x, partial):
         if text is None:
             return 0
         n = len(text)
         w = self.getLineNumberWidth()
-        for i, s in enumerate(self.expand(f, text)):
+        for i, s in enumerate(self.expand(text)):
             width = self.getTextWidth(s)
             tmp = w
             if partial:
@@ -3448,7 +3504,7 @@ class FileDiffViewer(gtk.Table):
         i = min(y // self.font_height, len(self.panes[f].lines))
         if self.mode == CHAR_MODE and f == self.current_pane:
             text = strip_eol(self.getLineText(f, i))
-            j = self._getPickedCharacter(f, text, x, True)
+            j = self._getPickedCharacter(text, x, True)
             self.setCurrentChar(i, j, extend)
         else:
             if self.mode == ALIGN_MODE:
@@ -3482,9 +3538,9 @@ class FileDiffViewer(gtk.Table):
                     text = strip_eol(self.getLineText(f, i))
                     if text is not None:
                         n = len(text)
-                        j = self._getPickedCharacter(f, text, x, False)
+                        j = self._getPickedCharacter(text, x, False)
                         if j < n:
-                            ss = self.expand(f, text[:n])
+                            ss = self.expand(text[:n])
                             c = theResources.getCharacterClass(text[j])
                             k = j
                             while k > 0 and theResources.getCharacterClass(text[k - 1]) == c:
@@ -3744,7 +3800,7 @@ class FileDiffViewer(gtk.Table):
                     chardiff = []
                     if text is not None:
                         # expand text into a list of visual representations
-                        ss = self.expand(f, text)
+                        ss = self.expand(text)
 
                         # find the size of each region in pango units
                         old_end = 0
@@ -3766,23 +3822,34 @@ class FileDiffViewer(gtk.Table):
 
                 # draw background
                 colour = theResources.getColour('text_background')
+                alpha = theResources.getFloat('char_difference_alpha')
                 if flags != 0:
                     colour = (diffcolours[flags - 1] * theResources.getFloat('line_difference_alpha')).over(colour)
                 cr.set_source_rgb(colour.red, colour.green, colour.blue)
                 cr.paint()
 
+                # make preedit text appear as a modified line that differs from
+                # both neighbours
+                flags = 0
+                if f > 0:
+                    flags |= 1
+                if f + 1 < len(self.panes):
+                    flags |= 2
+                preedit_bg_colour = (diffcolours[flags - 1] * alpha).over(colour)
+
                 if text is not None:
                     # draw char diffs
-                    alpha = theResources.getFloat('char_difference_alpha')
                     for start, w, colour in chardiff:
                         cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
                         cr.rectangle(x_start + pixels(start), y_start, pixels(w), h)
                         cr.fill()
 
-                if line is not None and line.is_modified:
+                has_preedit = (self.mode == CHAR_MODE and self.current_pane == f and self.current_line == i and self.preedit is not None)
+                if has_preedit or (line is not None and line.is_modified):
                     # draw modified
                     colour = theResources.getColour('modified')
                     alpha = theResources.getFloat('modified_alpha')
+                    preedit_bg_colour = (colour * alpha).over(preedit_bg_colour)
                     cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
                     cr.paint()
                 if self.mode == ALIGN_MODE:
@@ -3817,7 +3884,7 @@ class FileDiffViewer(gtk.Table):
                                 end_char = len(text)
                             if start_char < end_char:
                                 if ss is None:
-                                    ss = self.expand(f, text)
+                                    ss = self.expand(text)
                                 layout = self.create_pango_layout(''.join(ss[:start_char]))
                                 layout.set_font_description(self.font)
                                 x_temp = layout.get_size()[0]
@@ -3887,7 +3954,7 @@ class FileDiffViewer(gtk.Table):
                     if blocks is None:
                         # populate the cache item if it didn't exist
                         if ss is None:
-                            ss = self.expand(f, text)
+                            ss = self.expand(text)
                         x_temp = 0
                         blocks = []
                         for start, end, tag in pane.syntax_cache[i][2]:
@@ -3905,48 +3972,38 @@ class FileDiffViewer(gtk.Table):
                         cr.show_layout(layout)
 
                 if self.current_pane == f and self.current_line == i:
-                    # draw the cursor
-                    colour = theResources.getColour('cursor')
-                    cr.set_source_rgb(colour.red, colour.green, colour.blue)
-                    cr.set_line_width(1)
-
+                    # draw the cursor and preedit text
                     if self.mode == CHAR_MODE:
-                        if text is not None:
-                            if ss is None:
-                                ss = self.expand(f, text)
-                            layout = self.create_pango_layout(''.join(ss[:self.current_char]))
-                            layout.set_font_description(self.font)
-                            x_temp = layout.get_size()[0]
-                        else:
-                            x_temp = 0
-                        x_pos = x_start + pixels(x_temp)
-                        # check for preedit text in the input method
-                        s, a, c = self.im_context.get_preedit_string()
-                        if len(s) > 0:
-                            # we have preedit text, draw that instead
-                            s = self.prefs.convertToUnicode([ s ])[0][0]
-                            layout = self.create_pango_layout(s)
-                            layout.set_font_description(self.font)
-                            layout.set_attributes(a)
+                        x_pos = x_start + pixels(self._get_cursor_x_offset())
+                        if has_preedit:
+                            # we have preedit text
+                            layout = self._preedit_layout()
                             w = pixels(layout.get_size()[0])
 
                             # clear the background
-                            colour = theResources.getColour('text_background')
+                            colour = preedit_bg_colour
                             cr.set_source_rgb(colour.red, colour.green, colour.blue)
                             cr.rectangle(x_pos, y_start, w, h)
                             cr.fill()
                             # draw the preedit text
-                            colour = theResources.getColour('text')
+                            colour = theResources.getColour('preedit')
                             cr.set_source_rgb(colour.red, colour.green, colour.blue)
                             cr.move_to(x_pos, y_start)
                             cr.show_layout(layout)
-                        else:
-                            # draw the character editing cursor
-                            cr.move_to(x_pos + 0.5, y_start)
-                            cr.rel_line_to(0, h)
-                            cr.stroke()
+                            # advance to the preedit's cursor position
+                            x_pos += pixels(self._preedit_layout(True).get_size()[0])
+                        # draw the character editing cursor
+                        colour = theResources.getColour('cursor')
+                        cr.set_source_rgb(colour.red, colour.green, colour.blue)
+                        cr.set_line_width(1)
+                        cr.move_to(x_pos + 0.5, y_start)
+                        cr.rel_line_to(0, h)
+                        cr.stroke()
                     elif self.mode == LINE_MODE or self.mode == ALIGN_MODE:
                         # draw the line editing cursor
+                        colour = theResources.getColour('cursor')
+                        cr.set_source_rgb(colour.red, colour.green, colour.blue)
+                        cr.set_line_width(1)
                         cr.move_to(maxx, y_start + 0.5)
                         cr.line_to(x_start + 0.5, y_start + 0.5)
                         cr.line_to(x_start + 0.5, y_start + h - 0.5)
@@ -3963,11 +4020,11 @@ class FileDiffViewer(gtk.Table):
 
     # callback used when panes are scrolled horizontally
     def hadj_changed_cb(self, adj):
-        self._notify_im_of_position_change()
+        self._cursor_position_changed(False)
 
     # callback used when panes are scrolled vertically
     def vadj_changed_cb(self, adj):
-        self._notify_im_of_position_change()
+        self._cursor_position_changed(False)
         self.map.queue_draw()
 
     # callback to handle button presses on the overview map
@@ -4131,6 +4188,7 @@ class FileDiffViewer(gtk.Table):
         if self.mode == CHAR_MODE:
             self.im_context.focus_out()
             self.im_context.reset()
+            self._set_preedit(None)
         self.mode = ALIGN_MODE
         self.selection_line = self.current_line
         self.align_pane = self.current_pane
@@ -4234,27 +4292,34 @@ class FileDiffViewer(gtk.Table):
             self.replaceText(self.prefs.convertToUnicode([ s ])[0][0])
             self.closeUndoBlock()
 
+    # update the cached preedit text
+    def _set_preedit(self, p):
+        self.preedit = p
+        self._cursor_position_changed(True)
+        if self.mode == CHAR_MODE:
+            self._queue_draw_lines(self.current_pane, self.current_line)
+        self.updateSize(False)
+
     # queue a redraw for location of preedit text
     def im_preedit_changed_cb(self, im):
         if self.mode == CHAR_MODE:
-            x, y = self.cursor_pos
-            x -= int(self.hadj.get_value())
-            y -= int(self.vadj.get_value())
-            darea = self.dareas[self.current_pane]
-            r = darea.get_allocation()
-            w = r.width - x
-            if w > 0:
-                darea.queue_draw_area(x, y, w, self.font_height)
+            s, a, c = self.im_context.get_preedit_string()
+            if len(s) > 0:
+                # we have preedit text, draw that instead
+                s = self.prefs.convertToUnicode([ s ])[0][0]
+                p = (s, a, c)
+            else:
+                p = None
+            self._set_preedit(p)
+            self._ensure_cursor_is_visible()
 
     # callback to respond to retrieve_surrounding signals from input methods
     def im_retrieve_surrounding_cb(self, im):
         if self.mode == CHAR_MODE:
             # notify input method of text surrounding the cursor
-            text = self.getLineText(self.current_pane, self.current_line)
-            if text is None:
-                im.set_surrounding('', 0, 0)
-            else:
-                im.set_surrounding(text, len(text), self.current_char)
+            s = nullToEmpty(self.getLineText(self.current_pane, self.current_line))
+            s, n = codecs.encode(s, 'utf_8'), len(codecs.encode(s[:self.current_char]), 'utf_8')
+            im.set_surrounding(s, len(s), n)
 
     # callback for 'focus_in_event'
     def focus_in_cb(self, widget, event):
@@ -4687,6 +4752,9 @@ class FileDiffViewer(gtk.Table):
     # changed
     def prefsUpdated(self):
         self.setFont(pango.FontDescription(self.prefs.getString('display_font')))
+        # update preedit text
+        self._cursor_position_changed(True)
+
         for pane in self.panes:
             del pane.diff_cache[:]
         # tab width may have changed

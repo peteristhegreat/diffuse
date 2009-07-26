@@ -1527,6 +1527,13 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>preedit</userinput></term>
+            <listitem>
+              <para>pre-edit text colour</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>text</userinput></term>
             <listitem>
               <para>regular text colour</para>

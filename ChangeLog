@@ -1,3 +1,12 @@
+- optimised redraws when only the cursor position has changed
+- input methods that use pre-editing can now be used when editing text
+- dead keys can now be used when editing text
+- updated Monotone support to use 'mtn automate inventory'
+- Git support now handles files flagged as 'unmerged'
+- graceful handling of and non-zero exit codes from 'git status'
+- added version control section to the manual
+- minor bug fixes
+
 Diffuse 0.3.4 - 2009-07-03
 - syntax highlighting for .plist, GLSL, SConscript, and SConstruct files
 - status bar now explains how to navigate between modes
