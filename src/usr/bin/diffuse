@@ -2323,7 +2323,8 @@ class FileDiffViewer(gtk.Table):
 
     # returns the 'column width' for a string -- used to help position
     # characters when tabs and other special characters are present
-    def getStringColumnWidth(self, f, s):
+    # This is an inline loop over self.characterWidth() for performance reasons.
+    def stringWidth(self, s):
         if self.prefs.getBool('display_hide_endofline'):
             s = strip_eol(s)
         col = 0
@@ -2369,16 +2370,6 @@ class FileDiffViewer(gtk.Table):
             or (v >= 0x20000 and v <= 0x2ffff)):
             return 2
         return 1
-
-    # returns the 'column width' of a string taking into account the optional
-    # display of EOL characters
-    def stringWidth(self, f, s):
-        if self.prefs.getBool('display_hide_endofline'):
-            s = strip_eol(s)
-        w, width = 0, self.characterWidth
-        for c in s:
-            w += width(w, c)
-        return w
 
     # translates a string into an array of the printable representation for
     # each character
@@ -2555,7 +2546,7 @@ class FileDiffViewer(gtk.Table):
                             text.append(line.modified_text)
                         for s in text:
                             if s is not None:
-                                pane.line_lengths = max(pane.line_lengths, self.digit_width * self.getStringColumnWidth(f, s))
+                                pane.line_lengths = max(pane.line_lengths, self.digit_width * self.stringWidth(s))
         # compute the maximum extents
         num_lines, line_lengths = 0, 0
         for pane in self.panes:
@@ -2563,7 +2554,11 @@ class FileDiffViewer(gtk.Table):
             line_lengths = max(line_lengths, pane.line_lengths)
         # account for any preedit text
         if self.preedit is not None:
-            line_lengths = max(line_lengths, self._get_cursor_x_offset() + self._preedit_layout().get_size()[0])
+            w = self._preedit_layout().get_size()[0]
+            s = self.getLineText(self.current_pane, self.current_line)
+            if s is not None:
+                w += self.digit_width * self.stringWidth(s)
+            line_lengths = max(line_lengths, w)
         # the cursor can move one line past the last line of text, add it so we
         # can scroll to see this line
         num_lines += 1
@@ -2682,7 +2677,7 @@ class FileDiffViewer(gtk.Table):
 
         # update/invalidate all relevent caches and queue widgets for redraw
         if text is not None:
-            pane.line_lengths = max(pane.line_lengths, self.digit_width * self.getStringColumnWidth(f, text))
+            pane.line_lengths = max(pane.line_lengths, self.digit_width * self.stringWidth(text))
         self.updateSize(False)
 
         y = int(self.vadj.get_value())
@@ -3818,7 +3813,7 @@ class FileDiffViewer(gtk.Table):
                             layout = self.create_pango_layout(''.join(ss[start:end]))
                             layout.set_font_description(self.font)
                             w = layout.get_size()[0]
-                            chardiff.append((x_temp, w, diffcolours[tflags - 1]))
+                            chardiff.append((start, end, x_temp, w, diffcolours[tflags - 1]))
                             old_end = end
                             x_temp += w
                     # cache flags and character diff ranges
@@ -3828,13 +3823,18 @@ class FileDiffViewer(gtk.Table):
 
                 # draw background
                 has_preedit = (self.mode == CHAR_MODE and self.current_pane == f and self.current_line == i and self.preedit is not None)
-                colour = theResources.getColour('text_background')
-                alpha = theResources.getFloat('char_difference_alpha')
                 if has_preedit:
+                    # we have preedit text
+                    preeditlayout = self._preedit_layout()
+                    preeditwidth = preeditlayout.get_size()[0]
                     if f > 0:
                         flags |= 1
                     if f + 1 < len(self.panes):
                         flags |= 2
+                else:
+                    preeditwidth = 0
+                colour = theResources.getColour('text_background')
+                alpha = theResources.getFloat('char_difference_alpha')
                 if flags != 0:
                     colour = (diffcolours[flags - 1] * theResources.getFloat('line_difference_alpha')).over(colour)
                 cr.set_source_rgb(colour.red, colour.green, colour.blue)
@@ -3846,7 +3846,13 @@ class FileDiffViewer(gtk.Table):
 
                 if text is not None:
                     # draw char diffs
-                    for start, w, colour in chardiff:
+                    for starti, endi, start, w, colour in chardiff:
+                        if has_preedit:
+                            # make space for preedit text
+                            if self.current_char <= starti:
+                                start += preeditwidth
+                            elif self.current_char < endi:
+                                w += preeditwidth
                         cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
                         cr.rectangle(x_start + pixels(start), y_start, pixels(w), h)
                         cr.fill()
@@ -3929,8 +3935,8 @@ class FileDiffViewer(gtk.Table):
                             x_temp += h2
                         cr.stroke()
                 else:
-                    # continue populating the cache until line 'i' is included
-                    # in the syntax highlighting cache
+                    # continue populating the syntax highlighting cache until
+                    # line 'i' is included
                     n = len(pane.syntax_cache)
                     while i >= n:
                         temp = self.getLineText(f, n)
@@ -3967,13 +3973,27 @@ class FileDiffViewer(gtk.Table):
                             layout = self.create_pango_layout(''.join(ss[start:end]))
                             layout.set_font_description(self.font)
                             colour = theResources.getColour(tag)
-                            blocks.append((x_temp, layout, colour))
+                            blocks.append((start, end, x_temp, layout, colour))
                             x_temp += layout.get_size()[0]
                         pane.syntax_cache[i][3] = blocks
 
                     # draw text
-                    for start, layout, colour in blocks:
+                    for starti, endi, start, layout, colour in blocks:
                         cr.set_source_rgb(colour.red, colour.green, colour.blue)
+                        if has_preedit:
+                            # make space for preedit text
+                            if self.current_char <= starti:
+                                start += preeditwidth
+                            elif self.current_char < endi:
+                                # divide text into 2 segments
+                                ss = self.expand(text)
+                                layout = self.create_pango_layout(''.join(ss[starti:self.current_char]))
+                                layout.set_font_description(self.font)
+                                cr.move_to(x_start + pixels(start), y_start)
+                                cr.show_layout(layout)
+                                start += layout.get_size()[0] + preeditwidth
+                                layout = self.create_pango_layout(''.join(ss[self.current_char:endi]))
+                                layout.set_font_description(self.font)
                         cr.move_to(x_start + pixels(start), y_start)
                         cr.show_layout(layout)
 
@@ -4378,7 +4398,7 @@ class FileDiffViewer(gtk.Table):
                 if col < 0:
                     # find the current cursor column
                     s = nullToEmpty(self.getLineText(f, i))[:self.current_char]
-                    col = self.getStringColumnWidth(f, s)
+                    col = self.stringWidth(s)
                 if event.keyval in [ gtk.keysyms.Up, gtk.keysyms.Down ]:
                     delta = 1
                 else:
@@ -4458,7 +4478,7 @@ class FileDiffViewer(gtk.Table):
                                 j -= 1
                                 break
                         else:
-                            w = self.stringWidth(f, text)
+                            w = self.stringWidth(text)
                             width = self.prefs.getInt('editor_soft_tab_width')
                             w = (w - 1) // width * width
                             if self.prefs.getBool('editor_expand_tabs'):
@@ -4512,7 +4532,7 @@ class FileDiffViewer(gtk.Table):
                         j, text = 0, self.getLineText(f, start_i)
                         while j < start_j and text[j] in ' \t':
                             j += 1
-                        w = self.stringWidth(f, text[:j])
+                        w = self.stringWidth(text[:j])
                         if self.prefs.getBool('editor_expand_tabs'):
                             # convert to spaces
                             s += u' ' * w
@@ -4533,7 +4553,7 @@ class FileDiffViewer(gtk.Table):
                 temp = start_j
                 if temp > 0:
                     text = self.getLineText(f, start_i)[:start_j]
-                    w = self.stringWidth(f, text)
+                    w = self.stringWidth(text)
                     while temp > 0 and text[temp - 1] in ' \t':
                         temp -= 1
                 else:
@@ -5452,7 +5472,7 @@ class Diffuse(gtk.Window):
                     j = viewer.current_char
                     if j > 0:
                         text = viewer.getLineText(viewer.current_pane, viewer.current_line)[:j]
-                        j = viewer.stringWidth(viewer.current_pane, text)
+                        j = viewer.stringWidth(text)
                     s = _('Column %d') % (j, )
                 else:
                     s = ''
