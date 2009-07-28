@@ -2294,7 +2294,7 @@ class FileDiffViewer(gtk.Table):
 
         # font
         self.setFont(pango.FontDescription(prefs.getString('display_font')))
-        self.cursor_pos = (0, 0, 1, self.font_height)
+        self.cursor_pos = (0, 0)
 
         # scroll to first difference when realised
         darea.connect_after('realize', self._realise_cb)
@@ -2483,6 +2483,9 @@ class FileDiffViewer(gtk.Table):
     # 'undo' action
     def undo(self):
         self.undoblock, old_block = None, self.undoblock
+        if self.mode == CHAR_MODE:
+            # avoid implicit preedit commit when an undo changes the mode
+            self.im_context.reset()
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             if len(self.undos) > 0:
                 # move the block to the redo stack
@@ -2497,6 +2500,9 @@ class FileDiffViewer(gtk.Table):
     def redo(self):
         self.undoblock, old_block = None, self.undoblock
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
+            if self.mode == CHAR_MODE:
+                # avoid implicit preedit commit when an redo changes the mode
+                self.im_context.reset()
             if len(self.redos) > 0:
                 # move the block to the undo stack
                 block = self.redos.pop()
@@ -3349,6 +3355,10 @@ class FileDiffViewer(gtk.Table):
         # ensure the new cursor position is visible
         self._ensure_line_is_visible(i)
 
+    # returns True if the line has preedit text
+    def hasPreedit(self, f, i):
+        return self.mode == CHAR_MODE and self.current_pane == f and self.current_line == i and self.preedit is not None
+
     # create a layout for the existing preedit text
     def _preedit_layout(self, partial=False):
         s, a, c = self.preedit
@@ -3363,20 +3373,17 @@ class FileDiffViewer(gtk.Table):
     def _cursor_position_changed(self, recompute):
         if self.mode == CHAR_MODE:
             # update input method
-            h, i = self.font_height, self.current_line
+            h = self.font_height
             if recompute:
-                x, y = pixels(self._get_cursor_x_offset()), i * h
-                if self.preedit is None:
-                    w = 1
-                else:
-                    w = pixels(self._preedit_layout().get_size()[0])
-                self.cursor_pos = (x, y, w, h)
-            x, y, w, h = self.cursor_pos
+                self.cursor_pos = (pixels(self._get_cursor_x_offset()), self.current_line * h)
+            x, y = self.cursor_pos
             x -= int(self.hadj.get_value())
             y -= int(self.vadj.get_value())
             # translate to a position relative to the window
             x, y = self.dareas[self.current_pane].translate_coordinates(self.get_toplevel(), x, y)
-            self.im_context.set_cursor_location((x, y, w, h))
+            # input methods support widgets are centred horizontally about the
+            # cursor, a width of 50 seems to give a better widget positions
+            self.im_context.set_cursor_location((x, y, 50, h))
 
     # get the position of the cursor in pango units
     def _get_cursor_x_offset(self):
@@ -3821,8 +3828,12 @@ class FileDiffViewer(gtk.Table):
                 else:
                     flags, chardiff = pane.diff_cache[i]
 
-                # draw background
-                has_preedit = (self.mode == CHAR_MODE and self.current_pane == f and self.current_line == i and self.preedit is not None)
+                # account for preedit changes
+                if f > 0 and self.hasPreedit(f - 1, i):
+                    flags |= 1
+                if f + 1 < len(self.panes) and self.hasPreedit(f + 1, i):
+                    flags |= 2
+                has_preedit = self.hasPreedit(f, i)
                 if has_preedit:
                     # we have preedit text
                     preeditlayout = self._preedit_layout()
@@ -3833,6 +3844,7 @@ class FileDiffViewer(gtk.Table):
                         flags |= 2
                 else:
                     preeditwidth = 0
+                # draw background
                 colour = theResources.getColour('text_background')
                 alpha = theResources.getFloat('char_difference_alpha')
                 if flags != 0:
@@ -4321,9 +4333,13 @@ class FileDiffViewer(gtk.Table):
     # update the cached preedit text
     def _set_preedit(self, p):
         self.preedit = p
-        self._cursor_position_changed(True)
         if self.mode == CHAR_MODE:
-            self._queue_draw_lines(self.current_pane, self.current_line)
+            f, i = self.current_pane, self.current_line
+            self._queue_draw_lines(f, i)
+            if f > 0:
+                self._queue_draw_lines(f - 1, i)
+            if f + 1 < len(self.panes):
+                self._queue_draw_lines(f + 1, i)
         self.updateSize(False)
 
     # queue a redraw for location of preedit text
