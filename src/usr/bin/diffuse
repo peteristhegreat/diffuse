@@ -144,13 +144,13 @@ if __name__ == '__main__':
 class MessageDialog(gtk.MessageDialog):
     def __init__(self, parent, type, s):
         if type == gtk.MESSAGE_QUESTION:
-           buttons = gtk.BUTTONS_OK_CANCEL
+            buttons = gtk.BUTTONS_OK_CANCEL
         else:
-           buttons = gtk.BUTTONS_OK
+            buttons = gtk.BUTTONS_OK
         gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, type, buttons, s)
         self.set_title(APP_NAME)
 
-# report error messages 
+# report error messages
 def logError(s):
     m = MessageDialog(None, gtk.MESSAGE_ERROR, s)
     m.run()
@@ -401,20 +401,20 @@ class Resources:
 
         # default floats
         self.floats = {
-           'align_alpha' : 1.0,
-           'char_difference_alpha' : 0.4,
-           'char_selection_alpha' : 0.4,
-           'line_difference_alpha' : 0.3,
-           'line_selection_alpha' : 0.4,
-           'modified_alpha' : 0.4 }
+            'align_alpha' : 1.0,
+            'char_difference_alpha' : 0.4,
+            'char_selection_alpha' : 0.4,
+            'line_difference_alpha' : 0.3,
+            'line_selection_alpha' : 0.4,
+            'modified_alpha' : 0.4 }
         # list of unknown float resources we have already issued warnings for
         self.unknown_floats = {}
 
         # default strings
         self.strings = {
-           'help_browser': '',
-           'help_file': '',
-           'help_url': WEBSITE + 'manual.html' }
+            'help_browser': '',
+            'help_file': '',
+            'help_url': WEBSITE + 'manual.html' }
 
         # list of unknown string resources we have already issued warnings for
         self.unknown_strings = {}
@@ -574,83 +574,83 @@ class Resources:
             for i, s in enumerate(ss):
                 args = shlex.split(s, True)
                 if len(args) > 0:
-                   try:
-                       # eg. add Python syntax highlighting:
-                       #    import /usr/share/diffuse/syntax/python.syntax
-                       if args[0] == 'import' and len(args) == 2:
-                           path = os.path.expanduser(args[1])
-                           # relative paths are relative to the parsed file
-                           path = os.path.join(os.path.dirname(file_name), path)
-                           paths = glob.glob(path)
-                           if len(paths) == 0:
-                               paths = [ path ]
-                           for path in paths:
-                               self.parse(path)
-                       # eg. make Ctrl+o trigger the open_file menu item
-                       #    keybinding menu open_file Ctrl+o
-                       elif args[0] == 'keybinding' and len(args) == 4:
-                           self.setKeyBinding(args[1], args[2], args[3])
-                       # eg. set the regular background colour to white
-                       #    colour text_background 1.0 1.0 1.0
-                       elif args[0] in [ 'colour', 'color' ] and len(args) == 5:
-                           self.colours[args[1]] = Colour(float(args[2]), float(args[3]), float(args[4]))
-                       # eg. set opacity of the line_selection colour
-                       #    float line_selection_alpha 0.4
-                       elif args[0] == 'float' and len(args) == 3:
-                           self.floats[args[1]] = float(args[2])
-                       # eg. set the help browser
-                       #    string help_browser gnome-help
-                       elif args[0] == 'string' and len(args) == 3:
-                           self.strings[args[1]] = args[2]
-                           if args[1] == 'difference_colours':
-                               self.setDifferenceColours(args[2])
-                           elif args[1] == 'character_classes':
-                               self.setCharacterClasses(args[2])
-                       # eg. start a syntax specification for Python
-                       #    syntax Python normal text
-                       # where 'normal' is the name of the default state and
-                       # 'text' is the classification of all characters not
-                       # explicitly matched by a syntax highlighting rule
-                       elif args[0] == 'syntax' and (len(args) == 2 or len(args) == 4):
-                           if len(args) == 2:
-                               # remove a syntax specification
-                               self.current_syntax = None
-                               if self.syntaxes.has_key(args[1]):
-                                   del self.syntaxes[args[1]]
-                           else:
-                               self.current_syntax = SyntaxParser(args[2], args[3])
-                               self.syntaxes[args[1]] = self.current_syntax
-                       # eg. transition from state 'normal' to 'comment' when
-                       # the pattern '#' is matched and classify the matched
-                       # characters as 'python_comment'
-                       #    syntax_pattern normal comment python_comment '#'
-                       elif args[0] == 'syntax_pattern' and self.current_syntax is not None and len(args) >= 5:
-                           flags = 0
-                           for arg in args[5:]:
-                               if arg == 'ignorecase':
-                                   flags |= re.IGNORECASE
-                               else:
-                                   raise ValueError()
-                           self.current_syntax.addPattern(args[1], args[2], args[3], re.compile(args[4], flags))
-                       # eg. default to the Python syntax rules when viewing
-                       # a file ending with '.py' or '.pyw'
-                       #    syntax_files Python '\.pyw?$'
-                       elif args[0] == 'syntax_files' and (len(args) == 2 or len(args) == 3):
-                           key = args[1]
-                           if len(args) == 2:
-                               # remove file pattern for a syntax specification
-                               if self.syntax_file_patterns.has_key(key):
-                                   del self.syntax_file_patterns[key]
-                           else:
-                               flags = 0
-                               if isWindows():
-                                   flags |= re.IGNORECASE
-                               self.syntax_file_patterns[key] = re.compile(args[2], flags)
-                       else:
-                           raise ValueError()
-                   except: # Grr... the 're' module throws weird errors
-                   #except ValueError:
-                       logError(_('Error parsing line %(line)d of %(file)s.') % { 'line': i + 1, 'file': file_name })
+                    try:
+                        # eg. add Python syntax highlighting:
+                        #    import /usr/share/diffuse/syntax/python.syntax
+                        if args[0] == 'import' and len(args) == 2:
+                            path = os.path.expanduser(args[1])
+                            # relative paths are relative to the parsed file
+                            path = os.path.join(os.path.dirname(file_name), path)
+                            paths = glob.glob(path)
+                            if len(paths) == 0:
+                                paths = [ path ]
+                            for path in paths:
+                                self.parse(path)
+                        # eg. make Ctrl+o trigger the open_file menu item
+                        #    keybinding menu open_file Ctrl+o
+                        elif args[0] == 'keybinding' and len(args) == 4:
+                            self.setKeyBinding(args[1], args[2], args[3])
+                        # eg. set the regular background colour to white
+                        #    colour text_background 1.0 1.0 1.0
+                        elif args[0] in [ 'colour', 'color' ] and len(args) == 5:
+                            self.colours[args[1]] = Colour(float(args[2]), float(args[3]), float(args[4]))
+                        # eg. set opacity of the line_selection colour
+                        #    float line_selection_alpha 0.4
+                        elif args[0] == 'float' and len(args) == 3:
+                            self.floats[args[1]] = float(args[2])
+                        # eg. set the help browser
+                        #    string help_browser gnome-help
+                        elif args[0] == 'string' and len(args) == 3:
+                            self.strings[args[1]] = args[2]
+                            if args[1] == 'difference_colours':
+                                self.setDifferenceColours(args[2])
+                            elif args[1] == 'character_classes':
+                                self.setCharacterClasses(args[2])
+                        # eg. start a syntax specification for Python
+                        #    syntax Python normal text
+                        # where 'normal' is the name of the default state and
+                        # 'text' is the classification of all characters not
+                        # explicitly matched by a syntax highlighting rule
+                        elif args[0] == 'syntax' and (len(args) == 2 or len(args) == 4):
+                            if len(args) == 2:
+                                # remove a syntax specification
+                                self.current_syntax = None
+                                if self.syntaxes.has_key(args[1]):
+                                    del self.syntaxes[args[1]]
+                            else:
+                                self.current_syntax = SyntaxParser(args[2], args[3])
+                                self.syntaxes[args[1]] = self.current_syntax
+                        # eg. transition from state 'normal' to 'comment' when
+                        # the pattern '#' is matched and classify the matched
+                        # characters as 'python_comment'
+                        #    syntax_pattern normal comment python_comment '#'
+                        elif args[0] == 'syntax_pattern' and self.current_syntax is not None and len(args) >= 5:
+                            flags = 0
+                            for arg in args[5:]:
+                                if arg == 'ignorecase':
+                                    flags |= re.IGNORECASE
+                                else:
+                                    raise ValueError()
+                            self.current_syntax.addPattern(args[1], args[2], args[3], re.compile(args[4], flags))
+                        # eg. default to the Python syntax rules when viewing
+                        # a file ending with '.py' or '.pyw'
+                        #    syntax_files Python '\.pyw?$'
+                        elif args[0] == 'syntax_files' and (len(args) == 2 or len(args) == 3):
+                            key = args[1]
+                            if len(args) == 2:
+                                # remove file pattern for a syntax specification
+                                if self.syntax_file_patterns.has_key(key):
+                                    del self.syntax_file_patterns[key]
+                            else:
+                                flags = 0
+                                if isWindows():
+                                    flags |= re.IGNORECASE
+                                self.syntax_file_patterns[key] = re.compile(args[2], flags)
+                        else:
+                            raise ValueError()
+                    except: # Grr... the 're' module throws weird errors
+                    #except ValueError:
+                        logError(_('Error parsing line %(line)d of %(file)s.') % { 'line': i + 1, 'file': file_name })
 
 theResources = Resources()
 
@@ -2065,19 +2065,19 @@ def url2path(s):
             if c == '%':
                 v = 0
                 for j in 0, 1:
-                   if i < n:
-                       p = ord(s[i])
-                       if p >= 48 and p <= 57:
-                           p -= 48
-                       elif p >= 65 and p <= 70:
-                           p -= 55
-                       elif p >= 97 and p <= 102:
-                           p -= 87
-                       else:
-                           p = None
-                       if p is not None:
-                           v = 16 * v + p
-                           i += 1
+                    if i < n:
+                        p = ord(s[i])
+                        if p >= 48 and p <= 57:
+                            p -= 48
+                        elif p >= 65 and p <= 70:
+                            p -= 55
+                        elif p >= 97 and p <= 102:
+                            p -= 87
+                        else:
+                            p = None
+                        if p is not None:
+                            v = 16 * v + p
+                            i += 1
                 c = chr(v)
             elif c == '|' and isWindows():
                 c = ':'
@@ -2911,8 +2911,8 @@ class FileDiffViewer(gtk.Table):
             for c in text:
                 if c in whitespace:
                     if pc:
-                       append(' ')
-                       pc = False
+                        append(' ')
+                        pc = False
                 else:
                     append(c)
                     pc = True
@@ -3539,6 +3539,7 @@ class FileDiffViewer(gtk.Table):
                     self.setCurrentLine(f, i)
                     # silently switch mode so the viewer does not scroll yet.
                     self.mode = CHAR_MODE
+                    self.im_context.focus_in()
                     self.button_press(f, x, y, False)
                     self.emit('mode_changed')
                 elif self.mode == CHAR_MODE and self.current_pane == f:
@@ -4774,7 +4775,7 @@ class FileDiffViewer(gtk.Table):
             s = convert_to_format(text, format)
             # only modify lines that actually change
             if s != text:
-                self.updateLineText(f, i, True, s)
+                self.updateText(f, i, s)
         self.setFormat(f, format)
         self.recordEditMode()
 
