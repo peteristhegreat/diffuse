@@ -127,6 +127,10 @@ if not hasattr(__builtins__, 'WindowsError'):
     # define 'WindowsError' so 'except' statements will work on all platforms
     WindowsError = IOError
 
+# convenience function for enable/disable debug messages
+def logDebug(s):
+    pass #sys.stderr.write('%s: %s\n', (APP_NAME, s))
+
 # avoid some dictionary lookups when string.whitespace is used in loops
 whitespace = string.whitespace
 
@@ -139,6 +143,8 @@ if __name__ == '__main__':
         iconpath = os.path.join(bin_dir, '../share/pixmaps/diffuse.png')
     if os.path.isfile(iconpath):
         gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(iconpath))
+    else:
+        logDebug('Missing icon %s' % (iconpath, ))
 
 # convenience class for displaying a message dialogue
 class MessageDialog(gtk.MessageDialog):
@@ -741,7 +747,7 @@ class Preferences:
               [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore blank line differences') ],
               [ 'Boolean', 'display_ignore_case', False, _('Ignore case differences') ],
               [ 'Boolean', 'display_ignore_endofline', False, _('Ignore end of line differences') ],
-              [ 'Boolean', 'display_hide_endofline', True, _('Hide end of line characters') ]
+              [ 'Boolean', 'display_show_whitespace', False, _('Show white space characters') ]
             ],
             _('Alignment'),
             [ 'List',
@@ -827,9 +833,9 @@ class Preferences:
                             else:
                                 raise ValueError()
                     except ValueError:
-                        logError(_('Error parsing line %(line)d of %(file)s.') % { 'line': j + 1, 'file': self.path })
+                        logDebug('Error parsing line %d of %s.' % (j + 1, self.path))
             except IOError:
-                logError(_('Error reading %s.') % (self.path, ))
+                logDebug('Error reading %s.' % (self.path, ))
 
     # recursively traverses 'template' to discover the preferences and
     # initialise their default values in self.bool_prefs, self.int_prefs, and
@@ -2329,7 +2335,7 @@ class FileDiffViewer(gtk.Table):
     # characters when tabs and other special characters are present
     # This is an inline loop over self.characterWidth() for performance reasons.
     def stringWidth(self, s):
-        if self.prefs.getBool('display_hide_endofline'):
+        if not self.prefs.getBool('display_show_whitespace'):
             s = strip_eol(s)
         col = 0
         tab_width = self.prefs.getInt('display_tab_width')
@@ -2338,6 +2344,8 @@ class FileDiffViewer(gtk.Table):
             if v < 32:
                 if c == '\t':
                     col += tab_width - col % tab_width
+                elif c == '\n':
+                    col += 1
                 else:
                     col += 2
             elif v >= 0x1100 and (v <= 0x115f
@@ -2362,8 +2370,9 @@ class FileDiffViewer(gtk.Table):
             if c == '\t':
                 tab_width = self.prefs.getInt('display_tab_width')
                 return tab_width - i % tab_width
-            return 2
-        if v >= 0x1100 and (v <= 0x115f
+            elif c != '\n':
+                return 2
+        elif v >= 0x1100 and (v <= 0x115f
             or v == 0x2329 or v == 0x232a
             or (v >= 0x2e80 and v <= 0xa4cf and v != 0x303f)
             or (v >= 0xac00 and v <= 0xd7a3)
@@ -2378,18 +2387,33 @@ class FileDiffViewer(gtk.Table):
     # translates a string into an array of the printable representation for
     # each character
     def expand(self, s):
-        if self.prefs.getBool('display_hide_endofline'):
+        visible = self.prefs.getBool('display_show_whitespace')
+        if not visible:
             s = strip_eol(s)
         tab_width = self.prefs.getInt('display_tab_width')
         col = 0
         result = []
         for c in s:
             v = ord(c)
-            if v < 32:
-                if c == '\t':
+            if v <= 32:
+                if c == ' ':
+                    if visible:
+                        # show spaces using a centre-dot
+                        result.append(u'\u00b7');
+                    else:
+                        result.append(c);
+                elif c == '\t':
                     width = tab_width - col % tab_width
-                    result.append(width * u' ')
+                    if visible:
+                        # show tabs using a right double angle quote
+                        result.append(u'\u00bb' + (width - 1) * u' ')
+                    else:
+                        result.append(width * u' ')
+                elif c == '\n' and visible:
+                    # show newlines using a pilcrow
+                    result.append(u'\u00b6')
                 else:
+                    # prefix with a ^
                     result.append(u'^' + chr(v + 64))
             else:
                 result.append(c)
@@ -6160,9 +6184,9 @@ class Diffuse(gtk.Window):
                             else:
                                 raise ValueError()
                     except ValueError:
-                        logError(_('Error parsing line %(line)d of %(file)s.') % { 'line': j + 1, 'file': configpath })
+                        logDebug('Error parsing line %d of %s.' % (j + 1, configpath))
             except IOError:
-                logError(_('Error reading %s.') % (configpath, ))
+                logDebug('Error reading %s.' % (configpath, ))
 
         self.move(self.int_state['window_x'], self.int_state['window_y'])
         self.resize(self.int_state['window_width'], self.int_state['window_height'])
@@ -6184,7 +6208,7 @@ class Diffuse(gtk.Window):
                 f.write(s)
             f.close()
         except IOError:
-            logError(_('Error writing %s.') % (configpath, ))
+            logDebug('Error writing %s.' % (configpath, ))
 
     # callback for the close button on each tab
     def remove_tab_cb(self, widget, data):
