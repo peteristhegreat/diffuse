@@ -1,3 +1,5 @@
+- added format menu with new items for changing case, sorting, and manipulating white space
+- replaced 'Hide end of line characters' preference with 'Show white space characters'
 - errors are now reported in a dialogue instead of printing to stderr
 - optimised redraws when only the cursor position has changed
 - input methods that use pre-editing can now be used when editing text

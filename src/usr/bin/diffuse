@@ -42,12 +42,12 @@ if isWindows():
     # gettext looks for the language using environment variables which
     # are normally not set on Windows so we try setting it for them
     for lang in 'LANGUAGE', 'LC_ALL', 'LC_MESSAGES', 'LANG':
-       if os.environ.has_key(lang):
-           break
+        if os.environ.has_key(lang):
+            break
     else:
-       lang = locale.getdefaultlocale()[0]
-       if lang is not None:
-           os.environ['LANG'] = lang
+        lang = locale.getdefaultlocale()[0]
+        if lang is not None:
+            os.environ['LANG'] = lang
     del lang
     locale_dir = 'locale'
 else:
@@ -127,7 +127,7 @@ if not hasattr(__builtins__, 'WindowsError'):
     # define 'WindowsError' so 'except' statements will work on all platforms
     WindowsError = IOError
 
-# convenience function for enable/disable debug messages
+# convenience function to display debug messages
 def logDebug(s):
     pass #sys.stderr.write('%s: %s\n', (APP_NAME, s))
 
@@ -144,6 +144,8 @@ if __name__ == '__main__':
     if os.path.isfile(iconpath):
         gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(iconpath))
     else:
+        # this can occur if we are run without a proper install
+        # it is just cosmetic, don't bother the user
         logDebug('Missing icon %s' % (iconpath, ))
 
 # convenience class for displaying a message dialogue
@@ -221,9 +223,9 @@ class SyntaxParser:
             for pattern, token_type, next_state in transitions:
                 m = pattern.match(s, start)
                 if m is not None:
-                     end, state_name = m.span()[1], next_state
-                     transitions = lookup[state_name]
-                     break
+                    end, state_name = m.span()[1], next_state
+                    transitions = lookup[state_name]
+                    break
             else:
                 end, token_type = start + 1, self.default_token_type
             if len(blocks) > 0 and blocks[-1][2] == token_type:
@@ -298,12 +300,7 @@ class Resources:
         set_binding('menu', 'find', 'Ctrl+f')
         set_binding('menu', 'find_next', 'Ctrl+g')
         set_binding('menu', 'find_previous', 'Shift+Ctrl+G')
-        set_binding('menu', 'go_to_line', 'Shift+Ctrl+l')
-        set_binding('menu', 'decrease_indenting', 'Shift+Ctrl+less')
-        set_binding('menu', 'increase_indenting', 'Shift+Ctrl+greater')
-        set_binding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
-        set_binding('menu', 'convert_to_mac', 'Shift+Ctrl+C')
-        set_binding('menu', 'convert_to_unix', 'Ctrl+e')
+        set_binding('menu', 'go_to_line', 'Shift+Ctrl+L')
         set_binding('menu', 'realign_all', 'Ctrl+l')
         set_binding('menu', 'isolate', 'Ctrl+i')
         set_binding('menu', 'first_difference', 'Shift+Ctrl+Up')
@@ -314,6 +311,18 @@ class Resources:
         set_binding('menu', 'next_tab', 'Ctrl+Page_Down')
         set_binding('menu', 'shift_pane_left', 'Shift+Ctrl+Left')
         set_binding('menu', 'shift_pane_right', 'Shift+Ctrl+Right')
+        set_binding('menu', 'convert_to_upper_case', 'Ctrl+u')
+        set_binding('menu', 'convert_to_lower_case', 'Shift+Ctrl+U')
+        set_binding('menu', 'sort_lines_in_ascending_order', 'Ctrl+y')
+        set_binding('menu', 'sort_lines_in_descending_order', 'Shift+Ctrl+Y')
+        set_binding('menu', 'remove_trailing_white_space', 'Ctrl+k')
+        set_binding('menu', 'convert_tabs_to_spaces', 'Ctrl+b')
+        set_binding('menu', 'convert_leading_spaces_to_tabs', 'Shift+Ctrl+B')
+        set_binding('menu', 'increase_indenting', 'Shift+Ctrl+greater')
+        set_binding('menu', 'decrease_indenting', 'Shift+Ctrl+less')
+        set_binding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
+        set_binding('menu', 'convert_to_mac', 'Shift+Ctrl+C')
+        set_binding('menu', 'convert_to_unix', 'Ctrl+e')
         set_binding('menu', 'merge_from_left', 'Ctrl+Left')
         set_binding('menu', 'merge_from_right', 'Ctrl+Right')
         set_binding('menu', 'merge_from_left_then_right', 'Ctrl+m')
@@ -456,10 +465,10 @@ class Resources:
                 if token[0].isdigit():
                     token = '_' + token
                 if not hasattr(gtk.keysyms, token):
-                   raise ValueError()
+                    raise ValueError()
                 key = getattr(gtk.keysyms, token)
         if key is None:
-           raise ValueError()
+            raise ValueError()
         key_tuple = (ctx, (key, modifiers))
 
         # remove any existing binding
@@ -833,8 +842,11 @@ class Preferences:
                             else:
                                 raise ValueError()
                     except ValueError:
+                        # this may happen if the prefs were written by a
+                        # different version -- don't bother the user
                         logDebug('Error parsing line %d of %s.' % (j + 1, self.path))
             except IOError:
+                # bad $HOME value? -- don't bother the user
                 logDebug('Error reading %s.' % (self.path, ))
 
     # recursively traverses 'template' to discover the preferences and
@@ -2229,11 +2241,6 @@ class FileDiffViewer(gtk.Table):
             'paste': self.paste,
             'select_all': self.select_all,
             'clear_edits': self.clear_edits,
-            'decrease_indenting': self.decrease_indenting,
-            'increase_indenting': self.increase_indenting,
-            'convert_to_dos': self.convert_to_dos,
-            'convert_to_mac': self.convert_to_mac,
-            'convert_to_unix': self.convert_to_unix,
             'realign_all': self.realign_all,
             'isolate': self.isolate,
             'first_difference': self.first_difference,
@@ -2242,6 +2249,18 @@ class FileDiffViewer(gtk.Table):
             'last_difference': self.last_difference,
             'shift_pane_left': self.shift_pane_left,
             'shift_pane_right': self.shift_pane_right,
+            'convert_to_upper_case': self.convert_to_upper_case,
+            'convert_to_lower_case': self.convert_to_lower_case,
+            'sort_lines_in_ascending_order': self.sort_lines_in_ascending_order,
+            'sort_lines_in_descending_order': self.sort_lines_in_descending_order,
+            'remove_trailing_white_space': self.remove_trailing_white_space,
+            'convert_tabs_to_spaces': self.convert_tabs_to_spaces,
+            'convert_leading_spaces_to_tabs': self.convert_leading_spaces_to_tabs,
+            'increase_indenting': self.increase_indenting,
+            'decrease_indenting': self.decrease_indenting,
+            'convert_to_dos': self.convert_to_dos,
+            'convert_to_mac': self.convert_to_mac,
+            'convert_to_unix': self.convert_to_unix,
             'merge_from_left': self.merge_from_left,
             'merge_from_right': self.merge_from_right,
             'merge_from_left_then_right': self.merge_from_left_then_right,
@@ -4762,75 +4781,6 @@ class FileDiffViewer(gtk.Table):
         self.centre_view_about_y((idx + 0.5) * self.font_height)
         self.setCurrentLine(f, idx)
 
-    # adjust indenting of the selected lines by 'offset' soft tabs
-    def _adjust_indenting(self, offset):
-        if self.mode == LINE_MODE or self.mode == CHAR_MODE:
-            # find range of lines to operate upon
-            f = self.current_pane
-            start, end = self.selection_line, self.current_line
-            if end < start:
-                start, end = end, start
-            end += 1
-
-            self.recordEditMode()
-            for i in range(start, end):
-                text = self.getLineText(f, i)
-                if text is not None and len_minus_line_ending(text) > 0:
-                    # count spacing before the first non-whitespace character
-                    j, w = 0, 0
-                    while j < len(text) and text[j] in ' \t':
-                        w += self.characterWidth(w, text[j])
-                        j += 1
-                    # adjust by a multiple of the soft tab width
-                    ws = max(0, w + offset * self.prefs.getInt('editor_soft_tab_width'))
-                    if ws != w:
-                        if self.prefs.getBool('editor_expand_tabs'):
-                            s = u' ' * ws
-                        else:
-                            tab_width = self.prefs.getInt('display_tab_width')
-                            s = u'\t' * (ws // tab_width)
-                            s += u' ' * (ws % tab_width)
-                        self.updateText(f, i, s + text[j:])
-            if self.mode == CHAR_MODE:
-                # ensure the cursor position is valid
-                i = self.current_line
-                self.setCurrentChar(self.selection_line, 0)
-                self.setCurrentChar(i, 0, True)
-            self.recordEditMode()
-
-    # 'decrease_indenting' action
-    def decrease_indenting(self):
-        self._adjust_indenting(-1)
-
-    # 'increase_indenting' action
-    def increase_indenting(self):
-        self._adjust_indenting(1)
-
-    def convert_format(self, format):
-        self.setLineMode()
-        self.recordEditMode()
-        f = self.current_pane
-        for i in range(len(self.panes[f].lines)):
-            text = self.getLineText(f, i)
-            s = convert_to_format(text, format)
-            # only modify lines that actually change
-            if s != text:
-                self.updateText(f, i, s)
-        self.setFormat(f, format)
-        self.recordEditMode()
-
-    # 'convert_to_dos' action
-    def convert_to_dos(self):
-        self.convert_format(DOS_FORMAT)
-
-    # 'convert_to_mac' action
-    def convert_to_mac(self):
-        self.convert_format(MAC_FORMAT)
-
-    # 'convert_to_unix' action
-    def convert_to_unix(self):
-        self.convert_format(UNIX_FORMAT)
-
     # recompute viewport size and redraw as the display preferences may have
     # changed
     def prefsUpdated(self):
@@ -5061,6 +5011,274 @@ class FileDiffViewer(gtk.Table):
     def shift_pane_right(self):
         f = self.current_pane
         self.swap_panes(f + 1, f)
+
+    # 'convert_to_upper_case' action
+    def _convert_case(self, to_upper):
+        # find range of characters to operate upon
+        if self.mode == CHAR_MODE:
+            start, end = self.current_line, self.selection_line
+            j0, j1 = self.current_char, self.selection_char
+            if end < start or (start == end and j1 < j0):
+                start, j0, end, j1 = end, j1, start, j0
+        else:
+            self.setLineMode()
+            start, end = self.current_line, self.selection_line
+            if end < start:
+                start, end = end, start
+            end += 1
+            j0, j1 = 0, 0
+        self.recordEditMode()
+        f = self.current_pane
+        for i in range(start, end + 1):
+            text = self.getLineText(f, i)
+            if text is not None:
+                s = text
+                # skip characters after the selection
+                if i == end:
+                    s, post = s[:j1], s[j1:]
+                else:
+                    post = ''
+                # skip characters before the selection
+                if i == start:
+                    pre, s = s[:j0], s[j0:]
+                else:
+                    pre = ''
+                # change the case
+                if to_upper:
+                    s = s.upper()
+                else:
+                    s = s.lower()
+                s = ''.join([pre, s, post])
+                # only update the line if it changed
+                if s != text:
+                    self.updateText(f, i, s)
+
+    # 'convert_to_upper_case' action
+    def convert_to_upper_case(self):
+        self._convert_case(True)
+
+    # 'convert_to_lower_case' action
+    def convert_to_lower_case(self):
+        self._convert_case(False)
+
+    # sort lines
+    def _sort_lines(self, descending):
+        if self.mode != CHAR_MODE:
+            self.setLineMode()
+        self.recordEditMode()
+        f = self.current_pane
+        # find cursor range
+        start, end = self.selection_line, self.current_line
+        if end < start:
+            start, end = end, start
+        # get set of lines
+        ss = [ self.getLineText(f, i) for i in range(start, end + 1) ]
+        # create sorted list, removing any nulls
+        temp = [ s for s in ss if s is not None ]
+        temp.sort()
+        if descending:
+            temp.reverse()
+        # add back in the nulls
+        temp.extend((len(ss) - len(temp)) * [ None ])
+        for i, s in enumerate(temp):
+            # update line if it changed
+            if ss[i] != s:
+                self.updateText(f, start + i, s)
+        if self.mode == CHAR_MODE:
+            # ensure the cursor position is valid
+            i = self.current_line
+            self.setCurrentChar(self.selection_line, 0)
+            self.setCurrentChar(i, 0, True)
+        self.recordEditMode()
+
+    # 'sort_lines_in_ascending_order' action
+    def sort_lines_in_ascending_order(self):
+        self._sort_lines(False)
+
+    # 'sort_lines_in_descending_order' action
+    def sort_lines_in_descending_order(self):
+        self._sort_lines(True)
+
+    # 'remove_trailing_white_space' action
+    def remove_trailing_white_space(self):
+        if self.mode != CHAR_MODE:
+            self.setLineMode()
+        self.recordEditMode()
+        f = self.current_pane
+        # find cursor range
+        start, end = self.selection_line, self.current_line
+        if end < start:
+            start, end = end, start
+        # get set of lines
+        for i in range(start, end + 1):
+            text = self.getLineText(f, i)
+            if text is not None:
+                # locate trailing whitespace
+                old_n = n = len_minus_line_ending(text)
+                while n > 0 and text[n - 1] in whitespace:
+                    n -= 1
+                # update line if it changed
+                if n < old_n:
+                    self.updateText(f, i, text[:n] + text[old_n:])
+        if self.mode == CHAR_MODE:
+            # ensure the cursor position is valid
+            i = self.current_line
+            self.setCurrentChar(self.selection_line, 0)
+            self.setCurrentChar(i, 0, True)
+        self.recordEditMode()
+
+    # 'convert_tabs_to_spaces' action
+    def convert_tabs_to_spaces(self):
+        # find range of characters to operate upon
+        if self.mode == CHAR_MODE:
+            start, end = self.current_line, self.selection_line
+            j0, j1 = self.current_char, self.selection_char
+            if end < start or (start == end and j1 < j0):
+                start, j0, end, j1 = end, j1, start, j0
+        else:
+            self.setLineMode()
+            start, end = self.current_line, self.selection_line
+            if end < start:
+                start, end = end, start
+            end += 1
+            j0, j1 = 0, 0
+        self.recordEditMode()
+        f = self.current_pane
+        for i in range(start, end + 1):
+            text = self.getLineText(f, i)
+            if text is not None:
+                # expand tabs
+                ss, col = [], 0
+                for c in text:
+                    w = self.characterWidth(col, c)
+                    # replace tab with spaces
+                    if c == '\t':
+                        c = w * u' '
+                    ss.append(c)
+                    col += w
+                # determine the range of interest
+                if i == start:
+                    k0 = j0
+                else:
+                    k0 = 0
+                if i == end:
+                    k1 = j1
+                else:
+                    k1 = len(ss)
+                # compute leading and converted text
+                s = text[:k0] + ''.join(ss[k0:k1])
+                if i == end:
+                    # update the end cursor location
+                    j1 = len(s)
+                # append the trailing text
+                s += text[k1:]
+                # update line only if it changed
+                if text != s:
+                    self.updateText(f, i, s)
+        if self.mode == CHAR_MODE:
+            # ensure the cursor position is valid
+            self.setCurrentChar(start, j0)
+            self.setCurrentChar(end, j1, True)
+        self.recordEditMode()
+
+    # 'convert_leading_spaces_to_tabs' action
+    def convert_leading_spaces_to_tabs(self):
+        if self.mode != CHAR_MODE:
+            self.setLineMode()
+        self.recordEditMode()
+        f = self.current_pane
+        tab_width = self.prefs.getInt('display_tab_width')
+        # find cursor range
+        start, end = self.selection_line, self.current_line
+        if end < start:
+            start, end = end, start
+        for i in range(start, end + 1):
+            text = self.getLineText(f, i)
+            if text is not None:
+                # find leading white space
+                j, col = 0, 0
+                while j < len(text) and text[j] in ' \t':
+                    col += self.characterWidth(col, text[j])
+                    j += 1
+                if col >= tab_width:
+                    # convert to tabs
+                    s = ''.join([ u'\t' * (col // tab_width), u' ' * (col % tab_width), text[j:] ])
+                    # update line only if it changed
+                    if text != s:
+                        self.updateText(f, i, s)
+        if self.mode == CHAR_MODE:
+            # ensure the cursor position is valid
+            i = self.current_line
+            self.setCurrentChar(self.selection_line, 0)
+            self.setCurrentChar(i, 0, True)
+        self.recordEditMode()
+
+    # adjust indenting of the selected lines by 'offset' soft tabs
+    def _adjust_indenting(self, offset):
+        if self.mode != CHAR_MODE:
+            self.setLineMode()
+        # find range of lines to operate upon
+        f = self.current_pane
+        start, end = self.selection_line, self.current_line
+        if end < start:
+            start, end = end, start
+
+        self.recordEditMode()
+        for i in range(start, end + 1):
+            text = self.getLineText(f, i)
+            if text is not None and len_minus_line_ending(text) > 0:
+                # count spacing before the first non-whitespace character
+                j, w = 0, 0
+                while j < len(text) and text[j] in ' \t':
+                    w += self.characterWidth(w, text[j])
+                    j += 1
+                # adjust by a multiple of the soft tab width
+                ws = max(0, w + offset * self.prefs.getInt('editor_soft_tab_width'))
+                if ws != w:
+                    if self.prefs.getBool('editor_expand_tabs'):
+                        s = u' ' * ws
+                    else:
+                        tab_width = self.prefs.getInt('display_tab_width')
+                        s = u'\t' * (ws // tab_width) + u' ' * (ws % tab_width)
+                    self.updateText(f, i, s + text[j:])
+        if self.mode == CHAR_MODE:
+            # ensure the cursor position is valid
+            i = self.current_line
+            self.setCurrentChar(self.selection_line, 0)
+            self.setCurrentChar(i, 0, True)
+        self.recordEditMode()
+
+    # 'increase_indenting' action
+    def increase_indenting(self):
+        self._adjust_indenting(1)
+
+    # 'decrease_indenting' action
+    def decrease_indenting(self):
+        self._adjust_indenting(-1)
+
+    def convert_format(self, format):
+        self.setLineMode()
+        self.recordEditMode()
+        f = self.current_pane
+        for i in range(len(self.panes[f].lines)):
+            text = self.getLineText(f, i)
+            s = convert_to_format(text, format)
+            # only modify lines that actually change
+            if s != text:
+                self.updateText(f, i, s)
+        self.setFormat(f, format)
+
+    # 'convert_to_dos' action
+    def convert_to_dos(self):
+        self.convert_format(DOS_FORMAT)
+
+    # 'convert_to_mac' action
+    def convert_to_mac(self):
+        self.convert_format(MAC_FORMAT)
+
+    # 'convert_to_unix' action
+    def convert_to_unix(self):
+        self.convert_format(UNIX_FORMAT)
 
     # copies the selected range of lines from pane 'f_src' to 'f_dst'
     def merge_lines(self, f_dst, f_src):
@@ -6054,13 +6272,6 @@ class Diffuse(gtk.Window):
                      [_('Find Pre_vious'), self.find_previous_cb, None, None, 'find_previous'],
                      [_('_Go To Line...'), self.go_to_line_cb, None, gtk.STOCK_JUMP_TO, 'go_to_line'],
                      [],
-                     [_('Decrea_se Indenting'), self.button_cb, 'decrease_indenting', gtk.STOCK_UNINDENT, 'decrease_indenting'],
-                     [_('_Increase Indenting'), self.button_cb, 'increase_indenting', gtk.STOCK_INDENT, 'increase_indenting'],
-                     [],
-                     [_('Convert to _DOS Format'), self.button_cb, 'convert_to_dos', None, 'convert_to_dos'],
-                     [_('Convert to _Mac Format'), self.button_cb, 'convert_to_mac', None, 'convert_to_mac'],
-                     [_('Convert to Uni_x Format'), self.button_cb, 'convert_to_unix', None, 'convert_to_unix'],
-                     [],
                      [_('Pr_eferences...'), self.preferences_cb, None, gtk.STOCK_PREFERENCES, 'preferences'] ] ])
 
         submenudef = [ [_('None'), self.syntax_cb, None, None, 'no_syntax_highlighting'] ]
@@ -6087,6 +6298,24 @@ class Diffuse(gtk.Window):
                      [],
                      [_('Shift Pane _Left'), self.button_cb, 'shift_pane_left', None, 'shift_pane_left'],
                      [_('Shift Pane _Right'), self.button_cb, 'shift_pane_right', None, 'shift_pane_right'] ] ])
+
+        menuspecs.append([ _('_Format'), [
+                     [_('Convert To _Upper Case'), self.button_cb, 'convert_to_upper_case', None, 'convert_to_upper_case'],
+                     [_('Convert To _Lower Case'), self.button_cb, 'convert_to_lower_case', None, 'convert_to_lower_case'],
+                     [],
+                     [_('Sort Lines In _Ascending Order'), self.button_cb, 'sort_lines_in_ascending_order', gtk.STOCK_SORT_ASCENDING, 'sort_lines_in_ascending_order'],
+                     [_('Sort Lines In D_escending Order'), self.button_cb, 'sort_lines_in_descending_order', gtk.STOCK_SORT_DESCENDING, 'sort_lines_in_descending_order'],
+                     [],
+                     [_('Remove Trailing _White Space'), self.button_cb, 'remove_trailing_white_space', None, 'remove_trailing_white_space'],
+                     [_('Convert Tabs To _Spaces'), self.button_cb, 'convert_tabs_to_spaces', None, 'convert_tabs_to_spaces'],
+                     [_('Convert Leading Spaces To _Tabs'), self.button_cb, 'convert_leading_spaces_to_tabs', None, 'convert_leading_spaces_to_tabs'],
+                     [],
+                     [_('_Increase Indenting'), self.button_cb, 'increase_indenting', gtk.STOCK_INDENT, 'increase_indenting'],
+                     [_('De_crease Indenting'), self.button_cb, 'decrease_indenting', gtk.STOCK_UNINDENT, 'decrease_indenting'],
+                     [],
+                     [_('Convert To _DOS Format'), self.button_cb, 'convert_to_dos', None, 'convert_to_dos'],
+                     [_('Convert To _Mac Format'), self.button_cb, 'convert_to_mac', None, 'convert_to_mac'],
+                     [_('Convert To Uni_x Format'), self.button_cb, 'convert_to_unix', None, 'convert_to_unix'] ] ])
 
         menuspecs.append([ _('_Merge'), [
                      [_('Merge From _Left'), self.button_cb, 'merge_from_left', gtk.STOCK_GO_FORWARD, 'merge_from_left'],
@@ -6184,8 +6413,11 @@ class Diffuse(gtk.Window):
                             else:
                                 raise ValueError()
                     except ValueError:
+                        # this may happen if the state was written by a
+                        # different version -- don't bother the user
                         logDebug('Error parsing line %d of %s.' % (j + 1, configpath))
             except IOError:
+                # bad $HOME value? -- don't bother the user
                 logDebug('Error reading %s.' % (configpath, ))
 
         self.move(self.int_state['window_x'], self.int_state['window_y'])
@@ -6208,6 +6440,7 @@ class Diffuse(gtk.Window):
                 f.write(s)
             f.close()
         except IOError:
+            # bad $HOME value? -- don't bother the user
             logDebug('Error writing %s.' % (configpath, ))
 
     # callback for the close button on each tab

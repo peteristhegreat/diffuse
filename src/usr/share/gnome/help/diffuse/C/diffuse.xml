@@ -779,46 +779,6 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>decrease_indenting</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Decrease Indenting</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Shift+Ctrl+&lt;</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>increase_indenting</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Increase Indenting</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Shift+Ctrl+&gt;</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>convert_to_dos</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert to DOS Format</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Shift+Ctrl+E</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>convert_to_mac</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert to Mac Format</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Shift+Ctrl+C</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>convert_to_unix</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert to Unix Format</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+e</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><userinput>preferences</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Preferences</guimenuitem></menuchoice> menu item</para>
@@ -919,6 +879,102 @@
             <listitem>
               <para>shift the currently selected pane to the right</para>
               <para>Default: Shift+Ctrl+Right</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>convert_to_upper_case</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert To Upper Case</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+u</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>convert_to_lower_case</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert To Lower Case</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+U</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>sort_lines_in_ascending_order</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Sort Lines In Ascending Order</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+y</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>sort_lines_in_descending_order</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Sort Lines In Descending Order</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+Y</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>remove_trailing_white_space</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Remove Trailing White Space</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+k</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>convert_tabs_to_spaces</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert Tabs To Spaces</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+b</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>convert_leading_spaces_to_tabs</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert Leading Spaces To Tabs</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+B</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>increase_indenting</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Increase Indenting</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+&gt;</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>decrease_indenting</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Decrease Indenting</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+&lt;</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>convert_to_dos</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert To DOS Format</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+E</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>convert_to_mac</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert To Mac Format</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+C</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>convert_to_unix</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert To Unix Format</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Ctrl+e</para>
             </listitem>
           </varlistentry>
 
