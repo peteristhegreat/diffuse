@@ -2290,7 +2290,11 @@ class FileDiffViewer(gtk.Table):
         im.connect('commit', self.im_commit_cb)
         im.connect('preedit_changed', self.im_preedit_changed_cb)
         im.connect('retrieve_surrounding', self.im_retrieve_surrounding_cb)
-        self.preedit = None
+        self.im_preedit = None
+        # Cache our keyboard focus state so we know when to change the
+        # input method's focus.  We ensure the input method is given focus
+        # if and only if (self.has_focus and self.mode == CHAR_MODE).
+        self.has_focus = False
 
         # font
         self.setFont(pango.FontDescription(prefs.getString('display_font')))
@@ -2396,9 +2400,9 @@ class FileDiffViewer(gtk.Table):
     def setLineMode(self):
         if self.mode != LINE_MODE:
             if self.mode == CHAR_MODE:
-                self.im_context.focus_out()
+                self._im_focus_out()
                 self.im_context.reset()
-                self._set_preedit(None)
+                self._im_set_preedit(None)
                 self.current_char = 0
                 self.selection_char = 0
                 self.dareas[self.current_pane].queue_draw()
@@ -2423,7 +2427,7 @@ class FileDiffViewer(gtk.Table):
                 self.align_pane = 0
                 self.align_line = 0
                 self.setCurrentChar(self.current_line, 0)
-            self.im_context.focus_in()
+            self._im_focus_in()
             self.im_context.reset()
             self.mode = CHAR_MODE
             self.emit('cursor_changed')
@@ -2559,7 +2563,7 @@ class FileDiffViewer(gtk.Table):
             num_lines = max(num_lines, len(pane.lines))
             line_lengths = max(line_lengths, pane.line_lengths)
         # account for any preedit text
-        if self.preedit is not None:
+        if self.im_preedit is not None:
             w = self._preedit_layout().get_size()[0]
             s = self.getLineText(self.current_pane, self.current_line)
             if s is not None:
@@ -3357,11 +3361,11 @@ class FileDiffViewer(gtk.Table):
 
     # returns True if the line has preedit text
     def hasPreedit(self, f, i):
-        return self.mode == CHAR_MODE and self.current_pane == f and self.current_line == i and self.preedit is not None
+        return self.mode == CHAR_MODE and self.current_pane == f and self.current_line == i and self.im_preedit is not None
 
     # create a layout for the existing preedit text
     def _preedit_layout(self, partial=False):
-        s, a, c = self.preedit
+        s, a, c = self.im_preedit
         if partial:
             s = s[:c]
         layout = self.create_pango_layout(s)
@@ -3400,7 +3404,7 @@ class FileDiffViewer(gtk.Table):
 
         # find the cursor's horizontal range
         lower = self._get_cursor_x_offset()
-        if self.preedit is not None:
+        if self.im_preedit is not None:
             lower += self._preedit_layout(True).get_size()[0]
         upper = lower + self.getLineNumberWidth() + self.digit_width
         lower, upper = pixels(lower), pixels(upper)
@@ -3539,7 +3543,7 @@ class FileDiffViewer(gtk.Table):
                     self.setCurrentLine(f, i)
                     # silently switch mode so the viewer does not scroll yet.
                     self.mode = CHAR_MODE
-                    self.im_context.focus_in()
+                    self._im_focus_in()
                     self.button_press(f, x, y, False)
                     self.emit('mode_changed')
                 elif self.mode == CHAR_MODE and self.current_pane == f:
@@ -4225,9 +4229,9 @@ class FileDiffViewer(gtk.Table):
     # 'enter_align_mode' keybinding action
     def _line_mode_enter_align_mode(self):
         if self.mode == CHAR_MODE:
-            self.im_context.focus_out()
+            self._im_focus_out()
             self.im_context.reset()
-            self._set_preedit(None)
+            self._im_set_preedit(None)
         self.mode = ALIGN_MODE
         self.selection_line = self.current_line
         self.align_pane = self.current_pane
@@ -4324,6 +4328,16 @@ class FileDiffViewer(gtk.Table):
         elif self.current_pane + 1 == f1:
             self.align(self.current_pane, line2, line1)
 
+    # give the input method focus
+    def _im_focus_in(self):
+        if self.has_focus:
+            self.im_context.focus_in()
+
+    # remove input method focus
+    def _im_focus_out(self):
+        if self.has_focus:
+            self.im_context.focus_out()
+
     # input method callback for committed text
     def im_commit_cb(self, im, s):
         if self.mode == CHAR_MODE:
@@ -4332,8 +4346,8 @@ class FileDiffViewer(gtk.Table):
             self.closeUndoBlock()
 
     # update the cached preedit text
-    def _set_preedit(self, p):
-        self.preedit = p
+    def _im_set_preedit(self, p):
+        self.im_preedit = p
         if self.mode == CHAR_MODE:
             f, i = self.current_pane, self.current_line
             self._queue_draw_lines(f, i)
@@ -4353,7 +4367,7 @@ class FileDiffViewer(gtk.Table):
                 p = (s, a, c)
             else:
                 p = None
-            self._set_preedit(p)
+            self._im_set_preedit(p)
             self._ensure_cursor_is_visible()
 
     # callback to respond to retrieve_surrounding signals from input methods
@@ -4366,15 +4380,17 @@ class FileDiffViewer(gtk.Table):
 
     # callback for 'focus_in_event'
     def focus_in_cb(self, widget, event):
+        self.has_focus = True
         if self.mode == CHAR_MODE:
             # notify the input method of the focus change
-            self.im_context.focus_in()
+            self._im_focus_in()
 
     # callback for 'focus_out_event'
     def focus_out_cb(self, widget, event):
         if self.mode == CHAR_MODE:
             # notify the input method of the focus change
-            self.im_context.focus_out()
+            self._im_focus_out()
+        self.has_focus = False
 
     # callback for keyboard events
     # only keypresses that are not handled by menu item accelerators reach here
