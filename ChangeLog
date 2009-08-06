@@ -1,3 +1,4 @@
+- changed the default hotkeys for merging to reflect the direction text "moves"
 - added format menu with new items for changing case, sorting, and manipulating white space
 - replaced 'Hide end of line characters' preference with 'Show white space characters'
 - errors are now reported in a dialogue instead of printing to stderr

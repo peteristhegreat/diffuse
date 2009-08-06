@@ -870,7 +870,7 @@
             <term><userinput>shift_pane_left</userinput></term>
             <listitem>
               <para>shift the currently selected pane to the left</para>
-              <para>Default: Shift+Ctrl+Left</para>
+              <para>Default: Shift+Ctrl+Right</para>
             </listitem>
           </varlistentry>
 
@@ -878,7 +878,7 @@
             <term><userinput>shift_pane_right</userinput></term>
             <listitem>
               <para>shift the currently selected pane to the right</para>
-              <para>Default: Shift+Ctrl+Right</para>
+              <para>Default: Shift+Ctrl+Left</para>
             </listitem>
           </varlistentry>
 
