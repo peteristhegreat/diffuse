@@ -3,6 +3,17 @@
 syntax 'C Shell' normal text
 syntax_files 'C Shell' '^(.*\.csh|\.t?cshrc)$'
 
+# colours
+colour csh_comment 0.2 0.4 0.64
+colour csh_fixme 1.0 0.5 0.0
+colour csh_literal 1.0 0.2 0.8
+colour csh_string 0.8 0.0 0.0
+colour csh_subshell 0.46 0.31 0.48
+colour csh_escapedchar 0.46 0.31 0.48
+colour csh_variable 0.02 0.6 0.6
+colour csh_keyword 0.77 0.63 0.0
+colour csh_punctuation 0.5 0.5 0.5
+
 # whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'
 
@@ -58,14 +69,3 @@ syntax_pattern expr expr csh_literal '\b[0-9]+\b'
 
 # parsing optimisation
 syntax_pattern expr expr text '[a-z0-9_]+' ignorecase
-
-# colours
-colour csh_comment 0.2 0.4 0.64
-colour csh_fixme 1.0 0.5 0.0
-colour csh_literal 1.0 0.2 0.8
-colour csh_string 0.8 0.0 0.0
-colour csh_subshell 0.46 0.31 0.48
-colour csh_escapedchar 0.46 0.31 0.48
-colour csh_variable 0.02 0.6 0.6
-colour csh_keyword 0.77 0.63 0.0
-colour csh_punctuation 0.5 0.5 0.5

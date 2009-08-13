@@ -3,6 +3,18 @@
 syntax Objective-C++ normal text
 syntax_files Objective-C++ '\.mm?$'
 
+# colours
+colour objc_comment 0.2 0.4 0.64
+colour objc_fixme 1.0 0.5 0.0
+colour objc_keyword 0.77 0.63 0.0
+colour objc_type 0.3 0.6 0.02
+colour objc_cpp 0.8 0.0 0.0
+colour objc_cppkeyword 0.46 0.31 0.48
+colour objc_literal 1.0 0.2 0.8
+colour objc_string 0.8 0.0 0.0
+colour objc_escapedchar 0.46 0.31 0.48
+colour objc_punctuation 0.5 0.5 0.5
+
 # preprocessor
 syntax_pattern normal cpp objc_cppkeyword '^[ \t]*#[ \t]*(define|elif|else|endif|error|if|ifdef|ifndef|import|include|line|pragma|undef|warning)\b'
 syntax_pattern cpp normal objc_cppkeyword '(\r\n|\r|\n)$'
@@ -60,15 +72,3 @@ syntax_pattern normal normal objc_punctuation '[/\.]'
 
 # parsing optimisation
 syntax_pattern normal normal text '[a-z_][a-z_0-9]*' ignorecase
-
-# colours
-colour objc_comment 0.2 0.4 0.64
-colour objc_fixme 1.0 0.5 0.0
-colour objc_keyword 0.77 0.63 0.0
-colour objc_type 0.3 0.6 0.02
-colour objc_cpp 0.8 0.0 0.0
-colour objc_cppkeyword 0.46 0.31 0.48
-colour objc_literal 1.0 0.2 0.8
-colour objc_string 0.8 0.0 0.0
-colour objc_escapedchar 0.46 0.31 0.48
-colour objc_punctuation 0.5 0.5 0.5

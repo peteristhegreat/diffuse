@@ -3,6 +3,17 @@
 syntax Tcl normal text
 syntax_files Tcl '\.tcl$'
 
+# colours
+colour tcl_comment 0.2 0.4 0.64
+colour tcl_fixme 1.0 0.5 0.0
+colour tcl_literal 1.0 0.2 0.8
+colour tcl_string 0.8 0.0 0.0
+colour tcl_escapedchar 0.46 0.31 0.48
+colour tcl_variable 0.02 0.6 0.6
+colour tcl_keyword 0.77 0.63 0.0
+colour tcl_punctuation 0.5 0.5 0.5
+colour tcl_function 0.02 0.6 0.6
+
 # whitespace/comments
 syntax_pattern normal normal text '[ \t\r]+'
 syntax_pattern expr expr text '[ \t\r]+'
@@ -45,14 +56,3 @@ syntax_pattern expr expr tcl_variable '\$(([a-z_0-9]|::)+|\{([a-z_0-9]|::)+\})' 
 # parsing optimisation
 syntax_pattern expr expr text '[a-z_0-9]+' ignorecase
 syntax_pattern normal expr text ''
-
-# colours
-colour tcl_comment 0.2 0.4 0.64
-colour tcl_fixme 1.0 0.5 0.0
-colour tcl_literal 1.0 0.2 0.8
-colour tcl_string 0.8 0.0 0.0
-colour tcl_escapedchar 0.46 0.31 0.48
-colour tcl_variable 0.02 0.6 0.6
-colour tcl_keyword 0.77 0.63 0.0
-colour tcl_punctuation 0.5 0.5 0.5
-colour tcl_function 0.02 0.6 0.6

@@ -3,6 +3,29 @@
 syntax PHP normal text
 syntax_files PHP '\.php$'
 
+# colours
+colour php_comment 0.2 0.4 0.64
+colour php_fixme 1.0 0.5 0.0
+colour php_tag 0.46 0.31 0.48
+colour php_import 0.46 0.31 0.48
+colour php_keyword 0.77 0.63 0.0
+colour php_type 0.3 0.6 0.02
+colour php_literal 1.0 0.2 0.8
+colour php_string 0.8 0.0 0.0
+colour php_escapedchar 0.46 0.31 0.48
+colour php_punctuation 0.5 0.5 0.5
+colour php_variable 0.02 0.6 0.6
+
+# colours
+colour php_html_comment 0.2 0.4 0.64
+colour php_html_fixme 1.0 0.5 0.0
+colour php_html_escapedchar 0.77 0.63 0.0
+colour php_html_tag 0.02 0.6 0.6
+colour php_html_tagname 0.77 0.63 0.0
+colour php_html_punctuation 0.5 0.5 0.5
+colour php_html_attribute 0.3 0.6 0.02
+colour php_html_string 0.8 0.0 0.0
+
 # php tags
 syntax_pattern normal php php_tag '<\?(php)?=?' ignorecase
 syntax_pattern php normal php_tag '\?>'
@@ -99,26 +122,3 @@ syntax_pattern html_tag_singlestring html_tag_singlestring php_html_string ".[^\
 # text/parsing optimisation
 syntax_pattern normal normal php_html_escapedchar '\&([a-z_:][a-z_0-9\.\-_:]*|#[0-9]+|#x[0-9a-f]+);' ignorecase
 syntax_pattern normal normal text '.[^\&<]*'
-
-# colours
-colour php_comment 0.2 0.4 0.64
-colour php_fixme 1.0 0.5 0.0
-colour php_tag 0.46 0.31 0.48
-colour php_import 0.46 0.31 0.48
-colour php_keyword 0.77 0.63 0.0
-colour php_type 0.3 0.6 0.02
-colour php_literal 1.0 0.2 0.8
-colour php_string 0.8 0.0 0.0
-colour php_escapedchar 0.46 0.31 0.48
-colour php_punctuation 0.5 0.5 0.5
-colour php_variable 0.02 0.6 0.6
-
-# colours
-colour php_html_comment 0.2 0.4 0.64
-colour php_html_fixme 1.0 0.5 0.0
-colour php_html_escapedchar 0.77 0.63 0.0
-colour php_html_tag 0.02 0.6 0.6
-colour php_html_tagname 0.77 0.63 0.0
-colour php_html_punctuation 0.5 0.5 0.5
-colour php_html_attribute 0.3 0.6 0.02
-colour php_html_string 0.8 0.0 0.0

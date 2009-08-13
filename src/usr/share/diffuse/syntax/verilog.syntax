@@ -3,6 +3,19 @@
 syntax Verilog normal text
 syntax_files Verilog '\.v$'
 
+# colours
+colour verilog_comment 0.2 0.4 0.64
+colour verilog_fixme 1.0 0.5 0.0
+colour verilog_keyword 0.77 0.63 0.0
+colour verilog_type 0.3 0.6 0.02
+colour verilog_cpp 0.8 0.0 0.0
+colour verilog_cppkeyword 0.46 0.31 0.48
+colour verilog_literal 1.0 0.2 0.8
+colour verilog_string 0.8 0.0 0.0
+colour verilog_escapedchar 0.46 0.31 0.48
+colour verilog_variable 0.02 0.6 0.6
+colour verilog_punctuation 0.5 0.5 0.5
+
 # directives
 syntax_pattern normal cpp verilog_cppkeyword '`[0-9a-z_]+'
 syntax_pattern cpp normal verilog_cppkeyword '(\r\n|\r|\n)$'
@@ -51,16 +64,3 @@ syntax_pattern normal normal verilog_punctuation '[/\.]'
 # parsing optimisation
 syntax_pattern normal normal verilog_variable '\$[a-z_0-9\$]*' ignorecase
 syntax_pattern normal normal text '[a-z_][a-z_0-9\$]*' ignorecase
-
-# colours
-colour verilog_comment 0.2 0.4 0.64
-colour verilog_fixme 1.0 0.5 0.0
-colour verilog_keyword 0.77 0.63 0.0
-colour verilog_type 0.3 0.6 0.02
-colour verilog_cpp 0.8 0.0 0.0
-colour verilog_cppkeyword 0.46 0.31 0.48
-colour verilog_literal 1.0 0.2 0.8
-colour verilog_string 0.8 0.0 0.0
-colour verilog_escapedchar 0.46 0.31 0.48
-colour verilog_variable 0.02 0.6 0.6
-colour verilog_punctuation 0.5 0.5 0.5

@@ -3,6 +3,19 @@
 syntax Makefile normal text
 syntax_files Makefile '^(GNUmakefile|[Mm]akefile)$'
 
+# colours
+colour makefile_continue 0.46 0.31 0.48
+colour makefile_comment 0.2 0.4 0.64
+colour makefile_fixme 1.0 0.5 0.0
+colour makefile_keyword 0.46 0.31 0.48
+colour makefile_processor 0.8 0.0 0.0
+colour makefile_declaration 0.02 0.6 0.6
+colour makefile_step 0.46 0.31 0.48
+colour makefile_commands 0.8 0.0 0.0
+colour makefile_target 0.02 0.6 0.6
+colour makefile_variable 0.02 0.6 0.6
+
+# continuation
 syntax_pattern normal normal makefile_continue '\\(\r\n|\r|\n)$'
 
 # normal comment
@@ -67,15 +80,3 @@ syntax_pattern depends_comment depends makefile_comment '(\r\n|\r|\n)$'
 syntax_pattern depends_comment depends makefile_continue '\\(\r\n|\r|\n)$'
 syntax_pattern depends_comment depends_comment makefile_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern depends_comment depends_comment makefile_comment '.[^TFX\r\n]*'
-
-# colours
-colour makefile_continue 0.46 0.31 0.48
-colour makefile_comment 0.2 0.4 0.64
-colour makefile_fixme 1.0 0.5 0.0
-colour makefile_keyword 0.46 0.31 0.48
-colour makefile_processor 0.8 0.0 0.0
-colour makefile_declaration 0.02 0.6 0.6
-colour makefile_step 0.46 0.31 0.48
-colour makefile_commands 0.8 0.0 0.0
-colour makefile_target 0.02 0.6 0.6
-colour makefile_variable 0.02 0.6 0.6

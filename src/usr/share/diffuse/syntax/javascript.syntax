@@ -3,6 +3,19 @@
 syntax JavaScript normal text
 syntax_files JavaScript '\.js$'
 
+# colours
+colour javascript_comment 0.2 0.4 0.64
+colour javascript_fixme 1.0 0.5 0.0
+colour javascript_import 0.46 0.31 0.48
+colour javascript_keyword 0.77 0.63 0.0
+colour javascript_type 0.3 0.6 0.02
+colour javascript_regex 0.8 0.0 0.0
+colour javascript_regexsep 0.77 0.63 0.0
+colour javascript_literal 1.0 0.2 0.8
+colour javascript_string 0.8 0.0 0.0
+colour javascript_escapedchar 0.46 0.31 0.48
+colour javascript_punctuation 0.5 0.5 0.5
+
 # whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern expr expr text '[ \t\r\n]+'
@@ -63,16 +76,3 @@ syntax_pattern expr normal javascript_punctuation '/'
 # parsing optimisation
 syntax_pattern normal expr text '[\$a-z_][\$a-z_0-9]*' ignorecase
 syntax_pattern expr normal javascript_punctuation ''
-
-# colours
-colour javascript_comment 0.2 0.4 0.64
-colour javascript_fixme 1.0 0.5 0.0
-colour javascript_import 0.46 0.31 0.48
-colour javascript_keyword 0.77 0.63 0.0
-colour javascript_type 0.3 0.6 0.02
-colour javascript_regex 0.8 0.0 0.0
-colour javascript_regexsep 0.77 0.63 0.0
-colour javascript_literal 1.0 0.2 0.8
-colour javascript_string 0.8 0.0 0.0
-colour javascript_escapedchar 0.46 0.31 0.48
-colour javascript_punctuation 0.5 0.5 0.5

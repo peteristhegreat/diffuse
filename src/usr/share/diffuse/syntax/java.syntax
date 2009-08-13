@@ -3,6 +3,17 @@
 syntax Java normal text
 syntax_files Java '\.java$'
 
+# colours
+colour java_comment 0.2 0.4 0.64
+colour java_fixme 1.0 0.5 0.0
+colour java_import 0.46 0.31 0.48
+colour java_keyword 0.77 0.63 0.0
+colour java_type 0.3 0.6 0.02
+colour java_literal 1.0 0.2 0.8
+colour java_string 0.8 0.0 0.0
+colour java_escapedchar 0.46 0.31 0.48
+colour java_punctuation 0.5 0.5 0.5
+
 # whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'
 
@@ -50,14 +61,3 @@ syntax_pattern normal normal java_punctuation '[/\.]'
 
 # parsing optimisation
 syntax_pattern normal normal text '[a-z_][a-z_0-9]*' ignorecase
-
-# colours
-colour java_comment 0.2 0.4 0.64
-colour java_fixme 1.0 0.5 0.0
-colour java_import 0.46 0.31 0.48
-colour java_keyword 0.77 0.63 0.0
-colour java_type 0.3 0.6 0.02
-colour java_literal 1.0 0.2 0.8
-colour java_string 0.8 0.0 0.0
-colour java_escapedchar 0.46 0.31 0.48
-colour java_punctuation 0.5 0.5 0.5

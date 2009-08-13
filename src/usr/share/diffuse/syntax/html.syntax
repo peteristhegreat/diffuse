@@ -3,6 +3,46 @@
 syntax HTML normal text
 syntax_files HTML '\.html$'
 
+# colours
+colour html_comment 0.2 0.4 0.64
+colour html_fixme 1.0 0.5 0.0
+colour html_escapedchar 0.77 0.63 0.0
+colour html_processingtag 0.46 0.31 0.48
+colour html_processingtagname 0.3 0.6 0.02
+colour html_tag 0.02 0.6 0.6
+colour html_tagname 0.77 0.63 0.0
+colour html_punctuation 0.5 0.5 0.5
+colour html_attribute 0.3 0.6 0.02
+colour html_string 0.8 0.0 0.0
+colour html_script 0.46 0.31 0.48
+colour html_style 0.46 0.31 0.48
+
+# script colours
+colour html_script_comment 0.2 0.4 0.64
+colour html_script_fixme 1.0 0.5 0.0
+colour html_script_import 0.46 0.31 0.48
+colour html_script_keyword 0.77 0.63 0.0
+colour html_script_type 0.3 0.6 0.02
+colour html_script_regex 0.8 0.0 0.0
+colour html_script_regexsep 0.77 0.63 0.0
+colour html_script_literal 1.0 0.2 0.8
+colour html_script_string 0.8 0.0 0.0
+colour html_script_escapedchar 0.46 0.31 0.48
+colour html_script_punctuation 0.5 0.5 0.5
+
+# style colours
+colour html_style_comment 0.2 0.4 0.64
+colour html_style_fixme 1.0 0.5 0.0
+colour html_style_rule 0.46 0.31 0.48
+colour html_style_block 0.02 0.6 0.6
+colour html_style_selector 0.77 0.63 0.0
+colour html_style_property 0.3 0.6 0.02
+colour html_style_important 0.46 0.31 0.48
+colour html_style_literal 1.0 0.2 0.8
+colour html_style_string 0.8 0.0 0.0
+colour html_style_escapedchar 0.46 0.31 0.48
+colour html_style_punctuation 0.5 0.5 0.5
+
 # whitespace/comments
 syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern normal comment html_comment '<!--'
@@ -183,43 +223,3 @@ syntax_pattern tag_singlestring tag_singlestring html_string ".[^\\&']*"
 # text/parsing optimisation
 syntax_pattern normal normal html_escapedchar '\&([a-z_:][a-z_0-9\.\-_:]*|#[0-9]+|#x[0-9a-f]+);' ignorecase
 syntax_pattern normal normal text '.[^\&<]*'
-
-# colours
-colour html_comment 0.2 0.4 0.64
-colour html_fixme 1.0 0.5 0.0
-colour html_escapedchar 0.77 0.63 0.0
-colour html_processingtag 0.46 0.31 0.48
-colour html_processingtagname 0.3 0.6 0.02
-colour html_tag 0.02 0.6 0.6
-colour html_tagname 0.77 0.63 0.0
-colour html_punctuation 0.5 0.5 0.5
-colour html_attribute 0.3 0.6 0.02
-colour html_string 0.8 0.0 0.0
-colour html_script 0.46 0.31 0.48
-colour html_style 0.46 0.31 0.48
-
-# script colours
-colour html_script_comment 0.2 0.4 0.64
-colour html_script_fixme 1.0 0.5 0.0
-colour html_script_import 0.46 0.31 0.48
-colour html_script_keyword 0.77 0.63 0.0
-colour html_script_type 0.3 0.6 0.02
-colour html_script_regex 0.8 0.0 0.0
-colour html_script_regexsep 0.77 0.63 0.0
-colour html_script_literal 1.0 0.2 0.8
-colour html_script_string 0.8 0.0 0.0
-colour html_script_escapedchar 0.46 0.31 0.48
-colour html_script_punctuation 0.5 0.5 0.5
-
-# style colours
-colour html_style_comment 0.2 0.4 0.64
-colour html_style_fixme 1.0 0.5 0.0
-colour html_style_rule 0.46 0.31 0.48
-colour html_style_block 0.02 0.6 0.6
-colour html_style_selector 0.77 0.63 0.0
-colour html_style_property 0.3 0.6 0.02
-colour html_style_important 0.46 0.31 0.48
-colour html_style_literal 1.0 0.2 0.8
-colour html_style_string 0.8 0.0 0.0
-colour html_style_escapedchar 0.46 0.31 0.48
-colour html_style_punctuation 0.5 0.5 0.5

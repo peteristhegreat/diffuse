@@ -3,6 +3,20 @@
 syntax Perl normal text
 syntax_files Perl '\.p[hlm]$'
 
+# colours
+colour perl_comment 0.2 0.4 0.64
+colour perl_fixme 1.0 0.5 0.0
+colour perl_keyword 0.77 0.63 0.0
+colour perl_import 0.46 0.31 0.48
+colour perl_literal 1.0 0.2 0.8
+colour perl_string 0.8 0.0 0.0
+colour perl_escapedchar 0.46 0.31 0.48
+colour perl_function 0.02 0.6 0.6
+colour perl_punctuation 0.5 0.5 0.5
+colour perl_variable 0.02 0.6 0.6
+colour perl_regexsep 0.77 0.63 0.0
+colour perl_regex 0.8 0.0 0.0
+
 # whitespace/comments
 syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern expr expr text '[ \t\r\n]+'
@@ -86,17 +100,3 @@ syntax_pattern expr normal perl_punctuation '/'
 # parsing optimisation
 syntax_pattern normal expr text '[a-z_][a-z_0-9]*' ignorecase
 syntax_pattern expr normal perl_regex ''
-
-# colours
-colour perl_comment 0.2 0.4 0.64
-colour perl_fixme 1.0 0.5 0.0
-colour perl_keyword 0.77 0.63 0.0
-colour perl_import 0.46 0.31 0.48
-colour perl_literal 1.0 0.2 0.8
-colour perl_string 0.8 0.0 0.0
-colour perl_escapedchar 0.46 0.31 0.48
-colour perl_function 0.02 0.6 0.6
-colour perl_punctuation 0.5 0.5 0.5
-colour perl_variable 0.02 0.6 0.6
-colour perl_regexsep 0.77 0.63 0.0
-colour perl_regex 0.8 0.0 0.0

@@ -3,6 +3,29 @@
 syntax JSP normal text
 syntax_files JSP '\.jsp$'
 
+# colours
+colour jsp_comment 0.2 0.4 0.64
+colour jsp_fixme 1.0 0.5 0.0
+colour jsp_import 0.46 0.31 0.48
+colour jsp_keyword 0.77 0.63 0.0
+colour jsp_type 0.3 0.6 0.02
+colour jsp_literal 1.0 0.2 0.8
+colour jsp_string 0.8 0.0 0.0
+colour jsp_escapedchar 0.46 0.31 0.48
+colour jsp_punctuation 0.5 0.5 0.5
+colour jsp_tag 0.46 0.31 0.48
+
+# colours
+colour jsp_html_comment 0.2 0.4 0.64
+colour jsp_html_fixme 1.0 0.5 0.0
+colour jsp_html_escapedchar 0.77 0.63 0.0
+colour jsp_html_tag 0.02 0.6 0.6
+colour jsp_html_tagname 0.77 0.63 0.0
+colour jsp_html_punctuation 0.5 0.5 0.5
+colour jsp_html_attribute 0.3 0.6 0.02
+colour jsp_html_string 0.8 0.0 0.0
+
+# jsp tag
 syntax_pattern normal jsp jsp_tag '<%=?'
 syntax_pattern jsp normal jsp_tag '%>'
 
@@ -102,25 +125,3 @@ syntax_pattern html_tag_singlestring html_tag_singlestring jsp_html_string ".[^\
 # text/parsing optimisation
 syntax_pattern normal normal jsp_html_escapedchar '\&([a-z_:][a-z_0-9\.\-_:]*|#[0-9]+|#x[0-9a-f]+);' ignorecase
 syntax_pattern normal normal text '.[^\&<]*'
-
-# colours
-colour jsp_comment 0.2 0.4 0.64
-colour jsp_fixme 1.0 0.5 0.0
-colour jsp_import 0.46 0.31 0.48
-colour jsp_keyword 0.77 0.63 0.0
-colour jsp_type 0.3 0.6 0.02
-colour jsp_literal 1.0 0.2 0.8
-colour jsp_string 0.8 0.0 0.0
-colour jsp_escapedchar 0.46 0.31 0.48
-colour jsp_punctuation 0.5 0.5 0.5
-colour jsp_tag 0.46 0.31 0.48
-
-# colours
-colour jsp_html_comment 0.2 0.4 0.64
-colour jsp_html_fixme 1.0 0.5 0.0
-colour jsp_html_escapedchar 0.77 0.63 0.0
-colour jsp_html_tag 0.02 0.6 0.6
-colour jsp_html_tagname 0.77 0.63 0.0
-colour jsp_html_punctuation 0.5 0.5 0.5
-colour jsp_html_attribute 0.3 0.6 0.02
-colour jsp_html_string 0.8 0.0 0.0

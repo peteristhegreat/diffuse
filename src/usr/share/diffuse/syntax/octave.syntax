@@ -6,6 +6,16 @@ syntax Octave normal text
 # with the extension '.m' here.
 #syntax_files Octave '\.m$'
 
+# colours
+colour octave_comment 0.2 0.4 0.64
+colour octave_fixme 1.0 0.5 0.0
+colour octave_keyword 0.77 0.63 0.0
+colour octave_type 0.3 0.6 0.02
+colour octave_literal 1.0 0.2 0.8
+colour octave_string 0.8 0.0 0.0
+colour octave_escapedchar 0.46 0.31 0.48
+colour octave_punctuation 0.5 0.5 0.5
+
 # whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'
 
@@ -52,13 +62,3 @@ syntax_pattern normal normal octave_punctuation '[\[\(\{:;,~&\|=<>\*/\+\-@\^\\!]
 
 # parsing optimisation
 syntax_pattern normal op text '[a-z_][a-z_0-9]*' ignorecase
-
-# colours
-colour octave_comment 0.2 0.4 0.64
-colour octave_fixme 1.0 0.5 0.0
-colour octave_keyword 0.77 0.63 0.0
-colour octave_type 0.3 0.6 0.02
-colour octave_literal 1.0 0.2 0.8
-colour octave_string 0.8 0.0 0.0
-colour octave_escapedchar 0.46 0.31 0.48
-colour octave_punctuation 0.5 0.5 0.5

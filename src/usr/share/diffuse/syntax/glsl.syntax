@@ -3,6 +3,16 @@
 syntax GLSL normal text
 syntax_files GLSL '\.(frag|vert|glsl)$'
 
+# colours
+colour glsl_comment 0.2 0.4 0.64
+colour glsl_fixme 1.0 0.5 0.0
+colour glsl_keyword 0.77 0.63 0.0
+colour glsl_type 0.3 0.6 0.02
+colour glsl_cpp 0.8 0.0 0.0
+colour glsl_cppkeyword 0.46 0.31 0.48
+colour glsl_literal 1.0 0.2 0.8
+colour glsl_punctuation 0.5 0.5 0.5
+
 # preprocessor
 syntax_pattern normal cpp glsl_cppkeyword '^[ \t]*#[ \t]*(define|elif|else|endif|error|extension|if|ifdef|ifndef|line|pragma|undef|version)\b'
 syntax_pattern cpp normal glsl_cppkeyword '(\r\n|\r|\n)$'
@@ -47,13 +57,3 @@ syntax_pattern normal normal glsl_punctuation '[/\.]'
 
 # parsing optimisation
 syntax_pattern normal normal text '[a-z_][a-z_0-9]*' ignorecase
-
-# colours
-colour glsl_comment 0.2 0.4 0.64
-colour glsl_fixme 1.0 0.5 0.0
-colour glsl_keyword 0.77 0.63 0.0
-colour glsl_type 0.3 0.6 0.02
-colour glsl_cpp 0.8 0.0 0.0
-colour glsl_cppkeyword 0.46 0.31 0.48
-colour glsl_literal 1.0 0.2 0.8
-colour glsl_punctuation 0.5 0.5 0.5

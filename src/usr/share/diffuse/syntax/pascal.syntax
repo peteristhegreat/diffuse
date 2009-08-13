@@ -3,6 +3,19 @@
 syntax Pascal normal text
 syntax_files Pascal '\.pas$'
 
+# colours
+colour pascal_comment 0.2 0.4 0.64
+colour pascal_cppkeyword 0.46 0.31 0.48
+colour pascal_cpp 0.8 0.0 0.0
+colour pascal_fixme 1.0 0.5 0.0
+colour pascal_import 0.46 0.31 0.48
+colour pascal_keyword 0.77 0.63 0.0
+colour pascal_type 0.3 0.6 0.02
+colour pascal_literal 1.0 0.2 0.8
+colour pascal_string 0.8 0.0 0.0
+colour pascal_escapedchar 0.46 0.31 0.48
+colour pascal_punctuation 0.5 0.5 0.5
+
 # whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'
 
@@ -55,16 +68,3 @@ syntax_pattern normal normal pascal_punctuation '[\(/]'
 
 # parsing optimisation
 syntax_pattern normal normal text '[a-z_][a-z_0-9]*' ignorecase
-
-# colours
-colour pascal_comment 0.2 0.4 0.64
-colour pascal_cppkeyword 0.46 0.31 0.48
-colour pascal_cpp 0.8 0.0 0.0
-colour pascal_fixme 1.0 0.5 0.0
-colour pascal_import 0.46 0.31 0.48
-colour pascal_keyword 0.77 0.63 0.0
-colour pascal_type 0.3 0.6 0.02
-colour pascal_literal 1.0 0.2 0.8
-colour pascal_string 0.8 0.0 0.0
-colour pascal_escapedchar 0.46 0.31 0.48
-colour pascal_punctuation 0.5 0.5 0.5

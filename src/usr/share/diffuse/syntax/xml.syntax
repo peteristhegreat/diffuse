@@ -3,6 +3,20 @@
 syntax XML normal text
 syntax_files XML '\.(dtd|omf|plist|svg|xhtml|xml|xsd|xsl)$'
 
+# colours
+colour xml_comment 0.2 0.4 0.64
+colour xml_fixme 1.0 0.5 0.0
+colour xml_escapedchar 0.77 0.63 0.0
+colour xml_processingtag 0.46 0.31 0.48
+colour xml_processingtagname 0.3 0.6 0.02
+colour xml_tag 0.02 0.6 0.6
+colour xml_tagname 0.77 0.63 0.0
+colour xml_punctuation 0.5 0.5 0.5
+colour xml_attribute 0.3 0.6 0.02
+colour xml_string 0.8 0.0 0.0
+colour xml_cdatatag 0.3 0.6 0.02
+colour xml_cdata 0.8 0.0 0.0
+
 # whitespace/comments
 syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern normal comment xml_comment '<!--'
@@ -118,17 +132,3 @@ syntax_pattern tag_singlestring tag_singlestring xml_string ".[^\\&']*"
 # text/parsing optimisation
 syntax_pattern normal normal xml_escapedchar '\&([a-z_:][a-z_0-9\.\-_:]*|#[0-9]+|#x[0-9a-f]+);' ignorecase
 syntax_pattern normal normal text '.[^\&<]*'
-
-# colours
-colour xml_comment 0.2 0.4 0.64
-colour xml_fixme 1.0 0.5 0.0
-colour xml_escapedchar 0.77 0.63 0.0
-colour xml_processingtag 0.46 0.31 0.48
-colour xml_processingtagname 0.3 0.6 0.02
-colour xml_tag 0.02 0.6 0.6
-colour xml_tagname 0.77 0.63 0.0
-colour xml_punctuation 0.5 0.5 0.5
-colour xml_attribute 0.3 0.6 0.02
-colour xml_string 0.8 0.0 0.0
-colour xml_cdatatag 0.3 0.6 0.02
-colour xml_cdata 0.8 0.0 0.0

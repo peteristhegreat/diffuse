@@ -3,7 +3,20 @@
 syntax CSS normal text
 syntax_files CSS '\.css$'
 
-# whitespace and comments
+# colours
+colour css_comment 0.2 0.4 0.64
+colour css_fixme 1.0 0.5 0.0
+colour css_rule 0.46 0.31 0.48
+colour css_block 0.02 0.6 0.6
+colour css_selector 0.77 0.63 0.0
+colour css_property 0.3 0.6 0.02
+colour css_important 0.46 0.31 0.48
+colour css_literal 1.0 0.2 0.8
+colour css_string 0.8 0.0 0.0
+colour css_escapedchar 0.46 0.31 0.48
+colour css_punctuation 0.5 0.5 0.5
+
+# whitespace/comments
 syntax_pattern normal normal text '[ \t\r\n]+'
 syntax_pattern property property text '[ \t\r\n]+'
 syntax_pattern normal comment css_comment '/\*'
@@ -45,16 +58,3 @@ syntax_pattern property property_singlestring css_string "'"
 syntax_pattern property_singlestring property css_string "'"
 syntax_pattern property_singlestring property_singlestring css_escapedchar '\\([0-9][a-f]{1,6}|.)' ignorecase
 syntax_pattern property_singlestring property_singlestring css_string ".[^']*"
-
-# colours
-colour css_comment 0.2 0.4 0.64
-colour css_fixme 1.0 0.5 0.0
-colour css_rule 0.46 0.31 0.48
-colour css_block 0.02 0.6 0.6
-colour css_selector 0.77 0.63 0.0
-colour css_property 0.3 0.6 0.02
-colour css_important 0.46 0.31 0.48
-colour css_literal 1.0 0.2 0.8
-colour css_string 0.8 0.0 0.0
-colour css_escapedchar 0.46 0.31 0.48
-colour css_punctuation 0.5 0.5 0.5

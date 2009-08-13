@@ -3,6 +3,18 @@
 syntax 'Bourne Shell' normal text
 syntax_files 'Bourne Shell' '^(.*\.sh|\.bashrc)$'
 
+# colours
+colour bash_comment 0.2 0.4 0.64
+colour bash_fixme 1.0 0.5 0.0
+colour bash_literal 1.0 0.2 0.8
+colour bash_string 0.8 0.0 0.0
+colour bash_subshell 0.46 0.31 0.48
+colour bash_escapedchar 0.46 0.31 0.48
+colour bash_variable 0.02 0.6 0.6
+colour bash_keyword 0.77 0.63 0.0
+colour bash_punctuation 0.5 0.5 0.5
+colour bash_function 0.02 0.6 0.6
+
 # keywords
 syntax_pattern normal expr bash_keyword '\b(alias|bg|bind|break|builtin|caller|case|cd|command|compgen|complete|continue|declare|dirs|disown|do|done|echo|elif|else|enable|esac|eval|exec|exit|export|fc|fg|fi|for|getopts|hash|help|history|if|in|jobs|kill|let|local|logout|popd|printf|pushd|pwd|read|readonly|return|select|set|shift|shopt|source|suspend|test|then|time|times|trap|type|typeset|ulimit|umask|unalias|unset|until|wait|while)\b'
 
@@ -62,15 +74,3 @@ syntax_pattern expr expr bash_variable '\$([\*@#\?\-\$!]|[a-z_0-9]+|\{[a-z_0-9]+
 
 # parsing optimisation
 syntax_pattern expr expr text '[a-z0-9_]+' ignorecase
-
-# colours
-colour bash_comment 0.2 0.4 0.64
-colour bash_fixme 1.0 0.5 0.0
-colour bash_literal 1.0 0.2 0.8
-colour bash_string 0.8 0.0 0.0
-colour bash_subshell 0.46 0.31 0.48
-colour bash_escapedchar 0.46 0.31 0.48
-colour bash_variable 0.02 0.6 0.6
-colour bash_keyword 0.77 0.63 0.0
-colour bash_punctuation 0.5 0.5 0.5
-colour bash_function 0.02 0.6 0.6

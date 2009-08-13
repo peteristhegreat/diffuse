@@ -3,9 +3,23 @@
 syntax C++ normal text
 syntax_files C++ '\.(h|c|C|cc|cxx|c\+\+|cpp)$'
 
+# colours
+colour c++_comment 0.2 0.4 0.64
+colour c++_fixme 1.0 0.5 0.0
+colour c++_keyword 0.77 0.63 0.0
+colour c++_type 0.3 0.6 0.02
+colour c++_cpp 0.8 0.0 0.0
+colour c++_cppkeyword 0.46 0.31 0.48
+colour c++_literal 1.0 0.2 0.8
+colour c++_string 0.8 0.0 0.0
+colour c++_escapedchar 0.46 0.31 0.48
+colour c++_punctuation 0.5 0.5 0.5
+
 # preprocessor
 syntax_pattern normal cpp c++_cppkeyword '^[ \t]*#[ \t]*(define|elif|else|endif|error|if|ifdef|ifndef|include|line|pragma|undef|warning)\b'
 syntax_pattern cpp normal c++_cppkeyword '(\r\n|\r|\n)$'
+
+# whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'
 
 # C++ style comments
@@ -59,15 +73,3 @@ syntax_pattern normal normal c++_punctuation '[/\.]'
 
 # parsing optimisation
 syntax_pattern normal normal text '[a-z_][a-z_0-9]*' ignorecase
-
-# colours
-colour c++_comment 0.2 0.4 0.64
-colour c++_fixme 1.0 0.5 0.0
-colour c++_keyword 0.77 0.63 0.0
-colour c++_type 0.3 0.6 0.02
-colour c++_cpp 0.8 0.0 0.0
-colour c++_cppkeyword 0.46 0.31 0.48
-colour c++_literal 1.0 0.2 0.8
-colour c++_string 0.8 0.0 0.0
-colour c++_escapedchar 0.46 0.31 0.48
-colour c++_punctuation 0.5 0.5 0.5
