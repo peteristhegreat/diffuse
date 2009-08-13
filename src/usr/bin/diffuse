@@ -3354,13 +3354,16 @@ class FileDiffViewer(gtk.Table):
 
     # queue a range of lines for redrawing
     def _queue_draw_lines(self, f, line0, line1=None):
-        if line1 is None:
-            line1 = line0
-        elif line0 > line1:
-            line0, line1 = line1, line0
-        darea = self.dareas[f]
-        w, h = darea.get_allocation().width, self.font_height
-        darea.queue_draw_area(0, line0 * h - int(self.vadj.get_value()), w, (line1 - line0 + 1) * h)
+        # FIXME: ScrollWindow() cannot handle scrolling with partial redraws
+        # yet so queue the entire widget for redrawing for now
+        self.dareas[f].queue_draw()
+        #if line1 is None:
+        #    line1 = line0
+        #elif line0 > line1:
+        #    line0, line1 = line1, line0
+        #darea = self.dareas[f]
+        #w, h = darea.get_allocation().width, self.font_height
+        #darea.queue_draw_area(0, line0 * h - int(self.vadj.get_value()), w, (line1 - line0 + 1) * h)
 
     # scroll vertically to ensure the current line is visible
     def _ensure_line_is_visible(self, i):
