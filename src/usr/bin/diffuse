@@ -1846,10 +1846,15 @@ class ScrolledWindow(gtk.Table):
         gtk.Table.__init__(self, 2, 2)
         self.position = (0, 0)
         self.scroll_count = 0
+        self.partial_redraw = False
 
         vport = gtk.Viewport()
         darea = gtk.DrawingArea()
         self.darea = darea
+        # replace darea's queue_draw_area with our own so we can tell when
+        # to disable/enable our scrolling optimisation
+        self.darea_queue_draw_area = darea.queue_draw_area
+        darea.queue_draw_area = self.redraw_region
         vport.add(darea)
         darea.show()
         self.attach(vport, 0, 1, 0, 1)
@@ -1863,6 +1868,7 @@ class ScrolledWindow(gtk.Table):
         self.hbar = bar = gtk.HScrollbar()
         self.attach(bar, 0, 1, 1, 2, gtk.EXPAND|gtk.FILL, gtk.FILL)
         bar.show()
+        self.hhandle = bar.get_adjustment().connect('value_changed', self.value_changed_cb)
         self.hhandle = bar.get_adjustment().connect('value_changed', self.value_changed_cb)
 
         darea.connect('configure_event', self.configure_cb)
@@ -1922,14 +1928,19 @@ class ScrolledWindow(gtk.Table):
         if self.darea.window is not None:
             # window.scroll() although visually nice, is slow, revert to
             # queue_draw() if scroll a lot without seeing an expose event
-            if self.scroll_count < 2:
+            if self.scroll_count < 2 and not self.partial_redraw:
                 self.scroll_count += 1
                 self.darea.window.scroll(old_x - pos_x, old_y - pos_y)
             else:
                 self.darea.queue_draw()
+                self.partial_redraw = False
 
     def expose_cb(self, widget, event):
         self.scroll_count = 0
+
+    def redraw_region(self, x, y, w, h):
+        self.partial_redraw = True
+        self.darea_queue_draw_area(x, y, w, h)
 
 # Enforcing manual alignment is accomplished by dividing the lines of text into
 # sections that are matched independently.  'blocks' is an array of integers
@@ -3354,16 +3365,13 @@ class FileDiffViewer(gtk.Table):
 
     # queue a range of lines for redrawing
     def _queue_draw_lines(self, f, line0, line1=None):
-        # FIXME: ScrollWindow() cannot handle scrolling with partial redraws
-        # yet so queue the entire widget for redrawing for now
-        self.dareas[f].queue_draw()
-        #if line1 is None:
-        #    line1 = line0
-        #elif line0 > line1:
-        #    line0, line1 = line1, line0
-        #darea = self.dareas[f]
-        #w, h = darea.get_allocation().width, self.font_height
-        #darea.queue_draw_area(0, line0 * h - int(self.vadj.get_value()), w, (line1 - line0 + 1) * h)
+        if line1 is None:
+            line1 = line0
+        elif line0 > line1:
+            line0, line1 = line1, line0
+        darea = self.dareas[f]
+        w, h = darea.get_allocation().width, self.font_height
+        darea.queue_draw_area(0, line0 * h - int(self.vadj.get_value()), w, (line1 - line0 + 1) * h)
 
     # scroll vertically to ensure the current line is visible
     def _ensure_line_is_visible(self, i):
