@@ -1932,12 +1932,14 @@ class ScrolledWindow(gtk.Table):
                 self.scroll_count += 1
                 self.darea.window.scroll(old_x - pos_x, old_y - pos_y)
             else:
-                self.darea.queue_draw()
                 self.partial_redraw = False
+                self.darea.queue_draw()
 
     def expose_cb(self, widget, event):
         self.scroll_count = 0
 
+    # replacement for darea.queue_draw_area that notifies us when a partial
+    # redraw happened
     def redraw_region(self, x, y, w, h):
         self.partial_redraw = True
         self.darea_queue_draw_area(x, y, w, h)
@@ -3231,8 +3233,7 @@ class FileDiffViewer(gtk.Table):
                 self.updateText(f, line0 + i, None)
         # update selection
         if self.mode == LINE_MODE:
-            self.selection_line = line0
-            self.setCurrentLine(f, line0 + max(n_need, n_have) - 1, True)
+            self.setCurrentLine(f, line0 + max(n_need, n_have) - 1, line0)
         else:
             self.setCurrentChar(cur_line, lastcol)
         self.recordEditMode()
@@ -3357,7 +3358,7 @@ class FileDiffViewer(gtk.Table):
         if mode == CHAR_MODE:
             self.setCurrentChar(self.current_line, self.current_char, True)
         else:
-            self.setCurrentLine(self.current_pane, self.current_line, True)
+            self.setCurrentLine(self.current_pane, self.current_line, self.selection_line)
         self.emit('cursor_changed')
         self.emit('mode_changed')
         # queue a redraw to show the updated selection
@@ -3388,7 +3389,7 @@ class FileDiffViewer(gtk.Table):
 
     # change the current selection in LINE_MODE
     # use extend=True to extend the selection
-    def setCurrentLine(self, f, i, extend=False):
+    def setCurrentLine(self, f, i, selection=None):
         # remember old cursor position so we can just redraw what is necessary
         old_f = self.current_pane
         line0, line1 = self.current_line, self.selection_line
@@ -3400,8 +3401,10 @@ class FileDiffViewer(gtk.Table):
         # update cursor
         self.current_pane = f
         self.current_line = i
-        if not extend:
+        if selection is None:
             self.selection_line = i
+        else:
+            self.selection_line = selection
 
         self.emit('cursor_changed')
 
@@ -3477,7 +3480,7 @@ class FileDiffViewer(gtk.Table):
 
     # change the current selection in CHAR_MODE
     # use extend=True to extend the selection
-    def setCurrentChar(self, i, j, extend=False):
+    def setCurrentChar(self, i, j, si=None, sj=None):
         f = self.current_pane
 
         # remember old cursor position so we can just redraw what is necessary
@@ -3486,13 +3489,16 @@ class FileDiffViewer(gtk.Table):
         # clear remembered cursor column
         self.cursor_column = -1
         # update cursor and selection
+        extend = (si is not None and sj is not None)
+        if not extend:
+            si, sj = i, j
         self.current_line = i
         self.current_char = j
+        self.selection_line = si
+        self.selection_char = sj
+
         if extend:
             gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).set_text(self.getSelectedText())
-        else:
-            self.selection_line = i
-            self.selection_char = j
 
         self._cursor_position_changed(True)
         self.emit('cursor_changed')
@@ -3571,13 +3577,21 @@ class FileDiffViewer(gtk.Table):
         if self.mode == CHAR_MODE and f == self.current_pane:
             text = strip_eol(self.getLineText(f, i))
             j = self._getPickedCharacter(text, x, True)
-            self.setCurrentChar(i, j, extend)
+            if extend:
+                si, sj = self.selection_line, self.selection_char
+            else:
+                si, sj = None, None
+            self.setCurrentChar(i, j, si, sj)
         else:
             if self.mode == ALIGN_MODE:
                 extend = False
             elif self.mode == CHAR_MODE:
                 self.setLineMode()
-            self.setCurrentLine(f, i, extend and f == self.current_pane)
+            if extend and f == self.current_pane:
+                selection = self.selection_line
+            else:
+                selection = None
+            self.setCurrentLine(f, i, selection)
 
     # callback for mouse button presses in the text window
     def darea_button_press_cb(self, widget, event, f):
@@ -3614,14 +3628,12 @@ class FileDiffViewer(gtk.Table):
                                 k -= 1
                             while j < n and theResources.getCharacterClass(text[j]) == c:
                                 j += 1
-                            self.setCurrentChar(i, k)
-                            self.setCurrentChar(i, j, True)
+                            self.setCurrentChar(i, j, i, k)
             elif event.type == gtk.gdk._3BUTTON_PRESS:
                 # triple click, select a whole line
                 if self.mode == CHAR_MODE and self.current_pane == f:
                     i2 = min(i + 1, nlines)
-                    self.setCurrentChar(i, 0)
-                    self.setCurrentChar(i2, 0, True)
+                    self.setCurrentChar(i2, 0, i, 0)
             else:
                 # update the selection
                 is_shifted = event.state & gtk.gdk.SHIFT_MASK
@@ -4299,7 +4311,7 @@ class FileDiffViewer(gtk.Table):
 
     # 'extend_first_line' keybinding action
     def _extend_first_line(self):
-        self.setCurrentLine(self.current_pane, 0, True)
+        self.setCurrentLine(self.current_pane, 0, self.selection_line)
 
     # 'last_line' keybinding action
     def _last_line(self):
@@ -4309,57 +4321,57 @@ class FileDiffViewer(gtk.Table):
     # 'extend_last_line' keybinding action
     def _extend_last_line(self):
         f = self.current_pane
-        self.setCurrentLine(f, len(self.panes[f].lines), True)
+        self.setCurrentLine(f, len(self.panes[f].lines), self.selection_line)
 
     # 'up' keybinding action
-    def _line_mode_up(self, extend=False):
-        self.setCurrentLine(self.current_pane, self.current_line - 1, extend)
+    def _line_mode_up(self, selection=None):
+        self.setCurrentLine(self.current_pane, self.current_line - 1, selection)
 
     # 'extend_up' keybinding action
     def _line_mode_extend_up(self):
-        self._line_mode_up(True)
+        self._line_mode_up(self.selection_line)
 
     # 'down' keybinding action
-    def _line_mode_down(self, extend=False):
-        self.setCurrentLine(self.current_pane, self.current_line + 1, extend)
+    def _line_mode_down(self, selection=None):
+        self.setCurrentLine(self.current_pane, self.current_line + 1, selection)
 
     # 'extend_down' keybinding action
     def _line_mode_extend_down(self):
-        self._line_mode_down(True)
+        self._line_mode_down(self.selection_line)
 
     # 'left' keybinding action
-    def _line_mode_left(self, extend=False):
-        self.setCurrentLine(self.current_pane - 1, self.current_line, extend)
+    def _line_mode_left(self, selection=None):
+        self.setCurrentLine(self.current_pane - 1, self.current_line, selection)
 
     # 'extend_left' keybinding action
     def _line_mode_extend_left(self):
-        self._line_mode_left(True)
+        self._line_mode_left(self.selection_line)
 
     # 'right' keybinding action
-    def _line_mode_right(self, extend=False):
-        self.setCurrentLine(self.current_pane + 1, self.current_line, extend)
+    def _line_mode_right(self, selection=None):
+        self.setCurrentLine(self.current_pane + 1, self.current_line, selection)
 
     # 'extend_right' keybinding action
     def _line_mode_extend_right(self):
-        self._line_mode_right(True)
+        self._line_mode_right(self.selection_line)
 
     # 'page_up' keybinding action
-    def _line_mode_page_up(self, extend=False):
+    def _line_mode_page_up(self, selection=None):
         delta = int(self.vadj.page_size // self.font_height)
-        self.setCurrentLine(self.current_pane, self.current_line - delta, extend)
+        self.setCurrentLine(self.current_pane, self.current_line - delta, selection)
 
     # 'extend_page_up' keybinding action
     def _line_mode_extend_page_up(self):
-        self._line_mode_page_up(True)
+        self._line_mode_page_up(self.selection_line)
 
     # 'page_down' keybinding action
-    def _line_mode_page_down(self, extend=False):
+    def _line_mode_page_down(self, selection=None):
         delta = int(self.vadj.page_size // self.font_height)
-        self.setCurrentLine(self.current_pane, self.current_line + delta, extend)
+        self.setCurrentLine(self.current_pane, self.current_line + delta, selection)
 
     # 'extend_page_down' keybinding action
     def _line_mode_extend_page_down(self):
-        self._line_mode_page_down(True)
+        self._line_mode_page_down(self.selection_line)
 
     # 'delete_text' keybinding action
     def _delete_text(self):
@@ -4467,7 +4479,10 @@ class FileDiffViewer(gtk.Table):
                 retval = True
         elif self.mode == CHAR_MODE:
             f = self.current_pane
-            is_shifted = event.state & gtk.gdk.SHIFT_MASK
+            if event.state & gtk.gdk.SHIFT_MASK:
+                si, sj = self.selection_line, self.selection_char
+            else:
+                si, sj = None, None
             is_ctrl = event.state & gtk.gdk.CONTROL_MASK
             retval = True
             # check if the keyval matches a character mode action
@@ -4511,7 +4526,7 @@ class FileDiffViewer(gtk.Table):
                                 break
                             idx += w
                             j += 1
-                self.setCurrentChar(i, j, is_shifted)
+                self.setCurrentChar(i, j, si, sj)
                 self.cursor_column = col
             # home key
             elif event.keyval == gtk.keysyms.Home:
@@ -4519,7 +4534,7 @@ class FileDiffViewer(gtk.Table):
                     i = 0
                 else:
                     i = self.current_line
-                self.setCurrentChar(i, 0, is_shifted)
+                self.setCurrentChar(i, 0, si, sj)
             # end key
             elif event.keyval == gtk.keysyms.End:
                 if is_ctrl:
@@ -4528,7 +4543,7 @@ class FileDiffViewer(gtk.Table):
                 else:
                     i = self.current_line
                     j = self.getMaxCharPosition(i)
-                self.setCurrentChar(i, j, is_shifted)
+                self.setCurrentChar(i, j, si, sj)
             # cursor left navigation
             elif event.keyval == gtk.keysyms.Left:
                 i = self.current_line
@@ -4538,7 +4553,7 @@ class FileDiffViewer(gtk.Table):
                 elif i > 0:
                     i -= 1
                     j = self.getMaxCharPosition(i)
-                self.setCurrentChar(i, j, is_shifted)
+                self.setCurrentChar(i, j, si, sj)
             # cursor right navigation
             elif event.keyval == gtk.keysyms.Right:
                 i = self.current_line
@@ -4548,7 +4563,7 @@ class FileDiffViewer(gtk.Table):
                 elif i < len(self.panes[f].lines):
                     i += 1
                     j = 0
-                self.setCurrentChar(i, j, is_shifted)
+                self.setCurrentChar(i, j, si, sj)
             # backspace
             elif event.keyval == gtk.keysyms.BackSpace:
                 s = ''
@@ -4755,8 +4770,7 @@ class FileDiffViewer(gtk.Table):
                     end = idx + len(pattern)
                     if backwards:
                         idx, end = end, idx
-                    self.setCurrentChar(i, idx)
-                    self.setCurrentChar(i, end, True)
+                    self.setCurrentChar(i, end, i, idx)
                     return True
             # advance
             if backwards:
@@ -4873,8 +4887,7 @@ class FileDiffViewer(gtk.Table):
             end = start + sum(b)
             if end > start:
                 end -= 1
-            self.selection_line = start
-            self.setCurrentLine(f, end, True)
+            self.setCurrentLine(f, end, start)
             removeNullLines(middle, lines)
 
             for s, line in zip(space, lines):
@@ -4938,8 +4951,7 @@ class FileDiffViewer(gtk.Table):
                 start, i = i, start
             # centre the view on the selection
             self.centre_view_about_y((start + i) * self.font_height / 2)
-            self.selection_line = i
-            self.setCurrentLine(f, start, True)
+            self.setCurrentLine(f, start, i)
 
     # 'first_difference' action
     def first_difference(self):
@@ -5097,9 +5109,7 @@ class FileDiffViewer(gtk.Table):
                 self.updateText(f, start + i, s)
         if self.mode == CHAR_MODE:
             # ensure the cursor position is valid
-            i = self.current_line
-            self.setCurrentChar(self.selection_line, 0)
-            self.setCurrentChar(i, 0, True)
+            self.setCurrentChar(self.current_line, 0, self.selection_line, 0)
         self.recordEditMode()
 
     # 'sort_lines_in_ascending_order' action
@@ -5133,9 +5143,7 @@ class FileDiffViewer(gtk.Table):
                     self.updateText(f, i, text[:n] + text[old_n:])
         if self.mode == CHAR_MODE:
             # ensure the cursor position is valid
-            i = self.current_line
-            self.setCurrentChar(self.selection_line, 0)
-            self.setCurrentChar(i, 0, True)
+            self.setCurrentChar(self.current_line, 0, self.selection_line, 0)
         self.recordEditMode()
 
     # 'convert_tabs_to_spaces' action
@@ -5188,8 +5196,7 @@ class FileDiffViewer(gtk.Table):
                     self.updateText(f, i, s)
         if self.mode == CHAR_MODE:
             # ensure the cursor position is valid
-            self.setCurrentChar(start, j0)
-            self.setCurrentChar(end, j1, True)
+            self.setCurrentChar(end, j1, start, j0)
         self.recordEditMode()
 
     # 'convert_leading_spaces_to_tabs' action
@@ -5219,9 +5226,7 @@ class FileDiffViewer(gtk.Table):
                         self.updateText(f, i, s)
         if self.mode == CHAR_MODE:
             # ensure the cursor position is valid
-            i = self.current_line
-            self.setCurrentChar(self.selection_line, 0)
-            self.setCurrentChar(i, 0, True)
+            self.setCurrentChar(self.current_line, 0, self.selection_line, 0)
         self.recordEditMode()
 
     # adjust indenting of the selected lines by 'offset' soft tabs
@@ -5254,9 +5259,7 @@ class FileDiffViewer(gtk.Table):
                     self.updateText(f, i, s + text[j:])
         if self.mode == CHAR_MODE:
             # ensure the cursor position is valid
-            i = self.current_line
-            self.setCurrentChar(self.selection_line, 0)
-            self.setCurrentChar(i, 0, True)
+            self.setCurrentChar(self.current_line, 0, self.selection_line, 0)
         self.recordEditMode()
 
     # 'increase_indenting' action
@@ -5406,8 +5409,7 @@ class FileDiffViewer(gtk.Table):
             end = start + new_n
             if end > start:
                 end -= 1
-            self.selection_line = start
-            self.setCurrentLine(f, end, True)
+            self.setCurrentLine(f, end, start)
         self.recordEditMode()
 
     # 'merge_from_left_then_right' keybinding action
