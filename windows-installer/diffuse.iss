@@ -4,7 +4,7 @@
 
 [Setup]
 AppName=Diffuse Merge Tool
-AppVerName=Diffuse 0.3.4
+AppVerName=Diffuse 0.4.0
 DefaultDirName={pf}\Diffuse
 DefaultGroupName=Diffuse
 UninstallDisplayIcon={app}\diffusew.exe

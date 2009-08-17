@@ -24,7 +24,7 @@ import platform
 import subprocess
 import sys
 
-VERSION='0.3.4'
+VERSION='0.4.0'
 PACKAGE='1'
 PLATFORM='win' + ''.join([ c for c in platform.architecture()[0] if c.isdigit() ])
 INSTALLER='diffuse-%s-%s.%s' % (VERSION, PACKAGE, PLATFORM)
@@ -148,6 +148,8 @@ if proc.wait() != 0:
     raise OSError('Could not run xsltproc')
 # add link to style sheet
 s = s.replace('</head>', '<link rel="stylesheet" href="style.css" type="text/css"/></head>')
+s = s.replace('<p>\n        </p>', '')
+s = s.replace('<p>\n      </p>', '')
 # save HTML version of the manual
 f = open('dist\\manual.html', 'w')
 f.write(s)
