@@ -982,7 +982,7 @@
             <term><userinput>merge_from_left</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Merge From Left</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+Left</para>
+              <para>Default: Ctrl+Right</para>
             </listitem>
           </varlistentry>
 
@@ -990,7 +990,7 @@
             <term><userinput>merge_from_right</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Merge From Right</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Ctrl+Right</para>
+              <para>Default: Ctrl+Left</para>
             </listitem>
           </varlistentry>
 
