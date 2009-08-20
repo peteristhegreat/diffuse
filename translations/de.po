@@ -138,6 +138,10 @@ msgstr "Standard Ausschnitte"
 msgid "Default revision"
 msgstr "Standard Revision"
 
+#: ../src/usr/bin/diffuse:5567
+msgid "Derrick Moser <derrick_moser@yahoo.com>"
+msgstr "Derrick Moser <derrick_moser@yahoo.com>"
+
 #: ../src/usr/bin/diffuse:5564
 msgid "Diffuse is a graphical tool for merging and comparing text files."
 msgstr "Diffuse ist ein graphisches Werzeug zum Mischen und Vergleichen von Textdateien."
@@ -233,13 +237,13 @@ msgstr "Erster Unterschied"
 msgid "Font"
 msgstr "Schriftart"
 
-#: ../src/usr/bin/diffuse:5568
-msgid "German"
-msgstr "Deutsch"
-
 #: ../src/usr/bin/diffuse:5527
 msgid "Go To Line..."
 msgstr "Gehe zu Zeile..."
+
+#: ../src/usr/bin/diffuse:5568
+msgid "Henri Menke <henrimenke4@aim.com> (German)"
+msgstr "Henri Menke <henrimenke4@aim.com> (Deutsch)"
 
 #: ../src/usr/bin/diffuse:756
 msgid "Ignore blank line differences"

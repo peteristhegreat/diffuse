@@ -804,7 +804,7 @@ class Preferences:
             ],
             _('Merge'),
             [ 'List',
-              [ 'Radio', 'merge_action', 'pull', _('The "Merge Left" and "Merge Right" actions should:'), [ 'pull', 'pull into the selection', 'push', 'push from the selection' ] ],
+              [ 'Radio', 'merge_action', 'pull', _('The "Merge Left" and "Merge Right" actions should:'), [ 'pull', _('pull into the selection'), 'push', _('push from the selection') ] ],
             ],
             _('Tabs'),
             [ 'List',
@@ -5628,8 +5628,8 @@ class AboutDialog(gtk.AboutDialog):
         self.set_comments(_('Diffuse is a graphical tool for merging and comparing text files.'))
         self.set_copyright(COPYRIGHT)
         self.set_website(WEBSITE)
-        self.set_authors([ 'Derrick Moser <derrick_moser@yahoo.com>' ])
-        self.set_translator_credits(''.join(['Henri Menke <henrimenke4@aim.com> (', _('German'), ')']))
+        self.set_authors([ _('Derrick Moser <derrick_moser@yahoo.com>') ])
+        self.set_translator_credits(_('Henri Menke <henrimenke4@aim.com> (German)'))
         ss = [ APP_NAME + ' ' + VERSION + '\n',
                COPYRIGHT + '\n\n',
                _("""This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the licence, or (at your option) any later version.
