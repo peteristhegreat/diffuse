@@ -6382,8 +6382,8 @@ class Diffuse(gtk.Window):
                      [_('Convert To Uni_x Format'), self.button_cb, 'convert_to_unix', None, 'convert_to_unix'] ] ])
 
         menuspecs.append([ _('_Merge'), [
-                     [_('Merge _Right'), self.button_cb, 'merge_right', gtk.STOCK_GO_BACK, 'merge_right'],
-                     [_('Merge _Left'), self.button_cb, 'merge_left', gtk.STOCK_GO_FORWARD, 'merge_left'],
+                     [_('Merge _Right'), self.button_cb, 'merge_right', gtk.STOCK_GO_FORWARD, 'merge_right'],
+                     [_('Merge _Left'), self.button_cb, 'merge_left', gtk.STOCK_GO_BACK, 'merge_left'],
                      [_('Merge From Left _Then Right'), self.button_cb, 'merge_from_left_then_right', DIFFUSE_STOCK_LEFT_RIGHT, 'merge_from_left_then_right'],
                      [_('Merge From Right T_hen Left'), self.button_cb, 'merge_from_right_then_left', DIFFUSE_STOCK_RIGHT_LEFT, 'merge_from_right_then_left'] ] ])
 
