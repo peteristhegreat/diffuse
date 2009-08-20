@@ -323,8 +323,8 @@ class Resources:
         set_binding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
         set_binding('menu', 'convert_to_mac', 'Shift+Ctrl+C')
         set_binding('menu', 'convert_to_unix', 'Ctrl+e')
-        set_binding('menu', 'merge_from_left', 'Ctrl+Right')
-        set_binding('menu', 'merge_from_right', 'Ctrl+Left')
+        set_binding('menu', 'merge_right', 'Ctrl+Right')
+        set_binding('menu', 'merge_left', 'Ctrl+Left')
         set_binding('menu', 'merge_from_left_then_right', 'Ctrl+m')
         set_binding('menu', 'merge_from_right_then_left', 'Shift+Ctrl+M')
         set_binding('menu', 'help_contents', 'F1')
@@ -370,8 +370,8 @@ class Resources:
         set_binding('line_mode', 'next_difference', 'n')
         set_binding('line_mode', 'last_difference', 'Ctrl+End')
         set_binding('line_mode', 'last_difference', 'Shift+N')
-        set_binding('line_mode', 'merge_from_left', 'Shift+H')
-        set_binding('line_mode', 'merge_from_right', 'Shift+L')
+        set_binding('line_mode', 'merge_right', 'Shift+L')
+        set_binding('line_mode', 'merge_left', 'Shift+H')
         set_binding('line_mode', 'merge_from_left_then_right', 'm')
         set_binding('line_mode', 'merge_from_right_then_left', 'Shift+M')
         set_binding('align_mode', 'enter_line_mode', 'Escape')
@@ -708,6 +708,35 @@ class FontButton(gtk.FontButton):
     def get_text(self):
         return self.get_font_name()
 
+# text entry widget using radio buttons to choose from a pre-defined list
+class RadioEntry(gtk.VBox):
+    def __init__(self, title, options):
+        gtk.VBox.__init__(self)
+        label = gtk.Label(title)
+        label.set_alignment(0, 0.5)
+        self.pack_start(label, False, True, 0)
+        label.show()
+        self.buttons = []
+        j, button = 0, None
+        while j < len(options):
+            button = gtk.RadioButton(button, options[j + 1])
+            button.set_active(j == 0)
+            self.buttons.append((options[j], button))
+            self.pack_start(button, False, False, 0)
+            button.show()
+            j += 2
+
+    def set_text(self, s):
+        for v, button in self.buttons:
+            if v == s:
+                button.set_active(True)
+                break
+
+    def get_text(self):
+        for v, button in self.buttons:
+            if button.get_active():
+                return v
+
 # class to store preferences and construct a dialogue for manipulating them
 class Preferences:
     def __init__(self, path):
@@ -716,6 +745,7 @@ class Preferences:
         self.string_prefs = {}
         self.int_prefs_min = {}
         self.int_prefs_max = {}
+        self.string_prefs_enums = {}
 
         # find available encodings
         encs = {}
@@ -771,6 +801,10 @@ class Preferences:
               [ 'Integer', 'editor_soft_tab_width', 8, _('Soft tab width'), 1, 1024 ],
               [ 'Boolean', 'editor_expand_tabs', False, _('Expand tabs to spaces') ],
               [ 'Boolean', 'editor_auto_indent', False, _('Auto indent') ]
+            ],
+            _('Merge'),
+            [ 'List',
+              [ 'Radio', 'merge_action', 'pull', _('The "Merge Left" and "Merge Right" actions should:'), [ 'pull', 'pull into the selection', 'push', 'push from the selection' ] ],
             ],
             _('Tabs'),
             [ 'List',
@@ -838,7 +872,8 @@ class Preferences:
                             elif len(a) == 2 and self.int_prefs.has_key(a[0]):
                                 self.int_prefs[a[0]] = max(self.int_prefs_min[a[0]], min(int(a[1]), self.int_prefs_max[a[0]]))
                             elif len(a) == 2 and self.string_prefs.has_key(a[0]):
-                                self.string_prefs[a[0]] = a[1]
+                                if not self.string_prefs_enums.has_key(a[0]) or self.string_prefs_enums[a[0]].has_key(a[1]):
+                                    self.string_prefs[a[0]] = a[1]
                             else:
                                 raise ValueError()
                     except ValueError:
@@ -866,8 +901,14 @@ class Preferences:
             self.int_prefs[template[1]] = template[2]
             self.int_prefs_min[template[1]] = template[4]
             self.int_prefs_max[template[1]] = template[5]
-        elif template[0] in [ 'String', 'File', 'Font' ]:
+        elif template[0] in [ 'String', 'File', 'Font', 'Radio' ]:
             self.string_prefs[template[1]] = template[2]
+            if template[0] == 'Radio':
+                m, j = {}, 0
+                while j < len(template[4]):
+                    m[template[4][j]] = None
+                    j += 2
+                self.string_prefs_enums[template[1]] = m
 
     # display the dialogue and update the preference values if the accept
     # button was pressed
@@ -942,6 +983,12 @@ class Preferences:
                     widgets[tpl[1]] = button
                     table.attach(button, 1, 2, i, i + 1, gtk.FILL, gtk.FILL)
                     button.show()
+                elif type == 'Radio':
+                    radio = RadioEntry(tpl[3], tpl[4])
+                    widgets[tpl[1]] = radio
+                    radio.set_text(self.string_prefs[tpl[1]])
+                    table.attach(radio, 0, 2, i, i + 1, gtk.EXPAND|gtk.FILL, gtk.FILL)
+                    radio.show()
                 else:
                     label = gtk.Label(tpl[3] + ': ')
                     label.set_alignment(1.0, 0.5)
@@ -2228,8 +2275,8 @@ class FileDiffViewer(gtk.Table):
             'previous_difference': self.previous_difference,
             'next_difference': self.next_difference,
             'last_difference': self.last_difference,
-            'merge_from_left': self.merge_from_left,
-            'merge_from_right': self.merge_from_right,
+            'merge_right': self.merge_right,
+            'merge_left': self.merge_left,
             'merge_from_left_then_right': self.merge_from_left_then_right,
             'merge_from_right_then_left': self.merge_from_right_then_left }
         self._align_mode_actions = {
@@ -2274,8 +2321,8 @@ class FileDiffViewer(gtk.Table):
             'convert_to_dos': self.convert_to_dos,
             'convert_to_mac': self.convert_to_mac,
             'convert_to_unix': self.convert_to_unix,
-            'merge_from_left': self.merge_from_left,
-            'merge_from_right': self.merge_from_right,
+            'merge_right': self.merge_right,
+            'merge_left': self.merge_left,
             'merge_from_left_then_right': self.merge_from_left_then_right,
             'merge_from_right_then_left': self.merge_from_right_then_left }
 
@@ -5318,16 +5365,20 @@ class FileDiffViewer(gtk.Table):
         self.merge_lines(data, self.current_pane)
         self.closeUndoBlock()
 
-    # 'merge_from_left' action
-    def merge_from_left(self):
+    # 'merge_right' action
+    def merge_right(self):
         f = self.current_pane
-        if f > 0:
+        if self.prefs.getString('merge_action') == 'push':
+            f += 1
+        if f > 0 and f < len(self.panes):
             self.merge_lines(f, f - 1)
 
-    # 'merge_from_right' action
-    def merge_from_right(self):
+    # 'merge_left' action
+    def merge_left(self):
         f = self.current_pane
-        if f + 1 < len(self.panes):
+        if self.prefs.getString('merge_action') == 'push':
+            f -= 1
+        if f >= 0 and f + 1 < len(self.panes):
             self.merge_lines(f, f + 1)
 
     # merge from both left and right into the current pane
@@ -6331,8 +6382,8 @@ class Diffuse(gtk.Window):
                      [_('Convert To Uni_x Format'), self.button_cb, 'convert_to_unix', None, 'convert_to_unix'] ] ])
 
         menuspecs.append([ _('_Merge'), [
-                     [_('Merge From _Left'), self.button_cb, 'merge_from_left', gtk.STOCK_GO_FORWARD, 'merge_from_left'],
-                     [_('Merge From _Right'), self.button_cb, 'merge_from_right', gtk.STOCK_GO_BACK, 'merge_from_right'],
+                     [_('Merge _Right'), self.button_cb, 'merge_right', gtk.STOCK_GO_BACK, 'merge_right'],
+                     [_('Merge _Left'), self.button_cb, 'merge_left', gtk.STOCK_GO_FORWARD, 'merge_left'],
                      [_('Merge From Left _Then Right'), self.button_cb, 'merge_from_left_then_right', DIFFUSE_STOCK_LEFT_RIGHT, 'merge_from_left_then_right'],
                      [_('Merge From Right T_hen Left'), self.button_cb, 'merge_from_right_then_left', DIFFUSE_STOCK_RIGHT_LEFT, 'merge_from_right_then_left'] ] ])
 
@@ -6357,8 +6408,8 @@ class Diffuse(gtk.Window):
            [ gtk.STOCK_GO_DOWN, self.button_cb, 'next_difference', _('Next Difference') ],
            [ gtk.STOCK_GOTO_BOTTOM, self.button_cb, 'last_difference', _('Last Difference') ],
            [],
-           [ gtk.STOCK_GO_FORWARD, self.button_cb, 'merge_from_left', _('Merge From Left') ],
-           [ gtk.STOCK_GO_BACK, self.button_cb, 'merge_from_right', _('Merge From Right') ],
+           [ gtk.STOCK_GO_FORWARD, self.button_cb, 'merge_right', _('Merge Right') ],
+           [ gtk.STOCK_GO_BACK, self.button_cb, 'merge_left', _('Merge Left') ],
            [ DIFFUSE_STOCK_LEFT_RIGHT, self.button_cb, 'merge_from_left_then_right', _('Merge From Left Then Right') ],
            [ DIFFUSE_STOCK_RIGHT_LEFT, self.button_cb, 'merge_from_right_then_left', _('Merge From Right Then Left') ],
            [],

@@ -979,17 +979,17 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>merge_from_left</userinput></term>
+            <term><userinput>merge_right</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Merge From Left</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Merge Right</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+Right</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>merge_from_right</userinput></term>
+            <term><userinput>merge_left</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Merge From Right</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Merge Left</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+Left</para>
             </listitem>
           </varlistentry>
@@ -1232,18 +1232,18 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>merge_from_left</userinput></term>
+            <term><userinput>merge_right</userinput></term>
             <listitem>
-              <para>merge lines from file on the left</para>
-              <para>Default: Shift+H</para>
+              <para>merge lines one pane to the right</para>
+              <para>Default: Shift+L</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>merge_from_right</userinput></term>
+            <term><userinput>merge_left</userinput></term>
             <listitem>
-              <para>merge lines from file on the right</para>
-              <para>Default: Shift+L</para>
+              <para>merge lines one pane to the left</para>
+              <para>Default: Shift+H</para>
             </listitem>
           </varlistentry>
 

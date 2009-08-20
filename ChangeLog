@@ -1,5 +1,7 @@
-Diffuse 0.4.0 - 2009-08-17
+- added preference to customise "Merge Right" and "Merge Left" behaviour
 - changed the default hotkeys for merging to reflect the direction text "moves"
+
+Diffuse 0.4.0 - 2009-08-17
 - added format menu with new items for changing case, sorting, and manipulating white space
 - replaced 'Hide end of line characters' preference with 'Show white space characters'
 - errors are now reported in a dialogue instead of printing to stderr
