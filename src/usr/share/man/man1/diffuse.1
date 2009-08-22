@@ -601,18 +601,18 @@ menu item
 Default: Ctrl+Page_Down
 .RE
 .PP
-\fBshift_pane_left\fR
-.RS 4
-shift the currently selected pane to the left
-.sp
-Default: Shift+Ctrl+Right
-.RE
-.PP
 \fBshift_pane_right\fR
 .RS 4
 shift the currently selected pane to the right
 .sp
-Default: Shift+Ctrl+Left
+Default: Shift+Ctrl+parenleft
+.RE
+.PP
+\fBshift_pane_left\fR
+.RS 4
+shift the currently selected pane to the left
+.sp
+Default: Shift+Ctrl+parenright
 .RE
 .PP
 \fBconvert_to_upper_case\fR
@@ -711,17 +711,33 @@ menu item
 Default: Ctrl+e
 .RE
 .PP
-\fBmerge_right\fR
+\fBcopy_selection_right\fR
 .RS 4
-Merge \(-> Merge Right
+Merge \(-> Copy Selection Right
+menu item
+.sp
+Default: Shift+Ctrl+Right
+.RE
+.PP
+\fBcopy_selection_left\fR
+.RS 4
+Merge \(-> Copy Selection Left
+menu item
+.sp
+Default: Shift+Ctrl+Left
+.RE
+.PP
+\fBcopy_left_into_selection\fR
+.RS 4
+Merge \(-> Copy Left Into Selection
 menu item
 .sp
 Default: Ctrl+Right
 .RE
 .PP
-\fBmerge_left\fR
+\fBcopy_right_into_selection\fR
 .RS 4
-Merge \(-> Merge Left
+Merge \(-> Copy Right Into Selection
 menu item
 .sp
 Default: Ctrl+Left
@@ -942,16 +958,16 @@ clear all edits from the selected lines
 Default: r
 .RE
 .PP
-\fBmerge_right\fR
+\fBcopy_left_into_selection\fR
 .RS 4
-merge lines one pane to the right
+copy lines from the file on the left into the selection
 .sp
 Default: Shift+L
 .RE
 .PP
-\fBmerge_left\fR
+\fBcopy_right_into_selection\fR
 .RS 4
-merge lines one pane to the left
+copy lines from the file on the right into the selection
 .sp
 Default: Shift+H
 .RE
