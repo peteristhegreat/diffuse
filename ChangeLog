@@ -1,4 +1,9 @@
-- added preference to customise "Merge Right" and "Merge Left" behaviour
+- Diffuse now quits if no viewers were created with the -m option
+- MMB on a notebook tab now closes the tab
+- RMB on a notebook tab creates a popup menu to set the current page
+- added "Undo Close Tab" menu item
+- replaced "Closing last tab quits Diffuse" preference with a "Warn me when closing a tab will quit Diffuse" preference
+- added new menu items and buttons for copying lines between panes
 - changed the default hotkeys for merging to reflect the direction text "moves"
 
 Diffuse 0.4.0 - 2009-08-17

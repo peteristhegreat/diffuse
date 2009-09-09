@@ -151,10 +151,10 @@ if __name__ == '__main__':
 # convenience class for displaying a message dialogue
 class MessageDialog(gtk.MessageDialog):
     def __init__(self, parent, type, s):
-        if type == gtk.MESSAGE_QUESTION:
-            buttons = gtk.BUTTONS_OK_CANCEL
-        else:
+        if type == gtk.MESSAGE_ERROR:
             buttons = gtk.BUTTONS_OK
+        else:
+            buttons = gtk.BUTTONS_OK_CANCEL
         gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, type, buttons, s)
         self.set_title(APP_NAME)
 
@@ -289,6 +289,7 @@ class Resources:
         set_binding('menu', 'new_2_way_file_merge', 'Ctrl+2')
         set_binding('menu', 'new_3_way_file_merge', 'Ctrl+3')
         set_binding('menu', 'close_tab', 'Ctrl+w')
+        set_binding('menu', 'undo_close_tab', 'Shift+Ctrl+W')
         set_binding('menu', 'quit', 'Ctrl+q')
         set_binding('menu', 'undo', 'Ctrl+z')
         set_binding('menu', 'redo', 'Shift+Ctrl+Z')
@@ -781,7 +782,7 @@ class Preferences:
             [ 'List',
               [ 'Integer', 'tabs_default_panes', 2, _('Default panes'), 2, 16 ],
               [ 'Boolean', 'tabs_always_show', False, _('Always show the tab bar') ],
-              [ 'Boolean', 'tabs_closing_last_quits', False, _('Closing the last tab quits %s') % APP_NAME ]
+              [ 'Boolean', 'tabs_warn_before_quit', False, _('Warn me when closing a tab will quit %s') % APP_NAME ]
             ],
             _('Regional Settings'),
             [ 'List',
@@ -5508,6 +5509,13 @@ def confirmDiscardEdits(parent):
     dialog.destroy()
     return end
 
+# convenience method to request confirmation when closing the last tab
+def confirmTabClose(parent):
+    dialog = MessageDialog(parent, gtk.MESSAGE_WARNING, _('Closing this tab will quit %s.') % (APP_NAME, ))
+    end = (dialog.run() == gtk.RESPONSE_OK)
+    dialog.destroy()
+    return end
+
 # custom dialogue for picking files with widgets for specifying the encoding
 # and revision
 class FileChooserDialog(gtk.FileChooserDialog):
@@ -5613,19 +5621,22 @@ You should have received a copy of the GNU General Public License along with thi
 
 # widget classed to create notebook tabs with labels and a close button
 # use notebooktab.button.connect() to be notified when the button is pressed
-class NotebookTab(gtk.HBox):
+# make this a gtk.EventBox so signals can be connected for MMB and RMB button
+# presses.
+class NotebookTab(gtk.EventBox):
     def __init__(self, name, stock):
-        gtk.HBox.__init__(self)
-
+        gtk.EventBox.__init__(self)
+        self.set_visible_window(False)
+        hbox = gtk.HBox()
         if stock is not None:
             image = gtk.Image()
             image.set_from_stock(stock, gtk.ICON_SIZE_MENU)
-            self.pack_start(image, False, False, 5)
+            hbox.pack_start(image, False, False, 5)
             image.show()
         self.label = label = gtk.Label(name)
         # left justify the widget
         label.set_alignment(0, 0.5)
-        self.pack_start(label, True, True, 0)
+        hbox.pack_start(label, True, True, 0)
         label.show()
         self.button = button = gtk.Button()
         button.set_relief(gtk.RELIEF_NONE)
@@ -5636,8 +5647,10 @@ class NotebookTab(gtk.HBox):
         if hasattr(button, 'set_tooltip_text'):
             # only available in pygtk >= 2.12
             button.set_tooltip_text(_('Close Tab'))
-        self.pack_start(button, False, False, 0)
+        hbox.pack_start(button, False, False, 0)
         button.show()
+        self.add(hbox)
+        hbox.show()
 
     def get_text(self):
         return self.label.get_text()
@@ -6288,6 +6301,7 @@ class Diffuse(gtk.Window):
                      [_('New _3-Way File Merge'), self.new_3way_file_merge_cb, None, DIFFUSE_STOCK_NEW_3WAY_MERGE, 'new_3_way_file_merge'],
                      [],
                      [_('_Close Tab'), self.close_tab_cb, None, gtk.STOCK_CLOSE, 'close_tab'],
+                     [_('_Undo Close Tab'), self.undo_close_tab_cb, None, None, 'undo_close_tab'],
                      [_('_Quit'), self.quit_cb, None, gtk.STOCK_QUIT, 'quit'] ] ])
 
         menuspecs.append([ _('_Edit'), [
@@ -6399,6 +6413,7 @@ class Diffuse(gtk.Window):
         vbox.pack_start(hbox, False, False, 0)
         hbox.show()
 
+        self.closed_tabs = []
         self.notebook = notebook = gtk.Notebook()
         notebook.set_scrollable(True)
         notebook.connect('switch-page', self.switch_page_cb)
@@ -6484,13 +6499,38 @@ class Diffuse(gtk.Window):
 
     # callback for the close button on each tab
     def remove_tab_cb(self, widget, data):
-        if self.notebook.get_n_pages() > 1:
+        nb = self.notebook
+        if nb.get_n_pages() > 1:
             # warn about losing unsaved changes before removing a tab
             if not data.hasEdits() or confirmDiscardEdits(self.get_toplevel()):
-                self.notebook.remove(data)
-                self.notebook.set_show_tabs(self.prefs.getBool('tabs_always_show') or self.notebook.get_n_pages() > 1)
-        elif self.prefs.getBool('tabs_closing_last_quits'):
+                self.closed_tabs.append((nb.page_num(data), data, nb.get_tab_label(data)))
+                nb.remove(data)
+                nb.set_show_tabs(self.prefs.getBool('tabs_always_show') or nb.get_n_pages() > 1)
+        elif not self.prefs.getBool('tabs_warn_before_quit') or confirmTabClose(self.get_toplevel()):
             self.quit_cb(widget, data)
+
+    # callback for RMB menu on notebook tabs
+    def notebooktab_pick_cb(self, widget, data):
+        self.notebook.set_current_page(data)
+
+    # callback used when a mouse button is pressed on a notebook tab
+    def notebooktab_button_press_cb(self, widget, event, data):
+        if event.button == 2:
+            # remove the tab on MMB
+            self.remove_tab_cb(widget, data)
+        elif event.button == 3:
+            # create a popup to pick a tab for focus on RMB
+            menu = gtk.Menu()
+            nb = self.notebook
+            for i in range(nb.get_n_pages()):
+                viewer = nb.get_nth_page(i)
+                item = gtk.MenuItem(nb.get_tab_label(viewer).get_text())
+                item.connect('activate', self.notebooktab_pick_cb, i)
+                menu.append(item)
+                item.show()
+                if viewer is data:
+                    menu.select_item(item)
+            menu.popup(None, None, None, event.button, event.time)
 
     # update window's title
     def updateTitle(self, viewer):
@@ -6538,6 +6578,7 @@ class Diffuse(gtk.Window):
         tab = NotebookTab(tabname, gtk.STOCK_FILE)
         viewer = Diffuse.FileDiffViewer(n, self.prefs, tabname)
         tab.button.connect('clicked', self.remove_tab_cb, viewer)
+        tab.connect('button_press_event', self.notebooktab_button_press_cb, viewer)
         self.notebook.append_page(viewer, tab)
         if hasattr(self.notebook, 'set_tab_reorderable'):
             # some PyGTK packages incorrectly omit this method
@@ -6626,6 +6667,12 @@ class Diffuse(gtk.Window):
                     dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving modifications for %s.') % (dn, ))
                     dialog.run()
                     dialog.destroy()
+
+    # close all tabs without differences
+    def closeOnSame(self):
+        for i in range(self.notebook.get_n_pages() - 1, -1, -1):
+            if not self.notebook.get_nth_page(i).hasDifferences():
+                self.notebook.remove_page(i)
 
     # returns True if the application can safely quit
     def confirmQuit(self):
@@ -6718,6 +6765,14 @@ class Diffuse(gtk.Window):
     # callback for the close tab menu item
     def close_tab_cb(self, widget, data):
         self.remove_tab_cb(widget, self.notebook.get_nth_page(self.notebook.get_current_page()))
+
+    # callback for the undo close tab menu item
+    def undo_close_tab_cb(self, widget, data):
+        if len(self.closed_tabs) > 0:
+            i, tab, tab_label = self.closed_tabs.pop()
+            self.notebook.insert_page(tab, tab_label, i)
+            self.notebook.set_current_page(i)
+            self.notebook.set_show_tabs(True)
 
     # callback for the quit menu item
     def quit_cb(self, widget, data):
@@ -6917,14 +6972,12 @@ if __name__ == '__main__':
     diff.loadState(configpath)
 
     # process remaining command line arguments
-    encoding = None
-    specs = []
-    revs = []
+    encoding, revs, close_on_same = None, [], False
+    specs, had_specs = [], False
     funcs = { 'modified': diff.createModifiedFileTabs,
               'separate': diff.createSeparateTabs,
               'single': diff.createSingleTab }
     mode = 'single'
-    close_on_same = False
     while i < argc:
         arg = args[i]
         if len(arg) > 0 and arg[0] == '-':
@@ -7002,21 +7055,20 @@ if __name__ == '__main__':
                     revs.append((None, encoding))
                 specs.append((filename, revs))
                 revs = []
+            had_specs = True
         i += 1
     if mode == 'modified' and len(specs) == 0:
         specs.append((os.curdir, [ (None, encoding) ]))
+        had_specs = True
     funcs[mode](specs)
 
     # create a file diff viewer if the command line arguments haven't
     # implicitly created any
-    nb = diff.notebook
-    n = nb.get_n_pages()
-    if n == 0:
+    if not had_specs:
         diff.newLoadedFileDiffViewer([])
     elif close_on_same:
-        for i in range(n - 1, -1, -1):
-            if not nb.get_nth_page(i).hasDifferences():
-                nb.remove_page(i)
+        diff.closeOnSame()
+    nb = diff.notebook
     n = nb.get_n_pages()
     if n > 0:
         nb.set_show_tabs(diff.prefs.getBool('tabs_always_show') or n > 1)

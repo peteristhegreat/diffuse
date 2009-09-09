@@ -683,6 +683,14 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>undo_close_tab</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Undo Close Tab</guimenuitem></menuchoice> menu item</para>
+              <para>Default: Shift+Ctrl+w</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>quit</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>File</guimenu><guimenuitem>Quit</guimenuitem></menuchoice> menu item</para>
