@@ -6524,7 +6524,7 @@ class Diffuse(gtk.Window):
             nb = self.notebook
             for i in range(nb.get_n_pages()):
                 viewer = nb.get_nth_page(i)
-                item = gtk.MenuItem(nb.get_tab_label(viewer).get_text())
+                item = gtk.MenuItem(nb.get_tab_label(viewer).get_text(), False)
                 item.connect('activate', self.notebooktab_pick_cb, i)
                 menu.append(item)
                 item.show()
