@@ -782,7 +782,7 @@ class Preferences:
             [ 'List',
               [ 'Integer', 'tabs_default_panes', 2, _('Default panes'), 2, 16 ],
               [ 'Boolean', 'tabs_always_show', False, _('Always show the tab bar') ],
-              [ 'Boolean', 'tabs_warn_before_quit', False, _('Warn me when closing a tab will quit %s') % APP_NAME ]
+              [ 'Boolean', 'tabs_warn_before_quit', True, _('Warn me when closing a tab will quit %s') % APP_NAME ]
             ],
             _('Regional Settings'),
             [ 'List',
