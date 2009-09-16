@@ -582,13 +582,9 @@ class Resources:
         # only process files once
         if not self.resource_files.has_key(file_name):
             self.resource_files[file_name] = None
-            try:
-                f = open(file_name, 'r')
-                ss = readlines(f)
-                f.close()
-            except IOError:
-                logError(_('Error reading %s.') % (file_name, ))
-                return
+            f = open(file_name, 'r')
+            ss = readlines(f)
+            f.close()
 
             # FIXME: improve validation
             for i, s in enumerate(ss):
@@ -605,7 +601,10 @@ class Resources:
                             if len(paths) == 0:
                                 paths = [ path ]
                             for path in paths:
-                                self.parse(path)
+                                # convert to absolute path so the location of
+                                # any processing errors are reported with
+                                # normalised file names
+                                self.parse(os.path.abspath(path))
                         # eg. make Ctrl+o trigger the open_file menu item
                         #    keybinding menu open_file Ctrl+o
                         elif args[0] == 'keybinding' and len(args) == 4:
@@ -670,7 +669,7 @@ class Resources:
                             raise ValueError()
                     except: # Grr... the 're' module throws weird errors
                     #except ValueError:
-                        logError(_('Error parsing line %(line)d of %(file)s.') % { 'line': i + 1, 'file': file_name })
+                        logError(_('Error processing line %(line)d of %(file)s.') % { 'line': i + 1, 'file': file_name })
 
 theResources = Resources()
 
@@ -850,7 +849,7 @@ class Preferences:
                     except ValueError:
                         # this may happen if the prefs were written by a
                         # different version -- don't bother the user
-                        logDebug('Error parsing line %d of %s.' % (j + 1, self.path))
+                        logDebug('Error processing line %d of %s.' % (j + 1, self.path))
             except IOError:
                 # bad $HOME value? -- don't bother the user
                 logDebug('Error reading %s.' % (self.path, ))
@@ -6469,7 +6468,7 @@ class Diffuse(gtk.Window):
                     except ValueError:
                         # this may happen if the state was written by a
                         # different version -- don't bother the user
-                        logDebug('Error parsing line %d of %s.' % (j + 1, configpath))
+                        logDebug('Error processing line %d of %s.' % (j + 1, configpath))
             except IOError:
                 # bad $HOME value? -- don't bother the user
                 logDebug('Error reading %s.' % (configpath, ))
@@ -6947,24 +6946,30 @@ if __name__ == '__main__':
 
     # load resource files
     i = 1
+    rc_files = []
     if argc == 2 and args[1] == '--no-rcfile':
         i += 1
     elif argc == 3 and args[1] == '--rcfile':
         i += 1
-        theResources.parse(args[i])
+        rc_files.append(args[i])
         i += 1
     else:
-        # parse system wide initialisation file
+        # parse system wide then personal initialisation files
         if isWindows():
             rc_file = os.path.join(bin_dir, 'diffuserc')
         else:
             rc_file = os.path.join(bin_dir, '../../etc/diffuserc')
-        if os.path.isfile(rc_file):
+        for rc_file in rc_file, os.path.join(rc_dir, 'diffuserc'):
+            if os.path.isfile(rc_file):
+                rc_files.append(rc_file)
+    for rc_file in rc_files:
+        # convert to absolute path so the location of any processing errors are
+        # reported with normalised file names
+        rc_file = os.path.abspath(rc_file)
+        try:
             theResources.parse(rc_file)
-        # parse personal initialisation file
-        rc_file = os.path.join(rc_dir, 'diffuserc')
-        if os.path.isfile(rc_file):
-            theResources.parse(rc_file)
+        except IOError:
+            logError(_('Error reading %s.') % (rc_file, ))
 
     diff = Diffuse(rc_dir)
     # load state
