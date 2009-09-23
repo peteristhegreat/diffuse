@@ -756,12 +756,13 @@ class Preferences:
             [ 'List',
               [ 'Font', 'display_font', font, _('Font') ],
               [ 'Integer', 'display_tab_width', 8, _('Tab width'), 1, 1024 ],
+              [ 'Boolean', 'display_show_line_numbers', True, _('Show line numbers') ],
+              [ 'Boolean', 'display_show_whitespace', False, _('Show white space characters') ],
               [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore white space differences') ],
               [ 'Boolean', 'display_ignore_whitespace_changes', False, _('Ignore changes to white space') ],
               [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore blank line differences') ],
               [ 'Boolean', 'display_ignore_case', False, _('Ignore case differences') ],
-              [ 'Boolean', 'display_ignore_endofline', False, _('Ignore end of line differences') ],
-              [ 'Boolean', 'display_show_whitespace', False, _('Show white space characters') ]
+              [ 'Boolean', 'display_ignore_endofline', False, _('Ignore end of line differences') ]
             ],
             _('Alignment'),
             [ 'List',
@@ -2585,10 +2586,12 @@ class FileDiffViewer(gtk.Table):
     def getLineNumberWidth(self):
         # find the maximum number of digits for a line number from all panes
         n = 0
-        for pane in self.panes:
-            n = max(n, len(str(pane.max_line_number)))
-        # pad the total width by the width of a digit on either side
-        return (n + 2) * self.digit_width
+        if self.prefs.getBool('display_show_line_numbers'):
+            for pane in self.panes:
+                n = max(n, len(str(pane.max_line_number)))
+            # pad the total width by the width of a digit on either side
+            n = (n + 2) * self.digit_width
+        return n
 
     # returns the width of a string in pango units
     def getTextWidth(self, text):
@@ -3835,7 +3838,7 @@ class FileDiffViewer(gtk.Table):
             line = self.getLine(f, i)
 
             # line numbers
-            if 0 < maxx and line_number_width > x:
+            if line_number_width > 0 and 0 < maxx and line_number_width > x:
                 cr.save()
                 cr.rectangle(0, y_start, line_number_width, h)
                 cr.clip()
