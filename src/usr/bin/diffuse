@@ -97,6 +97,7 @@ General Options:
   ( -r | --revision ) <rev>        File revision <rev>
   ( -s | --separate )              Create a new tab for each file
   ( -t | --tab )                   Start a new tab
+  --null-file                      Create a blank file comparison pane
 
 Display Options:
   ( -b | --ignore-space-change )   Ignore changes to white space
@@ -1839,7 +1840,8 @@ class VCSs:
 
     # determines which VCS to use for the named file
     def findByFilename(self, name):
-        return self.findByFolder(os.path.dirname(name))
+        if name is not None:
+            return self.findByFolder(os.path.dirname(name))
 
 theVCSs = VCSs()
 
@@ -7048,6 +7050,14 @@ if __name__ == '__main__':
                 diff.prefs.setBool('display_ignore_whitespace', True)
                 diff.prefs.setBool('align_ignore_whitespace', True)
                 diff.preferences_updated()
+            elif arg == '--null-file':
+                # add a blank file pane
+                if mode == 'single' or mode == 'separate':
+                    if len(revs) == 0:
+                        revs.append((None, encoding))
+                    specs.append((None, revs))
+                    revs = []
+                had_specs = True
             else:
                 logError(_('Skipping unknown argument "%s".') % (args[i], ))
         else:

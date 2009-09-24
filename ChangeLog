@@ -1,3 +1,5 @@
+- new command line option for specifying blank file comparison panes
+- new preference to enable/disable line numbers
 - Diffuse now quits if no viewers were created with the -m option
 - MMB on a notebook tab now closes the tab
 - RMB on a notebook tab creates a popup menu to set the current page

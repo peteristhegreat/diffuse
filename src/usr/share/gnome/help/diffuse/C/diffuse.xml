@@ -222,6 +222,15 @@
               </para>
             </listitem>
           </varlistentry>
+
+          <varlistentry>
+            <term><userinput>--null-file</userinput></term>
+            <listitem>
+              <para>
+                Create a blank file comparison pane.
+              </para>
+            </listitem>
+          </varlistentry>
         </variablelist>
       </sect2>
 
