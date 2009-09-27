@@ -38,17 +38,18 @@ def isWindows():
 
 # translation location: '../share/locale/<LANG>/LC_MESSAGES/diffuse.mo'
 # where '<LANG>' is the language key
+lang = locale.getdefaultlocale()[0]
 if isWindows():
     # gettext looks for the language using environment variables which
     # are normally not set on Windows so we try setting it for them
-    for lang in 'LANGUAGE', 'LC_ALL', 'LC_MESSAGES', 'LANG':
-        if os.environ.has_key(lang):
+    for v in 'LANGUAGE', 'LC_ALL', 'LC_MESSAGES', 'LANG':
+        if os.environ.has_key(v):
+            lang = os.environ[v]
             break
     else:
-        lang = locale.getdefaultlocale()[0]
         if lang is not None:
             os.environ['LANG'] = lang
-    del lang
+    del v
     locale_dir = 'locale'
 else:
     locale_dir = '../share/locale'
@@ -432,10 +433,7 @@ class Resources:
         self.unknown_floats = {}
 
         # default strings
-        self.strings = {
-            'help_browser': '',
-            'help_file': '',
-            'help_url': WEBSITE + 'manual.html' }
+        self.strings = {}
 
         # list of unknown string resources we have already issued warnings for
         self.unknown_strings = {}
@@ -1288,7 +1286,7 @@ class VCSs:
             # merge conflict
             left = name + '.OTHER'
             right = name + '.THIS'
-            if os.path.exists(left) and os.path.exists(right):
+            if os.path.isfile(left) and os.path.isfile(right):
                 return [ (left, None), (name, None), (right, None) ]
             # default case
             return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
@@ -6881,54 +6879,60 @@ class Diffuse(gtk.Window):
 
     # display help documenation
     def help_contents_cb(self, widget, data):
-        browser = theResources.getString('help_browser')
-        help_file = theResources.getString('help_file')
-        help_url = theResources.getString('help_url')
-        if help_file == '':
-            # use the local help documentation and browser if available,
-            # otherwise fall back on the on-line manual
-            browser = ''
-            if isWindows():
-                # help documentation is distributed as local HTML files
-                help_file = os.path.join(bin_dir, 'manual.html')
+        help_url = None
+        if isWindows():
+            # help documentation is distributed as local HTML files
+            # search for localised manual first
+            parts = [ 'manual' ]
+            if lang is not None:
+                parts = [ 'manual' ]
+                parts.extend(lang.split('_'))
+            while len(parts) > 0:
+                help_file = os.path.join(bin_dir, '_'.join(parts) + '.html')
                 if os.path.isfile(help_file):
+                    # we found a help file
                     help_url = path2url(help_file)
-            else:
-                # help documentation is distributed as in DocBook format
-                # find the help directory for the current locale and display
-                # using the Gnome help browser
-                s = os.path.join(bin_dir, '../share/gnome/help/diffuse')
-                d = os.path.join(s, 'C')
-                lang = locale.getdefaultlocale()[0]
-                if lang is not None:
-                    path = os.path.join(s, lang)
-                    if os.path.exists(path):
-                        d = path
-                    else:
-                        postfix = lang.index('_')
-                        if postfix > 0:
-                            path = os.path.join(s, lang[:postfix])
-                            if os.path.exists(path):
-                                d = path
-                help_file = os.path.join(d, 'diffuse.xml')
-                if os.path.isfile(help_file):
-                    help_file = path2url(help_file, 'ghelp')
-                    if os.environ.has_key('PATH'):
-                        s = 'gnome-help'
-                        for p in os.environ['PATH'].split(os.pathsep):
-                            fp = os.path.join(p, s)
-                            if os.path.isfile(fp):
-                                browser = fp
-                                break
-        elif browser == '':
-            help_url = path2url(help_file)
-        if browser == '':
-            # use a web browser to display the help documentation
-            webbrowser.open(help_url)
+                    break
+                del parts[-1]
         else:
-            args = [ browser, help_file ]
-            # spawnvp is not available on some systems, use spawnv instead
-            os.spawnv(os.P_NOWAIT, args[0], args)
+            # verify gnome-help is available
+            browser = None
+            if os.environ.has_key('PATH'):
+                for p in os.environ['PATH'].split(os.pathsep):
+                    fp = os.path.join(p, 'gnome-help')
+                    if os.path.isfile(fp):
+                        browser = fp
+                        break
+            if browser is not None:
+                # find localised help file
+                if lang is None:
+                    parts = []
+                else:
+                    parts = lang.split('_')
+                s = os.path.abspath(os.path.join(bin_dir, '../share/gnome/help/diffuse'))
+                while True:
+                    if len(parts) > 0:
+                        d = '_'.join(parts)
+                    else:
+                        # fall back to using 'C'
+                        d = 'C'
+                    help_file = os.path.join(os.path.join(s, d), 'diffuse.xml')
+                    if os.path.isfile(help_file):
+                        args = [ browser, path2url(help_file, 'ghelp') ]
+                        # spawnvp is not available on some systems, use spawnv instead
+                        os.spawnv(os.P_NOWAIT, args[0], args)
+                        return
+                    if len(parts) == 0:
+                        break
+                    del parts[-1]
+        if help_url is None:
+            # no local help file is available, show on-line help
+            help_url = WEBSITE + 'manual.html'
+            # ask for localised manual
+            if lang is not None:
+                help_url += '?lang=' + lang
+        # use a web browser to display the help documentation
+        webbrowser.open(help_url)
 
     # callback for the about menu item
     def about_cb(self, widget, data):

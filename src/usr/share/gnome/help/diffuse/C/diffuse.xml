@@ -1475,28 +1475,6 @@
               <para>a list of colour resources used to indicate differences</para>
             </listitem>
           </varlistentry>
-
-          <varlistentry>
-            <term><userinput>help_browser</userinput></term>
-            <listitem>
-              <para>executable used to browse help documentation</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>help_file</userinput></term>
-            <listitem>
-              <para>path to the help document</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>help_url</userinput></term>
-            <listitem>
-              <para>URL of the on-line help document</para>
-            </listitem>
-          </varlistentry>
-
         </variablelist>
       </sect2> 
     </sect1> 

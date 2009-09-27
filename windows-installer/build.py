@@ -132,28 +132,33 @@ for p in 'AUTHORS', 'ChangeLog', 'COPYING', 'README':
     copyFile(os.path.join('..', p), os.path.join('dist', p + '.txt'), True)
 
 # convert the manual from DocBook to HTML
-cmd = [ 'xsltproc',
-        os.path.join(os.environ['DOCBOOK_XSL_HOME'], 'html\\docbook.xsl'),
-        '..\\src\\usr\\share\\gnome\\help\\diffuse\\C\\diffuse.xml' ]
-info = subprocess.STARTUPINFO()
-info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-info.wShowWindow = subprocess.SW_HIDE
-proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=info)
-proc.stdin.close()
-proc.stderr.close()
-fd = proc.stdout
-s = fd.read()
-fd.close()
-if proc.wait() != 0:
-    raise OSError('Could not run xsltproc')
-# add link to style sheet
-s = s.replace('</head>', '<link rel="stylesheet" href="style.css" type="text/css"/></head>')
-s = s.replace('<p>\n        </p>', '')
-s = s.replace('<p>\n      </p>', '')
-# save HTML version of the manual
-f = open('dist\\manual.html', 'w')
-f.write(s)
-f.close()
+d = '..\\src\\usr\\share\\gnome\\help\\diffuse'
+for lang in os.listdir(d):
+    p = os.path.join(os.path.join(d, lang), 'diffuse.xml')
+    if os.path.isfile(p):
+        cmd = [ 'xsltproc', os.path.join(os.environ['DOCBOOK_XSL_HOME'], 'html\\docbook.xsl'), p ]
+        info = subprocess.STARTUPINFO()
+        info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        info.wShowWindow = subprocess.SW_HIDE
+        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, startupinfo=info)
+        proc.stdin.close()
+        proc.stderr.close()
+        fd = proc.stdout
+        s = fd.read()
+        fd.close()
+        if proc.wait() != 0:
+            raise OSError('Could not run xsltproc')
+        # add link to style sheet
+        s = s.replace('</head>', '<link rel="stylesheet" href="style.css" type="text/css"/></head>')
+        s = s.replace('<p>\n        </p>', '')
+        s = s.replace('<p>\n      </p>', '')
+        # save HTML version of the manual
+        fn = 'manual'
+        if lang != 'C':
+            fn += '_' + lang
+        f = open(os.path.join('dist', fn + '.html'), 'w')
+        f.write(s)
+        f.close()
 copyFile('style.css', 'dist\\style.css')
 
 #
