@@ -45,6 +45,9 @@ if isWindows():
     for v in 'LANGUAGE', 'LC_ALL', 'LC_MESSAGES', 'LANG':
         if os.environ.has_key(v):
             lang = os.environ[v]
+            # remove any additional languages, encodings, or modifications
+            for v in ':.@':
+                lang = lang.split(v)[0]
             break
     else:
         if lang is not None:
