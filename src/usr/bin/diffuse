@@ -5507,14 +5507,6 @@ class SearchDialog(gtk.Dialog):
     def entry_cb(self, widget):
         self.response(gtk.RESPONSE_ACCEPT)
 
-# convenience method to request confirmation before doing an operation that
-# will cause edits to be lost
-def confirmDiscardEdits(parent):
-    dialog = MessageDialog(parent, gtk.MESSAGE_QUESTION, _('Discard unsaved changes?'))
-    end = (dialog.run() == gtk.RESPONSE_OK)
-    dialog.destroy()
-    return end
-
 # convenience method to request confirmation when closing the last tab
 def confirmTabClose(parent):
     dialog = MessageDialog(parent, gtk.MESSAGE_WARNING, _('Closing this tab will quit %s.') % (APP_NAME, ))
@@ -5861,6 +5853,33 @@ class Diffuse(gtk.Window):
             # initialise status
             self.updateStatus()
 
+        # convenience method to request confirmation before loading a file if
+        # it will cause existing edits to be lost
+        def loadFromInfo(self, f, info):
+            if self.headers[f].has_edits:
+                # warn users of any unsaved changes they might lose
+                dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, _('Save changes before loading the new file?'))
+                dialog.set_title(APP_NAME)
+                dialog.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+                dialog.add_button(gtk.STOCK_NO, gtk.RESPONSE_REJECT)
+                dialog.add_button(gtk.STOCK_YES, gtk.RESPONSE_OK)
+                dialog.set_default_response(gtk.RESPONSE_CANCEL)
+                response = dialog.run()
+                dialog.destroy()
+                if response == gtk.RESPONSE_OK:
+                    # save the current pane contents
+                    if not self.save_file(f):
+                        # cancel if the save failed
+                        return
+                elif response != gtk.RESPONSE_REJECT:
+                    # cancel if the user did not choose 'yes' or 'no'
+                    return
+            self.openUndoBlock()
+            self.recordEditMode()
+            self.load(f, info)
+            self.recordEditMode()
+            self.closeUndoBlock()
+
         # callback used when receiving drag-n-drop data
         def drag_data_received_cb(self, widget, context, x, y, selection, targettype, eventtime, f):
             # parse uri-list
@@ -5887,12 +5906,7 @@ class Diffuse(gtk.Window):
             # load the first valid file
             for s in ss:
                 if os.path.isfile(s):
-                    if self.panes[f].num_edits == 0 or confirmDiscardEdits(self.get_toplevel()):
-                        self.openUndoBlock()
-                        self.recordEditMode()
-                        self.load(f, FileInfo(s))
-                        self.recordEditMode()
-                        self.closeUndoBlock()
+                    self.loadFromInfo(f, FileInfo(s))
                     break
 
         # change the file info for pane 'f' to 'info'
@@ -5989,9 +6003,6 @@ class Diffuse(gtk.Window):
         def open_file(self, f, reload=False):
             h = self.headers[f]
             info = h.info
-            # warn users of any unsaved changes they might lose
-            if h.has_edits and not confirmDiscardEdits(self.get_toplevel()):
-                return
             if not reload:
                 # we need to ask for a file name if we are not reloading the
                 # existing file
@@ -6012,11 +6023,7 @@ class Diffuse(gtk.Window):
                 dialog.destroy()
                 if end:
                     return
-            self.openUndoBlock()
-            self.recordEditMode()
-            self.load(f, info)
-            self.recordEditMode()
-            self.closeUndoBlock()
+            self.loadFromInfo(f, info)
 
         # callback for open file button
         def open_file_button_cb(self, widget, f):
@@ -6076,7 +6083,7 @@ class Diffuse(gtk.Window):
                     encoding = dialog.get_encoding()
                 dialog.destroy()
             if name is None:
-                return
+                return False
             try:
                 msg = None
                 # warn if we are about to overwrite an existing file
@@ -6093,7 +6100,7 @@ class Diffuse(gtk.Window):
                     end = (dialog.run() != gtk.RESPONSE_OK)
                     dialog.destroy()
                     if end:
-                        return
+                        return False
             except OSError:
                 pass
             try:
@@ -6124,6 +6131,7 @@ class Diffuse(gtk.Window):
                 syntax = theResources.getSyntaxByFilename(name)
                 if syntax is not None:
                     self.setSyntax(syntax)
+                return True
             except UnicodeEncodeError:
                 dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error encoding to %s.') % (encoding, ))
                 dialog.run()
@@ -6132,6 +6140,7 @@ class Diffuse(gtk.Window):
                 dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (name, ))
                 dialog.run()
                 dialog.destroy()
+            return False
 
         # callback for save file menu item
         def save_file_cb(self, widget, data):
@@ -6503,12 +6512,60 @@ class Diffuse(gtk.Window):
             # bad $HOME value? -- don't bother the user
             logDebug('Error writing %s.' % (configpath, ))
 
+    # returns True if the list of viewers can be closed.  The user will be
+    # given a chance to save any modified files before this method completes.
+    def confirmCloseViewers(self, viewers):
+        # make a list of modified files
+        modified = []
+        for v in viewers:
+            for f, h in enumerate(v.headers):
+                if h.has_edits:
+                    modified.append((v, f))
+        if len(modified) == 0:
+            # there are no modified files, the viewers can be closed
+            return True
+
+        # ask the user which files should be saved
+        dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, _('Some files have unsaved changes.  Select the files to save before closing.'))
+        dialog.set_title(APP_NAME)
+        # add list of files with unsaved changes
+        vbox = gtk.VBox()
+        buttons = []
+        for v, f in modified:
+            button = gtk.CheckButton(_('%(title)s Pane %(pane)d') % { 'title': v.title, 'pane': f + 1 }, False)
+            button.set_active(True)
+            vbox.pack_start(button, False, False, 0)
+            button.show()
+            buttons.append(button)
+        dialog.vbox.pack_start(vbox, False, False, 0)
+        vbox.show()
+        # add custom set of action buttons
+        dialog.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+        button = gtk.Button(_('Close _Without Saving'))
+        dialog.add_action_widget(button, gtk.RESPONSE_REJECT)
+        button.show()
+        dialog.add_button(gtk.STOCK_SAVE, gtk.RESPONSE_OK)
+        dialog.set_default_response(gtk.RESPONSE_CANCEL)
+        response = dialog.run()
+        dialog.destroy()
+        if response == gtk.RESPONSE_OK:
+            # save all checked files
+            for i, button in enumerate(buttons):
+                if button.get_active():
+                    v, f = modified[i]
+                    if not v.save_file(f):
+                        # cancel if we failed to save a file
+                        return False
+            return True
+        # cancel if the user did not choose 'Close Without Saving' or 'Save'
+        return response == gtk.RESPONSE_REJECT
+
     # callback for the close button on each tab
     def remove_tab_cb(self, widget, data):
         nb = self.notebook
         if nb.get_n_pages() > 1:
             # warn about losing unsaved changes before removing a tab
-            if not data.hasEdits() or confirmDiscardEdits(self.get_toplevel()):
+            if self.confirmCloseViewers([ data ]):
                 self.closed_tabs.append((nb.page_num(data), data, nb.get_tab_label(data)))
                 nb.remove(data)
                 nb.set_show_tabs(self.prefs.getBool('tabs_always_show') or nb.get_n_pages() > 1)
@@ -6682,11 +6739,8 @@ class Diffuse(gtk.Window):
 
     # returns True if the application can safely quit
     def confirmQuit(self):
-        for i in range(self.notebook.get_n_pages()):
-            viewer = self.notebook.get_nth_page(i)
-            if viewer.hasEdits():
-                return confirmDiscardEdits(self)
-        return True
+        nb = self.notebook
+        return self.confirmCloseViewers([ nb.get_nth_page(i) for i in range(nb.get_n_pages()) ])
 
     # respond to close window request from the window manager
     def delete_cb(self, widget, event):
