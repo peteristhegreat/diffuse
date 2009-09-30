@@ -3101,7 +3101,6 @@ class FileDiffViewer(gtk.Table):
 
     # replace the contents of pane 'f' with the strings list of strings 'ss'
     def replaceContents(self, f, ss):
-        self.setLineMode()
         self.alignmentChange(False)
         # determine the format for the text
         self.setFormat(f, getFormat(ss))
@@ -3154,6 +3153,9 @@ class FileDiffViewer(gtk.Table):
         self.invalidateLineMatching(0, old_n, new_n)
         self.updateBlocks(blocks)
         self.alignmentChange(True)
+        # update cursor
+        self.setLineMode()
+        self.setCurrentLine(self.current_pane, min(self.current_line, len(pane.lines) + 1))
 
     # refresh the lines to contain new objects with updated line numbers and
     # no local edits
