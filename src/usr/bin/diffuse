@@ -4214,7 +4214,7 @@ class FileDiffViewer(gtk.Table):
                     if line is not None and line.is_modified:
                         # modified line
                         flag = 4
-                    elif s0 is None:
+                    elif self.getLineText(f, i) is None:
                         # empty line
                         flag = 0
                     elif flag == 0:
