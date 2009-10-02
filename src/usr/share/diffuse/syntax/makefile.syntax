@@ -68,7 +68,7 @@ syntax_pattern declaration_comment declaration_comment makefile_fixme '\b(TODO|F
 syntax_pattern declaration_comment declaration_comment makefile_comment '.[^TFX\r\n]*'
 
 # dependencies
-syntax_pattern normal depends makefile_target '^[^#:]*:'
+syntax_pattern normal depends makefile_target '^[^#:]*::?'
 syntax_pattern depends normal makefile_continue '(\r\n|\r|\n)$'
 syntax_pattern depends depends makefile_continue '\\(\r\n|\r|\n)$'
 syntax_pattern depends depends makefile_variable '\$(\([^\)]+\)|@|%|<|\?|\^|\+|\*)'
