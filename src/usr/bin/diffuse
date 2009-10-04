@@ -3676,7 +3676,7 @@ class FileDiffViewer(gtk.Table):
             can_swap = (f != self.current_pane)
 
             menu = createMenu(
-                      [ [_('Align to Selection'), self.align_to_selection_cb, [f, i], gtk.STOCK_EXECUTE, None, can_align],
+                      [ [_('Align with Selection'), self.align_with_selection_cb, [f, i], gtk.STOCK_EXECUTE, None, can_align],
                       [_('Isolate'), self.button_cb, 'isolate', None, None, can_isolate ],
                       [_('Merge Selection'), self.merge_lines_cb, f, None, None, can_merge],
                       [],
@@ -4866,8 +4866,8 @@ class FileDiffViewer(gtk.Table):
         self.setCurrentLine(f, min(self.current_line, len(self.panes[f].lines)))
         self.recordEditMode()
 
-    # callback for the align to selection menu item
-    def align_to_selection_cb(self, widget, data):
+    # callback for the align with selection menu item
+    def align_with_selection_cb(self, widget, data):
         self.setLineMode()
         self.openUndoBlock()
         self.recordEditMode()
@@ -5536,7 +5536,7 @@ class FileChooserDialog(gtk.FileChooserDialog):
         if action in [ gtk.FILE_CHOOSER_ACTION_OPEN, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER ]:
             self.encodings = self.encodings[:]
             self.encodings.insert(0, None)
-            combobox.prepend_text('Auto Detect')
+            combobox.prepend_text(_('Auto Detect'))
             combobox.set_active(0)
         hbox.pack_start(combobox, False, False, 5)
         combobox.show()
@@ -6367,7 +6367,7 @@ class Diffuse(gtk.Window):
                      [_('Shift Pane _Right'), self.button_cb, 'shift_pane_right', None, 'shift_pane_right'],
                      [_('Shift Pane _Left'), self.button_cb, 'shift_pane_left', None, 'shift_pane_left'] ] ])
 
-        menuspecs.append([ _('_Format'), [
+        menuspecs.append([ _('F_ormat'), [
                      [_('Convert To _Upper Case'), self.button_cb, 'convert_to_upper_case', None, 'convert_to_upper_case'],
                      [_('Convert To _Lower Case'), self.button_cb, 'convert_to_lower_case', None, 'convert_to_lower_case'],
                      [],

@@ -31,7 +31,7 @@ msgid "A file named %s already exists.  Do you want to overwrite it?"
 msgstr "Eine Datei mit dem Namen %s existiert bereits. Überschreiben?"
 
 #: ../src/usr/bin/diffuse:3679
-msgid "Align to Selection"
+msgid "Align with Selection"
 msgstr "Ausrichten an der Auswahl"
 
 #: ../src/usr/bin/diffuse:773
@@ -273,6 +273,10 @@ msgstr "Erster Unterschied"
 #: ../src/usr/bin/diffuse:763
 msgid "Font"
 msgstr "Schriftart"
+
+#: ../src/usr/bin/diffuse:6370
+msgid "F_ormat"
+msgstr "F_ormat"
 
 #: ../src/usr/bin/diffuse:5572
 msgid "Go To Line..."
@@ -735,10 +739,6 @@ msgstr "_Suchen..."
 #: ../src/usr/bin/diffuse:6359
 msgid "_First Difference"
 msgstr "_Erster Unterschied"
-
-#: ../src/usr/bin/diffuse:6370
-msgid "_Format"
-msgstr "_Format"
 
 #: ../src/usr/bin/diffuse:6341
 msgid "_Go To Line..."

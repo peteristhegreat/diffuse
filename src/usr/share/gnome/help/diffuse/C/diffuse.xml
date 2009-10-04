@@ -347,7 +347,7 @@
         text with adjacent files.  To aligning lines of text using the mouse
         pointer, select a line of text with the left mouse button, right click
         on a line of text from an adjacent file, and choose
-        <menuchoice><guimenu>Align to Selection</guimenu></menuchoice>.  To
+        <menuchoice><guimenu>Align with Selection</guimenu></menuchoice>.  To
         align lines of text using the keyboard, move the selection with the
         cursor keys, press the space bar to pick the current line of text, move
         the selection with the cursor keys to a line of text in an adjacent
