@@ -116,19 +116,19 @@ msgstr "Kopieren"
 
 #: ../src/usr/bin/diffuse:6420
 msgid "Copy Left Into Selection"
-msgstr "Ausrichten an der Auswahl"
+msgstr "Von links in die Auswahl kopieren"
 
 #: ../src/usr/bin/diffuse:6392
 msgid "Copy Left _Into Selection"
-msgstr "Ausrichten an der Auswahl"
+msgstr "Von links _in die Auswahl kopieren"
 
 #: ../src/usr/bin/diffuse:6393
 msgid "Copy Right I_nto Selection"
-msgstr "Ausrichten an der Auswahl"
+msgstr "Von rechts i_n die Auswahl kopieren"
 
 #: ../src/usr/bin/diffuse:6421
 msgid "Copy Right Into Selection"
-msgstr "Ausrichten an der Auswahl"
+msgstr "Von rechts in die Auswahl kopieren"
 
 #: ../src/usr/bin/diffuse:6419
 msgid "Copy Selection Left"
@@ -357,7 +357,7 @@ msgstr "Mischen von rechts, dann von links"
 
 #: ../src/usr/bin/diffuse:3681
 msgid "Merge Selection"
-msgstr "Ausrichten an der Auswahl"
+msgstr "Auswahl mischen"
 
 #: ../src/usr/bin/diffuse:6409
 msgid "New 2-Way File Merge"
@@ -543,7 +543,7 @@ msgstr "Zeige Zeilennummern"
 
 #: ../src/usr/bin/diffuse:766
 msgid "Show white space characters"
-msgstr "Unterschiede bei Leerzeichen ignorieren"
+msgstr "Leerzeichen anzeigen"
 
 #: ../src/usr/bin/diffuse:7129
 #, python-format
