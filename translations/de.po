@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: diffuse-svn\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-09-30 19:51+0200\n"
+"POT-Creation-Date: 2009-10-05 17:16+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Henri Menke <henrimenke4@aim.com>\n"
 "Language-Team: German <henrimenke4@aim.com>\n"
@@ -41,6 +41,10 @@ msgstr "Ausrichtung"
 #: ../src/usr/bin/diffuse:790
 msgid "Always show the tab bar"
 msgstr "Reiter-Leiste immer anzeigen"
+
+#: ../src/usr/bin/diffuse:5539
+msgid "Auto Detect"
+msgstr "Automatische Erkennung"
 
 #: ../src/usr/bin/diffuse:785
 msgid "Auto indent"
@@ -249,6 +253,10 @@ msgstr "Fehler beim Schreiben von %s."
 msgid "Expand tabs to spaces"
 msgstr "Tabulatoren zu Leerzeichen erweitern"
 
+#: ../src/usr/bin/diffuse:6370
+msgid "F_ormat"
+msgstr "F_ormat"
+
 #: ../src/usr/bin/diffuse:6645
 #, python-format
 msgid "File Merge %d"
@@ -273,10 +281,6 @@ msgstr "Erster Unterschied"
 #: ../src/usr/bin/diffuse:763
 msgid "Font"
 msgstr "Schriftart"
-
-#: ../src/usr/bin/diffuse:6370
-msgid "F_ormat"
-msgstr "F_ormat"
 
 #: ../src/usr/bin/diffuse:5572
 msgid "Go To Line..."
