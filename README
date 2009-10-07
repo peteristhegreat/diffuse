@@ -37,11 +37,19 @@ dependencies should be installed prior to installing PyGTK.
 Diffuse can be run directly from an untared source distribution on any POSIX
 system or installed with the instructions described in the next section.
 
-The rules for parsing files in ~/.diffuse have changed in the 0.3.0 release.
+The location of the personal preferences, state, and initialisation files have
+changed in the 0.4.1 release.  Old settings may be migrated using the following
+commands:
+
+  $ mkdir -p ~/.config/diffuse
+  $ mv ~/.diffuse/config ~/.config/diffuse/state
+  $ mv ~/.diffuse/* ~/.config/diffuse
+  $ rmdir ~/.diffuse
+
+The rules for parsing files in ~/.diffuse changed in the 0.3.0 release.
 Non-fatal errors may be reported when parsing old files.  These errors can be
 fixed by removing the offending lines (or the entire file) from
-~/.diffuse/diffuserc.  Errors in ~/.diffuse/config will be automatically fixed
-when Diffuse exits.
+~/.config/diffuse/diffuserc.
 
 ----
 

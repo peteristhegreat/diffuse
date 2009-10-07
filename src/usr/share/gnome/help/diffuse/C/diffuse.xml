@@ -547,8 +547,8 @@
       initialisation file <filename>/etc/diffuserc</filename>
       (<filename>%INSTALL_DIR%\diffuserc</filename> on Microsoft Windows) and
       then the personal initialisation file
-      <filename>~/.diffuse/diffuserc</filename>
-      (<filename>%HOME%\.diffuse\diffuserc</filename> on Microsoft Windows).
+      <filename>~/.config/diffuse/diffuserc</filename>
+      (<filename>%HOME%\.config\diffuse\diffuserc</filename> on Microsoft Windows).
       This behaviour can be changed with the <userinput>--no-rcfile</userinput>
       and <userinput>--rcfile</userinput> configuration options.  A Bourne
       shell-like lexical analyser is used to parse initialisation commands.
@@ -1759,23 +1759,23 @@
       </varlistentry>
 
       <varlistentry>
-        <term><filename>~/.diffuse/config</filename></term>
+          <term><filename>~/.config/diffuse/diffuserc</filename></term>
         <listitem>
-          <para>data persistent across sessions (<filename>%HOME%\.diffuse\config</filename> on Microsoft Windows)</para>
+          <para>your initialisations (<filename>%HOME%\.config\diffuse\diffuserc</filename> on Microsoft Windows)</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-          <term><filename>~/.diffuse/diffuserc</filename></term>
+        <term><filename>~/.config/diffuse/prefs</filename></term>
         <listitem>
-          <para>your initialisations (<filename>%HOME%\.diffuse\diffuserc</filename> on Microsoft Windows)</para>
+          <para>your saved preferences (<filename>%HOME%\.config\diffuse\prefs</filename> on Microsoft Windows)</para>
         </listitem>
       </varlistentry>
 
       <varlistentry>
-        <term><filename>~/.diffuse/prefs</filename></term>
+        <term><filename>~/.config/diffuse/state</filename></term>
         <listitem>
-          <para>your saved preferences (<filename>%HOME%\.diffuse\prefs</filename> on Microsoft Windows)</para>
+          <para>data persistent across sessions (<filename>%HOME%\.config\diffuse\state</filename> on Microsoft Windows)</para>
         </listitem>
       </varlistentry>
     </variablelist>
