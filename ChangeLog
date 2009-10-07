@@ -1,3 +1,4 @@
+- added a 'Dismiss Edits' menu item
 - personal configuration files are now stored in ~/.config/diffuse/ (the README file describes how to migrate old settings)
 - localised manuals are now supported on Windows
 - new command line option for specifying blank file comparison panes

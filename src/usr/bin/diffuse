@@ -303,6 +303,7 @@ class Resources:
         set_binding('menu', 'paste', 'Ctrl+v')
         set_binding('menu', 'select_all', 'Ctrl+a')
         set_binding('menu', 'clear_edits', 'Ctrl+r')
+        set_binding('menu', 'dismiss_edits', 'Ctrl+d')
         set_binding('menu', 'find', 'Ctrl+f')
         set_binding('menu', 'find_next', 'Ctrl+g')
         set_binding('menu', 'find_previous', 'Shift+Ctrl+G')
@@ -2269,6 +2270,7 @@ class FileDiffViewer(gtk.Table):
             'paste': self.paste,
             'select_all': self.select_all,
             'clear_edits': self.clear_edits,
+            'dismiss_edits': self.dismiss_edits,
             'realign_all': self.realign_all,
             'isolate': self.isolate,
             'first_difference': self.first_difference,
@@ -3170,9 +3172,7 @@ class FileDiffViewer(gtk.Table):
                 lines.append(FileDiffViewer.Line(line_num, s))
 
         # update loaded pane
-        self.openUndoBlock()
         self.replaceLines(f, pane.lines, lines, pane.max_line_number, line_num)
-        self.closeUndoBlock()
 
     # update the contents for a line, creating the line if necessary
     def updateText(self, f, i, text, is_modified=True):
@@ -4753,6 +4753,11 @@ class FileDiffViewer(gtk.Table):
                     self.instanceLine(f, i, True)
         self.recordEditMode()
 
+    # 'dismiss_edits' action
+    def dismiss_edits(self):
+        self.setLineMode()
+        self.bakeEdits(self.current_pane)
+
     # callback for find menu item
     def find(self, pattern, match_case, backwards, from_start):
         self.setCharMode()
@@ -6126,7 +6131,9 @@ class Diffuse(gtk.Window):
                 fd.close()
 
                 # make the edits look permanent
+                self.openUndoBlock()
                 self.bakeEdits(f)
+                self.closeUndoBlock()
                 # update the pane file info
                 info.name, info.encoding, info.revision = name, encoding, None
                 info.last_stat = info.stat = os.stat(name)
@@ -6334,6 +6341,7 @@ class Diffuse(gtk.Window):
                      [],
                      [_('Select _All'), self.button_cb, 'select_all', None, 'select_all'],
                      [_('C_lear Edits'), self.button_cb, 'clear_edits', gtk.STOCK_CLEAR, 'clear_edits'],
+                     [_('_Dismiss Edits'), self.button_cb, 'dismiss_edits', None, 'dismiss_edits'],
                      [],
                      [_('_Find...'), self.find_cb, None, gtk.STOCK_FIND, 'find'],
                      [_('Find _Next'), self.find_next_cb, None, None, 'find_next'],
