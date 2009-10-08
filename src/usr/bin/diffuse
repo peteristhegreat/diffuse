@@ -303,7 +303,7 @@ class Resources:
         set_binding('menu', 'paste', 'Ctrl+v')
         set_binding('menu', 'select_all', 'Ctrl+a')
         set_binding('menu', 'clear_edits', 'Ctrl+r')
-        set_binding('menu', 'dismiss_edits', 'Ctrl+d')
+        set_binding('menu', 'dismiss_all_edits', 'Ctrl+d')
         set_binding('menu', 'find', 'Ctrl+f')
         set_binding('menu', 'find_next', 'Ctrl+g')
         set_binding('menu', 'find_previous', 'Shift+Ctrl+G')
@@ -2270,7 +2270,7 @@ class FileDiffViewer(gtk.Table):
             'paste': self.paste,
             'select_all': self.select_all,
             'clear_edits': self.clear_edits,
-            'dismiss_edits': self.dismiss_edits,
+            'dismiss_all_edits': self.dismiss_all_edits,
             'realign_all': self.realign_all,
             'isolate': self.isolate,
             'first_difference': self.first_difference,
@@ -4753,10 +4753,10 @@ class FileDiffViewer(gtk.Table):
                     self.instanceLine(f, i, True)
         self.recordEditMode()
 
-    # 'dismiss_edits' action
-    def dismiss_edits(self):
-        self.setLineMode()
-        self.bakeEdits(self.current_pane)
+    # 'dismiss_all_edits' action
+    def dismiss_all_edits(self):
+        if self.mode == LINE_MODE or self.mode == CHAR_MODE:
+            self.bakeEdits(self.current_pane)
 
     # callback for find menu item
     def find(self, pattern, match_case, backwards, from_start):
@@ -6341,7 +6341,7 @@ class Diffuse(gtk.Window):
                      [],
                      [_('Select _All'), self.button_cb, 'select_all', None, 'select_all'],
                      [_('C_lear Edits'), self.button_cb, 'clear_edits', gtk.STOCK_CLEAR, 'clear_edits'],
-                     [_('_Dismiss Edits'), self.button_cb, 'dismiss_edits', None, 'dismiss_edits'],
+                     [_('_Dismiss All Edits'), self.button_cb, 'dismiss_all_edits', None, 'dismiss_all_edits'],
                      [],
                      [_('_Find...'), self.find_cb, None, gtk.STOCK_FIND, 'find'],
                      [_('Find _Next'), self.find_next_cb, None, None, 'find_next'],

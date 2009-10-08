@@ -764,9 +764,9 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>dismiss_edits</userinput></term>
+            <term><userinput>dismiss_all_edits</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Dismiss Edits</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Dismiss All Edits</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+d</para>
             </listitem>
           </varlistentry>
