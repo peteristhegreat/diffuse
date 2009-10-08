@@ -282,10 +282,6 @@ msgstr "字体"
 msgid "Go To Line..."
 msgstr "跳到行..."
 
-#: ../src/usr/bin/diffuse:5613
-msgid "Henri Menke <henrimenke4@aim.com> (German)"
-msgstr ""
-
 #: ../src/usr/bin/diffuse:769
 msgid "Ignore blank line differences"
 msgstr "忽略空行的不同"
@@ -796,3 +792,7 @@ msgstr "恢复关闭的标签"
 #: ../src/usr/bin/diffuse:6353
 msgid "_View"
 msgstr "视图(_V)"
+
+#: ../src/usr/bin/diffuse:5613
+msgid "translator-credits"
+msgstr "Liu Hao <jarryson@gmail.com>"

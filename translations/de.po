@@ -286,10 +286,6 @@ msgstr "Schriftart"
 msgid "Go To Line..."
 msgstr "Gehe zu Zeile..."
 
-#: ../src/usr/bin/diffuse:5613
-msgid "Henri Menke <henrimenke4@aim.com> (German)"
-msgstr "Henri Menke <henrimenke4@aim.com> (Deutsch)"
-
 #: ../src/usr/bin/diffuse:769
 msgid "Ignore blank line differences"
 msgstr "Unterschiede bei leeren Zeilen ignorieren"
@@ -823,3 +819,7 @@ msgstr "_Reiter schließen rückgängig"
 #: ../src/usr/bin/diffuse:6353
 msgid "_View"
 msgstr "_Ansicht"
+
+#: ../src/usr/bin/diffuse:5613
+msgid "translator-credits"
+msgstr "Henri Menke <henrimenke4@aim.com>"
