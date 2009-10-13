@@ -90,11 +90,11 @@ msgstr "タブをスペースに変換(_S)"
 
 #: ../src/usr/bin/diffuse:6394
 msgid "Convert To Uni_x Format"
-msgstr "Unix形式に変換(_X)"
+msgstr "Unix 形式に変換(_X)"
 
 #: ../src/usr/bin/diffuse:6392
 msgid "Convert To _DOS Format"
-msgstr "DOS形式に変換(_D)"
+msgstr "DOS 形式に変換(_D)"
 
 #: ../src/usr/bin/diffuse:6380
 msgid "Convert To _Lower Case"
@@ -102,7 +102,7 @@ msgstr "小文字に変換(_L)"
 
 #: ../src/usr/bin/diffuse:6393
 msgid "Convert To _Mac Format"
-msgstr "Mac形式に変換(_M)"
+msgstr "Mac 形式に変換(_M)"
 
 #: ../src/usr/bin/diffuse:6379
 msgid "Convert To _Upper Case"

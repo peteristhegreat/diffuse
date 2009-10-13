@@ -24,7 +24,7 @@ import platform
 import subprocess
 import sys
 
-VERSION='0.4.0'
+VERSION='0.4.1'
 PACKAGE='1'
 PLATFORM='win' + ''.join([ c for c in platform.architecture()[0] if c.isdigit() ])
 INSTALLER='diffuse-%s-%s.%s' % (VERSION, PACKAGE, PLATFORM)
