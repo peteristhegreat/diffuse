@@ -1042,18 +1042,26 @@ class Preferences:
                 n = len(pr)
                 if len(p) > n and p[:n] == pr and len(p[n]) == 1:
                     p[:n + 1] = [ p[n] + ':' ]
-                elif len(p) > 1:
-                    if p[1] != '':
-                        p[0] = self.getString('cygwin_root')
+                elif len(p) > 1 and p[1] != '':
+                    p[0] = self.getString('cygwin_root')
             s = os.sep.join(p)
         return s
 
 # convenience method for creating a menu according to a template
-def createMenu(specs, accel_group=None):
+def createMenu(specs, radio=None, accel_group=None):
     menu = gtk.Menu()
     for spec in specs:
         if len(spec) > 0:
-            item = gtk.ImageMenuItem(spec[0])
+            if len(spec) > 7 and spec[7] is not None:
+                g, k = spec[7]
+                if not radio.has_key(g):
+                    item = gtk.RadioMenuItem(None, spec[0])
+                    radio[g] = (item, {})
+                else:
+                    item = gtk.RadioMenuItem(radio[g][0], spec[0])
+                radio[g][1][k] = item
+            else:
+                item = gtk.ImageMenuItem(spec[0])
             cb = spec[1]
             if cb is not None:
                 data = spec[2]
@@ -1070,7 +1078,7 @@ def createMenu(specs, accel_group=None):
             if len(spec) > 5:
                 item.set_sensitive(spec[5])
             if len(spec) > 6 and spec[6] is not None:
-                item.set_submenu(createMenu(spec[6], accel_group))
+                item.set_submenu(createMenu(spec[6], radio, accel_group))
         else:
             item = gtk.SeparatorMenuItem()
         menu.append(item)
@@ -1078,11 +1086,11 @@ def createMenu(specs, accel_group=None):
     return menu
 
 # convenience method for creating a menu bar according to a template
-def createMenuBar(specs, accel_group):
+def createMenuBar(specs, radio, accel_group):
     menu_bar = gtk.MenuBar()
     for label, spec in specs:
         menu = gtk.MenuItem(label)
-        menu.set_submenu(createMenu(spec, accel_group))
+        menu.set_submenu(createMenu(spec, radio, accel_group))
         menu_bar.append(menu)
         menu.show()
     return menu_bar
@@ -5684,37 +5692,6 @@ class FileInfo:
         # to warn about changes to file on disk
         self.last_stat = None
 
-# custom statusbar widget information about syntax highlighting
-class Statusbar(gtk.Statusbar):
-    def __init__(self):
-        gtk.Statusbar.__init__(self)
-        self.context = self.get_context_id('Message')
-
-        separator = gtk.VSeparator()
-        self.pack_end(separator, False, False, 10)
-        separator.show()
-
-        self.syntax = syntax = gtk.Label()
-        self.pack_end(syntax, False, False, 0)
-        syntax.show()
-
-        separator = gtk.VSeparator()
-        self.pack_end(separator, False, False, 10)
-        separator.show()
-
-    # set the status bar text
-    def setText(self, s):
-        if s is None:
-            s = ''
-        self.pop(self.context)
-        self.push(self.context, s)
-
-    # set the syntax highlighting label
-    def setSyntax(self, s):
-        if s is None:
-            s = ''
-        self.syntax.set_text(s)
-
 # the main application class containing a set of file viewers
 # this class displays tab for switching between viewers and dispatches menu
 # commands to the current viewer
@@ -6350,13 +6327,13 @@ class Diffuse(gtk.Window):
                      [],
                      [_('Pr_eferences...'), self.preferences_cb, None, gtk.STOCK_PREFERENCES, 'preferences'] ] ])
 
-        submenudef = [ [_('None'), self.syntax_cb, None, None, 'no_syntax_highlighting'] ]
+        submenudef = [ [_('None'), self.syntax_cb, None, None, 'no_syntax_highlighting', True, None, ('syntax', None) ] ]
         names = theResources.getSyntaxNames()
         if len(names) > 0:
             submenudef.append([])
             names.sort(key=str.lower)
             for name in names:
-                submenudef.append([name, self.syntax_cb, name, None, 'syntax_highlighting_' + name])
+                submenudef.append([name, self.syntax_cb, name, None, 'syntax_highlighting_' + name, True, None, ('syntax', name) ])
 
         menuspecs.append([ _('_View'), [
                      [_('_Syntax Highlighting'), None, None, None, None, True, submenudef],
@@ -6407,7 +6384,12 @@ class Diffuse(gtk.Window):
                      [],
                      [_('_About %s...') % (APP_NAME, ), self.about_cb, None, gtk.STOCK_ABOUT, 'about'] ] ])
 
-        menu_bar = createMenuBar(menuspecs, accel_group)
+        # used to disable menu events when switching tabs
+        self.menu_update_depth = 0
+        # build list of radio menu items so we can update them to match the
+        # currently viewed pane
+        self.radio_menus = radio_menus = {}
+        menu_bar = createMenuBar(menuspecs, radio_menus, accel_group)
         vbox.pack_start(menu_bar, False, False, 0)
         menu_bar.show()
 
@@ -6448,8 +6430,8 @@ class Diffuse(gtk.Window):
         vbox.pack_start(notebook, True, True, 0)
         notebook.show()
 
-        # Add a status bar to the botton
-        self.statusbar = statusbar = Statusbar()
+        # Add a status bar to the bottom
+        self.statusbar = statusbar = gtk.Statusbar()
         vbox.pack_start(statusbar, False, False, 0)
         statusbar.show()
 
@@ -6615,11 +6597,22 @@ class Diffuse(gtk.Window):
 
     # update the message in the status bar
     def setStatus(self, s):
-        self.statusbar.setText(s)
+        sb = self.statusbar
+        context = sb.get_context_id('Message')
+        sb.pop(context)
+        if s is None:
+            s = ''
+        sb.push(context, s)
 
     # update the label in the status bar
     def setSyntax(self, s):
-        self.statusbar.setSyntax(s)
+        # update menu
+        if self.radio_menus.has_key('syntax'):
+            t = self.radio_menus['syntax'][1]
+            if t.has_key(s):
+                self.menu_update_depth += 1
+                t[s].set_active(True)
+                self.menu_update_depth -= 1
 
     # callback used when switching notebook pages
     def switch_page_cb(self, widget, ptr, page_num):
@@ -6925,7 +6918,10 @@ class Diffuse(gtk.Window):
 
     # callback for all of the syntax highlighting menu items
     def syntax_cb(self, widget, data):
-        self.getCurrentViewer().setSyntax(data)
+        # ignore events while we update the menu when switching tabs
+        # also ignore notification of the newly disabled item
+        if self.menu_update_depth == 0 and widget.get_active():
+            self.getCurrentViewer().setSyntax(data)
 
     # callback for the previous tab menu item
     def previous_tab_cb(self, widget, data):
