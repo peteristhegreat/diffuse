@@ -447,7 +447,7 @@ msgstr "Einstellungen"
 
 #: ../src/usr/bin/diffuse:6213
 msgid "Press the enter key or double click to edit.  Press the space bar or use the RMB menu to manually align."
-msgstr "Enter drücken, oder Doppelklicken zum editieren.  Drücken Sie die Leertaste, oder nutzen sie das RMB Menü zum manuellen Ausrichten"
+msgstr "Enter drücken, oder Doppelklicken zum editieren.  Drücken Sie die Leertaste, oder nutzen sie das RMB Menü zum manuellen Ausrichten."
 
 #: ../src/usr/bin/diffuse:6215
 msgid "Press the escape key to finish editing."
