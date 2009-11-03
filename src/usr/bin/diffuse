@@ -1095,6 +1095,16 @@ def createMenuBar(specs, radio, accel_group):
         menu.show()
     return menu_bar
 
+# convenience method to set a widget's tooltip
+def set_tooltip(widget, tip):
+    if hasattr(widget, 'set_tooltip_text'):
+        # only available in pygtk >= 2.12
+        widget.set_tooltip_text(tip)
+    else:
+        # fallback on old tooltip method (pygtk < 2.12)
+        widget.tooltip = gtk.Tooltips()
+        widget.tooltip.set_tip(widget, tip)
+
 # convenience method for packing buttons into a container according to a
 # template
 def appendButtons(box, size, specs):
@@ -1110,9 +1120,7 @@ def appendButtons(box, size, specs):
             if len(spec) > 2:
                 button.connect('clicked', spec[1], spec[2])
                 if len(spec) > 3:
-                    if hasattr(button, 'set_tooltip_text'):
-                        # only available in pygtk >= 2.12
-                        button.set_tooltip_text(spec[3])
+                    set_tooltip(button, spec[3])
             box.pack_start(button, False, False, 0)
             button.show()
         else:
@@ -5660,9 +5668,7 @@ class NotebookTab(gtk.EventBox):
         image.set_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_MENU)
         button.add(image)
         image.show()
-        if hasattr(button, 'set_tooltip_text'):
-            # only available in pygtk >= 2.12
-            button.set_tooltip_text(_('Close Tab'))
+        set_tooltip(button, _('Close Tab'))
         hbox.pack_start(button, False, False, 0)
         button.show()
         self.add(hbox)
