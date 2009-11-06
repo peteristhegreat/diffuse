@@ -2,6 +2,7 @@
 # Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
 syntax 'C Shell' normal text
 syntax_files 'C Shell' '^(.*\.csh|\.t?cshrc)$'
+syntax_magic 'C Shell' '^#![ \t]*([^ \t/]*/)*(env[ \t]+)?(t?csh)[0-9\.]*([ \t].*)?$'
 
 # colours
 colour csh_comment 0.2 0.4 0.64

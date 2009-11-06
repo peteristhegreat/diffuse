@@ -1,3 +1,6 @@
+- "#!" interpreter lines are now used to select proper highlighting rules
+- syntax highlighting is now indicated by radio menu items
+
 Diffuse 0.4.1 - 2009-10-12
 - added Japanese translation
 - added Liu Hao's simplified Chinese translation

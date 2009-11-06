@@ -448,6 +448,7 @@ class Resources:
         # syntax highlighting support
         self.syntaxes = {}
         self.syntax_file_patterns = {}
+        self.syntax_magic_patterns = {}
         self.current_syntax = None
 
         # list of imported resources files (we only import each file once)
@@ -574,11 +575,17 @@ class Resources:
         if self.syntaxes.has_key(name):
             return self.syntaxes[name]
 
-    def getSyntaxByFilename(self, name):
+    def guessSyntaxForFile(self, name, ss):
         name = os.path.basename(name)
-        for key in self.syntax_file_patterns.keys():
-            if self.syntax_file_patterns[key].search(name):
+        for key, pattern in self.syntax_file_patterns.items():
+            if pattern.search(name):
                 return key
+        # fallback to analysing the first line of the file
+        if len(ss) > 0:
+            s = ss[0]
+            for key, pattern in self.syntax_magic_patterns.items():
+                if pattern.search(s):
+                    return key
 
     # parse resource files
     def parse(self, file_name):
@@ -639,6 +646,9 @@ class Resources:
                                 # remove file pattern for a syntax specification
                                 if self.syntax_file_patterns.has_key(key):
                                     del self.syntax_file_patterns[key]
+                                # remove magic pattern for a syntax specification
+                                if self.syntax_magic_patterns.has_key(key):
+                                    del self.syntax_magic_patterns[key]
                                 # remove a syntax specification
                                 self.current_syntax = None
                                 if self.syntaxes.has_key(key):
@@ -672,6 +682,23 @@ class Resources:
                                 if isWindows():
                                     flags |= re.IGNORECASE
                                 self.syntax_file_patterns[key] = re.compile(args[2], flags)
+                        # eg. default to the Python syntax rules when viewing
+                        # a files starting with patterns like #!/usr/bin/python
+                        #    syntax_magic Python '^#!/usr/bin/python$'
+                        elif args[0] == 'syntax_magic' and len(args) > 1:
+                            key = args[1]
+                            if len(args) == 2:
+                                # remove magic pattern for a syntax specification
+                                if self.syntax_magic_patterns.has_key(key):
+                                    del self.syntax_magic_patterns[key]
+                            else:
+                                flags = 0
+                                for arg in args[3:]:
+                                    if arg == 'ignorecase':
+                                        flags |= re.IGNORECASE
+                                    else:
+                                        raise ValueError()
+                                self.syntax_magic_patterns[key] = re.compile(args[2], flags)
                         else:
                             raise ValueError()
                     except: # Grr... the 're' module throws weird errors
@@ -5988,7 +6015,7 @@ class Diffuse(gtk.Window):
             self.setFileInfo(f, info)
             # use the file name to choose appropriate syntax highlighting rules
             if name is not None:
-                syntax = theResources.getSyntaxByFilename(name)
+                syntax = theResources.guessSyntaxForFile(name, ss)
                 if syntax is not None:
                     self.setSyntax(syntax)
 
@@ -6100,11 +6127,12 @@ class Diffuse(gtk.Window):
                 # convert the text to the output encoding
                 # refresh the lines to contain new objects with updated line
                 # numbers and no local edits
-                encoded = []
+                ss, encoded = [], []
                 for line in self.panes[f].lines:
                     if line is not None:
                         s = line.getText()
                         if s is not None:
+                            ss.append(s)
                             encoded.append(codecs.encode(s, encoding))
 
                 # write file
@@ -6123,7 +6151,7 @@ class Diffuse(gtk.Window):
                 self.setFileInfo(f, info)
                 # update the syntax highlighting incase we changed the file
                 # extension
-                syntax = theResources.getSyntaxByFilename(name)
+                syntax = theResources.guessSyntaxForFile(name, ss)
                 if syntax is not None:
                     self.setSyntax(syntax)
                 return True

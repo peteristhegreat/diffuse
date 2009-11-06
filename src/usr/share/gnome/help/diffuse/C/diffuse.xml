@@ -1726,7 +1726,21 @@
         </varlistentry>
 
         <varlistentry>
-          <term><userinput>syntax_pattern <replaceable>name</replaceable> <replaceable>initial_state</replaceable> <replaceable>final_state</replaceable> <replaceable>tag</replaceable> <replaceable>pattern</replaceable> <optional>ignorecase</optional> </userinput></term>
+          <term><userinput>syntax_magic <replaceable>name</replaceable> <optional><replaceable>pattern</replaceable> <optional>ignorecase</optional></optional></userinput></term>
+          <listitem>
+            <para>
+              Specifies that files with a first line matching
+              <replaceable>pattern</replaceable> should be highlighted using
+              the syntax style called <replaceable>name</replaceable>.
+              Patterns used to match files for use with the syntax style called
+              <replaceable>name</replaceable> can be removed by omitting
+              <replaceable>pattern</replaceable>.
+            </para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term><userinput>syntax_pattern <replaceable>name</replaceable> <replaceable>initial_state</replaceable> <replaceable>final_state</replaceable> <replaceable>tag</replaceable> <replaceable>pattern</replaceable> <optional>ignorecase</optional></userinput></term>
           <listitem>
             <para>
               Adds a pattern to the previously declared syntax style.  The
