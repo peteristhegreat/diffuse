@@ -1758,15 +1758,14 @@ class VCSs:
                                 if v.endswith(',v') and os.path.isfile(dn):
                                     # map to checkout name
                                     r.append(dn[:-2])
-                                elif os.path.isdir(dn):
-                                    if v == 'RCS':
-                                        for v in os.listdir(dn):
-                                            if os.path.isfile(os.path.join(dn, v)):
-                                                if v.endswith(',v'):
-                                                    v = v[:-2]
-                                                r.append(os.path.join(s, v))
-                                    elif recurse and not os.path.islink(dn):
-                                        n.append(dn)
+                                elif v == 'RCS' and os.path.isdir(dn):
+                                    for v in os.listdir(dn):
+                                        if os.path.isfile(os.path.join(dn, v)):
+                                            if v.endswith(',v'):
+                                                v = v[:-2]
+                                            r.append(os.path.join(s, v))
+                                elif recurse and os.path.isdir(dn) and not os.path.islink(dn):
+                                    n.append(dn)
                 else:
                     # the user specified a file
                     s = k + ',v'
