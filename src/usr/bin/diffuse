@@ -1747,22 +1747,26 @@ class VCSs:
             for k in names:
                 if os.path.isdir(k):
                     # the user specified a folder
-                    n = [ k ]
+                    n, ex = [ k ], True
                     while len(n) > 0:
                         s = n.pop()
-                        for v in os.listdir(s):
-                            dn = os.path.join(s, v)
-                            if v == 'RCS' and os.path.isdir(dn):
-                                for v in os.listdir(dn):
-                                    if os.path.isfile(os.path.join(dn, v)):
-                                        if v.endswith(',v'):
-                                            v = v[:-2]
-                                        r.append(os.path.join(s, v))
-                            elif v.endswith(',v') and os.path.isfile(dn):
-                                # map to checkout name
-                                r.append(dn[:-2])
-                            elif os.path.isdir(dn) and not os.path.islink(dn):
-                                n.append(dn)
+                        recurse = os.path.isdir(os.path.join(s, 'RCS'))
+                        if ex or recurse:
+                            ex = False
+                            for v in os.listdir(s):
+                                dn = os.path.join(s, v)
+                                if os.path.isdir(dn):
+                                    if v == 'RCS':
+                                        for v in os.listdir(dn):
+                                            if os.path.isfile(os.path.join(dn, v)):
+                                                if v.endswith(',v'):
+                                                    v = v[:-2]
+                                                r.append(os.path.join(s, v))
+                                    elif recurse and not os.path.islink(dn):
+                                        n.append(dn)
+                                elif v.endswith(',v') and os.path.isfile(dn):
+                                    # map to checkout name
+                                    r.append(dn[:-2])
                 else:
                     # the user specified a file
                     s = k + ',v'
