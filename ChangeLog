@@ -1,3 +1,4 @@
+- RCS support
 - added Henri Menke's Spanish translation
 - "#!" interpreter lines are now used to select proper highlighting rules
 - syntax highlighting is now indicated by radio menu items

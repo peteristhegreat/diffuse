@@ -83,7 +83,7 @@ Diffuse is a graphical tool for merging and comparing text files.  Diffuse is
 able to compare an arbitrary number of files side-by-side and gives users the
 ability to manually adjust line matching and directly edit files.  Diffuse can
 also retrieve revisions of files from Bazaar, CVS, Darcs, Git, Mercurial,
-Monotone, Subversion, and SVK repositories for comparison and merging.
+Monotone, RCS, Subversion, and SVK repositories for comparison and merging.
 
 Help Options:
   ( -h | -? | --help )             Display this usage information
@@ -845,15 +845,20 @@ class Preferences:
                 ('git', 'Git', 'git', 'HEAD'),
                 ('hg', 'Mercurial', 'hg', 'tip'),
                 ('mtn', 'Monotone', 'mtn', 'h:'),
+                ('rcs', 'RCS', None, None),
                 ('svn', 'Subversion', 'svn', 'BASE'),
                 ('svk', 'SVK', svk_bin, 'HEAD') ]
 
         vcs_template = [ 'FolderSet' ]
         for key, name, cmd, rev in vcs:
-            temp = [ 'List',
-                     [ 'File', key + '_bin', cmd, _('Command') ],
-                     [ 'String', key + '_default_revision', rev, _('Default revision') ]
-                   ]
+            temp = [ 'List' ]
+            if key == 'rcs':
+                # RCS uses multiple commands
+                temp.extend([ [ 'File', key + '_bin_co', 'co', _('"co" command') ],
+                              [ 'File', key + '_bin_rlog', 'rlog', _('"rlog" command') ] ])
+            else:
+                temp.extend([ [ 'File', key + '_bin', cmd, _('Command') ],
+                              [ 'String', key + '_default_revision', rev, _('Default revision') ] ])
             if isWindows():
                 temp.append([ 'Boolean', key + '_bash', False, _('Launch from a Bash login shell') ])
                 if key != 'git':
@@ -1289,6 +1294,36 @@ def popenReadLines(dn, cmd, prefs, bash_pref, success_results=None):
         raise IOError('Command failed.')
     return ss
 
+# simulate use of popen with xargs to read the output of a command
+def popenXArgsReadLines(dn, cmd, args, prefs, bash_pref, success_results=None):
+    # os.sysconf() is only available on Unix
+    if hasattr(os, 'sysconf'):
+        maxsize = os.sysconf('SC_ARG_MAX')
+        maxsize -= sum([ len(k) + len(v) + 2 for k, v in os.environ.items() ])
+    else:
+        # assume the Window's limit to CreateProcess()
+        maxsize = 32767
+    maxsize -= sum([ len(k) + 1 for k in cmd ])
+
+    ss = []
+    i, s, a = 0, 0, []
+    while i < len(args):
+        f = (len(a) == 0)
+        if f:
+            # start a new command line
+            a = cmd[:]
+        elif s + len(args[i]) + 1 <= maxsize:
+            f = True
+        if f:
+            # append another argument to the current command line
+            a.append(args[i])
+            s += len(args[i]) + 1
+            i += 1
+        if i == len(args) or not f:
+            ss.extend(popenReadLines(dn, a, prefs, bash_pref, success_results))
+            s, a = 0, []
+    return ss
+
 # utility class to help support Git and Monotone
 # represents a set of files and folders of interest for "git status" or
 # "mtn automate inventory"
@@ -1691,6 +1726,84 @@ class VCSs:
         def getRevision(self, prefs, name, rev):
             return popenReadLines(self.root, [ prefs.getString('mtn_bin'), 'cat', '--quiet', '-r', rev, safeRelativePath(self.root, name, prefs, 'mtn_cygwin') ], prefs, 'mtn_bash')
 
+    # RCS support
+    class Rcs:
+        def __init__(self, root):
+            self.root = root
+
+        def getFileTemplate(self, prefs, name):
+            args = [ prefs.getString('rcs_bin_rlog'), '-L', '-h', safeRelativePath(self.root, name, prefs, 'rcs_cygwin') ]
+            rev = ''
+            for line in strip_eols(popenReadLines(self.root, args, prefs, 'rcs_bash')):
+                if line.startswith('head: '):
+                    rev = line[6:]
+            return [ (name, rev), (name, None) ]
+
+        def getFolderTemplate(self, prefs, names):
+            result = []
+            pwd, isabs = os.path.abspath(os.curdir), False
+
+            r = []
+            for k in names:
+                if os.path.isdir(k):
+                    # the user specified a folder
+                    n = [ k ]
+                    while len(n) > 0:
+                        s = n.pop()
+                        for v in os.listdir(s):
+                            dn = os.path.join(s, v)
+                            if v == 'RCS' and os.path.isdir(dn):
+                                for v in os.listdir(dn):
+                                    if os.path.isfile(os.path.join(dn, v)):
+                                        if v.endswith(',v'):
+                                            v = v[:-2]
+                                        r.append(os.path.join(s, v))
+                            elif v.endswith(',v') and os.path.isfile(dn):
+                                # map to checkout name
+                                r.append(dn[:-2])
+                            elif os.path.isdir(dn) and not os.path.islink(dn):
+                                n.append(dn)
+                else:
+                    # the user specified a file
+                    s = k + ',v'
+                    if os.path.isfile(s):
+                        r.append(k)
+                        continue
+                    s = k.split(os.sep)
+                    s.insert(-1, 'RCS')
+                    # old-style RCS repository
+                    if os.path.isfile(os.sop.join(s)):
+                        r.append(k)
+                        continue
+                    # new-style RCS repository
+                    s[-1] += ',v'
+                    if os.path.isfile(os.sop.join(s)):
+                        r.append(k)
+
+            # build list of interesting files
+            for k in r:
+                isabs |= os.path.isabs(k)
+            cmd = [ prefs.getString('rcs_bin_rlog'), '-L', '-h' ]
+            args = [ safeRelativePath(self.root, k, prefs, 'rcs_cygwin') for k in r ]
+
+            r, k = {}, ''
+            for line in strip_eols(popenXArgsReadLines(self.root, cmd, args, prefs, 'rcs_bash')):
+                if line.startswith('Working file: '):
+                    k = prefs.convertToNativePath(line[14:])
+                    k = os.path.join(self.root, os.path.normpath(k))
+                    if not isabs:
+                        k = relpath(pwd, k)
+                elif line.startswith('head: '):
+                    r[k] = line[6:]
+
+            # sort the results
+            for k in sorted(r.keys()):
+                result.append([ (k, r[k]), (k, None) ])
+            return result
+
+        def getRevision(self, prefs, name, rev):
+            return popenReadLines(self.root, [ prefs.getString('rcs_bin_co'), '-p', '-q', '-r' + rev, safeRelativePath(self.root, name, prefs, 'rcs_cygwin') ], prefs, 'rcs_bash')
+
     # Subversion support
     class Svn:
         def __init__(self, root):
@@ -1865,7 +1978,7 @@ class VCSs:
         else:
             svkroot = os.path.expanduser('~/.svk')
         self.svkconfig = os.path.join(svkroot, 'config')
-        self.leaf_dir_repos = [('.svn', VCSs.Svn), ('CVS', VCSs.Cvs)]
+        self.leaf_dir_repos = [('.svn', VCSs.Svn), ('CVS', VCSs.Cvs), ('RCS', VCSs.Rcs)]
         self.common_dir_repos = [('.git', VCSs.Git), ('.hg', VCSs.Hg), ('.bzr', VCSs.Bzr), ('_darcs', VCSs.Darcs), ('_MTN', VCSs.Mtn)]
 
     # determines which VCS to use for the named file
@@ -1875,6 +1988,13 @@ class VCSs:
             name = os.path.join(path, dir_name)
             if os.path.isdir(name):
                 return repo(path)
+        try:
+            for s in os.listdir(path):
+                if s.endswith(',v') and os.path.isfile(os.path.join(path, s)):
+                    return VCSs.Rcs(path)
+        except OSError:
+            # the user specified an invalid folder name
+            pass
         if self.isSvkManaged(path):
             return VCSs.Svk(path)
         while True:
