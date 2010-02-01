@@ -1755,7 +1755,10 @@ class VCSs:
                             ex = False
                             for v in os.listdir(s):
                                 dn = os.path.join(s, v)
-                                if os.path.isdir(dn):
+                                if v.endswith(',v') and os.path.isfile(dn):
+                                    # map to checkout name
+                                    r.append(dn[:-2])
+                                elif os.path.isdir(dn):
                                     if v == 'RCS':
                                         for v in os.listdir(dn):
                                             if os.path.isfile(os.path.join(dn, v)):
@@ -1764,9 +1767,6 @@ class VCSs:
                                                 r.append(os.path.join(s, v))
                                     elif recurse and not os.path.islink(dn):
                                         n.append(dn)
-                                elif v.endswith(',v') and os.path.isfile(dn):
-                                    # map to checkout name
-                                    r.append(dn[:-2])
                 else:
                     # the user specified a file
                     s = k + ',v'
