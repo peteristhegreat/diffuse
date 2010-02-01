@@ -136,7 +136,7 @@ d = '..\\src\\usr\\share\\gnome\\help\\diffuse'
 for lang in os.listdir(d):
     p = os.path.join(os.path.join(d, lang), 'diffuse.xml')
     if os.path.isfile(p):
-        cmd = [ 'xsltproc', os.path.join(os.environ['DOCBOOK_XSL_HOME'], 'html\\docbook.xsl'), p ]
+        cmd = [ 'xsltproc', '/usr/share/docbook-xsl/html/docbook.xsl', p ]
         info = subprocess.STARTUPINFO()
         info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         info.wShowWindow = subprocess.SW_HIDE

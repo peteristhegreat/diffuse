@@ -20,26 +20,19 @@ Prerequisites:
 3) py2exe
    http://www.py2exe.org/
 
-4) xsltproc
-   http://xmlsoft.org/XSLT/
+4) xsltproc (use Cygwin installer)
 
-   There is no official installer.  Unzip the Windows binary package and
-   manually add its 'bin' directory to the PATH environment variable.
-
-5) DocBook stylesheets
-   http://docbook.sourceforge.net/
-
-   Only the 'docbook-xsl' package is needed.  Unzip the package and set the
-   environment variable DOCBOOK_XSL_HOME to the full path of the root
-   directory.
+5) docbook-xsl (use Cygwin installer)
 
 6) ADD_PATH
-   http://blog.barisione.org/project/#add_path
+   http://blog.barisione.org/projects/#add_path
 
    Unzip the package and set the environment variable ADD_PATH_HOME to the full
    path of the root directory.
 
-7) Inno Setup
+7) GNU gettext (use Cygwin installer; install the development package)
+
+8) Inno Setup
    http://jrsoftware.org/isinfo.php
 
    You may need to manually update the PATH environment variable to run
