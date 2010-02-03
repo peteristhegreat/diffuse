@@ -18,7 +18,7 @@ colour sql_variable 0.02 0.6 0.6
 # whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'
 
-# C++ style comments
+# regular comments
 syntax_pattern normal cpp_comment sql_comment '(#|--)'
 syntax_pattern cpp_comment cpp_comment sql_fixme '\b(TODO|FIXME|XXX)\b'
 syntax_pattern cpp_comment normal sql_comment '(\r\n|\r|\n)$'

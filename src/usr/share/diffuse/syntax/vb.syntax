@@ -17,7 +17,7 @@ colour vb_punctuation 0.5 0.5 0.5
 # whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'
 
-# C++ style comments
+# comments
 syntax_pattern normal comment vb_comment "'"
 syntax_pattern normal comment vb_comment '\brem\b' ignorecase
 syntax_pattern comment normal vb_comment '(\r\n|\r|\n)$'
