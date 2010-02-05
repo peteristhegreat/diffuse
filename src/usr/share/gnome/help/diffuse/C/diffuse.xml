@@ -446,7 +446,7 @@
         The <userinput>-m</userinput> option will cause Diffuse to open
         comparison tabs for each file the version control system indicates has
         uncommitted modifications.  This is convenient for reviewing all
-        changes before commiting or resolving a merge conflict.  If no paths
+        changes before committing or resolving a merge conflict.  If no paths
         are specified the current working directory will be used.  For example,
         view all of your uncommitted modifications with this command line:
       </para>
