@@ -1775,12 +1775,12 @@ class VCSs:
                     s = k.split(os.sep)
                     s.insert(-1, 'RCS')
                     # old-style RCS repository
-                    if os.path.isfile(os.sop.join(s)):
+                    if os.path.isfile(os.sep.join(s)):
                         r.append(k)
                         continue
                     # new-style RCS repository
                     s[-1] += ',v'
-                    if os.path.isfile(os.sop.join(s)):
+                    if os.path.isfile(os.sep.join(s)):
                         r.append(k)
 
             # build list of interesting files
