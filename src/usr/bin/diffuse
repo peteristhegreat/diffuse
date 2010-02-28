@@ -407,8 +407,8 @@ class Resources:
 
         # default colours
         self.colours = {
-            'align' : Colour(1.0, 1.0, 0.0),
-            'char_selection' : Colour(0.7, 0.7, 1.0),
+            'alignment' : Colour(1.0, 1.0, 0.0),
+            'character_selection' : Colour(0.7, 0.7, 1.0),
             'cursor' : Colour(0.0, 0.0, 0.0),
             'difference_1' : Colour(1.0, 0.625, 0.625),
             'difference_2' : Colour(0.85, 0.625, 0.775),
@@ -418,7 +418,7 @@ class Resources:
             'line_number_background' : Colour(0.75, 0.75, 0.75),
             'line_selection' : Colour(0.7, 0.7, 1.0),
             'map_background' : Colour(0.6, 0.6, 0.6),
-            'modified' : Colour(0.5, 1.0, 0.5),
+            'edited' : Colour(0.5, 1.0, 0.5),
             'preedit' : Colour(0.0, 0.0, 0.0),
             'text' : Colour(0.0, 0.0, 0.0),
             'text_background' : Colour(1.0, 1.0, 1.0) }
@@ -427,12 +427,12 @@ class Resources:
 
         # default floats
         self.floats = {
-            'align_alpha' : 1.0,
-            'char_difference_alpha' : 0.4,
-            'char_selection_alpha' : 0.4,
-            'line_difference_alpha' : 0.3,
-            'line_selection_alpha' : 0.4,
-            'modified_alpha' : 0.4 }
+            'alignment_opacity' : 1.0,
+            'character_difference_opacity' : 0.4,
+            'character_selection_opacity' : 0.4,
+            'edited_opacity' : 0.4,
+            'line_difference_opacity' : 0.3,
+            'line_selection_opacity' : 0.4 }
         # list of unknown float resources we have already issued warnings for
         self.unknown_floats = {}
 
@@ -624,7 +624,7 @@ class Resources:
                         elif args[0] in [ 'colour', 'color' ] and len(args) == 5:
                             self.colours[args[1]] = Colour(float(args[2]), float(args[3]), float(args[4]))
                         # eg. set opacity of the line_selection colour
-                        #    float line_selection_alpha 0.4
+                        #    float line_selection_opacity 0.4
                         elif args[0] == 'float' and len(args) == 3:
                             self.floats[args[1]] = float(args[2])
                         # eg. set the help browser
@@ -4104,9 +4104,9 @@ class FileDiffViewer(gtk.Table):
                     preeditwidth = 0
                 # draw background
                 colour = theResources.getColour('text_background')
-                alpha = theResources.getFloat('char_difference_alpha')
+                alpha = theResources.getFloat('character_difference_opacity')
                 if flags != 0:
-                    colour = (diffcolours[flags - 1] * theResources.getFloat('line_difference_alpha')).over(colour)
+                    colour = (diffcolours[flags - 1] * theResources.getFloat('line_difference_opacity')).over(colour)
                 cr.set_source_rgb(colour.red, colour.green, colour.blue)
                 cr.paint()
 
@@ -4129,16 +4129,16 @@ class FileDiffViewer(gtk.Table):
 
                 if has_preedit or (line is not None and line.is_modified):
                     # draw modified
-                    colour = theResources.getColour('modified')
-                    alpha = theResources.getFloat('modified_alpha')
+                    colour = theResources.getColour('edited')
+                    alpha = theResources.getFloat('edited_opacity')
                     preedit_bg_colour = (colour * alpha).over(preedit_bg_colour)
                     cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
                     cr.paint()
                 if self.mode == ALIGN_MODE:
                     # draw align
                     if self.align_pane == f and self.align_line == i:
-                        colour = theResources.getColour('align')
-                        alpha = theResources.getFloat('align_alpha')
+                        colour = theResources.getColour('alignment')
+                        alpha = theResources.getFloat('alignment_opacity')
                         cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
                         cr.paint()
                 elif self.mode == LINE_MODE:
@@ -4149,7 +4149,7 @@ class FileDiffViewer(gtk.Table):
                             start, end = end, start
                         if i >= start and i <= end:
                             colour = theResources.getColour('line_selection')
-                            alpha = theResources.getFloat('line_selection_alpha')
+                            alpha = theResources.getFloat('line_selection_opacity')
                             cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
                             cr.paint()
                 elif self.mode == CHAR_MODE:
@@ -4173,8 +4173,8 @@ class FileDiffViewer(gtk.Table):
                                 layout = self.create_pango_layout(''.join(ss[start_char:end_char]))
                                 layout.set_font_description(self.font)
                                 w = layout.get_size()[0]
-                                colour = theResources.getColour('char_selection')
-                                alpha = theResources.getFloat('char_selection_alpha')
+                                colour = theResources.getColour('character_selection')
+                                alpha = theResources.getFloat('character_selection_opacity')
                                 cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
                                 cr.rectangle(x_start + pixels(x_temp), y_start, pixels(w), h)
                                 cr.fill()
@@ -4407,7 +4407,7 @@ class FileDiffViewer(gtk.Table):
         cr.set_source_rgb(colour.red, colour.green, colour.blue)
         cr.paint()
         bg_colour = theResources.getColour('text_background')
-        modified_colour = theResources.getColour('modified')
+        modified_colour = theResources.getColour('edited')
 
         # get scroll position and total size
         r = widget.get_allocation()
@@ -4459,7 +4459,7 @@ class FileDiffViewer(gtk.Table):
                 yh -= 1
             if ymin + yh > y:
                 colour = theResources.getColour('line_selection')
-                alpha = theResources.getFloat('line_selection_alpha')
+                alpha = theResources.getFloat('line_selection_opacity')
                 cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
                 cr.rectangle(0.5, ymin + 0.5, w - 1, yh - 1)
                 cr.fill()

@@ -1511,14 +1511,14 @@
         <variablelist>
 
           <varlistentry>
-            <term><userinput>align</userinput></term>
+            <term><userinput>alignment</userinput></term>
             <listitem>
               <para>colour used to indicate a line picked for manual alignment</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>char_selection</userinput></term>
+            <term><userinput>character_selection</userinput></term>
             <listitem>
               <para>colour used to indicate selected characters</para>
             </listitem>
@@ -1549,6 +1549,13 @@
             <term><userinput>difference_3</userinput></term>
             <listitem>
               <para>colour used to identify differences between the third pair of files</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>edited</userinput></term>
+            <listitem>
+              <para>colour used to indicate edited lines</para>
             </listitem>
           </varlistentry>
 
@@ -1584,13 +1591,6 @@
             <term><userinput>map_background</userinput></term>
             <listitem>
               <para>background colour for the map area</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>modified</userinput></term>
-            <listitem>
-              <para>colour used to indicate modified lines</para>
             </listitem>
           </varlistentry>
 
@@ -1643,23 +1643,34 @@
         <variablelist>
 
           <varlistentry>
-            <term><userinput>align_alpha</userinput></term>
+            <term><userinput>alignment_opacity</userinput></term>
             <listitem>
-              <para>alpha value used when compositing the manual alignment colour</para>
+              <para>opacity used when compositing the manual alignment colour</para>
+              <para>Defaults: 1</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>char_difference_alpha</userinput></term>
+            <term><userinput>character_difference_opacity</userinput></term>
             <listitem>
-              <para>alpha value used when compositing character difference colours</para>
+              <para>opacity used when compositing character difference colours</para>
+              <para>Defaults: 0.4</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>char_selection_alpha</userinput></term>
+            <term><userinput>character_selection_opacity</userinput></term>
             <listitem>
-              <para>alpha value used when compositing the character selection colour</para>
+              <para>opacity used when compositing the character selection colour</para>
+              <para>Defaults: 0.4</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>edited_opacity</userinput></term>
+            <listitem>
+              <para>opacity used when compositing the edited line colour</para>
+              <para>Defaults: 0.4</para>
             </listitem>
           </varlistentry>
 
@@ -1667,20 +1678,15 @@
             <term><userinput>line_difference_alpha</userinput></term>
             <listitem>
               <para>alpha value used when compositing line difference colours</para>
+              <para>Defaults: 0.3</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>line_selection_alpha</userinput></term>
+            <term><userinput>line_selection_opacity</userinput></term>
             <listitem>
-              <para>alpha value used when compositing the line selection colour</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>modified_alpha</userinput></term>
-            <listitem>
-              <para>alpha value used when compositing the modified line colour</para>
+              <para>opacity used when compositing the line selection colour</para>
+              <para>Defaults: 0.4</para>
             </listitem>
           </varlistentry>
 
@@ -1743,13 +1749,14 @@
           <term><userinput>syntax_pattern <replaceable>name</replaceable> <replaceable>initial_state</replaceable> <replaceable>final_state</replaceable> <replaceable>tag</replaceable> <replaceable>pattern</replaceable> <optional>ignorecase</optional></userinput></term>
           <listitem>
             <para>
-              Adds a pattern to the previously declared syntax style.  The
-              pattern will only be used to match characters if the state
-              machine is in the state
-              <replaceable>initial_state</replaceable>.  The state machine
-              will transition to <replaceable>final_state</replaceable> if
-              the pattern defined by <replaceable>pattern</replaceable> is
-              matched.  Case insensitive pattern matching will be used if
+              Adds a pattern to the previously declared syntax style.  Patterns
+              are tried one at a time in the order they were declared until the
+              first match is found.  A pattern will only be used to match
+              characters if the state machine is in the state
+              <replaceable>initial_state</replaceable>.  The state machine will
+              transition to <replaceable>final_state</replaceable> if the
+              pattern defined by <replaceable>pattern</replaceable> is matched.
+              Case insensitive pattern matching will be used if
               <userinput>ignorecase</userinput> is specified.  All characters
               matched by the pattern will be tagged as
               <replaceable>tag</replaceable> for highlighting.

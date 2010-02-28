@@ -1184,12 +1184,12 @@ Used Colour Resources
 .PP
 The following colour resources are used by Diffuse:
 .PP
-\fBalign\fR
+\fBalignment\fR
 .RS 4
 colour used to indicate a line picked for manual alignment
 .RE
 .PP
-\fBchar_selection\fR
+\fBcharacter_selection\fR
 .RS 4
 colour used to indicate selected characters
 .RE
@@ -1212,6 +1212,11 @@ colour used to identify differences between the second pair of files
 \fBdifference_3\fR
 .RS 4
 colour used to identify differences between the third pair of files
+.RE
+.PP
+\fBedited\fR
+.RS 4
+colour used to indicate edited lines
 .RE
 .PP
 \fBhatch\fR
@@ -1237,11 +1242,6 @@ colour used to indicate selected lines
 \fBmap_background\fR
 .RS 4
 background colour for the map area
-.RE
-.PP
-\fBmodified\fR
-.RS 4
-colour used to indicate modified lines
 .RE
 .PP
 \fBpreedit\fR
@@ -1278,34 +1278,46 @@ Used Floating Point Resources
 .PP
 The following floating point resources are used by Diffuse:
 .PP
-\fBalign_alpha\fR
+\fBalignment_opacity\fR
 .RS 4
-alpha value used when compositing the manual alignment colour
+opacity used when compositing the manual alignment colour
+.sp
+Defaults: 1
 .RE
 .PP
-\fBchar_difference_alpha\fR
+\fBcharacter_difference_opacity\fR
 .RS 4
-alpha value used when compositing character difference colours
+opacity used when compositing character difference colours
+.sp
+Defaults: 0\&.4
 .RE
 .PP
-\fBchar_selection_alpha\fR
+\fBcharacter_selection_opacity\fR
 .RS 4
-alpha value used when compositing the character selection colour
+opacity used when compositing the character selection colour
+.sp
+Defaults: 0\&.4
+.RE
+.PP
+\fBedited_opacity\fR
+.RS 4
+opacity used when compositing the edited line colour
+.sp
+Defaults: 0\&.4
 .RE
 .PP
 \fBline_difference_alpha\fR
 .RS 4
 alpha value used when compositing line difference colours
+.sp
+Defaults: 0\&.3
 .RE
 .PP
-\fBline_selection_alpha\fR
+\fBline_selection_opacity\fR
 .RS 4
-alpha value used when compositing the line selection colour
-.RE
-.PP
-\fBmodified_alpha\fR
-.RS 4
-alpha value used when compositing the modified line colour
+opacity used when compositing the line selection colour
+.sp
+Defaults: 0\&.4
 .RE
 .RE
 .SS "Syntax Highlighting"
@@ -1348,7 +1360,7 @@ can be removed by omitting
 .PP
 \fBsyntax_pattern \fR\fB\fIname\fR\fR\fB \fR\fB\fIinitial_state\fR\fR\fB \fR\fB\fIfinal_state\fR\fR\fB \fR\fB\fItag\fR\fR\fB \fR\fB\fIpattern\fR\fR\fB \fR\fB[ignorecase]\fR
 .RS 4
-Adds a pattern to the previously declared syntax style\&. The pattern will only be used to match characters if the state machine is in the state
+Adds a pattern to the previously declared syntax style\&. Patterns are tried one at a time in the order they were declared until the first match is found\&. A pattern will only be used to match characters if the state machine is in the state
 \fIinitial_state\fR\&. The state machine will transition to
 \fIfinal_state\fR
 if the pattern defined by

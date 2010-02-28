@@ -1,3 +1,4 @@
+- renamed some resources to more user friendly names
 - RCS support
 - added Henri Menke's Spanish translation
 - "#!" interpreter lines are now used to select proper highlighting rules
