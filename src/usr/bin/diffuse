@@ -2017,6 +2017,14 @@ class VCSs:
 
 theVCSs = VCSs()
 
+# utility method to step advance an adjustment
+def step_adjustment(adj, delta):
+    v = adj.get_value() + delta
+    # clamp to the allowed range
+    v = max(v, int(adj.lower))
+    v = min(v, int(adj.upper - adj.page_size))
+    adj.set_value(v)
+
 # This is a replacement for gtk.ScrolledWindow as it forced expose events to be
 # handled immediately after changing the viewport position.  This could cause
 # the application to become unresponsive for a while as it processed a large
@@ -2091,14 +2099,14 @@ class ScrolledWindow(gtk.Table):
 
     # update the vertical adjustment when the mouse's scroll wheel is used
     def scroll_cb(self, widget, event):
-        vadj = self.get_vadjustment()
-        v = vadj.get_value()
         delta = 100
-        if event.direction == gtk.gdk.SCROLL_UP:
+        if event.direction in [ gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_LEFT ]:
             delta = -delta
-        v = max(v + delta, int(vadj.lower))
-        v = min(v, int(vadj.upper - vadj.page_size))
-        vadj.set_value(v)
+        # find the coresponding adjustment
+        if event.direction in [ gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_DOWN ]:
+            step_adjustment(self.get_vadjustment(), delta)
+        elif event.direction in [ gtk.gdk.SCROLL_LEFT, gtk.gdk.SCROLL_RIGHT ]:
+            step_adjustment(self.get_hadjustment(), delta)
 
     def value_changed_cb(self, widget):
         old_x, old_y = self.position
@@ -4339,14 +4347,11 @@ class FileDiffViewer(gtk.Table):
 
     # callback to handle mouse scrollwheel events
     def map_scroll_cb(self, widget, event):
-        vadj = self.vadj
-        v = vadj.get_value()
-        delta = 100
-        if event.direction == gtk.gdk.SCROLL_UP:
-            delta = -delta
-        v = max(v + delta, int(vadj.lower))
-        v = min(v, int(vadj.upper - vadj.page_size))
-        vadj.set_value(v)
+        if event.direction in [ gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_DOWN ]:
+            delta = 100
+            if event.direction == gtk.gdk.SCROLL_UP:
+                delta = -delta
+            step_adjustment(self.vadj, delta)
 
     # redraws the overview map when a portion is exposed
     def map_expose_cb(self, widget, event):
