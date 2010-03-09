@@ -2100,12 +2100,13 @@ class ScrolledWindow(gtk.Table):
     # update the vertical adjustment when the mouse's scroll wheel is used
     def scroll_cb(self, widget, event):
         delta = 100
-        if event.direction in [ gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_LEFT ]:
-            delta = -delta
-        # find the coresponding adjustment
-        if event.direction in [ gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_DOWN ]:
+        if event.direction == gtk.gdk.SCROLL_UP:
+            step_adjustment(self.get_vadjustment(), -delta)
+        elif event.direction == gtk.gdk.SCROLL_DOWN:
             step_adjustment(self.get_vadjustment(), delta)
-        elif event.direction in [ gtk.gdk.SCROLL_LEFT, gtk.gdk.SCROLL_RIGHT ]:
+        elif event.direction == gtk.gdk.SCROLL_LEFT:
+            step_adjustment(self.get_hadjustment(), -delta)
+        elif event.direction == gtk.gdk.SCROLL_RIGHT:
             step_adjustment(self.get_hadjustment(), delta)
 
     def value_changed_cb(self, widget):
@@ -4347,10 +4348,10 @@ class FileDiffViewer(gtk.Table):
 
     # callback to handle mouse scrollwheel events
     def map_scroll_cb(self, widget, event):
-        if event.direction in [ gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_DOWN ]:
-            delta = 100
-            if event.direction == gtk.gdk.SCROLL_UP:
-                delta = -delta
+        delta = 100
+        if event.direction == gtk.gdk.SCROLL_UP:
+            step_adjustment(self.vadj, -delta)
+        elif event.direction == gtk.gdk.SCROLL_DOWN:
             step_adjustment(self.vadj, delta)
 
     # redraws the overview map when a portion is exposed
