@@ -3108,6 +3108,59 @@ class FileDiffViewer(gtk.Table):
         self.map_cache = None
         self.map.queue_draw()
 
+    # remove a line
+    def removeSpacerLines(self, i, n, skip=-1):
+        npanes, removed = len(self.panes), []
+        for j in range(i, i + n):
+            for f in range(npanes):
+                line = self.getLine(f, j)
+                if line is not None:
+                    if line.line_number > 0 or (f != skip and line.getText() is not None):
+                        break
+            else:
+                # remove line
+                for f in range(npanes):
+                    line = self.getLine(f, j)
+                    if line is not None:
+                        # create undo to record any edits to the line before
+                        # removing it
+                        self.updateLineText(f, j, False, None)
+                        # remove the line so it doesn't persist as a spacer
+                        self.instanceLine(f, j, True)
+                removed.append(j)
+
+        nremoved = len(removed)
+        if nremoved > 0:
+            # update blocks
+            bi, bii, blocks = 0, 0, self.blocks[:]
+            for j in removed:
+                while bii + blocks[bi] < j:
+                    bii += blocks[bi]
+                    bi += 1
+                if blocks[bi] == 1:
+                    del blocks[bi]
+                else:
+                    blocks[bi] -= 1
+                bii += 1
+            self.updateBlocks(blocks)
+
+            self.alignmentChange(False)
+            removed.reverse()
+            for j in removed:
+                for f in range(npanes):
+                    self.insertNull(f, j, True)
+            # FIXME: we should be able to do something more intelligent here...
+            # the syntax cache will become invalidated.... we don't really need
+            # to do that...
+            self.invalidateLineMatching(i, n, n - nremoved)
+            self.alignmentChange(True)
+
+            # queue redraws
+            self.updateSize(False)
+            self.map_cache = None
+            self.map.queue_draw()
+        return nremoved
+
     # Undo for replacing the lines for a single pane with a new set
     class ReplaceLinesUndo:
         def __init__(self, f, lines, new_lines, max_num, new_max_num):
@@ -3363,12 +3416,13 @@ class FileDiffViewer(gtk.Table):
         # find the extents of the current selection
         f = self.current_pane
         pane = self.panes[f]
+        nlines = len(pane.lines)
         line0, line1 = self.selection_line, self.current_line
         if self.mode == LINE_MODE:
             col0, col1 = 0, 0
             if line1 < line0:
                 line0, line1 = line1, line0
-            if line1 < len(pane.lines):
+            if line1 < nlines:
                 line1 += 1
         else:
             col0, col1 = self.selection_char, self.current_char
@@ -3402,7 +3456,7 @@ class FileDiffViewer(gtk.Table):
             # the replacement text does not end with a new line character
             # we need more text to finish the line, search forward for some
             # more text
-            while line1 < len(pane.lines):
+            while line1 < nlines:
                 s = self.getLineText(f, line1)
                 line1 += 1
                 if s is not None:
@@ -3416,20 +3470,25 @@ class FileDiffViewer(gtk.Table):
             ss.append(s[col1:])
             line1 += 1
         # insert blank lines for more space if needed
-        n_have = line1 - line0
+        npanes = len(self.panes)
+
+        # remove blank rows if possible
         n_need = len(ss)
-        if n_need > n_have:
-            self.insertLines(line1, n_need - n_have)
+        n_have = line1 - line0
+        n_have -= self.removeSpacerLines(line0, n_have, f)
+        delta = n_have - n_need
+        if delta < 0:
+            self.insertLines(line0 + n_have, -delta)
+            delta = 0
         # update the text
         for i, s in enumerate(ss):
             self.updateText(f, line0 + i, s)
         # clear all unused lines
-        if n_have > n_need:
-            for i in range(n_need, n_have):
-                self.updateText(f, line0 + i, None)
+        for i in range(delta):
+            self.updateText(f, line0 + n_need + i, None)
         # update selection
         if self.mode == LINE_MODE:
-            self.setCurrentLine(f, line0 + max(n_need, n_have) - 1, line0)
+            self.setCurrentLine(f, line0 + max(n_need, 1) - 1, line0)
         else:
             self.setCurrentChar(cur_line, lastcol)
         self.recordEditMode()
@@ -3518,8 +3577,12 @@ class FileDiffViewer(gtk.Table):
         self.updateAlignment(start, end - start, finallines)
         self.updateBlocks(pre_blocks)
 
+        i = len(lines_s[0][0][0])
+        self.removeSpacerLines(start + i, len(finallines[0]) - i)
+        i -= min(self.removeSpacerLines(start, i), i - 1)
+
         # update selection
-        self.setCurrentLine(self.current_pane, start + len(lines_s[0][0][0]))
+        self.setCurrentLine(self.current_pane, start + i)
         self.recordEditMode()
 
     # Undo for changing the selection mode and range
@@ -4900,7 +4963,14 @@ class FileDiffViewer(gtk.Table):
     # callback used when receiving clipboard text
     def receive_clipboard_text_cb(self, clipboard, text, data):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
+            # there is no guarantee this will be called before finishing
+            # gtk.clipboard_get so we may need to create our own undo block
+            needs_block = (self.undoblock is None)
+            if needs_block:
+                self.openUndoBlock()
             self.replaceText(self.prefs.convertToUnicode([ text ])[0][0])
+            if needs_block:
+                self.closeUndoBlock()
 
     # 'paste' action
     def paste(self):
@@ -5508,6 +5578,12 @@ class FileDiffViewer(gtk.Table):
             self.setFormat(f_dst, getFormat(ss))
         for i, s in enumerate(ss):
             self.updateText(f_dst, start + i, convert_to_format(s, pane.format))
+        n = len(ss)
+        delta = min(self.removeSpacerLines(start, n), n - 1)
+        if self.selection_line > start:
+            self.selection_line -= delta
+        if self.current_line > start:
+            self.current_line -= delta
         self.recordEditMode()
 
     # callback for merge lines menu item
