@@ -4476,7 +4476,7 @@ class FileDiffViewer(gtk.Table):
         cr.set_source_rgb(colour.red, colour.green, colour.blue)
         cr.paint()
         bg_colour = theResources.getColour('text_background')
-        modified_colour = theResources.getColour('edited')
+        edited_colour = theResources.getColour('edited')
 
         # get scroll position and total size
         r = widget.get_allocation()
@@ -4500,7 +4500,7 @@ class FileDiffViewer(gtk.Table):
                         colour = bg_colour
                     elif p == 1 and flag & 7:
                         if flag & 4:
-                            colour = modified_colour
+                            colour = edited_colour
                         else:
                             colour = diffcolours[(flag & 3) - 1]
                     else:
