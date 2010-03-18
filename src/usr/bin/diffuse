@@ -5155,7 +5155,6 @@ class FileDiffViewer(gtk.Table):
             end = start + sum(b)
             if end > start:
                 end -= 1
-            self.setCurrentLine(f, end, start)
             removeNullLines(middle, lines)
 
             for s, line in zip(space, lines):
@@ -5167,6 +5166,9 @@ class FileDiffViewer(gtk.Table):
             pre.extend(middle)
             pre.extend(post)
             self.updateBlocks(pre)
+            self.removeSpacerLines(end, sum(middle))
+            end -= self.removeSpacerLines(start, sum(b))
+            self.setCurrentLine(f, end, start)
         self.recordEditMode()
 
     # returns True if line 'i' in pane 'f' has an edit or is different from its
