@@ -1329,16 +1329,20 @@ def popenXArgsReadLines(dn, cmd, args, prefs, bash_pref, success_results=None):
 # "mtn automate inventory"
 class _VcsFolderSet:
     def __init__(self, names):
-        self.folders = [ os.path.abspath(name) for name in names ]
+        self.folders = f = []
+        for name in names:
+            name = os.path.abspath(name)
+            # ensure all names end with os.sep
+            if not name.endswith(os.sep):
+                name += os.sep
+            f.append(name)
 
     # returns True if the given abspath is a file that should be included in
     # the interesting file subset
     def contains(self, abspath):
+        if not abspath.endswith(os.sep):
+            abspath += os.sep
         for f in self.folders:
-            if abspath == f:
-                return True
-            if not f.endswith(os.sep):
-                f += os.sep
             if abspath.startswith(f):
                 return True
         return False
@@ -1881,7 +1885,7 @@ class VCSs:
                 f = open(self.svkconfig, 'r')
                 ss = strip_eols(readlines(f))
                 f.close()
-                projs, sep = {}, os.sep
+                projs, sep = [], os.sep
                 # find the separator character
                 for s in ss:
                     if s.startswith('  sep: ') and len(s) > 7:
@@ -1919,16 +1923,11 @@ class VCSs:
                                 key = ''.join(tt).replace(sep, os.sep)
                                 if isWindows():
                                     key = key.upper()
-                                projs[key] = None
+                                projs.append(key)
                         break
                 # check if the file belongs to one of the project directories
-                while True:
-                    if projs.has_key(name):
-                        return True
-                    newname = os.path.dirname(name)
-                    if newname == name:
-                        break
-                    name = newname
+                if _VcsFolderSet(projs).contains(name):
+                    return True
             except IOError:
                 logError(_('Error parsing %s.') % (config, ))
         return False
@@ -1998,6 +1997,11 @@ class VCSs:
         except OSError:
             # the user specified an invalid folder name
             pass
+        # $GIT_WORKING_TREE takes precedence over .git folders
+        if os.environ.has_key('GIT_DIR') and os.environ.has_key('GIT_WORKING_TREE'):
+            d = os.path.abspath(os.environ['GIT_WORKING_TREE'])
+            if _VcsFolderSet([d]).contains(path):
+                return VCSs.Git(d)
         if self.isSvkManaged(path):
             return VCSs.Svk(path)
         while True:
