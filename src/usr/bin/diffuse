@@ -1413,7 +1413,7 @@ class VCSs:
                             k = os.path.join(self.root, k)
                             if not isabs:
                                 k = relpath(pwd, k)
-                            modified[k] = [ (k, None) ]
+                            modified[k] = [ (k, prefs.getString('bzr_default_revision')), (k, None) ]
                     elif s[0] == 'R':
                         # renamed file
                         k = k.split(' => ')
@@ -1475,7 +1475,7 @@ class VCSs:
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'CM':
                     # modified file or merge conflict
-                    result.append( [ (k, None) ] )
+                    result.append( [ (k, 'HEAD'), (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1519,7 +1519,7 @@ class VCSs:
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'M':
                     # modified file or merge conflict
-                    result.append( [ (k, None) ] )
+                    result.append( [ (k, prefs.getString('darcs_default_revision')), (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1581,7 +1581,7 @@ class VCSs:
                     if fs.contains(k):
                         if not isabs:
                             k = relpath(pwd, k)
-                        modified[k] = [ (k, None) ]
+                        modified[k] = [ (k, prefs.getString('git_default_revision')), (k, None) ]
                 elif s.startswith('#\trenamed:'):
                     # renamed file
                     keys = s[10:].split(' -> ')
@@ -1643,7 +1643,7 @@ class VCSs:
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'M':
                     # modified file or merge conflict
-                    result.append( [ (k, None) ] )
+                    result.append( [ (k, prefs.getString('hg_default_revision')), (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1863,7 +1863,7 @@ class VCSs:
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'CM':
                     # modified file or merge conflict
-                    result.append( [ (k, None) ] )
+                    result.append( [ (k, prefs.getString('svn_default_revision')), (k, None) ] )
                 elif v == 'R':
                     # renamed file
                     result.append( [ (k + '@BASE', prefs.getString('svn_default_revision')), (None, None) ] )
@@ -1967,7 +1967,7 @@ class VCSs:
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'CMR':
                     # modified file, merge conflict, or renamed file
-                    result.append( [ (k, None) ] )
+                    result.append( [ (k, prefs.getString('svk_default_revision')), (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1984,7 +1984,7 @@ class VCSs:
         self.common_dir_repos = [('.git', VCSs.Git), ('.hg', VCSs.Hg), ('.bzr', VCSs.Bzr), ('_darcs', VCSs.Darcs), ('_MTN', VCSs.Mtn)]
 
     # determines which VCS to use for the named file
-    def findByFolder(self, path):
+    def findByFolder(self, path, prefs):
         path = os.path.abspath(path)
         for dir_name, repo in self.leaf_dir_repos:
             name = os.path.join(path, dir_name)
@@ -1997,11 +1997,30 @@ class VCSs:
         except OSError:
             # the user specified an invalid folder name
             pass
-        # $GIT_WORK_TREE takes precedence over .git folders
-        if os.environ.has_key('GIT_DIR') and os.environ.has_key('GIT_WORK_TREE'):
-            d = os.path.abspath(os.environ['GIT_WORK_TREE'])
-            if _VcsFolderSet([d]).contains(path):
+        # $GIT_DIR takes precedence over .git folders
+        if os.environ.has_key('GIT_DIR'):
+            try:
+                d = path
+                ss = popenReadLines(d, [ prefs.getString('git_bin'), 'rev-parse', '--show-prefix' ], prefs, 'git_bash')
+                if len(ss) > 0:
+                    # be careful to handle trailing slashes
+                    d = d.split(os.sep)
+                    if d[-1] != '':
+                        d.append('')
+                    ss = strip_eol(ss[0]).split('/')
+                    if ss[-1] != '':
+                        ss.append('')
+                    n = len(ss)
+                    if n <= len(d):
+                        del d[-n:]
+                    if len(d) == 0:
+                        d = os.curdir
+                    else:
+                        d = os.sep.join(d)
                 return VCSs.Git(d)
+            except (IOError, OSError, WindowsError):
+                # working tree not found
+                pass
         if self.isSvkManaged(path):
             return VCSs.Svk(path)
         while True:
@@ -2015,9 +2034,9 @@ class VCSs:
             path = newpath
 
     # determines which VCS to use for the named file
-    def findByFilename(self, name):
+    def findByFilename(self, name, prefs):
         if name is not None:
-            return self.findByFolder(os.path.dirname(name))
+            return self.findByFolder(os.path.dirname(name), prefs)
 
 theVCSs = VCSs()
 
@@ -6249,7 +6268,7 @@ class Diffuse(gtk.Window):
                 revision = dialog.get_revision().strip()
                 if revision != '':
                     rev = revision
-                    vcs = theVCSs.findByFilename(name)
+                    vcs = theVCSs.findByFilename(name, self.prefs)
                 info = FileInfo(name, dialog.get_encoding(), vcs, rev)
                 dialog.destroy()
                 if end:
@@ -6916,7 +6935,7 @@ class Diffuse(gtk.Window):
             # determine which other files to compare it with
             name, data = items[0]
             rev, encoding = data[0]
-            vcs = theVCSs.findByFilename(name)
+            vcs = theVCSs.findByFilename(name, self.prefs)
             if vcs is None:
                 # shift the existing file so it will be in the second pane
                 specs.append(FileInfo())
@@ -6937,7 +6956,7 @@ class Diffuse(gtk.Window):
                     if rev is None:
                         vcs = None
                     else:
-                        vcs = theVCSs.findByFilename(name)
+                        vcs = theVCSs.findByFilename(name, self.prefs)
                     specs.append(FileInfo(name, encoding, vcs, rev))
 
         # open a new viewer
@@ -6972,11 +6991,14 @@ class Diffuse(gtk.Window):
             dst[1] = r[-1][1]
             dst[2].append(s)
         for dn, encoding, names in new_items:
-            vcs = theVCSs.findByFolder(dn)
+            vcs = theVCSs.findByFolder(dn, self.prefs)
             if vcs is not None:
                 try:
-                    for template in vcs.getFolderTemplate(self.prefs, names):
-                        self.newLoadedFileDiffViewer([ (name, [ (rev, encoding) ]) for name, rev in template ])
+                    for specs in vcs.getFolderTemplate(self.prefs, names):
+                        viewer = self.newFileDiffViewer(len(specs))
+                        for i, spec in enumerate(specs):
+                            name, rev = spec
+                            viewer.load(i, FileInfo(name, encoding, vcs, rev))
                 except (IOError, OSError, WindowsError):
                     dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving modifications for %s.') % (dn, ))
                     dialog.run()
