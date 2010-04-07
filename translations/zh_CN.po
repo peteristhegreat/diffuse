@@ -6,7 +6,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Diffuse svn 213\n"
+"Project-Id-Version: Diffuse svn 244\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-10-08 08:20-0400\n"
 "PO-Revision-Date: 2009-10-07 11:19+0800\n"
@@ -16,574 +16,582 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/usr/bin/diffuse:6548
+#: usr/bin/diffuse:857
+msgid "\"co\" command"
+msgstr "\"co\"命令"
+
+#: usr/bin/diffuse:858
+msgid "\"rlog\" command"
+msgstr "\"rlog\"命令"
+
+#: usr/bin/diffuse:6775
 #, python-format
 msgid "%(title)s Pane %(pane)d"
 msgstr "%(title)s窗格%(pane)d"
 
-#: ../src/usr/bin/diffuse:6102
+#: usr/bin/diffuse:6323
 #, python-format
 msgid "A file named %s already exists.  Do you want to overwrite it?"
 msgstr "已存在名为%s的文件，您希望覆盖它吗？"
 
-#: ../src/usr/bin/diffuse:3679
+#: usr/bin/diffuse:3921
 msgid "Align with Selection"
 msgstr "向选中的对齐"
 
-#: ../src/usr/bin/diffuse:774
+#: usr/bin/diffuse:801
 msgid "Alignment"
 msgstr "对齐"
 
-#: ../src/usr/bin/diffuse:791
+#: usr/bin/diffuse:818
 msgid "Always show the tab bar"
 msgstr "总是显示标签栏"
 
-#: ../src/usr/bin/diffuse:5544
+#: usr/bin/diffuse:5798
 msgid "Auto Detect"
 msgstr "自动探测"
 
-#: ../src/usr/bin/diffuse:786
+#: usr/bin/diffuse:813
 msgid "Auto indent"
 msgstr "自动缩进"
 
-#: ../src/usr/bin/diffuse:6343
+#: usr/bin/diffuse:6565
 msgid "C_lear Edits"
 msgstr "取消编辑(L)"
 
-#: ../src/usr/bin/diffuse:6792
+#: usr/bin/diffuse:7030
 msgid "Choose Folder With Modified Files"
 msgstr "选择更改过的文件夹"
 
-#: ../src/usr/bin/diffuse:3688 ../src/usr/bin/diffuse:6438
+#: usr/bin/diffuse:3930 usr/bin/diffuse:6665
 msgid "Clear Edits"
 msgstr "取消编辑"
 
-#: ../src/usr/bin/diffuse:5657
+#: usr/bin/diffuse:5909
 msgid "Close Tab"
 msgstr "关闭标签"
 
-#: ../src/usr/bin/diffuse:6557
+#: usr/bin/diffuse:6784
 msgid "Close _Without Saving"
 msgstr "不保存而关闭"
 
-#: ../src/usr/bin/diffuse:5522
+#: usr/bin/diffuse:5776
 #, python-format
 msgid "Closing this tab will quit %s."
 msgstr "关闭此标签将会退出%s"
 
-#: ../src/usr/bin/diffuse:5806
+#: usr/bin/diffuse:6027
 #, python-format
 msgid "Column %d"
 msgstr "%d列"
 
-#: ../src/usr/bin/diffuse:827
+#: usr/bin/diffuse:860
 msgid "Command"
 msgstr "命令"
 
-#: ../src/usr/bin/diffuse:6387
+#: usr/bin/diffuse:6609
 msgid "Convert Leading Spaces To _Tabs"
 msgstr "转换开头的空格为制表符(_T)"
 
-#: ../src/usr/bin/diffuse:6386
+#: usr/bin/diffuse:6608
 msgid "Convert Tabs To _Spaces"
 msgstr "转换制表符为空格(_S)"
 
-#: ../src/usr/bin/diffuse:6394
+#: usr/bin/diffuse:6616
 msgid "Convert To Uni_x Format"
 msgstr "转换为Unix格式(_X)"
 
-#: ../src/usr/bin/diffuse:6392
+#: usr/bin/diffuse:6614
 msgid "Convert To _DOS Format"
 msgstr "转换为DOS格式(_D)"
 
-#: ../src/usr/bin/diffuse:6380
+#: usr/bin/diffuse:6602
 msgid "Convert To _Lower Case"
 msgstr "转换成小写"
 
-#: ../src/usr/bin/diffuse:6393
+#: usr/bin/diffuse:6615
 msgid "Convert To _Mac Format"
 msgstr "转换为Mac格式(_M)"
 
-#: ../src/usr/bin/diffuse:6379
+#: usr/bin/diffuse:6601
 msgid "Convert To _Upper Case"
 msgstr "转换成大写"
 
-#: ../src/usr/bin/diffuse:3684 ../src/usr/bin/diffuse:6436
+#: usr/bin/diffuse:3926 usr/bin/diffuse:6663
 msgid "Copy"
 msgstr "复制"
 
-#: ../src/usr/bin/diffuse:6428
+#: usr/bin/diffuse:6655
 msgid "Copy Left Into Selection"
 msgstr "复制左边内容到选择之处"
 
-#: ../src/usr/bin/diffuse:6400
+#: usr/bin/diffuse:6622
 msgid "Copy Left _Into Selection"
 msgstr "复制左边内容到选择之处(_L)"
 
-#: ../src/usr/bin/diffuse:6401
+#: usr/bin/diffuse:6623
 msgid "Copy Right I_nto Selection"
 msgstr "复制右边内容到选择之处(_L)"
 
-#: ../src/usr/bin/diffuse:6429
+#: usr/bin/diffuse:6656
 msgid "Copy Right Into Selection"
 msgstr "复制右边内容到选择之处"
 
-#: ../src/usr/bin/diffuse:6427
+#: usr/bin/diffuse:6654
 msgid "Copy Selection Left"
 msgstr "复制选择之处到左边"
 
-#: ../src/usr/bin/diffuse:6426
+#: usr/bin/diffuse:6653
 msgid "Copy Selection Right"
 msgstr "复制选择之处到右边"
 
-#: ../src/usr/bin/diffuse:6398
+#: usr/bin/diffuse:6620
 msgid "Copy Selection _Left"
 msgstr "复制选择之处到左边(_L)"
 
-#: ../src/usr/bin/diffuse:6397
+#: usr/bin/diffuse:6619
 msgid "Copy Selection _Right"
 msgstr "复制选择之处到右边(_R)"
 
-#: ../src/usr/bin/diffuse:67
-msgid "Copyright © 2006-2009 Derrick Moser"
-msgstr "版权所有 © 2006-2009 Derrick Moser"
+#: usr/bin/diffuse:67
+msgid "Copyright © 2006-2010 Derrick Moser"
+msgstr "版权所有 © 2006-2010 Derrick Moser"
 
-#: ../src/usr/bin/diffuse:6338
+#: usr/bin/diffuse:6560
 msgid "Cu_t"
 msgstr "剪切(_T)"
 
-#: ../src/usr/bin/diffuse:3683 ../src/usr/bin/diffuse:6435
+#: usr/bin/diffuse:3925 usr/bin/diffuse:6662
 msgid "Cut"
 msgstr "剪切"
 
-#: ../src/usr/bin/diffuse:810
+#: usr/bin/diffuse:837
 msgid "Cygdrive prefix"
 msgstr ""
 
-#: ../src/usr/bin/diffuse:807
+#: usr/bin/diffuse:834
 msgid "Cygwin"
 msgstr ""
 
-#: ../src/usr/bin/diffuse:6390
+#: usr/bin/diffuse:6612
 msgid "De_crease Indenting"
 msgstr "减少缩进"
 
-#: ../src/usr/bin/diffuse:790
+#: usr/bin/diffuse:817
 msgid "Default panes"
 msgstr "默认窗格"
 
-#: ../src/usr/bin/diffuse:828
+#: usr/bin/diffuse:861
 msgid "Default revision"
-msgstr "默认版本"
+msgstr "默认修正版本"
 
-#: ../src/usr/bin/diffuse:5617
+#: usr/bin/diffuse:5871
 msgid "Derrick Moser <derrick_moser@yahoo.com>"
 msgstr ""
 
-#: ../src/usr/bin/diffuse:5614
+#: usr/bin/diffuse:5868
 msgid "Diffuse is a graphical tool for merging and comparing text files."
 msgstr "Diffuse是一个合并和比较文本文件的图形化程序。"
 
-#: ../src/usr/bin/diffuse:762
+#: usr/bin/diffuse:789
 msgid "Display"
 msgstr "显示"
 
-#: ../src/usr/bin/diffuse:782
+#: usr/bin/diffuse:809
 msgid "Editor"
 msgstr "编辑器"
 
-#: ../src/usr/bin/diffuse:5534
+#: usr/bin/diffuse:5788
 msgid "Encoding: "
 msgstr "编码："
 
-#: ../src/usr/bin/diffuse:6148
+#: usr/bin/diffuse:6370
 #, python-format
 msgid "Error encoding to %s."
-msgstr "无法编码%s。"
+msgstr "无法编码为%s。"
 
-#: ../src/usr/bin/diffuse:1774
+#: usr/bin/diffuse:1932
 #, python-format
 msgid "Error parsing %s."
 msgstr "无法解析%s。"
 
-#: ../src/usr/bin/diffuse:6190
+#: usr/bin/diffuse:6412
 msgid "Error parsing line number."
 msgstr "解析行数时错误。"
 
-#: ../src/usr/bin/diffuse:7086
+#: usr/bin/diffuse:7327
 #, python-format
 msgid "Error parsing revision %s."
-msgstr "无法解析修订%s时。"
+msgstr "无法解析修订版本%s。"
 
-#: ../src/usr/bin/diffuse:7150
+#: usr/bin/diffuse:7391
 #, python-format
 msgid "Error processing argument \"%s\".  Directory not expected."
-msgstr "无法继续\"%s\"。目录不存在。"
+msgstr "无法处理\"%s\"。目录不存在。"
 
-#: ../src/usr/bin/diffuse:679
+#: usr/bin/diffuse:706
 #, python-format
 msgid "Error processing line %(line)d of %(file)s."
-msgstr "无法继续%(file)s的行%(line)d。"
+msgstr "处理到文件%(file)s的%(line)d行时出错。"
 
-#: ../src/usr/bin/diffuse:5996 ../src/usr/bin/diffuse:7058
+#: usr/bin/diffuse:6217 usr/bin/diffuse:7299
 #, python-format
 msgid "Error reading %s."
 msgstr "无法读取%s。"
 
-#: ../src/usr/bin/diffuse:5994
+#: usr/bin/diffuse:6215
 #, python-format
 msgid "Error reading revision %(rev)s of %(file)s."
-msgstr "无法读取%(file)s中修订%(rev)s。"
+msgstr "无法读取文件%(file)s中的修订版本%(rev)s。"
 
-#: ../src/usr/bin/diffuse:6743
+#: usr/bin/diffuse:6981
 #, python-format
 msgid "Error retrieving modifications for %s."
 msgstr "无法恢复对%s的修改。"
 
-#: ../src/usr/bin/diffuse:912 ../src/usr/bin/diffuse:6152
+#: usr/bin/diffuse:944 usr/bin/diffuse:6374
 #, python-format
 msgid "Error writing %s."
 msgstr "无法写入%s"
 
-#: ../src/usr/bin/diffuse:785
+#: usr/bin/diffuse:812
 msgid "Expand tabs to spaces"
 msgstr "展开制表符为空格"
 
-#: ../src/usr/bin/diffuse:6378
+#: usr/bin/diffuse:6600
 msgid "F_ormat"
 msgstr "格式(_O)"
 
-#: ../src/usr/bin/diffuse:6653
+#: usr/bin/diffuse:6891
 #, python-format
 msgid "File Merge %d"
 msgstr "文件合并%d"
 
-#: ../src/usr/bin/diffuse:6348
+#: usr/bin/diffuse:6570
 msgid "Find Pre_vious"
 msgstr "找上一个(_V)"
 
-#: ../src/usr/bin/diffuse:6347
+#: usr/bin/diffuse:6569
 msgid "Find _Next"
 msgstr "找下一个(_N)"
 
-#: ../src/usr/bin/diffuse:5472
+#: usr/bin/diffuse:5726
 msgid "Find..."
 msgstr "查找..."
 
-#: ../src/usr/bin/diffuse:6421
+#: usr/bin/diffuse:6648
 msgid "First Difference"
 msgstr "第一个不同之处"
 
-#: ../src/usr/bin/diffuse:764
+#: usr/bin/diffuse:791
 msgid "Font"
 msgstr "字体"
 
-#: ../src/usr/bin/diffuse:5577
+#: usr/bin/diffuse:5831
 msgid "Go To Line..."
 msgstr "跳到行..."
 
-#: ../src/usr/bin/diffuse:770
+#: usr/bin/diffuse:797
 msgid "Ignore blank line differences"
 msgstr "忽略空行的不同"
 
-#: ../src/usr/bin/diffuse:778
+#: usr/bin/diffuse:805
 msgid "Ignore blank lines"
 msgstr "忽略空行"
 
-#: ../src/usr/bin/diffuse:780
+#: usr/bin/diffuse:807
 msgid "Ignore case"
 msgstr "忽略大小写"
 
-#: ../src/usr/bin/diffuse:771
+#: usr/bin/diffuse:798
 msgid "Ignore case differences"
 msgstr "忽略大小写的不同"
 
-#: ../src/usr/bin/diffuse:769 ../src/usr/bin/diffuse:777
+#: usr/bin/diffuse:796 usr/bin/diffuse:804
 msgid "Ignore changes to white space"
 msgstr "忽略对空格的改变"
 
-#: ../src/usr/bin/diffuse:779
+#: usr/bin/diffuse:806
 msgid "Ignore end of line characters"
 msgstr "忽略行尾结束符"
 
-#: ../src/usr/bin/diffuse:772
+#: usr/bin/diffuse:799
 msgid "Ignore end of line differences"
 msgstr "忽略行尾的不同"
 
-#: ../src/usr/bin/diffuse:776
+#: usr/bin/diffuse:803
 msgid "Ignore white space"
 msgstr "忽略空格"
 
-#: ../src/usr/bin/diffuse:768
+#: usr/bin/diffuse:795
 msgid "Ignore white space differences"
 msgstr "忽略空格的不同"
 
-#: ../src/usr/bin/diffuse:3680
+#: usr/bin/diffuse:3922
 msgid "Isolate"
 msgstr "分离"
 
-#: ../src/usr/bin/diffuse:6424
+#: usr/bin/diffuse:6651
 msgid "Last Difference"
-msgstr "最后一个不同之处"
+msgstr "上一个不同之处"
 
-#: ../src/usr/bin/diffuse:831
+#: usr/bin/diffuse:863
 msgid "Launch from a Bash login shell"
 msgstr "从命令行登录界面加载"
 
-#: ../src/usr/bin/diffuse:5583
+#: usr/bin/diffuse:5837
 msgid "Line Number: "
 msgstr "行数："
 
-#: ../src/usr/bin/diffuse:6403
+#: usr/bin/diffuse:6625
 msgid "M_erge From Right Then Left"
-msgstr "从右向左合并(_E)"
+msgstr "先右后左合并(_E)"
 
-#: ../src/usr/bin/diffuse:5503
+#: usr/bin/diffuse:5757
 msgid "Match Case"
 msgstr "符合大小写"
 
-#: ../src/usr/bin/diffuse:6430
+#: usr/bin/diffuse:6657
 msgid "Merge From Left Then Right"
-msgstr "从左到右合并"
+msgstr "先左后右合并"
 
-#: ../src/usr/bin/diffuse:6431
+#: usr/bin/diffuse:6658
 msgid "Merge From Right Then Left"
-msgstr "从左到右合并(_T)"
+msgstr "先右后左合并(_T)"
 
-#: ../src/usr/bin/diffuse:3681
+#: usr/bin/diffuse:3923
 msgid "Merge Selection"
 msgstr "合并选择之处"
 
-#: ../src/usr/bin/diffuse:6417
+#: usr/bin/diffuse:6644
 msgid "New 2-Way File Merge"
-msgstr "新的2个文件合并"
+msgstr "新建2方文件合并"
 
-#: ../src/usr/bin/diffuse:6418
+#: usr/bin/diffuse:6645
 msgid "New 3-Way File Merge"
-msgstr "新的3个文件合并"
+msgstr "新建3方文件合并"
 
-#: ../src/usr/bin/diffuse:6327
+#: usr/bin/diffuse:6549
 msgid "New _2-Way File Merge"
-msgstr "新的2个文件合并(_2)"
+msgstr "新建2方文件合并(_2)"
 
-#: ../src/usr/bin/diffuse:6328
+#: usr/bin/diffuse:6550
 msgid "New _3-Way File Merge"
-msgstr "新的3个文件合并(_3)"
+msgstr "新建3方文件合并(_3)"
 
-#: ../src/usr/bin/diffuse:6423
+#: usr/bin/diffuse:6650
 msgid "Next Difference"
 msgstr "下个不同之处"
 
-#: ../src/usr/bin/diffuse:6373
+#: usr/bin/diffuse:6595
 msgid "Next _Tab"
 msgstr "下个标签(_T)"
 
-#: ../src/usr/bin/diffuse:6805
+#: usr/bin/diffuse:7043
 msgid "No modified files found."
 msgstr "没有找到修改过的文件。"
 
-#: ../src/usr/bin/diffuse:6353
+#: usr/bin/diffuse:6575
 msgid "None"
 msgstr "无"
 
-#: ../src/usr/bin/diffuse:6019
+#: usr/bin/diffuse:6240
 msgid "Open File"
 msgstr "打开文件"
 
-#: ../src/usr/bin/diffuse:6776
+#: usr/bin/diffuse:7014
 msgid "Open File In New Tab"
 msgstr "在新标签里打开文件"
 
-#: ../src/usr/bin/diffuse:6319
+#: usr/bin/diffuse:6541
 msgid "Open File In New _Tab..."
 msgstr "在新标签里打开文件(_T)"
 
-#: ../src/usr/bin/diffuse:5729
+#: usr/bin/diffuse:5950
 msgid "Open File..."
 msgstr "打开文件"
 
-#: ../src/usr/bin/diffuse:6320
+#: usr/bin/diffuse:6542
 msgid "Open _Modified Files..."
 msgstr "打开修改过的文件(_M)"
 
-#: ../src/usr/bin/diffuse:796
+#: usr/bin/diffuse:823
 msgid "Order of codecs used to identify encoding"
 msgstr "用来识别编码的编码顺序"
 
-#: ../src/usr/bin/diffuse:3685 ../src/usr/bin/diffuse:6437
+#: usr/bin/diffuse:3927 usr/bin/diffuse:6664
 msgid "Paste"
 msgstr "粘贴"
 
-#: ../src/usr/bin/diffuse:6889
+#: usr/bin/diffuse:7127
 msgid "Phrase not found.  Continue from the end of the file?"
 msgstr "短语未找到，从文件结尾继续吗？"
 
-#: ../src/usr/bin/diffuse:6891
+#: usr/bin/diffuse:7129
 msgid "Phrase not found.  Continue from the start of the file?"
 msgstr "短语未找到，从文件开头继续吗？"
 
-#: ../src/usr/bin/diffuse:6351
+#: usr/bin/diffuse:6573
 msgid "Pr_eferences..."
 msgstr "首选项(_E)"
 
-#: ../src/usr/bin/diffuse:6372
+#: usr/bin/diffuse:6594
 msgid "Pre_vious Tab"
 msgstr "前一个标签(_V)"
 
-#: ../src/usr/bin/diffuse:888
+#: usr/bin/diffuse:920
 msgid "Preferences"
 msgstr "首选项"
 
-#: ../src/usr/bin/diffuse:6213
+#: usr/bin/diffuse:6435
 msgid ""
 "Press the enter key or double click to edit.  Press the space bar or use the "
 "RMB menu to manually align."
 msgstr "按回车或者鼠标双击进行编译。空格键或者右键菜单手动对齐。"
 
-#: ../src/usr/bin/diffuse:6215
+#: usr/bin/diffuse:6437
 msgid "Press the escape key to finish editing."
 msgstr "按ESC键结束编辑"
 
-#: ../src/usr/bin/diffuse:6422
+#: usr/bin/diffuse:6649
 msgid "Previous Difference"
 msgstr "前一个不同"
 
-#: ../src/usr/bin/diffuse:6364
+#: usr/bin/diffuse:6586
 msgid "Re_align All"
 msgstr "重新对齐所有(_A)"
 
-#: ../src/usr/bin/diffuse:6420
+#: usr/bin/diffuse:6647
 msgid "Realign All"
 msgstr "重新对齐所有"
 
-#: ../src/usr/bin/diffuse:6434
+#: usr/bin/diffuse:6661
 msgid "Redo"
 msgstr "重做"
 
-#: ../src/usr/bin/diffuse:794
+#: usr/bin/diffuse:821
 msgid "Regional Settings"
 msgstr "区域性设置"
 
-#: ../src/usr/bin/diffuse:5730
+#: usr/bin/diffuse:5951
 msgid "Reload File"
 msgstr "重新加载文件"
 
-#: ../src/usr/bin/diffuse:6385
+#: usr/bin/diffuse:6607
 msgid "Remove Trailing _White Space"
 msgstr "删除多余的空格(_W)"
 
-#: ../src/usr/bin/diffuse:5552
+#: usr/bin/diffuse:5806
 msgid "Revision: "
 msgstr "修订："
 
-#: ../src/usr/bin/diffuse:809
+#: usr/bin/diffuse:836
 msgid "Root directory"
 msgstr "根目录"
 
-#: ../src/usr/bin/diffuse:6085
+#: usr/bin/diffuse:6306
 #, python-format
 msgid "Save %(title)s Pane %(pane)d"
 msgstr "保存%(title)s窗格%(pane)d"
 
-#: ../src/usr/bin/diffuse:6325
+#: usr/bin/diffuse:6547
 msgid "Save A_ll"
 msgstr "保存所有(_L)"
 
-#: ../src/usr/bin/diffuse:5731
+#: usr/bin/diffuse:5952
 msgid "Save File"
 msgstr "保存文件"
 
-#: ../src/usr/bin/diffuse:5732
+#: usr/bin/diffuse:5953
 msgid "Save File As..."
 msgstr "另存为"
 
-#: ../src/usr/bin/diffuse:6324
+#: usr/bin/diffuse:6546
 msgid "Save File _As..."
 msgstr "另存为(_A)"
 
-#: ../src/usr/bin/diffuse:5871
+#: usr/bin/diffuse:6092
 msgid "Save changes before loading the new file?"
 msgstr "加载新文件之前保存更改吗？"
 
-#: ../src/usr/bin/diffuse:5508
+#: usr/bin/diffuse:5762
 msgid "Search Backwards"
 msgstr "反向搜索"
 
-#: ../src/usr/bin/diffuse:5478
+#: usr/bin/diffuse:5732
 msgid "Search For: "
 msgstr "搜索："
 
-#: ../src/usr/bin/diffuse:3687
+#: usr/bin/diffuse:3929
 msgid "Select All"
 msgstr "选择所有"
 
-#: ../src/usr/bin/diffuse:6342
+#: usr/bin/diffuse:6564
 msgid "Select _All"
 msgstr "选择所有(_A)"
 
-#: ../src/usr/bin/diffuse:6217
+#: usr/bin/diffuse:6439
 msgid ""
 "Select target line and press the space bar to align.  Press the escape key "
 "to cancel."
 msgstr "选择目标行然后按空格键进行对齐，按ESC取消。"
 
-#: ../src/usr/bin/diffuse:6376
+#: usr/bin/diffuse:6598
 msgid "Shift Pane _Left"
 msgstr "左移窗格(_L)"
 
-#: ../src/usr/bin/diffuse:6375
+#: usr/bin/diffuse:6597
 msgid "Shift Pane _Right"
 msgstr "右移窗格(_R)"
 
-#: ../src/usr/bin/diffuse:766
+#: usr/bin/diffuse:793
 msgid "Show line numbers"
 msgstr "显示行号"
 
-#: ../src/usr/bin/diffuse:767
+#: usr/bin/diffuse:794
 msgid "Show white space characters"
 msgstr "显示空格字符"
 
-#: ../src/usr/bin/diffuse:7143
+#: usr/bin/diffuse:7384
 #, python-format
 msgid "Skipping unknown argument \"%s\"."
 msgstr "跳过未知参数\"%s\"。"
 
-#: ../src/usr/bin/diffuse:784
+#: usr/bin/diffuse:811
 msgid "Soft tab width"
 msgstr "软制表符宽度"
 
-#: ../src/usr/bin/diffuse:6542
+#: usr/bin/diffuse:6769
 msgid ""
 "Some files have unsaved changes.  Select the files to save before closing."
 msgstr ""
 "一些文件包含未保存的更改。请在关闭前保存这些文件。"
 
-#: ../src/usr/bin/diffuse:6383
+#: usr/bin/diffuse:6605
 msgid "Sort Lines In D_escending Order"
 msgstr "以递减的顺序排列行"
 
-#: ../src/usr/bin/diffuse:6382
+#: usr/bin/diffuse:6604
 msgid "Sort Lines In _Ascending Order"
 msgstr "以递增的顺序排列行"
 
-#: ../src/usr/bin/diffuse:3690
+#: usr/bin/diffuse:3932
 msgid "Swap with Selected Pane"
 msgstr "交换选中的窗格"
 
-#: ../src/usr/bin/diffuse:765
+#: usr/bin/diffuse:792
 msgid "Tab width"
 msgstr "制表符宽度"
 
-#: ../src/usr/bin/diffuse:788
+#: usr/bin/diffuse:815
 msgid "Tabs"
 msgstr "标签"
 
-#: ../src/usr/bin/diffuse:6065
+#: usr/bin/diffuse:6286
 #, python-format
 msgid "The file %s changed on disk.  Do you want to reload the file?"
 msgstr "磁盘文件%s已被更改，是否重新载入？"
 
-#: ../src/usr/bin/diffuse:6107
+#: usr/bin/diffuse:6328
 #, python-format
 msgid ""
 "The file %s has been modified by another process since reading it.  If you "
@@ -592,7 +600,7 @@ msgstr ""
 "文件%s打开后被其他进程更改过了，如果保存，其他程序的修改将会丢失，"
 "保存吗？"
 
-#: ../src/usr/bin/diffuse:5621
+#: usr/bin/diffuse:5875
 msgid ""
 "This program is free software; you can redistribute it and/or modify it "
 "under the terms of the GNU General Public License as published by the Free "
@@ -611,15 +619,15 @@ msgid ""
 "Fifth Floor, Boston, MA  02110-1301  USA\n"
 msgstr ""
 
-#: ../src/usr/bin/diffuse:6433
+#: usr/bin/diffuse:6660
 msgid "Undo"
 msgstr "恢复"
 
-#: ../src/usr/bin/diffuse:833
+#: usr/bin/diffuse:865
 msgid "Update paths for Cygwin"
 msgstr "为Cygwin更新路径"
 
-#: ../src/usr/bin/diffuse:78
+#: usr/bin/diffuse:78
 msgid ""
 "Usage:\n"
 "    diffuse [ [OPTION...] [FILE...] ]...\n"
@@ -660,144 +668,183 @@ msgid ""
 "  ( -i | --ignore-case )           Ignore case differences\n"
 "  ( -w | --ignore-all-space )      Ignore white space differences"
 msgstr ""
+msgid ""
+"用法:\n"
+"    diffuse [ [参数...] [文件...] ]...\n"
+"    diffuse ( -h | -? | --help | -v | --version )\n"
+"\n"
+"Diffuse is a graphical tool for merging and comparing text files.  Diffuse "
+"is\n"
+"able to compare an arbitrary number of files side-by-side and gives users "
+"the\n"
+"ability to manually adjust line matching and directly edit files.  Diffuse "
+"can\n"
+"also retrieve revisions of files from Bazaar, CVS, Darcs, Git, Mercurial,\n"
+"Monotone, RCS, Subversion, and SVK repositories for comparison and merging.\n"
+"\n"
+"帮助参数:\n"
+"  ( -h | -? | --help )             显示词使用信息\n"
+"  ( -v | --version )               现实版本和版权信息\n"
+"\n"
+"配置参数:\n"
+"  --no-rcfile                      不要读取任何源文件\n"
+"  --rcfile <file>                  指定明确的源文件\n"
+"\n"
+"其它参数:\n"
+"  ( -c | --commit ) <rev>          File revisions <rev-1> and <rev>\n"
+"  ( -D | --close-if-same )         Close all tabs with no differences\n"
+"  ( -e | --encoding ) <codec>      Use <codec> to read and write files\n"
+"  ( -m | --modified )              Create a new tab for each modified file\n"
+"  ( -r | --revision ) <rev>        File revision <rev>\n"
+"  ( -s | --separate )              Create a new tab for each file\n"
+"  ( -t | --tab )                   Start a new tab\n"
+"  --null-file                      Create a blank file comparison pane\n"
+"\n"
+"显示参数:\n"
+"  ( -b | --ignore-space-change )   忽略对空白的改变\n"
+"  ( -B | --ignore-blank-lines )    忽略对空行的改变\n"
+"  ( -E | --ignore-end-of-line )    忽略行尾的不同\n"
+"  ( -i | --ignore-case )           忽略小结的不同\n"
+"  ( -w | --ignore-all-space )      忽略所有空白的不同"
 
-#: ../src/usr/bin/diffuse:836
+
+#: usr/bin/diffuse:868
 msgid "Version Control"
 msgstr "版本控制"
 
-#: ../src/usr/bin/diffuse:792
+#: usr/bin/diffuse:819
 #, python-format
 msgid "Warn me when closing a tab will quit %s"
 msgstr "当关闭标签会退出%s的时候提醒我"
 
-#: ../src/usr/bin/diffuse:548
+#: usr/bin/diffuse:549
 #, python-format
 msgid "Warning: unknown colour \"%s\""
 msgstr "警告：未知的颜色\"%s\""
 
-#: ../src/usr/bin/diffuse:557
+#: usr/bin/diffuse:558
 #, python-format
 msgid "Warning: unknown float \"%s\""
-msgstr "警告：未知的浮点\"%s\""
+msgstr "警告：未知的浮点数\"%s\""
 
-#: ../src/usr/bin/diffuse:566
+#: usr/bin/diffuse:567
 #, python-format
 msgid "Warning: unknown string \"%s\""
 msgstr "警告：未知字符串\"%s\""
 
-#: ../src/usr/bin/diffuse:6408
+#: usr/bin/diffuse:6630
 #, python-format
 msgid "_About %s..."
 msgstr "关于%s(_A)"
 
-#: ../src/usr/bin/diffuse:6330
+#: usr/bin/diffuse:6552
 msgid "_Close Tab"
 msgstr "关闭标签(_C)"
 
-#: ../src/usr/bin/diffuse:6339
+#: usr/bin/diffuse:6561
 msgid "_Copy"
 msgstr "复制(_C)"
 
-#: ../src/usr/bin/diffuse:6344
+#: usr/bin/diffuse:6566
 msgid "_Dismiss All Edits"
 msgstr "撤销所有更改(_D)"
 
-#: ../src/usr/bin/diffuse:6334
+#: usr/bin/diffuse:6556
 msgid "_Edit"
 msgstr "编辑(_E)"
 
-#: ../src/usr/bin/diffuse:6317
+#: usr/bin/diffuse:6539
 msgid "_File"
 msgstr "文件(_F)"
 
-#: ../src/usr/bin/diffuse:6346
+#: usr/bin/diffuse:6568
 msgid "_Find..."
 msgstr "查找(_F)"
 
-#: ../src/usr/bin/diffuse:6367
+#: usr/bin/diffuse:6589
 msgid "_First Difference"
 msgstr "第一个不同(_F)"
 
-#: ../src/usr/bin/diffuse:6349
+#: usr/bin/diffuse:6571
 msgid "_Go To Line..."
 msgstr "跳到行(_G)"
 
-#: ../src/usr/bin/diffuse:6405
+#: usr/bin/diffuse:6627
 msgid "_Help"
 msgstr "帮助(_H)"
 
-#: ../src/usr/bin/diffuse:6406
+#: usr/bin/diffuse:6628
 msgid "_Help Contents..."
 msgstr "帮助内容(_H)"
 
-#: ../src/usr/bin/diffuse:6389
+#: usr/bin/diffuse:6611
 msgid "_Increase Indenting"
 msgstr "减少缩进(_I)"
 
-#: ../src/usr/bin/diffuse:6365
+#: usr/bin/diffuse:6587
 msgid "_Isolate"
 msgstr "分离(_I)"
 
-#: ../src/usr/bin/diffuse:6370
+#: usr/bin/diffuse:6592
 msgid "_Last Difference"
 msgstr "最后一个不同(_L)"
 
-#: ../src/usr/bin/diffuse:6396
+#: usr/bin/diffuse:6618
 msgid "_Merge"
 msgstr "合并(_M)"
 
-#: ../src/usr/bin/diffuse:6402
+#: usr/bin/diffuse:6624
 msgid "_Merge From Left Then Right"
-msgstr "从右向左合并(_M)"
+msgstr "先左再右合并(_M)"
 
-#: ../src/usr/bin/diffuse:6369
+#: usr/bin/diffuse:6591
 msgid "_Next Difference"
 msgstr "下一个不同(_N)"
 
-#: ../src/usr/bin/diffuse:6318
+#: usr/bin/diffuse:6540
 msgid "_Open File..."
 msgstr "打开文件(_O)"
 
-#: ../src/usr/bin/diffuse:6340
+#: usr/bin/diffuse:6562
 msgid "_Paste"
 msgstr "粘贴(_P)"
 
-#: ../src/usr/bin/diffuse:6368
+#: usr/bin/diffuse:6590
 msgid "_Previous Difference"
 msgstr "前一个不同(_P)"
 
-#: ../src/usr/bin/diffuse:6332
+#: usr/bin/diffuse:6554
 msgid "_Quit"
 msgstr "退出(_Q)"
 
-#: ../src/usr/bin/diffuse:6336
+#: usr/bin/diffuse:6558
 msgid "_Redo"
 msgstr "重做(_R)"
 
-#: ../src/usr/bin/diffuse:6321
+#: usr/bin/diffuse:6543
 msgid "_Reload File"
 msgstr "重新加载文件(_R)"
 
-#: ../src/usr/bin/diffuse:6323
+#: usr/bin/diffuse:6545
 msgid "_Save File"
 msgstr "保存(_S)"
 
-#: ../src/usr/bin/diffuse:6362
+#: usr/bin/diffuse:6584
 msgid "_Syntax Highlighting"
 msgstr "_Syntax高亮"
 
-#: ../src/usr/bin/diffuse:6335
+#: usr/bin/diffuse:6557
 msgid "_Undo"
 msgstr "恢复(_U)"
 
-#: ../src/usr/bin/diffuse:6331
+#: usr/bin/diffuse:6553
 msgid "_Undo Close Tab"
 msgstr "恢复关闭的标签"
 
-#: ../src/usr/bin/diffuse:6361
+#: usr/bin/diffuse:6583
 msgid "_View"
 msgstr "视图(_V)"
 
-#: ../src/usr/bin/diffuse:5618
+#: usr/bin/diffuse:5872
 msgid "translator-credits"
 msgstr "Liu Hao <jarryson@gmail.com>"
