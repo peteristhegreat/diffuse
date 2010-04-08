@@ -137,7 +137,8 @@ def logDebug(s):
     pass #sys.stderr.write('%s: %s\n', (APP_NAME, s))
 
 # avoid some dictionary lookups when string.whitespace is used in loops
-whitespace = string.whitespace
+# this is sorted based upon frequency to speed up code for striping whitespace
+whitespace = ' \t\n\r\x0b\x0c'
 
 # associate our icon with all of our windows
 if __name__ == '__main__':
@@ -537,9 +538,7 @@ class Resources:
 
     def getCharacterClass(self, c):
         c = ord(c)
-        if self.char_classes.has_key(c):
-            return self.char_classes[c]
-        return c
+        return self.char_classes.get(c, c)
 
     # colour resources
     def getColour(self, symbol):
@@ -572,8 +571,7 @@ class Resources:
         return self.syntaxes.keys()
 
     def getSyntax(self, name):
-        if self.syntaxes.has_key(name):
-            return self.syntaxes[name]
+        return self.syntaxes.get(name, None)
 
     def guessSyntaxForFile(self, name, ss):
         name = os.path.basename(name)
@@ -824,12 +822,11 @@ class Preferences:
             ],
         ]
         if isWindows():
-            if os.environ.has_key('SYSTEMDRIVE'):
-                root = os.environ['SYSTEMDRIVE']
-                if not root.endswith('\\'):
-                    root += '\\'
-            else:
+            root = os.environ.get('SYSTEMDRIVE', None)
+            if root is None:
                 root = 'C:\\'
+            elif not root.endswith('\\'):
+                root += '\\'
             self.template.extend([
                     _('Cygwin'),
                     [ 'List',
@@ -1975,9 +1972,8 @@ class VCSs:
 
     def __init__(self):
         # initialise the VCS objects
-        if os.environ.has_key('SVKROOT'):
-            svkroot = os.environ['SVKROOT']
-        else:
+        svkroot = os.environ.get('SVKROOT', None)
+        if svkroot is None:
             svkroot = os.path.expanduser('~/.svk')
         self.svkconfig = os.path.join(svkroot, 'config')
         self.leaf_dir_repos = [('.svn', VCSs.Svn), ('CVS', VCSs.Cvs), ('RCS', VCSs.Rcs)]
@@ -2334,6 +2330,9 @@ LINE_MODE = 0
 CHAR_MODE = 1
 ALIGN_MODE = 2
 
+# mapping to column width of a character (tab will never be in this map)
+char_width_cache = {}
+
 # widget used to compare and merge text files
 class FileDiffViewer(gtk.Table):
     # class describing a text pane
@@ -2389,6 +2388,7 @@ class FileDiffViewer(gtk.Table):
         gtk.Table.__init__(self, 3, n + 1)
         self.set_flags(gtk.CAN_FOCUS)
         self.prefs = prefs
+        self.string_width_cache = {}
 
         # diff blocks
         self.blocks = []
@@ -2587,19 +2587,56 @@ class FileDiffViewer(gtk.Table):
         if not self.prefs.getBool('display_show_whitespace'):
             s = strip_eol(s)
         col = 0
-        tab_width = self.prefs.getInt('display_tab_width')
+        get = char_width_cache.get
         for c in s:
+            w = get(c, 0)
+            if w == 0: 
+                v = ord(c)
+                if v < 32:
+                    if c == '\t':
+                        tab_width = self.prefs.getInt('display_tab_width')
+                        w = tab_width - col % tab_width
+                    elif c == '\n':
+                        w = 1
+                        char_width_cache[c] = w
+                    else:
+                        w = 2
+                        char_width_cache[c] = w
+                elif v >= 0x1100 and (v <= 0x115f
+                    or v == 0x2329
+                    or v == 0x232a
+                    or (v >= 0x2e80 and v <= 0xa4cf and v != 0x303f)
+                    or (v >= 0xac00 and v <= 0xd7a3)
+                    or (v >= 0xf900 and v <= 0xfaff)
+                    or (v >= 0xfe30 and v <= 0xfe6f)
+                    or (v >= 0xff00 and v <= 0xff60)
+                    or (v >= 0xffe0 and v <= 0xffe6)
+                    or (v >= 0x20000 and v <= 0x2ffff)):
+                    w = 2
+                    char_width_cache[c] = w
+                else:
+                    w = 1
+                    char_width_cache[c] = w
+            col += w
+        return col
+
+    # returns the 'column width' for a single character created at column 'i'
+    def characterWidth(self, i, c):
+        w = char_width_cache.get(c, 0)
+        if w == 0:
             v = ord(c)
             if v < 32:
                 if c == '\t':
-                    col += tab_width - col % tab_width
+                    tab_width = self.prefs.getInt('display_tab_width')
+                    w = tab_width - i % tab_width
                 elif c == '\n':
-                    col += 1
+                    w = 1
+                    char_width_cache[c] = w
                 else:
-                    col += 2
+                    w = 2
+                    char_width_cache[c] = w
             elif v >= 0x1100 and (v <= 0x115f
-                or v == 0x2329
-                or v == 0x232a
+                or v == 0x2329 or v == 0x232a
                 or (v >= 0x2e80 and v <= 0xa4cf and v != 0x303f)
                 or (v >= 0xac00 and v <= 0xd7a3)
                 or (v >= 0xf900 and v <= 0xfaff)
@@ -2607,31 +2644,9 @@ class FileDiffViewer(gtk.Table):
                 or (v >= 0xff00 and v <= 0xff60)
                 or (v >= 0xffe0 and v <= 0xffe6)
                 or (v >= 0x20000 and v <= 0x2ffff)):
-                col += 2
-            else:
-                col += 1
-        return col
-
-    # returns the 'column width' for a single character created at column 'i'
-    def characterWidth(self, i, c):
-        v = ord(c)
-        if v < 32:
-            if c == '\t':
-                tab_width = self.prefs.getInt('display_tab_width')
-                return tab_width - i % tab_width
-            elif c != '\n':
-                return 2
-        elif v >= 0x1100 and (v <= 0x115f
-            or v == 0x2329 or v == 0x232a
-            or (v >= 0x2e80 and v <= 0xa4cf and v != 0x303f)
-            or (v >= 0xac00 and v <= 0xd7a3)
-            or (v >= 0xf900 and v <= 0xfaff)
-            or (v >= 0xfe30 and v <= 0xfe6f)
-            or (v >= 0xff00 and v <= 0xff60)
-            or (v >= 0xffe0 and v <= 0xffe6)
-            or (v >= 0x20000 and v <= 0x2ffff)):
-            return 2
-        return 1
+                w = 2
+                char_width_cache[c] = w
+        return w
 
     # translates a string into an array of the printable representation for
     # each character
@@ -2813,6 +2828,8 @@ class FileDiffViewer(gtk.Table):
     # be used to determine the required width for the viewport, use True for
     # this value otherwise
     def updateSize(self, compute_width, f=None):
+        digit_width, stringWidth = self.digit_width, self.stringWidth
+        string_width_cache = self.string_width_cache
         if compute_width:
             if f is None:
                 panes = self.panes
@@ -2831,7 +2848,10 @@ class FileDiffViewer(gtk.Table):
                             text.append(line.modified_text)
                         for s in text:
                             if s is not None:
-                                pane.line_lengths = max(pane.line_lengths, self.digit_width * self.stringWidth(s))
+                                w = string_width_cache.get(s, None)
+                                if w is None:
+                                    string_width_cache[s] = w = stringWidth(s)
+                                pane.line_lengths = max(pane.line_lengths, digit_width * w)
         # compute the maximum extents
         num_lines, line_lengths = 0, 0
         for pane in self.panes:
@@ -2842,12 +2862,12 @@ class FileDiffViewer(gtk.Table):
             w = self._preedit_layout().get_size()[0]
             s = self.getLineText(self.current_pane, self.current_line)
             if s is not None:
-                w += self.digit_width * self.stringWidth(s)
+                w += digit_width * stringWidth(s)
             line_lengths = max(line_lengths, w)
         # the cursor can move one line past the last line of text, add it so we
         # can scroll to see this line
         num_lines += 1
-        width = self.getLineNumberWidth() + self.digit_width + line_lengths
+        width = self.getLineNumberWidth() + digit_width + line_lengths
         width = pixels(width)
         height = self.font_height * num_lines
         # update the adjustments
@@ -3223,36 +3243,39 @@ class FileDiffViewer(gtk.Table):
     def _alignmentHash(self, line):
         text = line.getText()
         if text is None:
-            return ''
-        # hashes for non-null lines should start with '+' to distinguish them
-        # from blank lines
-        if self.prefs.getBool('align_ignore_endofline'):
-            text = strip_eol(text)
-        if self.prefs.getBool('align_ignore_blanklines') and isBlank(text):
-            # consider all lines containing only white space as the same
-            return '+'
-        if self.prefs.getBool('align_ignore_whitespace'):
+            return None
+        pref = self.prefs.getBool
+        if pref('align_ignore_whitespace'):
             # strip all white space from the string
             for c in whitespace:
                 text = text.replace(c, '')
-        elif self.prefs.getBool('align_ignore_whitespace_changes'):
-            # replace all blocks of white space with a single space
-            pc = True
-            r = []
-            append = r.append
-            for c in text:
-                if c in whitespace:
-                    if pc:
-                        append(' ')
-                        pc = False
-                else:
-                    append(c)
-                    pc = True
-            text = ''.join(r)
-        if self.prefs.getBool('align_ignore_case'):
+        else:
+            # hashes for non-null lines should start with '+' to distinguish
+            # them from blank lines
+            if pref('align_ignore_endofline'):
+                text = strip_eol(text)
+            if pref('align_ignore_blanklines') and isBlank(text):
+                # consider all lines containing only white space as the same
+                return ''
+
+            if pref('align_ignore_whitespace_changes'):
+                # replace all blocks of white space with a single space
+                pc = True
+                r = []
+                append = r.append
+                for c in text:
+                    if c in whitespace:
+                        if pc:
+                            append(' ')
+                            pc = False
+                    else:
+                        append(c)
+                        pc = True
+                text = ''.join(r)
+        if pref('align_ignore_case'):
             # convert everything to upper case
             text = text.upper()
-        return '+' + text
+        return text
 
     # align sets of lines by insertting null spacers and updating the size
     # of blocks to which they belong
@@ -3272,8 +3295,9 @@ class FileDiffViewer(gtk.Table):
         s1, s2 = mlines
         n1, n2 = 0, 0
         # hash lines according to the alignment preferences
-        t1 = [ self._alignmentHash(s) for s in s1 ]
-        t2 = [ self._alignmentHash(s) for s in s2 ]
+        a = self._alignmentHash
+        t1 = [ a(s) for s in s1 ]
+        t2 = [ a(s) for s in s2 ]
         # align s1 and s2 by inserting spacer lines
         # this will be used to determine which lines from the inner lists of
         # lines should be neighbours
@@ -3304,7 +3328,7 @@ class FileDiffViewer(gtk.Table):
         while True:
             # if we have reached the end of the list for any side, it needs
             # spacer lines to align with the other side
-            insert = [ i >= len(m) for m in middle  ]
+            insert = [ i >= len(m) for m in middle ]
             if insert == [ True, True ]:
                 # we have reached the end of both inner lists of lines
                 # we are done
@@ -3364,7 +3388,8 @@ class FileDiffViewer(gtk.Table):
         if n > 0:
             blocks.append(n)
         # create line objects for the text
-        mid = [ [ FileDiffViewer.Line(j + 1, ss[j]) for j in range(n) ] ]
+        Line = FileDiffViewer.Line
+        mid = [ [ Line(j + 1, ss[j]) for j in range(n) ] ]
 
         if f > 0:
             # align with panes to the left
@@ -3392,15 +3417,16 @@ class FileDiffViewer(gtk.Table):
         self.replaceLines(f, pane.lines, mid[f], pane.max_line_number, n)
 
         # insert or remove spacer lines from the other panes
+        insertNull, getLine = self.insertNull, self.getLine
         for f_idx in range(len(self.panes)):
             if f_idx != f:
                 for j in range(old_n-1, -1, -1):
-                    if self.getLine(f_idx, j) is None:
-                        self.insertNull(f_idx, j, True)
+                    if getLine(f_idx, j) is None:
+                        insertNull(f_idx, j, True)
                 temp = mid[f_idx]
                 for j in range(new_n):
                     if temp[j] is None:
-                        self.insertNull(f_idx, j, False)
+                        insertNull(f_idx, j, False)
 
         # update the blocks
         self.invalidateLineMatching(0, old_n, new_n)
@@ -5100,6 +5126,8 @@ class FileDiffViewer(gtk.Table):
     # recompute viewport size and redraw as the display preferences may have
     # changed
     def prefsUpdated(self):
+        # clear cache as tab width may have changed
+        self.string_width_cache = {}
         self.setFont(pango.FontDescription(self.prefs.getString('display_font')))
         # update preedit text
         self._cursor_position_changed(True)
@@ -6871,8 +6899,9 @@ class Diffuse(gtk.Window):
     # update the label in the status bar
     def setSyntax(self, s):
         # update menu
-        if self.radio_menus.has_key('syntax'):
-            t = self.radio_menus['syntax'][1]
+        t = self.radio_menus.get('syntax', None)
+        if t is not None:
+            t = t[1]
             if t.has_key(s):
                 self.menu_update_depth += 1
                 t[s].set_active(True)
@@ -7227,9 +7256,10 @@ class Diffuse(gtk.Window):
         else:
             # verify gnome-help is available
             browser = None
-            if os.environ.has_key('PATH'):
-                for p in os.environ['PATH'].split(os.pathsep):
-                    fp = os.path.join(p, 'gnome-help')
+            p = os.environ.get('PATH', None)
+            if p is not None:
+                for s in p.split(os.pathsep):
+                    fp = os.path.join(s, 'gnome-help')
                     if os.path.isfile(fp):
                         browser = fp
                         break
@@ -7281,9 +7311,8 @@ gobject.signal_new('save_as', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_
 # process the command line arguments
 if __name__ == '__main__':
     # find the config directory
-    if os.environ.has_key('XDG_CONFIG_HOME'):
-        rc_dir = os.environ['XDG_CONFIG_HOME']
-    else:
+    rc_dir = os.environ.get('XDG_CONFIG_HOME', None)
+    if rc_dir is None:
         rc_dir = os.path.join(os.path.expanduser('~'), '.config')
     for rc_dir in rc_dir, os.path.join(rc_dir, 'diffuse'):
         # create the directory if it didn't exist
@@ -7354,8 +7383,7 @@ if __name__ == '__main__':
             elif i + 1 < argc and arg in [ '-e', '--encoding' ]:
                 i += 1
                 encoding = args[i]
-                if encodings.aliases.aliases.has_key(encoding):
-                    encoding = encodings.aliases.aliases[encoding]
+                encoding = encodings.aliases.aliases.get(encoding, encoding)
             elif arg in [ '-m', '--modified' ]:
                 funcs[mode](specs)
                 specs = []
