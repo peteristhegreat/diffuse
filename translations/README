@@ -2,10 +2,10 @@ Below are basic instructions for adding and maintaining Gettext translations
 for Diffuse.  The installer will discover .po files in this directory and
 compile them into the corresponding .mo files.
 
-The example command show how to create and manage the Japanese translations.
-Replace all instances of "ja" with the code for the desired language.  Also
-note the "Name" and "Comment" fields of the "diffuse.desktop" file should be
-translated.
+The example commands below show how to create and manage the Japanese
+translations.  Replace all instances of "ja" with the code for the desired
+language.  Also note the "Name" and "Comment" fields of the "diffuse.desktop"
+file should be translated separately.
 
 ----
 
