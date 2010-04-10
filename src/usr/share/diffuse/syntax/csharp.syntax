@@ -1,11 +1,13 @@
 # C# syntax file for Diffuse
-# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2010 Derrick Moser <derrick_moser@yahoo.com>
 syntax 'C#' normal text
 syntax_files 'C#' '\.cs$'
 
 # colours
 colour csharp_comment 0.2 0.4 0.64
 colour csharp_fixme 1.0 0.5 0.0
+colour csharp_cpp 0.8 0.0 0.0
+colour csharp_cppkeyword 0.46 0.31 0.48
 colour csharp_import 0.46 0.31 0.48
 colour csharp_keyword 0.77 0.63 0.0
 colour csharp_type 0.3 0.6 0.02
@@ -16,6 +18,14 @@ colour csharp_punctuation 0.5 0.5 0.5
 
 # whitespace
 syntax_pattern normal normal text '[ \t\r\n]+'
+
+# preprocessor
+syntax_pattern normal cpp csharp_cppkeyword '^[ \t]*#[ \t]*(define|elif|else|endif|endregion|error|if|line|region|undef|warning)\b'
+syntax_pattern cpp normal csharp_cppkeyword '(\r\n|\r|\n)$'
+
+# preprocessor args
+syntax_pattern cpp cpp csharp_cpp '\\(\r\n|\r|\n)$'
+syntax_pattern cpp cpp csharp_cpp '.[^\\/\r\n]*'
 
 # C++ style comments
 syntax_pattern normal cpp_comment csharp_comment '//'
