@@ -15,3 +15,4 @@ Terminal=false
 Type=Application
 MimeType=text/plain;text/x-csrc;text/x-chdr;
 Categories=Development;GTK;TextEditor;TextTools;
+StartupNotify=true
