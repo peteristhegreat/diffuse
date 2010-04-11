@@ -424,7 +424,7 @@ class Resources:
             'text' : Colour(0.0, 0.0, 0.0),
             'text_background' : Colour(1.0, 1.0, 1.0) }
         # list of unknown colour resources we have already issued warnings for
-        self.unknown_colours = {}
+        self.unknown_colours = set()
 
         # default floats
         self.floats = {
@@ -435,13 +435,13 @@ class Resources:
             'line_difference_opacity' : 0.3,
             'line_selection_opacity' : 0.4 }
         # list of unknown float resources we have already issued warnings for
-        self.unknown_floats = {}
+        self.unknown_floats = set()
 
         # default strings
         self.strings = {}
 
         # list of unknown string resources we have already issued warnings for
-        self.unknown_strings = {}
+        self.unknown_strings = set()
 
         self.default_colour = Colour(0.0, 0.0, 0.0)
         self.char_classes = {}
@@ -453,7 +453,7 @@ class Resources:
         self.current_syntax = None
 
         # list of imported resources files (we only import each file once)
-        self.resource_files = {}
+        self.resource_files = set()
 
         # special string resources
         self.setDifferenceColours('difference_1 difference_2 difference_3')
@@ -544,27 +544,27 @@ class Resources:
     def getColour(self, symbol):
         if self.colours.has_key(symbol):
             return self.colours[symbol]
-        if not self.unknown_colours.has_key(symbol):
+        if symbol not in self.unknown_colours:
             logError(_('Warning: unknown colour "%s"') % (symbol, ))
-            self.unknown_colours[symbol] = None
+            self.unknown_colours.add(symbol)
         return self.default_colour
 
     # float resources
     def getFloat(self, symbol):
         if self.floats.has_key(symbol):
             return self.floats[symbol]
-        if not self.unknown_floats.has_key(symbol):
+        if symbol not in self.unknown_floats:
             logError(_('Warning: unknown float "%s"') % (symbol, ))
-            self.unknown_floats[symbol] = None
+            self.unknown_floats.add(symbol)
         return 0.5
 
     # string resources
     def getString(self, symbol):
         if self.strings.has_key(symbol):
             return self.strings[symbol]
-        if not self.unknown_strings.has_key(symbol):
+        if symbol not in self.unknown_strings:
             logError(_('Warning: unknown string "%s"') % (symbol, ))
-            self.unknown_strings[symbol] = None
+            self.unknown_strings.add(symbol)
 
     # syntax highlighting
     def getSyntaxNames(self):
@@ -588,8 +588,8 @@ class Resources:
     # parse resource files
     def parse(self, file_name):
         # only process files once
-        if not self.resource_files.has_key(file_name):
-            self.resource_files[file_name] = None
+        if file_name not in self.resource_files:
+            self.resource_files.add(file_name)
             f = open(file_name, 'r')
             ss = readlines(f)
             f.close()
@@ -755,10 +755,7 @@ class Preferences:
         self.string_prefs_enums = {}
 
         # find available encodings
-        encs = {}
-        for e in encodings.aliases.aliases.values():
-            encs[e] = None
-        self.encodings = sorted(encs.keys())
+        self.encodings = sorted(set(encodings.aliases.aliases.values()))
 
         if isWindows():
             font = 'Courier 10'
@@ -1425,11 +1422,10 @@ class VCSs:
                                     k1 = relpath(pwd, k1)
                                 renamed[k1] = [ (k0, prefs.getString('bzr_default_revision')), (k1, None) ]
             # sort the results
-            r = {}
+            r = set()
             for m in removed, modified, added, renamed:
-                for k in m.keys():
-                    r[k] = None
-            for k in sorted(r.keys()):
+                r.update(m.keys())
+            for k in sorted(r):
                 for m in removed, modified, added, renamed:
                     if m.has_key(k):
                         result.append(m[k])
@@ -1591,11 +1587,10 @@ class VCSs:
                                 k1 = relpath(pwd, k1)
                             renamed[k1] = [ (k0, prefs.getString('git_default_revision')), (k1, None) ]
             # sort the results
-            r = {}
+            r = set()
             for m in unmerged, removed, added, modified, renamed:
-                for k in m.keys():
-                    r[k] = None
-            for k in sorted(r.keys()):
+                r.update(m.keys())
+            for k in sorted(r):
                 for m in unmerged, removed, added, modified, renamed:
                     if m.has_key(k):
                         result.append(m[k])
@@ -1714,11 +1709,10 @@ class VCSs:
                                 k = relpath(pwd, k)
                             modified[k] = [ (k, prefs.getString('mtn_default_revision')), (k, None) ]
             # sort the results
-            r = {}
+            r = set()
             for m in removed, added, modified, renamed:
-                for k in m.keys():
-                    r[k] = None
-            for k in sorted(r.keys()):
+                r.update(m.keys())
+            for k in sorted(r):
                 for m in removed, added, modified, renamed:
                     if m.has_key(k):
                         result.append(m[k])
@@ -6201,14 +6195,14 @@ class Diffuse(gtk.Window):
             # choose a short but descriptive title for the viewer
             has_edits = False
             names = []
-            unique_names = {}
+            unique_names = set()
             for header in self.headers:
                 has_edits |= header.has_edits
                 s = header.info.name
                 if s is not None:
                     s = os.path.basename(s)
                     names.append(s)
-                    unique_names[s] = None
+                    unique_names.add(s)
 
             if len(unique_names) > 0:
                 if len(unique_names) == 1:
