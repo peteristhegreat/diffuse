@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2009 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2009-2010 Derrick Moser <derrick_moser@yahoo.com>
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -157,12 +157,15 @@ def processTranslations(install, dst):
     for s in glob.glob('translations/*.po'):
         lang = s[13:-3]
         d = os.path.join(dst, 'share/locale/%s/LC_MESSAGES/diffuse.mo' % (lang, ))
-        print 'Installing %s' % (d, )
         if install:
             # install file
-            createDirs(os.path.dirname(d))
-            if subprocess.Popen(['msgfmt', '-o', d, s]).wait() != 0:
-                raise OSError('Failed to compile "%s" into "%s".' % (s, d))
+            try:
+                print 'Installing %s' % (d, )
+                createDirs(os.path.dirname(d))
+                if subprocess.Popen(['msgfmt', '-o', d, s]).wait() != 0:
+                    raise OSError()
+            except OSError:
+                logError('WARNING: Failed to compile "%s" localisation.' % (lang, ))
         else:
             # remove file
             removeFile(d)
