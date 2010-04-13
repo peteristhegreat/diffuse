@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xsl:stylesheet [
  <!ENTITY app "Diffuse">
- <!ENTITY app-version "0.4.1">
+ <!ENTITY app-version "0.4.2">
  <!ENTITY app-cmd "diffuse">
- <!ENTITY date "2009-10-12">
+ <!ENTITY date "2010-04-13">
 ]>
 <!--
   template for translating Diffuse's help documentation to a manual page
 
-  Copyright (C) 2009 Derrick Moser <derrick_moser@yahoo.com>
+  Copyright (C) 2010 Derrick Moser <derrick_moser@yahoo.com>
 -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2009 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2006-2010 Derrick Moser <derrick_moser@yahoo.com>
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -24,7 +24,7 @@ import platform
 import subprocess
 import sys
 
-VERSION='0.4.1'
+VERSION='0.4.2'
 PACKAGE='1'
 PLATFORM='win' + ''.join([ c for c in platform.architecture()[0] if c.isdigit() ])
 INSTALLER='diffuse-%s-%s.%s' % (VERSION, PACKAGE, PLATFORM)
@@ -38,11 +38,9 @@ def mkdir(s):
 def copyFile(src, dest, use_text_mode=False):
     print 'copying "%s" to "%s"' % (src, dest)
     if use_text_mode:
-        r = 'r'
-        w = 'w'
+        r, w = 'r', 'w'
     else:
-        r = 'rb'
-        w = 'wb'
+        r, w = 'rb', 'wb'
     f = open(src, r)
     s = f.read()
     f.close()

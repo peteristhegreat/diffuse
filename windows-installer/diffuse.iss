@@ -1,10 +1,10 @@
 ; Inno Setup file for Diffuse
 ;
-; Copyright (C) 2009 Derrick Moser <derrick_moser@yahoo.com>
+; Copyright (C) 2009-2010 Derrick Moser <derrick_moser@yahoo.com>
 
 [Setup]
 AppName=Diffuse Merge Tool
-AppVerName=Diffuse 0.4.1
+AppVerName=Diffuse 0.4.2
 DefaultDirName={pf}\Diffuse
 DefaultGroupName=Diffuse
 UninstallDisplayIcon={app}\diffusew.exe

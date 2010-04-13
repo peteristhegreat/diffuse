@@ -4,8 +4,8 @@
     <creator>Derrick Moser</creator>
     <maintainer>Derrick Moser</maintainer>
     <title>Diffuse Manual</title>
-    <date>2009-10-12</date>
-    <version identifier="0.4.1" date="2009-10-12"/>
+    <date>2010-04-13</date>
+    <version identifier="0.4.2" date="2010-04-13"/>
     <subject category="GNOME|Development|Applications"/>
     <description>Diffuse is a graphical tool for merging and comparing text files.</description>
     <type>manual</type>

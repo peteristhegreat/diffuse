@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (C) 2009 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2009-2010 Derrick Moser <derrick_moser@yahoo.com>
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -28,6 +28,11 @@ if [ "$1" == "" ]; then
     exit 1
 fi
 
+# create man page
 xsltproc --nonet book2manual.xsl ../src/usr/share/gnome/help/diffuse/C/diffuse.xml | xsltproc --nonet "$1/manpages/docbook.xsl" -
 # eliminate comment lines and replace arrow character with correct sequence
 sed -i '/^\.\\"/d;s/\xe2\x86\x92/\\(->/g' diffuse.1
+
+# create on-line manual
+# eliminate ugly empty paragraphs
+xsltproc "$1/html/docbook.xsl" ../src/usr/share/gnome/help/diffuse/C/diffuse.xml | sed ':a;N;$!ba;s/<p>[ \n]*<\/p>//g' > manual.html
