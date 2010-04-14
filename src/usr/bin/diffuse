@@ -1407,7 +1407,7 @@ class VCSs:
                             k = os.path.join(self.root, k)
                             if not isabs:
                                 k = relpath(pwd, k)
-                            modified[k] = [ (k, prefs.getString('bzr_default_revision')), (k, None) ]
+                            modified[k] = self.getFileTemplate(prefs, k)
                     elif s[0] == 'R':
                         # renamed file
                         k = k.split(' => ')
@@ -1462,13 +1462,13 @@ class VCSs:
                 v = r[k]
                 if v == 'R':
                     # deleted file
-                    result.append( [ (k, 'HEAD'), (None, None) ] )
+                    result.append( [ (k, prefs.getString('cvs_default_revision')), (None, None) ] )
                 elif v == 'A':
                     # new file
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'CM':
                     # modified file or merge conflict
-                    result.append( [ (k, 'HEAD'), (k, None) ] )
+                    result.append(self.getFileTemplate(prefs, k))
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1512,7 +1512,7 @@ class VCSs:
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'M':
                     # modified file or merge conflict
-                    result.append( [ (k, prefs.getString('darcs_default_revision')), (k, None) ] )
+                    result.append(self.getFileTemplate(prefs, k))
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1574,7 +1574,7 @@ class VCSs:
                     if fs.contains(k):
                         if not isabs:
                             k = relpath(pwd, k)
-                        modified[k] = [ (k, prefs.getString('git_default_revision')), (k, None) ]
+                        modified[k] = self.getFileTemplate(prefs, k)
                 elif s.startswith('#\trenamed:'):
                     # renamed file
                     keys = s[10:].split(' -> ')
@@ -1635,7 +1635,7 @@ class VCSs:
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'M':
                     # modified file or merge conflict
-                    result.append( [ (k, prefs.getString('hg_default_revision')), (k, None) ] )
+                    result.append(self.getFileTemplate(prefs, k))
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -1707,7 +1707,7 @@ class VCSs:
                         if fs.contains(k):
                             if not isabs:
                                 k = relpath(pwd, k)
-                            modified[k] = [ (k, prefs.getString('mtn_default_revision')), (k, None) ]
+                            modified[k] = self.getFileTemplate(prefs, k)
             # sort the results
             r = set()
             for m in removed, added, modified, renamed:
@@ -1854,7 +1854,7 @@ class VCSs:
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'CM':
                     # modified file or merge conflict
-                    result.append( [ (k, prefs.getString('svn_default_revision')), (k, None) ] )
+                    result.append(self.getFileTemplate(prefs, k))
                 elif v == 'R':
                     # renamed file
                     result.append( [ (k + '@BASE', prefs.getString('svn_default_revision')), (None, None) ] )
@@ -1958,7 +1958,7 @@ class VCSs:
                     result.append( [ (None, None), (k, None) ] )
                 elif v in 'CMR':
                     # modified file, merge conflict, or renamed file
-                    result.append( [ (k, prefs.getString('svk_default_revision')), (k, None) ] )
+                    result.append(self.getFileTemplate(prefs, k))
             return result
 
         def getRevision(self, prefs, name, rev):
