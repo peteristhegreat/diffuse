@@ -1,5 +1,8 @@
+- pane headers tooltips
+- Shift-ScrollWheel can now be used to scroll horizontally
+
 Diffuse 0.4.3 - 2010-04-15
-- fixed a bug that prevent the "-m" option from opening a 3-way merge for Subversion and Bazaar conflicts
+- fixed a bug that prevented the "-m" option from opening a 3-way merge for Subversion and Bazaar conflicts
 
 Diffuse 0.4.2 - 2010-04-13
 - support for detached Git repositories

@@ -2043,12 +2043,14 @@ def step_adjustment(adj, delta):
 # the application to become unresponsive for a while as it processed a large
 # queue of keypress and expose event pairs.
 class ScrolledWindow(gtk.Table):
-    def __init__(self):
+    scroll_directions = set((gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_DOWN, gtk.gdk.SCROLL_LEFT, gtk.gdk.SCROLL_RIGHT))
+    def __init__(self, hadj, vadj):
         gtk.Table.__init__(self, 2, 2)
         self.position = (0, 0)
         self.scroll_count = 0
         self.partial_redraw = False
 
+        self.hadj, self.vadj = hadj, vadj
         vport = gtk.Viewport()
         darea = gtk.DrawingArea()
         self.darea = darea
@@ -2061,71 +2063,51 @@ class ScrolledWindow(gtk.Table):
         self.attach(vport, 0, 1, 0, 1)
         vport.show()
 
-        self.vbar = bar = gtk.VScrollbar()
+        self.vbar = bar = gtk.VScrollbar(vadj)
         self.attach(bar, 1, 2, 0, 1, gtk.FILL, gtk.EXPAND|gtk.FILL)
         bar.show()
-        self.vhandle = bar.get_adjustment().connect('value_changed', self.value_changed_cb)
 
-        self.hbar = bar = gtk.HScrollbar()
+        self.hbar = bar = gtk.HScrollbar(hadj)
         self.attach(bar, 0, 1, 1, 2, gtk.EXPAND|gtk.FILL, gtk.FILL)
         bar.show()
-        self.hhandle = bar.get_adjustment().connect('value_changed', self.value_changed_cb)
-        self.hhandle = bar.get_adjustment().connect('value_changed', self.value_changed_cb)
 
+        # listen to our signals
+        hadj.connect('value_changed', self.value_changed_cb)
+        vadj.connect('value_changed', self.value_changed_cb)
         darea.connect('configure_event', self.configure_cb)
         darea.connect('scroll_event', self.scroll_cb)
         darea.connect('expose_event', self.expose_cb)
 
-    def set_vadjustment(self, adj):
-        self.get_vadjustment().disconnect(self.vhandle)
-        self.vhandle = adj.connect('value_changed', self.value_changed_cb)
-        self.vbar.set_adjustment(adj)
-
-    def get_vadjustment(self):
-        return self.vbar.get_adjustment()
-
-    def set_hadjustment(self, adj):
-        self.get_hadjustment().disconnect(self.hhandle)
-        self.hbar.set_adjustment(adj)
-        self.hhandle = adj.connect('value_changed', self.value_changed_cb)
-
-    def get_hadjustment(self):
-        return self.hbar.get_adjustment()
-
     # updates the adjustments to match the new widget size
     def configure_cb(self, widget, event):
         w, h = event.width, event.height
-
-        adj = self.get_hadjustment()
-        v = adj.get_value()
-        if v + w > adj.upper:
-            adj.set_value(max(0, adj.upper - w))
-        adj.page_size = w
-        adj.page_increment = w
-
-        adj = self.get_vadjustment()
-        v = adj.get_value()
-        if v + h > adj.upper:
-            adj.set_value(max(0, adj.upper - h))
-        adj.page_size = h
-        adj.page_increment = h
+        for adj, d in (self.hadj, w), (self.vadj, h):
+            v = adj.get_value()
+            if v + d > adj.upper:
+                adj.set_value(max(0, adj.upper - d))
+            adj.page_size = d
+            adj.page_increment = d
 
     # update the vertical adjustment when the mouse's scroll wheel is used
     def scroll_cb(self, widget, event):
-        delta = 100
-        if event.direction == gtk.gdk.SCROLL_UP:
-            step_adjustment(self.get_vadjustment(), -delta)
-        elif event.direction == gtk.gdk.SCROLL_DOWN:
-            step_adjustment(self.get_vadjustment(), delta)
-        elif event.direction == gtk.gdk.SCROLL_LEFT:
-            step_adjustment(self.get_hadjustment(), -delta)
-        elif event.direction == gtk.gdk.SCROLL_RIGHT:
-            step_adjustment(self.get_hadjustment(), delta)
+        d = event.direction
+        if d in self.scroll_directions:
+            delta = 100
+            if d in (gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_LEFT):
+                delta = -delta
+            vertical = (d in (gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_DOWN))
+            if event.state & gtk.gdk.SHIFT_MASK:
+                vertical = not vertical
+            if vertical:
+                adj = self.vadj
+            else:
+                adj = self.hadj
+            step_adjustment(adj, delta)
 
     def value_changed_cb(self, widget):
         old_x, old_y = self.position
-        pos_x = int(self.get_hadjustment().get_value())
-        pos_y = int(self.get_vadjustment().get_value())
+        pos_x = int(self.hadj.get_value())
+        pos_y = int(self.vadj.get_value())
         self.position = (pos_x, pos_y)
         if self.darea.window is not None:
             # window.scroll() although visually nice, is slow, revert to
@@ -2493,26 +2475,20 @@ class FileDiffViewer(gtk.Table):
         # create panes
         self.dareas = []
         self.panes = []
-        self.hadj = None
-        self.vadj = None
+        self.hadj = gtk.Adjustment()
+        self.vadj = gtk.Adjustment()
         for i in range(n):
             pane = FileDiffViewer.Pane()
             self.panes.append(pane)
 
             # pane contents
-            sw = ScrolledWindow()
+            sw = ScrolledWindow(self.hadj, self.vadj)
             darea = sw.darea
             darea.add_events(gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON1_MOTION_MASK)
             darea.connect('button_press_event', self.darea_button_press_cb, i)
             darea.connect('motion_notify_event', self.darea_motion_notify_cb, i)
             darea.connect('expose_event', self.darea_expose_cb, i)
             self.dareas.append(darea)
-            if self.hadj is None:
-                self.hadj = sw.get_hadjustment()
-                self.vadj = sw.get_vadjustment()
-            else:
-                sw.set_hadjustment(self.hadj)
-                sw.set_vadjustment(self.vadj)
             self.attach(sw, i, i + 1, 1, 2)
             sw.show()
 
@@ -6018,7 +5994,9 @@ class Diffuse(gtk.Window):
                     ss.append('(' + info.revision + ')')
                 if self.has_edits:
                     ss.append('*')
-                self.label.set_text(' '.join(ss))
+                s = ' '.join(ss)
+                self.label.set_text(s)
+                set_tooltip(self.label, s)
                 self.emit('title_changed')
 
             # set num edits
