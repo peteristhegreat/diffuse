@@ -1058,18 +1058,25 @@ class Preferences:
     # cygwin and native applications can be used on windows, use this method
     # to convert a path to the usual form expected on sys.platform
     def convertToNativePath(self, s):
-        if isWindows():
-            prefix = self.getString('cygwin_cygdrive_prefix')
-            prefix = ''.join([ '/' + p for p in prefix.split('/') if p != '' ])
+        if isWindows() and s.find('/') >= 0:
+            # treat as a cygwin path
+            s = s.replace(os.sep, '/')
             # convert to a Windows native style path
-            p = s.replace('/', os.sep).split(os.sep)
-            if p[0] == '':
-                pr = prefix.split('/')
+            p = [ a for a in s.split('/') if a != '' ]
+            if s.startswith('//'):
+                p[:0] = [ '', '' ]
+            elif s.startswith('/'):
+                pr = [ a for a in self.getString('cygwin_cygdrive_prefix').split('/') if a != '' ]
                 n = len(pr)
-                if len(p) > n and p[:n] == pr and len(p[n]) == 1:
+                if len(p) > n and len(p[n]) == 1 and p[:n] == pr:
+                    # path starts with cygdrive prefix
                     p[:n + 1] = [ p[n] + ':' ]
-                elif len(p) > 1 and p[1] != '':
-                    p[0] = self.getString('cygwin_root')
+                else:
+                    # full path
+                    p[:0] = [ a for a in self.getString('cygwin_root').split(os.sep) if a != '' ]
+            # add trailing slash
+            if p[-1] != '' and s.endswith('/'):
+                p.append('')
             s = os.sep.join(p)
         return s
 
