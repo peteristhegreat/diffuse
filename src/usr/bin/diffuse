@@ -3783,7 +3783,8 @@ class FileDiffViewer(gtk.Table):
         self.selection_char = sj
 
         if extend:
-            gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).set_text(self.getSelectedText())
+            # remove embedded nulls as the clipboard cannot handle them
+            gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).set_text(self.getSelectedText().replace('\0', ''))
 
         self._cursor_position_changed(True)
         self.emit('cursor_changed')
