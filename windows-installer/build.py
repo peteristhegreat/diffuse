@@ -110,8 +110,11 @@ copyFile('diffuserc', 'dist\\diffuserc')
 copyFile('diffuse.ico', 'dist\\diffuse.ico')
 
 # translations
+mkdir('dist\\share\\locale')
+locale_dir = os.path.join(gtk_dir, 'share\\locale')
 for s in glob.glob('..\\translations\\*.po'):
     lang = s[16:-3]
+    # Diffuse localisations
     print 'Compiling %s translation' % (lang, )
     d = 'dist'
     for p in [ 'locale', lang, 'LC_MESSAGES' ]:
@@ -120,6 +123,10 @@ for s in glob.glob('..\\translations\\*.po'):
     d = os.path.join(d, 'diffuse.mo')
     if subprocess.Popen(['msgfmt', '-o', d, s]).wait() != 0:
         raise OSError('Failed to compile "%s" into "%s".' % (s, d))
+    # GTK localisations
+    d = os.path.join(locale_dir, lang)
+    if os.path.isdir(d):
+        copyDir(d, os.path.join('dist\\share\\locale', lang))
 
 #
 # Add all documentation.
