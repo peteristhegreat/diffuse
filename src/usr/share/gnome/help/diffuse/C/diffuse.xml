@@ -423,11 +423,11 @@
     <title>Version Control</title>
 
     <para>
-      Diffuse can retrieve file revisions from several version control systems
-      via their command line interface.  The Microsoft Windows build of Diffuse
+      &app; can retrieve file revisions from several version control systems
+      via their command line interface.  The Microsoft Windows build of &app;
       is able to use both the Cygwin and native versions of the supported
-      version control systems.  When using Diffuse with Cygwin, ensure
-      Diffuse's Cygwin preferences correctly describe your system.  If the
+      version control systems.  When using &app; with Cygwin, ensure
+      &app;'s Cygwin preferences correctly describe your system.  If the
       <guilabel>Update paths for Cygwin</guilabel> preference exists for a
       version control system, it must be enabled to use the Cygwin version.
     </para>
@@ -443,7 +443,7 @@
       <title>Viewing Uncommitted Modifications</title>
 
       <para>
-        The <userinput>-m</userinput> option will cause Diffuse to open
+        The <userinput>-m</userinput> option will cause &app; to open
         comparison tabs for each file the version control system indicates has
         uncommitted modifications.  This is convenient for reviewing all
         changes before committing or resolving a merge conflict.  If no paths
@@ -520,7 +520,7 @@
       </para>
 
       <para>
-        Diffuse does not limit the number of panes that can be used for
+        &app; does not limit the number of panes that can be used for
         comparing files.  The inputs to a Git octopus merge could be viewed
         with a command line like this:
       </para>
@@ -535,7 +535,7 @@
     <title>Resources</title>
 
     <para>
-      Resources can be used to customise several aspects of Diffuse's
+      Resources can be used to customise several aspects of &app;'s
       appearance and behaviour such as changing the colours used in the user
       interface, customising the keyboard shortcuts, adding or replacing syntax
       highlighting rules, or changing the mapping from file extensions to
@@ -686,7 +686,7 @@
           <varlistentry>
             <term><userinput>close_tab</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Close Tab</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>File</guimenu><guimenuitem>Close Tab</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+w</para>
             </listitem>
           </varlistentry>
@@ -694,7 +694,7 @@
           <varlistentry>
             <term><userinput>undo_close_tab</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Undo Close Tab</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>File</guimenu><guimenuitem>Undo Close Tab</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+w</para>
             </listitem>
           </varlistentry>
@@ -758,7 +758,7 @@
           <varlistentry>
             <term><userinput>clear_edits</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Clear Edits</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Clear Edits</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+r</para>
             </listitem>
           </varlistentry>
@@ -766,7 +766,7 @@
           <varlistentry>
             <term><userinput>dismiss_all_edits</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Dismiss All Edits</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Dismiss All Edits</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+d</para>
             </listitem>
           </varlistentry>
@@ -806,7 +806,7 @@
           <varlistentry>
             <term><userinput>preferences</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Preferences</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Preferences</guimenuitem></menuchoice> menu item</para>
               <para>Default: None</para>
             </listitem>
           </varlistentry>
@@ -830,7 +830,7 @@
           <varlistentry>
             <term><userinput>realign_all</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Realign All</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Realign All</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+l</para>
             </listitem>
           </varlistentry>
@@ -838,7 +838,7 @@
           <varlistentry>
             <term><userinput>isolate</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Isolate</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Isolate</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+i</para>
             </listitem>
           </varlistentry>
@@ -846,7 +846,7 @@
           <varlistentry>
             <term><userinput>first_difference</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>First Difference</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>First Difference</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+Up</para>
             </listitem>
           </varlistentry>
@@ -854,7 +854,7 @@
           <varlistentry>
             <term><userinput>previous_difference</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Previous Difference</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Previous Difference</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+Up</para>
             </listitem>
           </varlistentry>
@@ -862,7 +862,7 @@
           <varlistentry>
             <term><userinput>next_difference</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Next Difference</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Next Difference</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+Down</para>
             </listitem>
           </varlistentry>
@@ -870,7 +870,7 @@
           <varlistentry>
             <term><userinput>last_difference</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Last Difference</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Last Difference</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+Down</para>
             </listitem>
           </varlistentry>
@@ -894,7 +894,7 @@
           <varlistentry>
             <term><userinput>shift_pane_right</userinput></term>
             <listitem>
-              <para>shift the currently selected pane to the right</para>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Shift Pane Right</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+parenleft</para>
             </listitem>
           </varlistentry>
@@ -902,7 +902,7 @@
           <varlistentry>
             <term><userinput>shift_pane_left</userinput></term>
             <listitem>
-              <para>shift the currently selected pane to the left</para>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Shift Pane Left</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+parenright</para>
             </listitem>
           </varlistentry>
@@ -910,7 +910,7 @@
           <varlistentry>
             <term><userinput>convert_to_upper_case</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert To Upper Case</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Convert To Upper Case</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+u</para>
             </listitem>
           </varlistentry>
@@ -918,7 +918,7 @@
           <varlistentry>
             <term><userinput>convert_to_lower_case</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert To Lower Case</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Convert To Lower Case</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+U</para>
             </listitem>
           </varlistentry>
@@ -926,7 +926,7 @@
           <varlistentry>
             <term><userinput>sort_lines_in_ascending_order</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Sort Lines In Ascending Order</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Sort Lines In Ascending Order</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+y</para>
             </listitem>
           </varlistentry>
@@ -934,7 +934,7 @@
           <varlistentry>
             <term><userinput>sort_lines_in_descending_order</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Sort Lines In Descending Order</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Sort Lines In Descending Order</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+Y</para>
             </listitem>
           </varlistentry>
@@ -942,7 +942,7 @@
           <varlistentry>
             <term><userinput>remove_trailing_white_space</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Remove Trailing White Space</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Remove Trailing White Space</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+k</para>
             </listitem>
           </varlistentry>
@@ -950,7 +950,7 @@
           <varlistentry>
             <term><userinput>convert_tabs_to_spaces</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert Tabs To Spaces</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Convert Tabs To Spaces</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+b</para>
             </listitem>
           </varlistentry>
@@ -958,7 +958,7 @@
           <varlistentry>
             <term><userinput>convert_leading_spaces_to_tabs</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert Leading Spaces To Tabs</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Convert Leading Spaces To Tabs</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+B</para>
             </listitem>
           </varlistentry>
@@ -966,7 +966,7 @@
           <varlistentry>
             <term><userinput>increase_indenting</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Increase Indenting</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Increase Indenting</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+&gt;</para>
             </listitem>
           </varlistentry>
@@ -974,7 +974,7 @@
           <varlistentry>
             <term><userinput>decrease_indenting</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Decrease Indenting</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Decrease Indenting</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+&lt;</para>
             </listitem>
           </varlistentry>
@@ -982,7 +982,7 @@
           <varlistentry>
             <term><userinput>convert_to_dos</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert To DOS Format</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Convert To DOS Format</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+E</para>
             </listitem>
           </varlistentry>
@@ -990,7 +990,7 @@
           <varlistentry>
             <term><userinput>convert_to_mac</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert To Mac Format</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Convert To Mac Format</guimenuitem></menuchoice> menu item</para>
               <para>Default: Shift+Ctrl+C</para>
             </listitem>
           </varlistentry>
@@ -998,7 +998,7 @@
           <varlistentry>
             <term><userinput>convert_to_unix</userinput></term>
             <listitem>
-              <para><menuchoice><guimenu>Edit</guimenu><guimenuitem>Convert To Unix Format</guimenuitem></menuchoice> menu item</para>
+              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Convert To Unix Format</guimenuitem></menuchoice> menu item</para>
               <para>Default: Ctrl+e</para>
             </listitem>
           </varlistentry>
