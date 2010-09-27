@@ -74,7 +74,7 @@
       </refsect1>
 
       <xsl:for-each select="chapter">
-        <xsl:if test="title != 'Introduction'">
+        <xsl:if test="@id != 'introduction'">
           <refsect1>
             <xsl:apply-templates select="title"/>
             <xsl:apply-templates select="para"/>
@@ -99,16 +99,11 @@
 
       <refsect1>
         <title>Author</title>
-        <xsl:for-each select="id('introduction-about')">
-          <xsl:apply-templates select="para[1]"/>
-        </xsl:for-each>
+        <xsl:apply-templates select="id('introduction-about')/para"/>
       </refsect1>
 
       <refsect1 id="introduction-licence">
-        <title>Copyright</title>
-        <xsl:for-each select="id('introduction-about')">
-          <xsl:apply-templates select="para[2]"/>
-        </xsl:for-each>
+        <title>Copying</title>
         <xsl:for-each select="id('introduction-licence')">
           <xsl:apply-templates select="para[1]"/>
         </xsl:for-each>
