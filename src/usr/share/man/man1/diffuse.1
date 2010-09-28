@@ -1,12 +1,15 @@
+'\" t
 .TH "DIFFUSE" "1" "2010\-04\-15" "diffuse 0\&.4\&.3" "Diffuse Manual"
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
 .nh
 .ad l
 .SH "NAME"
 diffuse \- graphical tool for merging and comparing text files
 .SH "SYNOPSIS"
-.HP 8
+.HP \w'\fBdiffuse\fR\ 'u
 \fBdiffuse\fR [\fB\-h\fR | \fB\-?\fR | \fB\-\-help\fR | \fB\-v\fR | \fB\-\-version\fR]
-.HP 8
+.HP \w'\fBdiffuse\fR\ 'u
 \fBdiffuse\fR [\fB\-\-no\-rcfile\fR | \fB\-\-rcfile\ \fR\fB\fIfile\fR\fR] [[\fIoption\fR...] | [\fIfile\fR...]...]
 .SH "DESCRIPTION"
 .PP
@@ -141,7 +144,7 @@ Isolate
 menu item to prevent the selected lines from being matched with any lines from the adjacent files\&.
 .SS "Editing"
 .PP
-Press the enter key or double\-click on a text area to enter text editing mode\&. The cursor will change to indicate text editing mode and the status bar at the bottom of the window will display the cursor\'s column position\&.
+Press the enter key or double\-click on a text area to enter text editing mode\&. The cursor will change to indicate text editing mode and the status bar at the bottom of the window will display the cursor\*(Aqs column position\&.
 .PP
 In text editing mode, text can be selected with the mouse pointer by click and dragging\&. The current selection can be extended by holding down the shift key and moving the cursor by clicking with the mouse pointer or pressing any of the arrow, home, end or page up/down keys\&. Individual words can be selected by double\-clicking on them with the mouse pointer\&. Whole lines can be selected by triple\-clicking on them with the mouse pointer\&.
 .PP
@@ -151,7 +154,7 @@ and
 Redo
 menu items to undo and redo the previously preformed operations\&.
 .PP
-Press the escape key or click on another file\'s text area using the left mouse button to leave editing mode\&.
+Press the escape key or click on another file\*(Aqs text area using the left mouse button to leave editing mode\&.
 .SS "Merging"
 .PP
 Use the difference buttons or menu items to navigate between blocks of differences within a file\&. When navigating, Diffuse will move the selection to the next continuous set of lines with differences or edits\&.
@@ -165,7 +168,7 @@ Clear Edits
 menu item regardless of the order the edits were performed\&.
 .SH "VERSION CONTROL"
 .PP
-Diffuse can retrieve file revisions from several version control systems via their command line interface\&. The Microsoft Windows build of Diffuse is able to use both the Cygwin and native versions of the supported version control systems\&. When using Diffuse with Cygwin, ensure Diffuse\'s Cygwin preferences correctly describe your system\&. If the
+Diffuse can retrieve file revisions from several version control systems via their command line interface\&. The Microsoft Windows build of Diffuse is able to use both the Cygwin and native versions of the supported version control systems\&. When using Diffuse with Cygwin, ensure Diffuse\*(Aqs Cygwin preferences correctly describe your system\&. If the
 Update paths for Cygwin
 preference exists for a version control system, it must be enabled to use the Cygwin version\&.
 .PP
@@ -180,108 +183,136 @@ option will cause Diffuse to open comparison tabs for each file the version cont
 .PP
 
 .sp
+.if n \{\
 .RS 4
+.\}
 .nf
 $ \fBdiffuse \-m\fR
 .fi
+.if n \{\
 .RE
+.\}
 .PP
 The default revision of a file will be used for comparison if only one file is specified\&. For example, this will display a 2\-way merge between the default revision of
-\fIfoo\&.C\fR
+foo\&.C
 and the local
-\fIfoo\&.C\fR
+foo\&.C
 file:
 .PP
 
 .sp
+.if n \{\
 .RS 4
+.\}
 .nf
 $ \fBdiffuse foo\&.C\fR
 .fi
+.if n \{\
 .RE
+.\}
 .sp
 .SS "Specifying Revisions"
 .PP
 The
 \fB\-r\fR
 option may also be used to explicitly specify a particular file revision\&. Any revision specifier understood by the version control system may be used\&. The local file will be used for comparison if only one file revision is specified\&. For example, this will display a 2\-way merge between revision 123 of
-\fIfoo\&.C\fR
+foo\&.C
 and the local
-\fIfoo\&.C\fR
+foo\&.C
 file:
 .PP
 
 .sp
+.if n \{\
 .RS 4
+.\}
 .nf
 $ \fBdiffuse \-r 123 foo\&.C\fR
 .fi
+.if n \{\
 .RE
+.\}
 .PP
 Multiple file revisions can be compared by specifying multiple
 \fB\-r\fR
 options\&. For example, this will display a 2\-way merge between revision 123 of
-\fIfoo\&.C\fR
+foo\&.C
 and revision 321 of
-\fIfoo\&.C\fR:
+foo\&.C:
 .PP
 
 .sp
+.if n \{\
 .RS 4
+.\}
 .nf
 $ \fBdiffuse \-r 123 \-r 321 foo\&.C\fR
 .fi
+.if n \{\
 .RE
+.\}
 .PP
 Local files can be mixed with files from the version control system\&. For example, this will display a 3\-way merge between revision MERGE_HEAD of
-\fIfoo\&.C\fR, the local
-\fIfoo\&.C\fR
+foo\&.C, the local
+foo\&.C
 file, and revision HEAD of
-\fIfoo\&.C\fR:
+foo\&.C:
 .PP
 
 .sp
+.if n \{\
 .RS 4
+.\}
 .nf
 $ \fBdiffuse \-r MERGE_HEAD foo\&.C foo\&.C \-r HEAD foo\&.C\fR
 .fi
+.if n \{\
 .RE
+.\}
 .PP
 For the
 \fB\-c\fR
 option may be used to easily specify a pair of numerically sequential revisions\&. For example, this will display a 2\-way merge between revision 1\&.2\&.2 of
-\fIfoo\&.C\fR
+foo\&.C
 and revision 1\&.2\&.3 of
-\fIfoo\&.C\fR:
+foo\&.C:
 .PP
 
 .sp
+.if n \{\
 .RS 4
+.\}
 .nf
 $ \fBdiffuse \-c 1\&.2\&.3 foo\&.C\fR
 .fi
+.if n \{\
 .RE
+.\}
 .PP
 Diffuse does not limit the number of panes that can be used for comparing files\&. The inputs to a Git octopus merge could be viewed with a command line like this:
 .PP
 
 .sp
+.if n \{\
 .RS 4
+.\}
 .nf
 $ \fBdiffuse \-r HEAD^1 \-r HEAD^2 \-r HEAD^3 \-r HEAD^4 \-r HEAD^5 foo\&.C\fR
 .fi
+.if n \{\
 .RE
+.\}
 .sp
 .SH "RESOURCES"
 .PP
-Resources can be used to customise several aspects of Diffuse\'s appearance and behaviour such as changing the colours used in the user interface, customising the keyboard shortcuts, adding or replacing syntax highlighting rules, or changing the mapping from file extensions to syntax highlighting rules\&.
+Resources can be used to customise several aspects of Diffuse\*(Aqs appearance and behaviour such as changing the colours used in the user interface, customising the keyboard shortcuts, adding or replacing syntax highlighting rules, or changing the mapping from file extensions to syntax highlighting rules\&.
 .PP
 When Diffuse is started, it will read commands from the system wide initialisation file
-\fI/etc/diffuserc\fR
-(\fI%INSTALL_DIR%\ediffuserc\fR
+/etc/diffuserc
+(%INSTALL_DIR%\ediffuserc
 on Microsoft Windows) and then the personal initialisation file
-\fI~/\&.config/diffuse/diffuserc\fR
-(\fI%HOME%\e\&.config\ediffuse\ediffuserc\fR
+~/\&.config/diffuse/diffuserc
+(%HOME%\e\&.config\ediffuse\ediffuserc
 on Microsoft Windows)\&. This behaviour can be changed with the
 \fB\-\-no\-rcfile\fR
 and
@@ -332,8 +363,9 @@ for the
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-Menu Item Key Bindings
-.RS
+.ps +1
+\fBMenu Item Key Bindings\fR
+.RS 4
 .PP
 Use
 \fBmenu\fR
@@ -803,8 +835,9 @@ Default: None
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-Line Editing Mode Key Bindings
-.RS
+.ps +1
+\fBLine Editing Mode Key Bindings\fR
+.RS 4
 .PP
 Use
 \fBline_mode\fR
@@ -1021,8 +1054,9 @@ Default: i
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-Alignment Editing Mode Key Bindings
-.RS
+.ps +1
+\fBAlignment Editing Mode Key Bindings\fR
+.RS 4
 .PP
 Use
 \fBalign_mode\fR
@@ -1113,8 +1147,9 @@ Default: space
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-Character Editing Mode Key Bindings
-.RS
+.ps +1
+\fBCharacter Editing Mode Key Bindings\fR
+.RS 4
 .PP
 Use
 \fBcharacter_mode\fR
@@ -1144,25 +1179,11 @@ with value
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-Used String Resources
-.RS
+.ps +1
+\fBUsed String Resources\fR
+.RS 4
 .PP
 The following string resources are used by Diffuse:
-.PP
-\fBcharacter_classes\fR
-.RS 4
-describes mapping used to identify characters of a similar class for selection when double\-clicking
-.sp
-This resource is a series of
-\fIrange\fR:\fIvalue\fR
-pairs\&. The
-\fIrange\fR
-is either a single number or
-\fIlow\fR\-\fIhigh\fR
-corresponding to the code for the character or characters to be set\&. Neighbouring characters that map to the same
-\fIvalue\fR
-will be selected as a group when double\-clicking on a word\&.
-.RE
 .PP
 \fBdifference_colours\fR
 .RS 4
@@ -1181,8 +1202,9 @@ Declares a colour resource called
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-Used Colour Resources
-.RS
+.ps +1
+\fBUsed Colour Resources\fR
+.RS 4
 .PP
 The following colour resources are used by Diffuse:
 .PP
@@ -1275,8 +1297,9 @@ with value
 .nr an-no-space-flag 1
 .nr an-break-flag 1
 .br
-Used Floating Point Resources
-.RS
+.ps +1
+\fBUsed Floating Point Resources\fR
+.RS 4
 .PP
 The following floating point resources are used by Diffuse:
 .PP
@@ -1377,42 +1400,42 @@ for highlighting\&.
 .PP
 The following files are used by Diffuse:
 .PP
-\fI/etc/diffuserc\fR
+/etc/diffuserc
 .RS 4
-system wide initialisations (\fI%INSTALL_DIR%\ediffuserc\fR
+system wide initialisations (%INSTALL_DIR%\ediffuserc
 on Microsoft Windows)
 .RE
 .PP
-\fI/usr/share/diffuse/syntax/*\&.syntax\fR
+/usr/share/diffuse/syntax/*\&.syntax
 .RS 4
-syntax files for various languages (\fI%INSTALL_DIR%\esyntax\e*\&.syntax\fR
+syntax files for various languages (%INSTALL_DIR%\esyntax\e*\&.syntax
 on Microsoft Windows)
 .RE
 .PP
-\fI~/\&.config/diffuse/diffuserc\fR
+~/\&.config/diffuse/diffuserc
 .RS 4
-your initialisations (\fI%HOME%\e\&.config\ediffuse\ediffuserc\fR
+your initialisations (%HOME%\e\&.config\ediffuse\ediffuserc
 on Microsoft Windows)
 .RE
 .PP
-\fI~/\&.config/diffuse/prefs\fR
+~/\&.config/diffuse/prefs
 .RS 4
-your saved preferences (\fI%HOME%\e\&.config\ediffuse\eprefs\fR
+your saved preferences (%HOME%\e\&.config\ediffuse\eprefs
 on Microsoft Windows)
 .RE
 .PP
-\fI~/\&.config/diffuse/state\fR
+~/\&.config/diffuse/state
 .RS 4
-data persistent across sessions (\fI%HOME%\e\&.config\ediffuse\estate\fR
+data persistent across sessions (%HOME%\e\&.config\ediffuse\estate
 on Microsoft Windows)
 .RE
 .SH "AUTHOR"
 .PP
 Diffuse was written by Derrick Moser
-<derrick_moser@yahoo\&.com>\&.
-.SH "COPYRIGHT"
+derrick_moser@yahoo\&.com\&.
 .PP
 \(co 2006\-2010 Derrick Moser\&. All Rights Reserved\&.
+.SH "COPYING"
 .PP
 Diffuse is free software; you may redistribute it and/or modify it under the terms of the
 GNU General Public License

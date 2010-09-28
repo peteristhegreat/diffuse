@@ -1459,24 +1459,6 @@
         <para>The following string resources are used by &app;:</para>
 
         <variablelist>
-
-          <varlistentry>
-            <term><userinput>character_classes</userinput></term>
-            <listitem>
-              <para>describes mapping used to identify characters of a similar class for selection when double-clicking</para>
-              <para>
-                This resource is a series of
-                <replaceable>range</replaceable>:<replaceable>value</replaceable>
-                pairs.  The <replaceable>range</replaceable> is either a single
-                number or <replaceable>low</replaceable>-<replaceable>high</replaceable>
-                corresponding to the code for the character or characters to be
-                set.  Neighbouring characters that map to the same
-                <replaceable>value</replaceable> will be selected as a group
-                when double-clicking on a word.
-              </para>
-            </listitem>
-          </varlistentry>
-
           <varlistentry>
             <term><userinput>difference_colours</userinput></term>
             <listitem>

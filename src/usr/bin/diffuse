@@ -444,7 +444,6 @@ class Resources:
         self.unknown_strings = set()
 
         self.default_colour = Colour(0.0, 0.0, 0.0)
-        self.char_classes = {}
 
         # syntax highlighting support
         self.syntaxes = {}
@@ -457,7 +456,6 @@ class Resources:
 
         # special string resources
         self.setDifferenceColours('difference_1 difference_2 difference_3')
-        self.setCharacterClasses('48-57:48 65-90:48 97-122:48 95:48 9:32')
 
     # keyboard action processing
     def setKeyBinding(self, ctx, s, v):
@@ -524,21 +522,6 @@ class Resources:
     def getDifferenceColour(self, i):
         n = len(self.difference_colours)
         return self.getColour(self.difference_colours[(i + n - 1) % n])
-
-    # mapping used to identify similar character to select when double-clicking
-    def setCharacterClasses(self, s):
-        self.char_classes = {}
-        for ss in s.split():
-            a = ss.split(':')
-            if len(a) == 2:
-                r = a[0].split('-')
-                c = int(a[1])
-                for a in range(int(r[0]), int(r[-1]) + 1):
-                    self.char_classes[a] = c
-
-    def getCharacterClass(self, c):
-        c = ord(c)
-        return self.char_classes.get(c, c)
 
     # colour resources
     def getColour(self, symbol):
@@ -631,8 +614,6 @@ class Resources:
                             self.strings[args[1]] = args[2]
                             if args[1] == 'difference_colours':
                                 self.setDifferenceColours(args[2])
-                            elif args[1] == 'character_classes':
-                                self.setCharacterClasses(args[2])
                         # eg. start a syntax specification for Python
                         #    syntax Python normal text
                         # where 'normal' is the name of the default state and
@@ -2325,6 +2306,14 @@ ALIGN_MODE = 2
 # mapping to column width of a character (tab will never be in this map)
 char_width_cache = {}
 
+# maps similar types of characters to a group
+def getCharacterClass(c):
+    if c.isalnum() or c == u'_':
+        return 0
+    elif c.isspace():
+        return 1
+    return 2
+
 # widget used to compare and merge text files
 class FileDiffViewer(gtk.Table):
     # class describing a text pane
@@ -3917,11 +3906,11 @@ class FileDiffViewer(gtk.Table):
                         j = self._getPickedCharacter(text, x, False)
                         if j < n:
                             ss = self.expand(text[:n])
-                            c = theResources.getCharacterClass(text[j])
+                            c = getCharacterClass(text[j])
                             k = j
-                            while k > 0 and theResources.getCharacterClass(text[k - 1]) == c:
+                            while k > 0 and getCharacterClass(text[k - 1]) == c:
                                 k -= 1
-                            while j < n and theResources.getCharacterClass(text[j]) == c:
+                            while j < n and getCharacterClass(text[j]) == c:
                                 j += 1
                             self.setCurrentChar(i, j, i, k)
             elif event.type == gtk.gdk._3BUTTON_PRESS:
@@ -6406,7 +6395,7 @@ class Diffuse(gtk.Window):
                 if syntax is not None:
                     self.setSyntax(syntax)
                 return True
-            except UnicodeEncodeError:
+            except (UnicodeEncodeError, LookupError):
                 dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error encoding to %s.') % (encoding, ))
                 dialog.run()
                 dialog.destroy()
@@ -7137,10 +7126,16 @@ class Diffuse(gtk.Window):
     # request search parameters if force=True and then perform a search in the
     # current viewer pane
     def find(self, force, reverse):
+        viewer = self.getCurrentViewer()
         if force or self.search_pattern is None:
             # construct search dialog
             history = self.search_history
-            dialog = SearchDialog(self.get_toplevel(), self.search_pattern, history)
+            pattern = viewer.getSelectedText()
+            for c in '\r\n':
+                i = pattern.find(c)
+                if i >= 0:
+                    pattern = pattern[:i]
+            dialog = SearchDialog(self.get_toplevel(), pattern, history)
             dialog.match_case_button.set_active(self.bool_state['search_matchcase'])
             dialog.backwards_button.set_active(self.bool_state['search_backwards'])
             keep = (dialog.run() == gtk.RESPONSE_ACCEPT)
@@ -7161,7 +7156,6 @@ class Diffuse(gtk.Window):
 
         # determine where to start searching from
         reverse ^= self.bool_state['search_backwards']
-        viewer = self.getCurrentViewer()
         from_start, more = False, True
         while more:
             if viewer.find(self.search_pattern, self.bool_state['search_matchcase'], reverse, from_start):
