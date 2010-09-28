@@ -705,6 +705,14 @@ class Resources:
 
 theResources = Resources()
 
+def decodefilename(s):
+    if s is not None:
+        if isWindows():
+            s = unicode(s, 'utf_8')
+        else:
+            s = unicode(s, sys.getfilesystemencoding())
+    return s
+ 
 # text entry widget with a button to help pick file names
 class FileEntry(gtk.HBox):
     def __init__(self, parent, title):
@@ -726,8 +734,9 @@ class FileEntry(gtk.HBox):
     # action performed when the pick file button is pressed
     def chooseFile(self, widget):
         dialog = gtk.FileChooserDialog(self.title, self.toplevel, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        dialog.set_current_folder(unicode(os.path.realpath(os.curdir), sys.getfilesystemencoding()))
         if dialog.run() == gtk.RESPONSE_OK:
-            self.entry.set_text(dialog.get_filename())
+            self.entry.set_text(decodefilename(dialog.get_filename()))
         dialog.destroy()
 
     def set_text(self, s):
@@ -758,10 +767,8 @@ class Preferences:
         self.encodings = sorted(set(encodings.aliases.aliases.values()))
 
         if isWindows():
-            font = 'Courier 10'
             svk_bin = 'svk.bat'
         else:
-            font = 'Monospace 10'
             svk_bin = 'svk'
 
         # self.template describes how preference dialogue layout
@@ -783,7 +790,7 @@ class Preferences:
         self.template = [ 'FolderSet',
             _('Display'),
             [ 'List',
-              [ 'Font', 'display_font', font, _('Font') ],
+              [ 'Font', 'display_font', 'Monospace 10', _('Font') ],
               [ 'Integer', 'display_tab_width', 8, _('Tab width'), 1, 1024 ],
               [ 'Boolean', 'display_show_line_numbers', True, _('Show line numbers') ],
               [ 'Boolean', 'display_show_whitespace', False, _('Show white space characters') ],
@@ -815,7 +822,7 @@ class Preferences:
             ],
             _('Regional Settings'),
             [ 'List',
-              [ 'String', 'encoding_auto_detect_codecs', 'utf_8 latin_1', _('Order of codecs used to identify encoding') ]
+              [ 'String', 'encoding_auto_detect_codecs', ' '.join([sys.getfilesystemencoding(), 'latin_1']), _('Order of codecs used to identify encoding') ]
             ],
         ]
         if isWindows():
@@ -1058,6 +1065,7 @@ class Preferences:
     # cygwin and native applications can be used on windows, use this method
     # to convert a path to the usual form expected on sys.platform
     def convertToNativePath(self, s):
+	s = unicode(s, sys.getfilesystemencoding())
         if isWindows() and s.find('/') >= 0:
             # treat as a cygwin path
             s = s.replace(os.sep, '/')
@@ -1258,6 +1266,7 @@ def relpath(a, b):
 # by prepending './' to the basename
 def safeRelativePath(abspath1, name, prefs, cygwin_pref):
     s = os.path.join(os.curdir, relpath(abspath1, os.path.abspath(name)))
+    s = codecs.encode(s, sys.getfilesystemencoding())
     if isWindows():
         if prefs.getBool(cygwin_pref):
             s = s.replace('\\', '/')
@@ -5834,7 +5843,7 @@ class FileChooserDialog(gtk.FileChooserDialog):
 
         self.vbox.pack_start(hbox, False, False, 0)
         hbox.show()
-        self.set_current_folder(os.path.realpath(os.path.curdir))
+        self.set_current_folder(unicode(os.path.realpath(os.curdir), sys.getfilesystemencoding()))
 
     def set_encoding(self, encoding):
         if encoding not in self.encodings:
@@ -5849,6 +5858,10 @@ class FileChooserDialog(gtk.FileChooserDialog):
 
     def get_revision(self):
         return self.revision.get_text()
+
+    def get_filename(self):
+        # convert from UTF-8 string to unicode
+        return decodefilename(gtk.FileChooserDialog.get_filename(self))
 
 # dialogue used to search for text
 class GoToLineDialog(gtk.Dialog):
@@ -6236,7 +6249,7 @@ class Diffuse(gtk.Window):
                         ss, encoding = self.prefs.convertToUnicode(ss)
                     else:
                         ss = [ unicode(s, encoding) for s in ss ]
-                except (IOError, OSError, UnicodeDecodeError, WindowsError):
+                except (IOError, OSError, UnicodeDecodeError, WindowsError, LookupError):
                     # FIXME: this can occur before the toplevel window is drawn
                     if rev is not None:
                         msg = _('Error reading revision %(rev)s of %(file)s.') % { 'rev': rev, 'file': name }
