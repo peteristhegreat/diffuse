@@ -230,14 +230,15 @@ processFiles(install, os.path.join(destdir, prefix[1:]), 'src/usr/', {
         'bin/diffuse': [ ("'../../etc/diffuserc'", repr(relpath(os.path.join(prefix, 'bin'), os.path.join(sysconfdir, 'diffuserc')))), ('/usr/bin/env python', pythonbin) ],
         'share/applications/diffuse.desktop': None,
         'share/diffuse/syntax/*.syntax': None,
-        'share/gnome/help/diffuse/C/diffuse.xml': [ ('/usr/', prefix), ('/etc/', sysconfdir) ],
+        'share/gnome/help/diffuse/*/diffuse.xml': [ ('/usr/', prefix), ('/etc/', sysconfdir) ],
         'share/omf/diffuse/diffuse-C.omf': [ ('/usr/', prefix) ],
         'share/pixmaps/diffuse.png': None
     })
 
 # install manual
 processFiles(install, os.path.join(destdir, mandir[1:]), 'src/usr/share/man/', {
-        'man1/diffuse.1': [ ('/usr/', prefix), ('/etc/', sysconfdir) ]
+        'man1/diffuse.1': [ ('/usr/', prefix), ('/etc/', sysconfdir) ],
+        '*/man1/diffuse.1': [ ('/usr/', prefix), ('/etc/', sysconfdir) ]
     })
 
 # install files to sysconfdir
@@ -248,7 +249,7 @@ processTranslations(install, os.path.join(destdir, prefix[1:]))
 
 if not install:
     # remove directories we own
-    for s in 'share/omf/diffuse', 'share/gnome/help/diffuse/C', 'share/gnome/help/diffuse', 'share/diffuse/syntax', 'share/diffuse':
+    for s in 'share/omf/diffuse', 'share/gnome/help/diffuse/C', 'share/gnome/help/diffuse/ru', 'share/gnome/help/diffuse', 'share/diffuse/syntax', 'share/diffuse':
         d = os.path.join(destdir, os.path.join(prefix, s)[1:])
         try:
             os.rmdir(d)
