@@ -15,8 +15,8 @@ ShowLanguageDialog=auto
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl,.\en.isl"
-Name: "de"; MessagesFile: "compiler:Languages\German.isl,.\en.isl"
-Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl,.\en.isl"
+Name: "de"; MessagesFile: "compiler:Languages\German.isl,.\de.isl"
+Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl,.\es.isl"
 Name: "ja"; MessagesFile: "compiler:Languages\Japanese.isl,.\en.isl"
 Name: "ko"; MessagesFile: "compiler:Languages\Korean-5-5.1.11.isl,.\en.isl"
 Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl,.\ru.isl"
