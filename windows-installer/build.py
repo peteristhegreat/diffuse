@@ -18,6 +18,7 @@
 
 # This program builds a Windows installer for Diffuse.
 
+import codecs
 import glob
 import os
 import platform
@@ -35,7 +36,7 @@ def mkdir(s):
         os.mkdir(s)
 
 # copies a file to 'dest'
-def copyFile(src, dest, use_text_mode=False):
+def copyFile(src, dest, use_text_mode=False,enc=None):
     print 'copying "%s" to "%s"' % (src, dest)
     if use_text_mode:
         r, w = 'r', 'w'
@@ -44,6 +45,8 @@ def copyFile(src, dest, use_text_mode=False):
     f = open(src, r)
     s = f.read()
     f.close()
+    if enc is not None:
+        s = codecs.encode(unicode(s, 'utf_8'), enc)
     f = open(dest, w)
     f.write(s)
     f.close()
@@ -59,6 +62,16 @@ def copyDir(src, dest):
             copyFile(s, d)
         elif os.path.isdir(s):
             copyDir(s, d)
+
+# helper to clean up the resulting HTML
+def extract_tag(s, start, end):
+    i = s.find(start)
+    if i >= 0:
+        pre = s[:i]
+        i += len(start)
+        j = s.find(end, i)
+        if j >= 0:
+            return pre, start, s[i:j], end, s[j+len(end):]
 
 #
 # Make sure we are in the correct directory.
@@ -135,13 +148,27 @@ for s in glob.glob('..\\translations\\*.po'):
 # license and other documentation
 for p in 'AUTHORS', 'ChangeLog', 'COPYING', 'README':
     copyFile(os.path.join('..', p), os.path.join('dist', p + '.txt'), True)
+for p, enc in [ ('README_ru', 'cp1251') ]:
+    copyFile(os.path.join('..', p), os.path.join('dist', p + '.txt'), True, enc)
+
+# fetch translations for English text hard coded in the stylesheets
+translations = {}
+f = open('translations.txt', 'rb')
+for v in f.read().split('\n'):
+    v = v.split(':')
+    if len(v) == 3:
+        lang = v[0]
+        if not translations.has_key(lang):
+            translations[lang] = []
+        translations[lang].append(v[1:])
+f.close()
 
 # convert the manual from DocBook to HTML
 d = '..\\src\\usr\\share\\gnome\\help\\diffuse'
 for lang in os.listdir(d):
     p = os.path.join(os.path.join(d, lang), 'diffuse.xml')
     if os.path.isfile(p):
-        cmd = [ 'xsltproc', '/usr/share/docbook-xsl/html/docbook.xsl', p ]
+        cmd = [ 'xsltproc', '/usr/share/sgml/docbook/xsl-stylesheets/html/docbook.xsl', p ]
         info = subprocess.STARTUPINFO()
         info.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         info.wShowWindow = subprocess.SW_HIDE
@@ -157,10 +184,40 @@ for lang in os.listdir(d):
         s = s.replace('</head>', '<link rel="stylesheet" href="style.css" type="text/css"/></head>')
         s = s.replace('<p>\n        </p>', '')
         s = s.replace('<p>\n      </p>', '')
+        # cleanup HTML to simpler UTF-8 form
+        s = s.replace('<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">', '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">')
+        a, idx = [], 0
+        while True:
+            i = s.find('&#', idx)
+            if i < 0:
+                a.append(unicode(s[idx:], 'latin_1'))
+                break
+            a.append(unicode(s[idx:i], 'latin_1'))
+            i += 2
+            j = s.find(';', i)
+            a.append(unichr(int(s[i:j])))
+            idx = j + 1
+        s = u''.join(a)
+        s = codecs.encode(s, 'utf-8')
+        # clean up translator credit portion
+        div = extract_tag(s, '<div class="othercredit">', '</div>')
+        if div is not None:
+           firstname = extract_tag(div[2], '<span class="firstname">', '</span>')
+           surname = extract_tag(div[2], '<span class="surname">', '</span>')
+           contrib = extract_tag(div[2], '<span class="contrib">', '</span>')
+           email = extract_tag(div[2], '<code class="email">', '</code>')
+           copyright = extract_tag(div[4], '<p class="copyright">', '</p>')
+           if firstname is not None and surname is not None and contrib is not None and email is not None and copyright is not None:
+               s = '%s%s<p><span class="contrib">%s:</span> <span class="firstname">%s</span> <span class="surname">%s</span> <code class="email">%s</code></p>%s' % (div[0], ''.join(copyright[:4]), contrib[2], firstname[2], surname[2], email[2], copyright[4])
+        # translate extra text
+        for k, v in translations.get(lang, []):
+            s = s.replace(k, v)
         # save HTML version of the manual
         fn = 'manual'
         if lang != 'C':
             fn += '_' + lang
+            # update the document language
+            s = s.replace(' lang="en" ', ' lang="%s" ' % (lang,))
         f = open(os.path.join('dist', fn + '.html'), 'w')
         f.write(s)
         f.close()

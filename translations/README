@@ -5,7 +5,7 @@ compile them into the corresponding .mo files.
 The example commands below show how to create and manage the Japanese
 translations.  Replace all instances of "ja" with the code for the desired
 language.  Also note the "Name" and "Comment" fields of the "diffuse.desktop"
-file should be translated separately.
+file and components of the Windows installer should be translated separately.
 
 ----
 

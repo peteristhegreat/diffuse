@@ -1,3 +1,7 @@
+- double clicking on text can now select full words with non-English characters
+- search dialog is now automatically populated with the currently selected text
+- fixed a bug that prevented opening files with non-ASCII characters in their path
+- added Oleg Pakhtusov's Russian translation
 - added Kang Bundo's Korean translation
 - pane headers tooltips
 - Shift-ScrollWheel can now be used to scroll horizontally

@@ -3,7 +3,7 @@
 ; Copyright (C) 2009-2010 Derrick Moser <derrick_moser@yahoo.com>
 
 [Setup]
-AppName=Diffuse Merge Tool
+AppName={cm:ToolName}
 AppVerName=Diffuse 0.4.3
 DefaultDirName={pf}\Diffuse
 DefaultGroupName=Diffuse
@@ -14,31 +14,32 @@ OutputDir=.
 ShowLanguageDialog=auto
 
 [Languages]
-Name: "en"; MessagesFile: "compiler:Default.isl"
-Name: "de"; MessagesFile: "compiler:Languages\German.isl"
-Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
-Name: "ja"; MessagesFile: "compiler:Languages\Japanese.isl"
-Name: "ko"; MessagesFile: "compiler:Languages\Korean-5-5.1.11.isl"
-Name: "zh_CN"; MessagesFile: "compiler:Languages\ChineseSimp-12-5.1.11.isl"
+Name: "en"; MessagesFile: "compiler:Default.isl,.\en.isl"
+Name: "de"; MessagesFile: "compiler:Languages\German.isl,.\en.isl"
+Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl,.\en.isl"
+Name: "ja"; MessagesFile: "compiler:Languages\Japanese.isl,.\en.isl"
+Name: "ko"; MessagesFile: "compiler:Languages\Korean-5-5.1.11.isl,.\en.isl"
+Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl,.\ru.isl"
+Name: "zh_CN"; MessagesFile: "compiler:Languages\ChineseSimp-12-5.1.11.isl,.\en.isl"
 
 [Files]
 Source: "dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Components]
-Name: main; Description: "Main Files"; Types: full compact custom; Flags: fixed
-Name: shellintegration; Description: "Windows Shell Integration"; Types: full
+Name: main; Description: "{cm:MainFiles}"; Types: full compact custom; Flags: fixed
+Name: shellintegration; Description: "{cm:ShellIntegration}"; Types: full
 
 [Registry]
 Root: HKCR; Subkey: "*\shell"; Flags: uninsdeletekeyifempty; Components: shellintegration
-Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool"; Flags: uninsdeletekey; Components: shellintegration
-Root: HKCR; Subkey: "*\shell\Open with Diffuse Merge Tool\command"; ValueType: string; ValueData: "{code:GetOpenWithCommand|dummy}"; Flags: uninsdeletekey; Components: shellintegration
+Root: HKCR; Subkey: "*\shell\{cm:OpenWithTool}"; Flags: uninsdeletekey; Components: shellintegration
+Root: HKCR; Subkey: "*\shell\{cm:OpenWithTool}\command"; ValueType: string; ValueData: "{code:GetOpenWithCommand|dummy}"; Flags: uninsdeletekey; Components: shellintegration
 
 [Icons]
-Name: "{group}\Diffuse Merge Tool"; Filename: "{app}\diffusew.exe"
-Name: "{group}\Uninstall Diffuse Merge Tool"; Filename: "{app}\unins000.exe"
+Name: "{group}\{cm:ToolName}"; Filename: "{app}\diffusew.exe"
+Name: "{group}\{cm:UninstallTool}"; Filename: "{app}\unins000.exe"
 
 [Run]
-Filename: "{app}\add_path.exe"; Parameters: "{app}"; Flags: postinstall; Description: "Add the installation path to the search path"
+Filename: "{app}\add_path.exe"; Parameters: "{app}"; Flags: postinstall; Description: "{cm:AddToPath}"
 
 [UninstallRun]
 Filename: "{app}\add_path.exe"; Parameters: "/del {app}"
