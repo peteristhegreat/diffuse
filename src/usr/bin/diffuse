@@ -1550,7 +1550,7 @@ class VCSs:
                     if fs.contains(k):
                         if not isabs:
                             k = relpath(pwd, k)
-                        unmerged[k] = [ (k, 'MERGE_HEAD'), (k, None), (k, prefs.getString('git_default_revision')) ]
+                        unmerged[k] = [ (k, prefs.getString('git_default_revision')), (k, None), (k, 'MERGE_HEAD') ]
                 elif s.startswith('#\tdeleted:'):
                     # deleted file
                     k = self._extractPath(s[10:], prefs)
@@ -1572,6 +1572,13 @@ class VCSs:
                         if not isabs:
                             k = relpath(pwd, k)
                         modified[k] = self.getFileTemplate(prefs, k)
+                elif s.startswith('#\tboth modified:'):
+                    # stash conflict
+                    k = self._extractPath(s[16:], prefs)
+                    if fs.contains(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
+                        unmerged[k] = [ (k, prefs.getString('git_default_revision')), (k, None), (k, ':3') ]
                 elif s.startswith('#\trenamed:'):
                     # renamed file
                     keys = s[10:].split(' -> ')
