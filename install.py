@@ -231,7 +231,7 @@ processFiles(install, os.path.join(destdir, prefix[1:]), 'src/usr/', {
         'share/applications/diffuse.desktop': None,
         'share/diffuse/syntax/*.syntax': None,
         'share/gnome/help/diffuse/*/diffuse.xml': [ ('/usr/', prefix), ('/etc/', sysconfdir) ],
-        'share/omf/diffuse/diffuse-C.omf': [ ('/usr/', prefix) ],
+        'share/omf/diffuse/diffuse-*.omf': [ ('/usr/', prefix) ],
         'share/pixmaps/diffuse.png': None
     })
 
