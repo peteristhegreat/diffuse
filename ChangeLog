@@ -1,3 +1,4 @@
+Diffuse 0.4.4 - 2010-10-21
 - Git support now recognises conflicts when re-applying the stash
 - double clicking on text can now select full words with non-English characters
 - search dialog is now automatically populated with the currently selected text
