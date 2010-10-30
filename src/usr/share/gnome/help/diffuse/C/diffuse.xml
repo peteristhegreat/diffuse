@@ -5,7 +5,7 @@
   <!ENTITY app-version "0.4.4">
 ]>
 <book id="index" lang="en">
-  <title>&app; User's Manual</title>
+  <title><application>&app;</application> User's Manual</title>
 
   <bookinfo>
     <copyright>
@@ -21,17 +21,17 @@
       </author>
     </authorgroup>
 
-    <releaseinfo>This manual describes version &app-version; of &app;.</releaseinfo>
+    <releaseinfo>This manual describes version &app-version; of <application>&app;</application>.</releaseinfo>
   </bookinfo>
 
   <chapter id="introduction">
     <title>Introduction</title>
 
     <para>
-      &app; is a graphical tool for merging and comparing text files.  &app;
+      <application>&app;</application> is a graphical tool for merging and comparing text files.  <application>&app;</application>
       is able to compare an arbitrary number of files side-by-side and gives
       users the ability to manually adjust line matching and directly edit
-      files.  &app; can also retrieve revisions of files from Bazaar, CVS,
+      files.  <application>&app;</application> can also retrieve revisions of files from Bazaar, CVS,
       Darcs, Git, Mercurial, Monotone, RCS, Subversion, and SVK repositories
       for comparison and merging.
     </para>
@@ -39,7 +39,7 @@
     <sect1 id="introduction-about">
       <title>About</title>
       <para>
-        &app; was written by Derrick Moser <email>derrick_moser@yahoo.com</email>.
+        <application>&app;</application> was written by Derrick Moser <email>derrick_moser@yahoo.com</email>.
       </para>
       <para>&copy; 2006-2010 Derrick Moser.  All Rights Reserved.</para>
     </sect1>
@@ -47,20 +47,20 @@
     <sect1 id="introduction-licence">
       <title>Licence</title>
       <para>
-        &app; is free software; you may redistribute it and/or modify it under
+        <application>&app;</application> is free software; you may redistribute it and/or modify it under
         the terms of the <citetitle>GNU General Public License</citetitle> as
         published by the Free Software Foundation; either version 2 of the
         licence, or (at your option) any later version.
       </para>
       <para>
-        &app; is distributed in the hope that it will be useful, but WITHOUT
+        <application>&app;</application> is distributed in the hope that it will be useful, but WITHOUT
         ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
         FITNESS FOR A PARTICULAR PURPOSE.  See the <citetitle>GNU General
         Public License</citetitle> for more details.
       </para>
       <para>
         You should have received a copy of the <citetitle>GNU General Public
-        License</citetitle> along with &app;.  You may also obtain a copy of
+        License</citetitle> along with <application>&app;</application>.  You may also obtain a copy of
         the <citetitle>GNU General Public License</citetitle> from the Free
         Software Foundation by visiting
         <ulink type="http" url="http://www.fsf.org/">their web site</ulink> or
@@ -81,7 +81,7 @@
         <varlistentry>
           <term><userinput>diffuse [ -h | -? | --help | -v | --version ]</userinput></term>
           <listitem>
-            <para>Display information about &app;.</para>
+            <para>Display information about <application>&app;</application>.</para>
           </listitem>
         </varlistentry>
 
@@ -98,7 +98,7 @@
 
         <para>
           If a help option is specified, it must be the only argument
-          specified on the command line.  &app; will immediately quit after
+          specified on the command line.  <application>&app;</application> will immediately quit after
           displaying the help information.
         </para>
 
@@ -301,12 +301,12 @@
       <menuchoice><guimenu>File</guimenu><guimenuitem>New 3-Way File
       Merge</guimenuitem></menuchoice> menu items to create additional tabs
       for comparing text files.  File names and revisions can be specified
-      either in the command line arguments used to invoke &app; or in fields
+      either in the command line arguments used to invoke <application>&app;</application> or in fields
       on the Open File dialogue.
     </para>
 
     <para>
-      &app; displays files side-by-side inserting gaps to align similar lines
+      <application>&app;</application> displays files side-by-side inserting gaps to align similar lines
       of text.  Differences are highlighted with a different background
       colour.
     </para>
@@ -347,16 +347,16 @@
         text with adjacent files.  To aligning lines of text using the mouse
         pointer, select a line of text with the left mouse button, right click
         on a line of text from an adjacent file, and choose
-        <menuchoice><guimenu>Align with Selection</guimenu></menuchoice>.  To
+        <menuchoice><guimenuitem>Align with Selection</guimenuitem></menuchoice>.  To
         align lines of text using the keyboard, move the selection with the
         cursor keys, press the space bar to pick the current line of text, move
         the selection with the cursor keys to a line of text in an adjacent
         file, and press the space bar to pick the target line of text.
-        Pressing the escape key will cancel the operation.
+        Pressing the <keycap>Escape</keycap> key will cancel the operation.
       </para>
 
       <para>
-        Use the <menuchoice><guimenu>Isolate</guimenu></menuchoice> menu item
+        Use the <menuchoice><guimenuitem>Isolate</guimenuitem></menuchoice> menu item
         to prevent the selected lines from being matched with any lines from
         the adjacent files.
       </para>
@@ -366,7 +366,7 @@
       <title>Editing</title>
 
       <para>
-        Press the enter key or double-click on a text area to enter text
+        Press the <keycap>Enter</keycap> key or double-click on a text area to enter text
         editing mode.  The cursor will change to indicate text editing mode
         and the status bar at the bottom of the window will display the
         cursor's column position.
@@ -385,13 +385,13 @@
       <para>
         Modify text by typing on the keyword.  Modified lines will be
         highlighted in green.  Use the
-        <menuchoice><guimenu>Undo</guimenu></menuchoice> and
-        <menuchoice><guimenu>Redo</guimenu></menuchoice> menu items to
+        <menuchoice><guimenuitem>Undo</guimenuitem></menuchoice> and
+        <menuchoice><guimenuitem>Redo</guimenuitem></menuchoice> menu items to
         undo and redo the previously preformed operations.
       </para>
 
       <para>
-        Press the escape key or click on another file's text area using the
+        Press the <keycap>Escape</keycap> key or click on another file's text area using the
         left mouse button to leave editing mode.
       </para>
     </sect1>
@@ -401,7 +401,7 @@
 
       <para>
         Use the difference buttons or menu items to navigate between blocks
-        of differences within a file.  When navigating, &app; will move the
+        of differences within a file.  When navigating, <application>&app;</application> will move the
         selection to the next continuous set of lines with differences or
         edits.
       </para>
@@ -409,11 +409,11 @@
       <para>
         Use the merge buttons or menu items to copy blocks of text into the
         selected range of lines.  The
-        <menuchoice><guimenu>Undo</guimenu></menuchoice> and
-        <menuchoice><guimenu>Redo</guimenu></menuchoice> menu items can be used
+        <menuchoice><guimenuitem>Undo</guimenuitem></menuchoice> and
+        <menuchoice><guimenuitem>Redo</guimenuitem></menuchoice> menu items can be used
         to undo and redo the previously preformed operations.  All changes to a
         set of lines can be reverted using the
-        <menuchoice><guimenu>Clear Edits</guimenu></menuchoice> menu item
+        <menuchoice><guimenuitem>Clear Edits</guimenuitem></menuchoice> menu item
         regardless of the order the edits were performed.
       </para>
     </sect1>
@@ -423,11 +423,11 @@
     <title>Version Control</title>
 
     <para>
-      &app; can retrieve file revisions from several version control systems
-      via their command line interface.  The Microsoft Windows build of &app;
+      <application>&app;</application> can retrieve file revisions from several version control systems
+      via their command line interface.  The Microsoft Windows build of <application>&app;</application>
       is able to use both the Cygwin and native versions of the supported
-      version control systems.  When using &app; with Cygwin, ensure
-      &app;'s Cygwin preferences correctly describe your system.  If the
+      version control systems.  When using <application>&app;</application> with Cygwin, ensure
+      <application>&app;</application>'s Cygwin preferences correctly describe your system.  If the
       <guilabel>Update paths for Cygwin</guilabel> preference exists for a
       version control system, it must be enabled to use the Cygwin version.
     </para>
@@ -443,7 +443,7 @@
       <title>Viewing Uncommitted Modifications</title>
 
       <para>
-        The <userinput>-m</userinput> option will cause &app; to open
+        The <userinput>-m</userinput> option will cause <application>&app;</application> to open
         comparison tabs for each file the version control system indicates has
         uncommitted modifications.  This is convenient for reviewing all
         changes before committing or resolving a merge conflict.  If no paths
@@ -520,7 +520,7 @@
       </para>
 
       <para>
-        &app; does not limit the number of panes that can be used for
+        <application>&app;</application> does not limit the number of panes that can be used for
         comparing files.  The inputs to a Git octopus merge could be viewed
         with a command line like this:
       </para>
@@ -535,7 +535,7 @@
     <title>Resources</title>
 
     <para>
-      Resources can be used to customise several aspects of &app;'s
+      Resources can be used to customise several aspects of <application>&app;</application>'s
       appearance and behaviour such as changing the colours used in the user
       interface, customising the keyboard shortcuts, adding or replacing syntax
       highlighting rules, or changing the mapping from file extensions to
@@ -543,7 +543,7 @@
     </para>
 
     <para>
-      When &app; is started, it will read commands from the system wide
+      When <application>&app;</application> is started, it will read commands from the system wide
       initialisation file <filename>/etc/diffuserc</filename>
       (<filename>%INSTALL_DIR%\diffuserc</filename> on Microsoft Windows) and
       then the personal initialisation file
@@ -967,7 +967,7 @@
             <term><userinput>increase_indenting</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Increase Indenting</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Shift+Ctrl+&gt;</para>
+              <para>Default: Shift+Ctrl+greater</para>
             </listitem>
           </varlistentry>
 
@@ -975,7 +975,7 @@
             <term><userinput>decrease_indenting</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Decrease Indenting</guimenuitem></menuchoice> menu item</para>
-              <para>Default: Shift+Ctrl+&lt;</para>
+              <para>Default: Shift+Ctrl+less</para>
             </listitem>
           </varlistentry>
 
@@ -1456,7 +1456,7 @@
       <sect2 id="resources-strings-used">
         <title>Used String Resources</title>
 
-        <para>The following string resources are used by &app;:</para>
+        <para>The following string resources are used by <application>&app;</application>:</para>
 
         <variablelist>
           <varlistentry>
@@ -1488,7 +1488,7 @@
       <sect2 id="resources-colours-used">
         <title>Used Colour Resources</title>
 
-        <para>The following colour resources are used by &app;:</para>
+        <para>The following colour resources are used by <application>&app;</application>:</para>
 
         <variablelist>
 
@@ -1620,7 +1620,7 @@
       <sect2 id="resources-floats-used">
         <title>Used Floating Point Resources</title>
 
-        <para>The following floating point resources are used by &app;:</para>
+        <para>The following floating point resources are used by <application>&app;</application>:</para>
 
         <variablelist>
 
@@ -1752,7 +1752,7 @@
 
   <chapter id="files">
     <title>Files</title>
-    <para>The following files are used by &app;:</para>
+    <para>The following files are used by <application>&app;</application>:</para>
 
     <variablelist>
       <varlistentry>

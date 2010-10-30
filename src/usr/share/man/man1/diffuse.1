@@ -13,11 +13,19 @@ diffuse \- graphical tool for merging and comparing text files
 \fBdiffuse\fR [\fB\-\-no\-rcfile\fR | \fB\-\-rcfile\ \fR\fB\fIfile\fR\fR] [[\fIoption\fR...] | [\fIfile\fR...]...]
 .SH "DESCRIPTION"
 .PP
-Diffuse is a graphical tool for merging and comparing text files\&. Diffuse is able to compare an arbitrary number of files side\-by\-side and gives users the ability to manually adjust line matching and directly edit files\&. Diffuse can also retrieve revisions of files from Bazaar, CVS, Darcs, Git, Mercurial, Monotone, RCS, Subversion, and SVK repositories for comparison and merging\&.
+
+Diffuse
+is a graphical tool for merging and comparing text files\&.
+Diffuse
+is able to compare an arbitrary number of files side\-by\-side and gives users the ability to manually adjust line matching and directly edit files\&.
+Diffuse
+can also retrieve revisions of files from Bazaar, CVS, Darcs, Git, Mercurial, Monotone, RCS, Subversion, and SVK repositories for comparison and merging\&.
 .SH "OPTIONS"
 .SS "Help Options"
 .PP
-If a help option is specified, it must be the only argument specified on the command line\&. Diffuse will immediately quit after displaying the help information\&.
+If a help option is specified, it must be the only argument specified on the command line\&.
+Diffuse
+will immediately quit after displaying the help information\&.
 .PP
 \fB\-h\fR, \fB\-?\fR, \fB\-\-help\fR
 .RS 4
@@ -125,9 +133,13 @@ Use the
 File \(-> New 2\-Way File Merge
 and
 File \(-> New 3\-Way File Merge
-menu items to create additional tabs for comparing text files\&. File names and revisions can be specified either in the command line arguments used to invoke Diffuse or in fields on the Open File dialogue\&.
+menu items to create additional tabs for comparing text files\&. File names and revisions can be specified either in the command line arguments used to invoke
+Diffuse
+or in fields on the Open File dialogue\&.
 .PP
-Diffuse displays files side\-by\-side inserting gaps to align similar lines of text\&. Differences are highlighted with a different background colour\&.
+
+Diffuse
+displays files side\-by\-side inserting gaps to align similar lines of text\&. Differences are highlighted with a different background colour\&.
 .SS "Comparison Summary"
 .PP
 A summary of the compared files is located in the far right margin\&. The summary illustrates where gaps have been inserted to align matching lines of text and highlights differences using colour\&. Manual edits are also highlighted in green\&. A blue cursor identifies the region currently being viewed\&. The viewed region can be changed by clicking anywhere on the summary\&.
@@ -137,14 +149,18 @@ Lines of text can be selected using the mouse pointer or keyboard\&. Select line
 .SS "Matching Lines"
 .PP
 The mouse pointer or keyboard can be used to manually align lines of text with adjacent files\&. To aligning lines of text using the mouse pointer, select a line of text with the left mouse button, right click on a line of text from an adjacent file, and choose
-Align with Selection\&. To align lines of text using the keyboard, move the selection with the cursor keys, press the space bar to pick the current line of text, move the selection with the cursor keys to a line of text in an adjacent file, and press the space bar to pick the target line of text\&. Pressing the escape key will cancel the operation\&.
+Align with Selection\&. To align lines of text using the keyboard, move the selection with the cursor keys, press the space bar to pick the current line of text, move the selection with the cursor keys to a line of text in an adjacent file, and press the space bar to pick the target line of text\&. Pressing the
+Escape
+key will cancel the operation\&.
 .PP
 Use the
 Isolate
 menu item to prevent the selected lines from being matched with any lines from the adjacent files\&.
 .SS "Editing"
 .PP
-Press the enter key or double\-click on a text area to enter text editing mode\&. The cursor will change to indicate text editing mode and the status bar at the bottom of the window will display the cursor\*(Aqs column position\&.
+Press the
+Enter
+key or double\-click on a text area to enter text editing mode\&. The cursor will change to indicate text editing mode and the status bar at the bottom of the window will display the cursor\*(Aqs column position\&.
 .PP
 In text editing mode, text can be selected with the mouse pointer by click and dragging\&. The current selection can be extended by holding down the shift key and moving the cursor by clicking with the mouse pointer or pressing any of the arrow, home, end or page up/down keys\&. Individual words can be selected by double\-clicking on them with the mouse pointer\&. Whole lines can be selected by triple\-clicking on them with the mouse pointer\&.
 .PP
@@ -154,10 +170,14 @@ and
 Redo
 menu items to undo and redo the previously preformed operations\&.
 .PP
-Press the escape key or click on another file\*(Aqs text area using the left mouse button to leave editing mode\&.
+Press the
+Escape
+key or click on another file\*(Aqs text area using the left mouse button to leave editing mode\&.
 .SS "Merging"
 .PP
-Use the difference buttons or menu items to navigate between blocks of differences within a file\&. When navigating, Diffuse will move the selection to the next continuous set of lines with differences or edits\&.
+Use the difference buttons or menu items to navigate between blocks of differences within a file\&. When navigating,
+Diffuse
+will move the selection to the next continuous set of lines with differences or edits\&.
 .PP
 Use the merge buttons or menu items to copy blocks of text into the selected range of lines\&. The
 Undo
@@ -168,7 +188,14 @@ Clear Edits
 menu item regardless of the order the edits were performed\&.
 .SH "VERSION CONTROL"
 .PP
-Diffuse can retrieve file revisions from several version control systems via their command line interface\&. The Microsoft Windows build of Diffuse is able to use both the Cygwin and native versions of the supported version control systems\&. When using Diffuse with Cygwin, ensure Diffuse\*(Aqs Cygwin preferences correctly describe your system\&. If the
+
+Diffuse
+can retrieve file revisions from several version control systems via their command line interface\&. The Microsoft Windows build of
+Diffuse
+is able to use both the Cygwin and native versions of the supported version control systems\&. When using
+Diffuse
+with Cygwin, ensure
+Diffuse\*(Aqs Cygwin preferences correctly describe your system\&. If the
 Update paths for Cygwin
 preference exists for a version control system, it must be enabled to use the Cygwin version\&.
 .PP
@@ -179,7 +206,9 @@ preference may be used to easily set the environment for Cygwin version control 
 .PP
 The
 \fB\-m\fR
-option will cause Diffuse to open comparison tabs for each file the version control system indicates has uncommitted modifications\&. This is convenient for reviewing all changes before committing or resolving a merge conflict\&. If no paths are specified the current working directory will be used\&. For example, view all of your uncommitted modifications with this command line:
+option will cause
+Diffuse
+to open comparison tabs for each file the version control system indicates has uncommitted modifications\&. This is convenient for reviewing all changes before committing or resolving a merge conflict\&. If no paths are specified the current working directory will be used\&. For example, view all of your uncommitted modifications with this command line:
 .PP
 
 .sp
@@ -289,7 +318,9 @@ $ \fBdiffuse \-c 1\&.2\&.3 foo\&.C\fR
 .RE
 .\}
 .PP
-Diffuse does not limit the number of panes that can be used for comparing files\&. The inputs to a Git octopus merge could be viewed with a command line like this:
+
+Diffuse
+does not limit the number of panes that can be used for comparing files\&. The inputs to a Git octopus merge could be viewed with a command line like this:
 .PP
 
 .sp
@@ -305,9 +336,12 @@ $ \fBdiffuse \-r HEAD^1 \-r HEAD^2 \-r HEAD^3 \-r HEAD^4 \-r HEAD^5 foo\&.C\fR
 .sp
 .SH "RESOURCES"
 .PP
-Resources can be used to customise several aspects of Diffuse\*(Aqs appearance and behaviour such as changing the colours used in the user interface, customising the keyboard shortcuts, adding or replacing syntax highlighting rules, or changing the mapping from file extensions to syntax highlighting rules\&.
+Resources can be used to customise several aspects of
+Diffuse\*(Aqs appearance and behaviour such as changing the colours used in the user interface, customising the keyboard shortcuts, adding or replacing syntax highlighting rules, or changing the mapping from file extensions to syntax highlighting rules\&.
 .PP
-When Diffuse is started, it will read commands from the system wide initialisation file
+When
+Diffuse
+is started, it will read commands from the system wide initialisation file
 /etc/diffuserc
 (%INSTALL_DIR%\ediffuserc
 on Microsoft Windows) and then the personal initialisation file
@@ -731,7 +765,7 @@ Default: Shift+Ctrl+B
 Format \(-> Increase Indenting
 menu item
 .sp
-Default: Shift+Ctrl+>
+Default: Shift+Ctrl+greater
 .RE
 .PP
 \fBdecrease_indenting\fR
@@ -739,7 +773,7 @@ Default: Shift+Ctrl+>
 Format \(-> Decrease Indenting
 menu item
 .sp
-Default: Shift+Ctrl+<
+Default: Shift+Ctrl+less
 .RE
 .PP
 \fBconvert_to_dos\fR
@@ -1183,7 +1217,8 @@ with value
 \fBUsed String Resources\fR
 .RS 4
 .PP
-The following string resources are used by Diffuse:
+The following string resources are used by
+Diffuse:
 .PP
 \fBdifference_colours\fR
 .RS 4
@@ -1206,7 +1241,8 @@ Declares a colour resource called
 \fBUsed Colour Resources\fR
 .RS 4
 .PP
-The following colour resources are used by Diffuse:
+The following colour resources are used by
+Diffuse:
 .PP
 \fBalignment\fR
 .RS 4
@@ -1301,7 +1337,8 @@ with value
 \fBUsed Floating Point Resources\fR
 .RS 4
 .PP
-The following floating point resources are used by Diffuse:
+The following floating point resources are used by
+Diffuse:
 .PP
 \fBalignment_opacity\fR
 .RS 4
@@ -1398,7 +1435,8 @@ for highlighting\&.
 .RE
 .SH "FILES"
 .PP
-The following files are used by Diffuse:
+The following files are used by
+Diffuse:
 .PP
 /etc/diffuserc
 .RS 4
@@ -1431,12 +1469,16 @@ on Microsoft Windows)
 .RE
 .SH "AUTHOR"
 .PP
-Diffuse was written by Derrick Moser
+
+Diffuse
+was written by Derrick Moser
 derrick_moser@yahoo\&.com\&.
 .PP
 \(co 2006\-2010 Derrick Moser\&. All Rights Reserved\&.
 .SH "COPYING"
 .PP
-Diffuse is free software; you may redistribute it and/or modify it under the terms of the
+
+Diffuse
+is free software; you may redistribute it and/or modify it under the terms of the
 GNU General Public License
 as published by the Free Software Foundation; either version 2 of the licence, or (at your option) any later version\&.
