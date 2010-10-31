@@ -1,11 +1,13 @@
+User Interface
+==============
+
 Below are basic instructions for adding and maintaining Gettext translations
 for Diffuse.  The installer will discover .po files in this directory and
 compile them into the corresponding .mo files.
 
 The example commands below show how to create and manage the Japanese
 translations.  Replace all instances of "ja" with the code for the desired
-language.  Also note the "Name" and "Comment" fields of the "diffuse.desktop"
-file and components of the Windows installer should be translated separately.
+language.
 
 ----
 
@@ -55,3 +57,33 @@ Validate a translation:
 1. Attempt to compile the .po file and note any warnings:
 
   $ msgfmt -c -v ja.po
+
+System Integration
+==================
+
+Localised text for the system menu (name and comment) should be manually
+added to the desktop file:
+
+  ../src/usr/share/applications/diffuse.desktop
+
+Localised text for the Microsoft Windows installer is stored in separate ISL
+files.  Copy the English version (../windows-installer/en.isl) and replace the
+text to the right of each equal sign.
+
+Documentation
+=============
+
+Documentation is stored in DocBook format.  Start a new translation of the
+manual by copying the English version of the DocBook manual
+(../src/usr/share/gnome/help/diffuse/C/diffuse.xml) and then edit the
+contents.
+
+The DocBook manual is converted to HTML for Windows and Unix man pages for
+POSIX platforms.  The conversion tools insert some English text that gets
+localised using search and replace.  Manually add new search and replace rules
+to these files:
+
+  ../windows-installer/translations.txt
+  ../utils/translations.txt
+
+The format of each line is: <language id>:<English text>:<localised text>
