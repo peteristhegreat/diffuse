@@ -1,3 +1,12 @@
+it:Diffuse Manual:Manuale di Diffuse
+it:.SH "NAME":.SH "NOME"
+it:.SH "SYNOPSIS":.SH "SINOSSI"
+it:graphical tool for merging and comparing text files:strumento grafico per l'unione e il confronto di file
+it:.SH "DESCRIPTION":.SH "DESCRIZIONE"
+it:.SH "OPTIONS":.SH "OPZIONI"
+it:.SH "AUTHOR":.SH "AUTORE"
+it:.SH "COPYING":.SH "COPIA"
+
 ru:Diffuse Manual:Руководство по Diffuse
 ru:.SH "NAME":.SH "НАЗВАНИЕ"
 ru:.SH "SYNOPSIS":.SH "СИНТАКСИС"
