@@ -693,7 +693,7 @@ def decodefilename(s):
         else:
             s = unicode(s, sys.getfilesystemencoding())
     return s
- 
+
 # text entry widget with a button to help pick file names
 class FileEntry(gtk.HBox):
     def __init__(self, parent, title):
@@ -1046,7 +1046,7 @@ class Preferences:
     # cygwin and native applications can be used on windows, use this method
     # to convert a path to the usual form expected on sys.platform
     def convertToNativePath(self, s):
-	s = unicode(s, sys.getfilesystemencoding())
+        s = unicode(s, sys.getfilesystemencoding())
         if isWindows() and s.find('/') >= 0:
             # treat as a cygwin path
             s = s.replace(os.sep, '/')
@@ -2572,7 +2572,7 @@ class FileDiffViewer(gtk.Table):
         get = char_width_cache.get
         for c in s:
             w = get(c, 0)
-            if w == 0: 
+            if w == 0:
                 v = ord(c)
                 if v < 32:
                     if c == '\t':
@@ -6348,6 +6348,13 @@ class Diffuse(gtk.Window):
                 if dialog.run() == gtk.RESPONSE_OK:
                     name = dialog.get_filename()
                     encoding = dialog.get_encoding()
+                    if encoding is None:
+                        if info.encoding is not None:
+                            # this case can occur if the user provided the
+                            # encoding and it is not an encoding we know about
+                            encoding = info.encoding
+                        else:
+                            encoding = self.prefs.getDefaultEncoding()
                 dialog.destroy()
             if name is None:
                 return False
