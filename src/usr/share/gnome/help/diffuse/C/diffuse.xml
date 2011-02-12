@@ -183,6 +183,15 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>-L</userinput>, <userinput>--label</userinput> <replaceable>label</replaceable></term>
+            <listitem>
+              <para>
+                Display <replaceable>label</replaceable> instead of the file name.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>-m</userinput>, <userinput>--modified</userinput></term>
             <listitem>
               <para>

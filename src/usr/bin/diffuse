@@ -97,6 +97,7 @@ General Options:
   ( -c | --commit ) <rev>          File revisions <rev-1> and <rev>
   ( -D | --close-if-same )         Close all tabs with no differences
   ( -e | --encoding ) <codec>      Use <codec> to read and write files
+  ( -L | --label ) <label>         Display <label> instead of the file name
   ( -m | --modified )              Create a new tab for each modified file
   ( -r | --revision ) <rev>        File revision <rev>
   ( -s | --separate )              Create a new tab for each file
@@ -687,7 +688,8 @@ class Resources:
 
 theResources = Resources()
 
-def decodefilename(s):
+# convert a string obtained from the file system or command line to unicode
+def decode_fs_string(s):
     if s is not None:
         if isWindows():
             s = unicode(s, 'utf_8')
@@ -5894,7 +5896,7 @@ class FileChooserDialog(gtk.FileChooserDialog):
 
     def get_filename(self):
         # convert from UTF-8 string to unicode
-        return decodefilename(gtk.FileChooserDialog.get_filename(self))
+        return decode_fs_string(gtk.FileChooserDialog.get_filename(self))
 
 # dialogue used to search for text
 class GoToLineDialog(gtk.Dialog):
@@ -5991,7 +5993,7 @@ class NotebookTab(gtk.EventBox):
 
 # contains information about a file
 class FileInfo:
-    def __init__(self, name=None, encoding=None, vcs=None, revision=None):
+    def __init__(self, name=None, encoding=None, vcs=None, revision=None, label=None):
         # file name
         self.name = name
         # name of codec used to translate the file contents to unicode text
@@ -6000,12 +6002,26 @@ class FileInfo:
         self.vcs = vcs
         # revision used to retrieve file from the VCS
         self.revision = revision
+        # alternate text to display instead of the actual file name
+        self.label = label
         # 'stat' for files read from disk -- used to warn about changes to the
         # file on disk before saving
         self.stat = None
         # most recent 'stat' for files read from disk -- used on focus change
         # to warn about changes to file on disk
         self.last_stat = None
+
+# assign user specified labels to the corresponding files
+def assign_file_labels(items, labels):
+    new_items = []
+    ss = labels[::-1]
+    for name, data in items:
+        if ss:
+            s = ss.pop()
+        else:
+            s = None
+        new_items.append((name, data, s))
+    return new_items
 
 # the main application class containing a set of file viewers
 # this class displays tab for switching between viewers and dispatches menu
@@ -6042,10 +6058,14 @@ class Diffuse(gtk.Window):
             def updateTitle(self):
                 ss = []
                 info = self.info
-                if info.name is not None:
-                    ss.append(info.name)
-                if info.revision is not None:
-                    ss.append('(' + info.revision + ')')
+                if info.label is not None:
+                    # show the provided label instead of the file name
+                    ss.append(info.label)
+                else:
+                    if info.name is not None:
+                        ss.append(info.name)
+                    if info.revision is not None:
+                        ss.append('(' + info.revision + ')')
                 if self.has_edits:
                     ss.append('*')
                 s = ' '.join(ss)
@@ -6230,9 +6250,13 @@ class Diffuse(gtk.Window):
             unique_names = set()
             for header in self.headers:
                 has_edits |= header.has_edits
-                s = header.info.name
+                s = header.info.label
+                if s is None:
+                    # no label provided, show the file name instead
+                    s = header.info.name
+                    if s is not None:
+                        s = os.path.basename(s)
                 if s is not None:
-                    s = os.path.basename(s)
                     names.append(s)
                     unique_names.add(s)
 
@@ -6369,7 +6393,7 @@ class Diffuse(gtk.Window):
         def save_file(self, f, save_as=False):
             h = self.headers[f]
             info = h.info
-            name, encoding, rev = info.name, info.encoding, info.revision
+            name, encoding, rev, label = info.name, info.encoding, info.revision, info.label
             if name is None or rev is not None:
                 # we need to prompt for a file name the current contents were
                 # not loaded from a regular file
@@ -6380,7 +6404,7 @@ class Diffuse(gtk.Window):
                 if name is not None:
                     dialog.set_filename(os.path.abspath(name))
                 dialog.set_encoding(encoding)
-                name = None
+                name, label = None, None
                 dialog.set_default_response(gtk.RESPONSE_OK)
                 if dialog.run() == gtk.RESPONSE_OK:
                     name = dialog.get_filename()
@@ -6437,7 +6461,7 @@ class Diffuse(gtk.Window):
                 self.bakeEdits(f)
                 self.closeUndoBlock()
                 # update the pane file info
-                info.name, info.encoding, info.revision = name, encoding, None
+                info.name, info.encoding, info.revision, info.label = name, encoding, None, label
                 info.last_stat = info.stat = os.stat(name)
                 self.setFileInfo(f, info)
                 # update the syntax highlighting incase we changed the file
@@ -6995,31 +7019,35 @@ class Diffuse(gtk.Window):
         elif len(items) == 1 and len(items[0][1]) == 1:
             # one file specified
             # determine which other files to compare it with
-            name, data = items[0]
+            name, data, label = items[0]
             rev, encoding = data[0]
             vcs = theVCSs.findByFilename(name, self.prefs)
             if vcs is None:
                 # shift the existing file so it will be in the second pane
                 specs.append(FileInfo())
-                specs.append(FileInfo(name, encoding))
+                specs.append(FileInfo(name, encoding, None, None, label))
             else:
                 if rev is None:
                     # no revision specified assume defaults
                     for name, rev in vcs.getFileTemplate(self.prefs, name):
-                        specs.append(FileInfo(name, encoding, vcs, rev))
+                        if rev is None:
+                            s = label
+                        else:
+                            s = None
+                        specs.append(FileInfo(name, encoding, vcs, rev, s))
                 else:
                     # single revision specified
                     specs.append(FileInfo(name, encoding, vcs, rev))
-                    specs.append(FileInfo(name, encoding))
+                    specs.append(FileInfo(name, encoding, None, None, label))
         else:
             # multiple files specified, use one pane for each file
-            for name, data in items:
+            for name, data, label in items:
                 for rev, encoding in data:
                     if rev is None:
-                        vcs = None
+                        vcs, s = None, label
                     else:
-                        vcs = theVCSs.findByFilename(name, self.prefs)
-                    specs.append(FileInfo(name, encoding, vcs, rev))
+                        vcs, s = theVCSs.findByFilename(name, self.prefs), None
+                    specs.append(FileInfo(name, encoding, vcs, rev, s))
 
         # open a new viewer
         viewer = self.newFileDiffViewer(max(2, len(specs)))
@@ -7030,28 +7058,28 @@ class Diffuse(gtk.Window):
         return viewer
 
     # create a new viewer for 'items'
-    def createSingleTab(self, items):
+    def createSingleTab(self, items, labels):
         if len(items) > 0:
-            self.newLoadedFileDiffViewer(items)
+            self.newLoadedFileDiffViewer(assign_file_labels(items, labels))
 
     # create a new viewer for each item in 'items'
-    def createSeparateTabs(self, items):
-        for item in items:
+    def createSeparateTabs(self, items, labels):
+        for item in assign_file_labels(items, labels):
             self.newLoadedFileDiffViewer([ item ])
 
     # create a new viewer for each modified file found in 'items'
-    def createModifiedFileTabs(self, items):
+    def createModifiedFileTabs(self, items, labels):
         new_items = []
         for item in items:
-            s, r = item
-            dn = s
+            name, data = item
+            dn = name
             if os.path.isfile(dn):
                 dn = os.path.dirname(dn)
             if len(new_items) == 0 or dn != new_items[-1][0]:
                 new_items.append([ dn, None, [] ])
             dst = new_items[-1]
-            dst[1] = r[-1][1]
-            dst[2].append(s)
+            dst[1] = data[-1][1]
+            dst[2].append(name)
         for dn, encoding, names in new_items:
             vcs = theVCSs.findByFolder(dn, self.prefs)
             if vcs is not None:
@@ -7104,7 +7132,7 @@ class Diffuse(gtk.Window):
             rev = None
         dialog.destroy()
         if accept:
-            viewer = self.newLoadedFileDiffViewer([ (name, [ (rev, encoding) ]) ])
+            viewer = self.newLoadedFileDiffViewer([ (name, [ (rev, encoding) ], None) ])
             self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
             viewer.grab_focus()
 
@@ -7118,7 +7146,7 @@ class Diffuse(gtk.Window):
         dialog.destroy()
         if accept:
             n = self.notebook.get_n_pages()
-            self.createModifiedFileTabs([ (name, [ (None, encoding) ]) ])
+            self.createModifiedFileTabs([ (name, [ (None, encoding) ], None) ])
             if self.notebook.get_n_pages() > n:
                 # we added some new tabs, focus on the first one
                 self.notebook.set_current_page(n)
@@ -7394,7 +7422,7 @@ if __name__ == '__main__':
 
     # process remaining command line arguments
     encoding, revs, close_on_same = None, [], False
-    specs, had_specs = [], False
+    specs, had_specs, labels = [], False, []
     funcs = { 'modified': diff.createModifiedFileTabs,
               'separate': diff.createSeparateTabs,
               'single': diff.createSingleTab }
@@ -7423,21 +7451,21 @@ if __name__ == '__main__':
                 encoding = args[i]
                 encoding = encodings.aliases.aliases.get(encoding, encoding)
             elif arg in [ '-m', '--modified' ]:
-                funcs[mode](specs)
-                specs = []
+                funcs[mode](specs, labels)
+                specs, labels = [], []
                 mode = 'modified'
             elif i + 1 < argc and arg in [ '-r', '--revision' ]:
                 # specified revision
                 i += 1
-                revs.append((args[i], encoding))
+                revs.append((decode_fs_string(args[i]), encoding))
             elif arg in [ '-s', '--separate' ]:
-                funcs[mode](specs)
-                specs = []
+                funcs[mode](specs, labels)
+                specs, labels = [], []
                 # open items in separate tabs
                 mode = 'separate'
-            elif i + 1 < argc and arg in [ '-t', '--tab' ]:
-                funcs[mode](specs)
-                specs = []
+            elif arg in [ '-t', '--tab' ]:
+                funcs[mode](specs, labels)
+                specs, labels = [], []
                 # start a new tab
                 mode = 'single'
             elif arg in [ '-b', '--ignore-space-change' ]:
@@ -7460,6 +7488,9 @@ if __name__ == '__main__':
                 diff.prefs.setBool('display_ignore_whitespace', True)
                 diff.prefs.setBool('align_ignore_whitespace', True)
                 diff.preferences_updated()
+            elif i + 1 < argc and arg == '-L':
+                i += 1
+                labels.append(decode_fs_string(args[i]))
             elif arg == '--null-file':
                 # add a blank file pane
                 if mode == 'single' or mode == 'separate':
@@ -7488,7 +7519,7 @@ if __name__ == '__main__':
     if mode == 'modified' and len(specs) == 0:
         specs.append((os.curdir, [ (None, encoding) ]))
         had_specs = True
-    funcs[mode](specs)
+    funcs[mode](specs, labels)
 
     # create a file diff viewer if the command line arguments haven't
     # implicitly created any
