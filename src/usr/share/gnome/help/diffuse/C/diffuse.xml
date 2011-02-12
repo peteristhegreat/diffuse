@@ -1590,6 +1590,14 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>margin</userinput></term>
+            <listitem>
+              <para>colour used to indicate the right margin</para>
+              <para>Default: <literal>0.8 0.8 0.8</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>preedit</userinput></term>
             <listitem>
               <para>pre-edit text colour</para>

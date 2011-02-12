@@ -419,6 +419,7 @@ class Resources:
             'line_number_background' : Colour(0.75, 0.75, 0.75),
             'line_selection' : Colour(0.7, 0.7, 1.0),
             'map_background' : Colour(0.6, 0.6, 0.6),
+            'margin' : Colour(0.8, 0.8, 0.8),
             'edited' : Colour(0.5, 1.0, 0.5),
             'preedit' : Colour(0.0, 0.0, 0.0),
             'text' : Colour(0.0, 0.0, 0.0),
@@ -775,25 +776,27 @@ class Preferences:
               [ 'Integer', 'display_tab_width', 8, _('Tab width'), 1, 1024 ],
               [ 'Boolean', 'display_show_line_numbers', True, _('Show line numbers') ],
               [ 'Boolean', 'display_show_whitespace', False, _('Show white space characters') ],
+              [ 'Boolean', 'display_ignore_case', False, _('Ignore case differences') ],
               [ 'Boolean', 'display_ignore_whitespace', False, _('Ignore white space differences') ],
               [ 'Boolean', 'display_ignore_whitespace_changes', False, _('Ignore changes to white space') ],
               [ 'Boolean', 'display_ignore_blanklines', False, _('Ignore blank line differences') ],
-              [ 'Boolean', 'display_ignore_case', False, _('Ignore case differences') ],
               [ 'Boolean', 'display_ignore_endofline', False, _('Ignore end of line differences') ]
             ],
             _('Alignment'),
             [ 'List',
+              [ 'Boolean', 'align_ignore_case', False, _('Ignore case') ],
               [ 'Boolean', 'align_ignore_whitespace', True, _('Ignore white space') ],
               [ 'Boolean', 'align_ignore_whitespace_changes', False, _('Ignore changes to white space') ],
               [ 'Boolean', 'align_ignore_blanklines', False, _('Ignore blank lines') ],
-              [ 'Boolean', 'align_ignore_endofline', True, _('Ignore end of line characters') ],
-              [ 'Boolean', 'align_ignore_case', False, _('Ignore case') ]
+              [ 'Boolean', 'align_ignore_endofline', True, _('Ignore end of line characters') ]
             ],
             _('Editor'),
             [ 'List',
-              [ 'Integer', 'editor_soft_tab_width', 8, _('Soft tab width'), 1, 1024 ],
+              [ 'Boolean', 'editor_auto_indent', False, _('Auto indent') ],
               [ 'Boolean', 'editor_expand_tabs', False, _('Expand tabs to spaces') ],
-              [ 'Boolean', 'editor_auto_indent', False, _('Auto indent') ]
+              [ 'Integer', 'editor_soft_tab_width', 8, _('Soft tab width'), 1, 1024 ],
+              [ 'Boolean', 'editor_show_right_margin', False, _('Show right margin') ],
+              [ 'Integer', 'editor_right_margin', 80, _('Right margin'), 1, 65536 ]
             ],
             _('Tabs'),
             [ 'List',
@@ -806,6 +809,16 @@ class Preferences:
               [ 'String', 'encoding_auto_detect_codecs', ' '.join([sys.getfilesystemencoding(), 'latin_1']), _('Order of codecs used to identify encoding') ]
             ],
         ]
+        # conditions used to determine if a preference should be greyed out
+        self.disable_when = {
+            'editor_right_margin': ('editor_show_right_margin', False),
+            'display_ignore_whitespace_changes': ('display_ignore_whitespace', True),
+            'display_ignore_blanklines': ('display_ignore_whitespace', True),
+            'display_ignore_endofline': ('display_ignore_whitespace', True),
+            'align_ignore_whitespace_changes': ('align_ignore_whitespace', True),
+            'align_ignore_blanklines': ('align_ignore_whitespace', True),
+            'align_ignore_endofline': ('align_ignore_whitespace', True)
+        }
         if isWindows():
             root = os.environ.get('SYSTEMDRIVE', None)
             if root is None:
@@ -860,12 +873,13 @@ class Preferences:
                     try:
                         a = shlex.split(s, True)
                         if len(a) > 0:
-                            if len(a) == 2 and self.bool_prefs.has_key(a[0]):
-                                self.bool_prefs[a[0]] = (a[1] == 'True')
-                            elif len(a) == 2 and self.int_prefs.has_key(a[0]):
-                                self.int_prefs[a[0]] = max(self.int_prefs_min[a[0]], min(int(a[1]), self.int_prefs_max[a[0]]))
-                            elif len(a) == 2 and self.string_prefs.has_key(a[0]):
-                                self.string_prefs[a[0]] = a[1]
+                            p = a[0]
+                            if len(a) == 2 and self.bool_prefs.has_key(p):
+                                self.bool_prefs[p] = (a[1] == 'True')
+                            elif len(a) == 2 and self.int_prefs.has_key(p):
+                                self.int_prefs[p] = max(self.int_prefs_min[p], min(int(a[1]), self.int_prefs_max[p]))
+                            elif len(a) == 2 and self.string_prefs.has_key(p):
+                                self.string_prefs[p] = a[1]
                             else:
                                 raise ValueError()
                     except ValueError:
@@ -896,6 +910,14 @@ class Preferences:
         elif template[0] in [ 'String', 'File', 'Font' ]:
             self.string_prefs[template[1]] = template[2]
 
+    # callback used when a preference is toggled
+    def _toggled_cb(self, widget, widgets, name):
+        # disable any preferences than are no longer relevant
+        for k, v in self.disable_when.items():
+            p, t = v
+            if p == name:
+                widgets[k].set_sensitive(widgets[p].get_active() != t)
+
     # display the dialogue and update the preference values if the accept
     # button was pressed
     def runDialog(self, parent):
@@ -903,6 +925,11 @@ class Preferences:
 
         widgets = {}
         w = self._buildPrefsDialog(parent, widgets, self.template)
+        # disable any preferences than are not relevant
+        for k, v in self.disable_when.items():
+            p, t = v
+            if widgets[p].get_active() == t:
+                widgets[k].set_sensitive(False)
         dialog.vbox.add(w)
         w.show()
 
@@ -968,6 +995,7 @@ class Preferences:
                     button.set_active(self.bool_prefs[tpl[1]])
                     widgets[tpl[1]] = button
                     table.attach(button, 1, 2, i, i + 1, gtk.FILL, gtk.FILL)
+                    button.connect('toggled', self._toggled_cb, widgets, tpl[1])
                     button.show()
                 else:
                     label = gtk.Label(tpl[3] + ': ')
@@ -4282,6 +4310,15 @@ class FileDiffViewer(gtk.Table):
                                 cr.set_source_rgba(colour.red, colour.green, colour.blue, alpha)
                                 cr.rectangle(x_start + pixels(x_temp), y_start, pixels(w), h)
                                 cr.fill()
+
+                if self.prefs.getBool('editor_show_right_margin'):
+                    # draw margin
+                    colour = theResources.getColour('margin')
+                    cr.set_source_rgb(colour.red, colour.green, colour.blue)
+                    cr.set_line_width(1)
+                    cr.move_to(line_number_width + pixels(self.prefs.getInt('editor_right_margin') * self.digit_width), y_start)
+                    cr.rel_line_to(0, h)
+                    cr.stroke()
 
                 if text is None:
                     # draw hatching

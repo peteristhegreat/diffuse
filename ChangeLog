@@ -1,4 +1,6 @@
+- added preference to display the right margin
 - added Cristian Marchi's Italian translation
+- fixed a bug that could cause "Save As..." to fail with some user specified encodings
 
 Diffuse 0.4.4 - 2010-10-21
 - Git support now recognises conflicts when re-applying the stash
