@@ -798,7 +798,7 @@ class Preferences:
               [ 'Boolean', 'editor_expand_tabs', False, _('Expand tabs to spaces') ],
               [ 'Integer', 'editor_soft_tab_width', 8, _('Soft tab width'), 1, 1024 ],
               [ 'Boolean', 'editor_show_right_margin', False, _('Show right margin') ],
-              [ 'Integer', 'editor_right_margin', 80, _('Right margin'), 1, 65536 ]
+              [ 'Integer', 'editor_right_margin', 80, _('Right margin'), 1, 8192 ]
             ],
             _('Tabs'),
             [ 'List',
@@ -4315,12 +4315,14 @@ class FileDiffViewer(gtk.Table):
 
                 if self.prefs.getBool('editor_show_right_margin'):
                     # draw margin
-                    colour = theResources.getColour('margin')
-                    cr.set_source_rgb(colour.red, colour.green, colour.blue)
-                    cr.set_line_width(1)
-                    cr.move_to(line_number_width + pixels(self.prefs.getInt('editor_right_margin') * self.digit_width), y_start)
-                    cr.rel_line_to(0, h)
-                    cr.stroke()
+                    x_temp = line_number_width + pixels(self.prefs.getInt('editor_right_margin') * self.digit_width)
+                    if x_temp >= x and x_temp < maxx:
+                        colour = theResources.getColour('margin')
+                        cr.set_source_rgb(colour.red, colour.green, colour.blue)
+                        cr.set_line_width(1)
+                        cr.move_to(x_temp, y_start)
+                        cr.rel_line_to(0, h)
+                        cr.stroke()
 
                 if text is None:
                     # draw hatching
