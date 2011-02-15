@@ -1,3 +1,4 @@
+- Diffuse now uses a patience diff-based algorithm to align lines
 - added command line option to specify a label to display instead of the file name
 - added preference to display the right margin
 - added Cristian Marchi's Italian translation
