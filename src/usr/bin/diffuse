@@ -6589,7 +6589,11 @@ class Diffuse(gtk.Window):
                         if info.last_stat[stat.ST_MTIME] < new_stat[stat.ST_MTIME]:
                             # update our notion of the most recent modification
                             info.last_stat = new_stat
-                            msg = _('The file %s changed on disk.  Do you want to reload the file?') % (info.name, )
+                            if info.label is not None:
+                                s = info.label
+                            else:
+                                s = info.name
+                            msg = _('The file %s changed on disk.  Do you want to reload the file?') % (s, )
                             dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
                             ok = (dialog.run() == gtk.RESPONSE_OK)
                             dialog.destroy()
