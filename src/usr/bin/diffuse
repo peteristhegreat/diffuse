@@ -776,6 +776,8 @@ class Preferences:
             [ 'List',
               [ 'Font', 'display_font', 'Monospace 10', _('Font') ],
               [ 'Integer', 'display_tab_width', 8, _('Tab width'), 1, 1024 ],
+              [ 'Boolean', 'display_show_right_margin', False, _('Show right margin') ],
+              [ 'Integer', 'display_right_margin', 80, _('Right margin'), 1, 8192 ],
               [ 'Boolean', 'display_show_line_numbers', True, _('Show line numbers') ],
               [ 'Boolean', 'display_show_whitespace', False, _('Show white space characters') ],
               [ 'Boolean', 'display_ignore_case', False, _('Ignore case differences') ],
@@ -796,9 +798,7 @@ class Preferences:
             [ 'List',
               [ 'Boolean', 'editor_auto_indent', False, _('Auto indent') ],
               [ 'Boolean', 'editor_expand_tabs', False, _('Expand tabs to spaces') ],
-              [ 'Integer', 'editor_soft_tab_width', 8, _('Soft tab width'), 1, 1024 ],
-              [ 'Boolean', 'editor_show_right_margin', False, _('Show right margin') ],
-              [ 'Integer', 'editor_right_margin', 80, _('Right margin'), 1, 8192 ]
+              [ 'Integer', 'editor_soft_tab_width', 8, _('Soft tab width'), 1, 1024 ]
             ],
             _('Tabs'),
             [ 'List',
@@ -813,7 +813,7 @@ class Preferences:
         ]
         # conditions used to determine if a preference should be greyed out
         self.disable_when = {
-            'editor_right_margin': ('editor_show_right_margin', False),
+            'display_right_margin': ('display_show_right_margin', False),
             'display_ignore_whitespace_changes': ('display_ignore_whitespace', True),
             'display_ignore_blanklines': ('display_ignore_whitespace', True),
             'display_ignore_endofline': ('display_ignore_whitespace', True),
@@ -4520,9 +4520,9 @@ class FileDiffViewer(gtk.Table):
                                 cr.rectangle(x_start + pixels(x_temp), y_start, pixels(w), h)
                                 cr.fill()
 
-                if self.prefs.getBool('editor_show_right_margin'):
+                if self.prefs.getBool('display_show_right_margin'):
                     # draw margin
-                    x_temp = line_number_width + pixels(self.prefs.getInt('editor_right_margin') * self.digit_width)
+                    x_temp = line_number_width + pixels(self.prefs.getInt('display_right_margin') * self.digit_width)
                     if x_temp >= x and x_temp < maxx:
                         colour = theResources.getColour('margin')
                         cr.set_source_rgb(colour.red, colour.green, colour.blue)
