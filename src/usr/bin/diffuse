@@ -272,7 +272,7 @@ def splitlines(s):
 
 # also recognise old Mac OS line endings
 def readlines(fd):
-    return splitlines(fd.read())
+    return strip_eols(splitlines(fd.read()))
 
 # This class to hold all customisable behaviour not exposed in the preferences
 # dialogue: hotkey assignment, colours, syntax highlighting, etc.
@@ -697,6 +697,35 @@ def decode_fs_string(s):
             s = unicode(s, sys.getfilesystemencoding())
     return s
 
+# map an encoding name to its standard form
+def norm_encoding(e):
+    if e is not None:
+        return e.replace('-', '_').lower()
+
+# widget to help pick an encoding
+class EncodingMenu(gtk.HBox):
+    def __init__(self, prefs, autodetect=False):
+        gtk.HBox.__init__(self)
+        self.combobox = combobox = gtk.combo_box_new_text()
+        self.encodings = prefs.getEncodings()[:]
+        for e in self.encodings:
+            combobox.append_text(e)
+        if autodetect:
+            self.encodings.insert(0, None)
+            combobox.prepend_text(_('Auto Detect'))
+        self.pack_start(combobox, False, False, 0)
+        combobox.show()
+
+    def set_text(self, encoding):
+        encoding = norm_encoding(encoding)
+        if encoding in self.encodings:
+            self.combobox.set_active(self.encodings.index(encoding))
+
+    def get_text(self):
+        i = self.combobox.get_active()
+        if i >= 0:
+            return self.encodings[i]
+
 # text entry widget with a button to help pick file names
 class FileEntry(gtk.HBox):
     def __init__(self, parent, title):
@@ -755,6 +784,13 @@ class Preferences:
         else:
             svk_bin = 'svk'
 
+        auto_detect_codecs = [ 'utf_8', 'latin_1' ]
+        e = norm_encoding(sys.getfilesystemencoding())
+        if e not in auto_detect_codecs:
+            # insert after UTF-8 as the default encoding may prevent UTF-8 from
+            # being tried
+            auto_detect_codecs.insert(1, e)
+
         # self.template describes how preference dialogue layout
         #
         # this will be traversed later to build the preferences dialogue and
@@ -808,7 +844,8 @@ class Preferences:
             ],
             _('Regional Settings'),
             [ 'List',
-              [ 'String', 'encoding_auto_detect_codecs', ' '.join([sys.getfilesystemencoding(), 'latin_1']), _('Order of codecs used to identify encoding') ]
+              [ 'Encoding', 'encoding_default_codec', sys.getfilesystemencoding(), _('Default codec') ],
+              [ 'String', 'encoding_auto_detect_codecs', ' '.join(auto_detect_codecs), _('Order of codecs used to identify encoding') ]
             ],
         ]
         # conditions used to determine if a preference should be greyed out
@@ -909,7 +946,7 @@ class Preferences:
             self.int_prefs[template[1]] = template[2]
             self.int_prefs_min[template[1]] = template[4]
             self.int_prefs_max[template[1]] = template[5]
-        elif template[0] in [ 'String', 'File', 'Font' ]:
+        elif template[0] in [ 'String', 'File', 'Font', 'Encoding' ]:
             self.string_prefs[template[1]] = template[2]
 
     # callback used when a preference is toggled
@@ -1018,7 +1055,10 @@ class Preferences:
                         entry.pack_start(button, False, False, 0)
                         button.show()
                     else:
-                        if tpl[0] == 'File':
+                        if tpl[0] == 'Encoding':
+                            entry = EncodingMenu(self)
+                            entry.set_text(tpl[3])
+                        elif tpl[0] == 'File':
                             entry = FileEntry(parent, tpl[3])
                         else:
                             entry = gtk.Entry()
@@ -1049,29 +1089,16 @@ class Preferences:
         return self.string_prefs['encoding_auto_detect_codecs'].split()
 
     def getDefaultEncoding(self):
-        encodings = self._getDefaultEncodings()
-        if len(encodings) > 0:
-            return encodings[0]
-        return 'utf_8'
+        return self.string_prefs['encoding_default_codec']
 
     # attempt to convert a string to unicode from an unknown encoding
-    def convertToUnicode(self, ss):
+    def convertToUnicode(self, s):
         for encoding in self._getDefaultEncodings():
             try:
-                result = []
-                for s in ss:
-                    if s is not None:
-                        s = unicode(s, encoding)
-                    result.append(s)
-                return result, encoding
+                return unicode(s, encoding), encoding
             except (UnicodeDecodeError, LookupError):
                 pass
-        result = []
-        for s in ss:
-            if s is not None:
-                s = ''.join([unichr(ord(c)) for c in s])
-            result.append(s)
-        return result, None
+        return u''.join([ unichr(ord(c)) for c in s ]), None
 
     # cygwin and native applications can be used on windows, use this method
     # to convert a path to the usual form expected on sys.platform
@@ -1290,7 +1317,7 @@ def bashEscape(s):
     return "'" + s.replace("'", "'\\''") + "'"
 
 # use popen to read the output of a command
-def popenReadLines(dn, cmd, prefs, bash_pref, success_results=None):
+def popenRead(dn, cmd, prefs, bash_pref, success_results=None):
     if success_results is None:
         success_results = [ 0 ]
     if isWindows() and prefs.getBool(bash_pref):
@@ -1309,14 +1336,18 @@ def popenReadLines(dn, cmd, prefs, bash_pref, success_results=None):
     proc.stderr.close()
     fd = proc.stdout
     # read the command's output
-    ss = readlines(fd)
+    s = fd.read()
     fd.close()
     if proc.wait() not in success_results:
         raise IOError('Command failed.')
-    return ss
+    return s
+
+# use popen to read the output of a command
+def popenReadLines(dn, cmd, prefs, bash_pref, success_results=None):
+    return strip_eols(splitlines(popenRead(dn, cmd, prefs, bash_pref, success_results)))
 
 # simulate use of popen with xargs to read the output of a command
-def popenXArgsReadLines(dn, cmd, args, prefs, bash_pref, success_results=None):
+def popenXArgsReadLines(dn, cmd, args, prefs, bash_pref):
     # os.sysconf() is only available on Unix
     if hasattr(os, 'sysconf'):
         maxsize = os.sysconf('SC_ARG_MAX')
@@ -1341,7 +1372,7 @@ def popenXArgsReadLines(dn, cmd, args, prefs, bash_pref, success_results=None):
             s += len(args[i]) + 1
             i += 1
         if i == len(args) or not f:
-            ss.extend(popenReadLines(dn, a, prefs, bash_pref, success_results))
+            ss.extend(popenReadLines(dn, a, prefs, bash_pref))
             s, a = 0, []
     return ss
 
@@ -1408,7 +1439,7 @@ class VCSs:
             # build list of interesting files
             # files will not appear in more than one set
             removed, modified, added, renamed = {}, {}, {}, {}
-            for s in strip_eols(popenReadLines(self.root, args, prefs, 'bzr_bash')):
+            for s in popenReadLines(self.root, args, prefs, 'bzr_bash'):
                 if len(s) > 4:
                     k = s[4:]
                     if s[1] == 'D':
@@ -1459,7 +1490,7 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
-            return popenReadLines(self.root, [ prefs.getString('bzr_bin'), 'cat', '--name-from-revision', '-r', rev, safeRelativePath(self.root, name, prefs, 'bzr_cygwin') ], prefs, 'bzr_bash')
+            return popenRead(self.root, [ prefs.getString('bzr_bin'), 'cat', '--name-from-revision', '-r', rev, safeRelativePath(self.root, name, prefs, 'bzr_cygwin') ], prefs, 'bzr_bash')
 
     # CVS support
     class Cvs:
@@ -1478,7 +1509,7 @@ class VCSs:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'cvs_cygwin'))
             # build list of interesting files
-            for s in strip_eols(popenReadLines(self.root, args, prefs, 'cvs_bash')):
+            for s in popenReadLines(self.root, args, prefs, 'cvs_bash'):
                 if len(s) > 2 and s[0] in 'ACMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
                     if not isabs:
@@ -1499,7 +1530,7 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
-            return popenReadLines(self.root, [ prefs.getString('cvs_bin'), '-Q', 'update', '-p', '-r', rev, safeRelativePath(self.root, name, prefs, 'cvs_cygwin') ], prefs, 'cvs_bash')
+            return popenRead(self.root, [ prefs.getString('cvs_bin'), '-Q', 'update', '-p', '-r', rev, safeRelativePath(self.root, name, prefs, 'cvs_cygwin') ], prefs, 'cvs_bash')
 
     # Darcs support
     class Darcs:
@@ -1519,7 +1550,7 @@ class VCSs:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'darcs_cygwin'))
             # build list of interesting files
-            for s in strip_eols(popenReadLines(self.root, args, prefs, 'darcs_bash')):
+            for s in popenReadLines(self.root, args, prefs, 'darcs_bash'):
                 p = s.split(' ')
                 if len(p) >= 2 and s[0] in 'AMR':
                     k = prefs.convertToNativePath(p[1])
@@ -1543,7 +1574,7 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
-            return popenReadLines(self.root, [ prefs.getString('darcs_bin'), 'show', 'contents', '-p', rev, safeRelativePath(self.root, name, prefs, 'darcs_cygwin') ], prefs, 'darcs_bash')
+            return popenRead(self.root, [ prefs.getString('darcs_bin'), 'show', 'contents', '-p', rev, safeRelativePath(self.root, name, prefs, 'darcs_cygwin') ], prefs, 'darcs_bash')
 
     # Git support
     class Git:
@@ -1564,7 +1595,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
             # 'git status' will return 1 when a commit would fail
-            ss = strip_eols(popenReadLines(self.root, args, prefs, 'git_bash', [0, 1]))
+            ss = popenReadLines(self.root, args, prefs, 'git_bash', [0, 1])
             # build list of interesting files
             # files may appear in more than one set
             i = 0
@@ -1633,7 +1664,7 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
-            return popenReadLines(self.root, [ prefs.getString('git_bin'), 'show', '%s:%s' % (rev, relpath(self.root, os.path.abspath(name)).replace(os.sep, '/')) ], prefs, 'git_bash')
+            return popenRead(self.root, [ prefs.getString('git_bin'), 'show', '%s:%s' % (rev, relpath(self.root, os.path.abspath(name)).replace(os.sep, '/')) ], prefs, 'git_bash')
 
     # Mercurial support
     class Hg:
@@ -1652,7 +1683,7 @@ class VCSs:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
             # build list of interesting files
-            for s in strip_eols(popenReadLines(self.root, args, prefs, 'hg_bash')):
+            for s in popenReadLines(self.root, args, prefs, 'hg_bash'):
                 if len(s) > 2 and s[0] in 'ADM':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
                     if not isabs:
@@ -1673,7 +1704,7 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
-            return popenReadLines(self.root, [ prefs.getString('hg_bin'), 'cat', '-r', rev, safeRelativePath(self.root, name, prefs, 'hg_cygwin') ], prefs, 'hg_bash')
+            return popenRead(self.root, [ prefs.getString('hg_bin'), 'cat', '-r', rev, safeRelativePath(self.root, name, prefs, 'hg_cygwin') ], prefs, 'hg_bash')
 
     # Monotone support
     class Mtn:
@@ -1692,7 +1723,7 @@ class VCSs:
             for name in names:
                 isabs |= os.path.isabs(name)
             # build list of interesting files
-            ss = strip_eols(popenReadLines(self.root, args, prefs, 'mtn_bash'))
+            ss = popenReadLines(self.root, args, prefs, 'mtn_bash')
             removed, added, modified, renamed = {}, {}, {}, {}
             i = 0
             while i < len(ss):
@@ -1753,7 +1784,7 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
-            return popenReadLines(self.root, [ prefs.getString('mtn_bin'), 'cat', '--quiet', '-r', rev, safeRelativePath(self.root, name, prefs, 'mtn_cygwin') ], prefs, 'mtn_bash')
+            return popenRead(self.root, [ prefs.getString('mtn_bin'), 'cat', '--quiet', '-r', rev, safeRelativePath(self.root, name, prefs, 'mtn_cygwin') ], prefs, 'mtn_bash')
 
     # RCS support
     class Rcs:
@@ -1763,7 +1794,7 @@ class VCSs:
         def getFileTemplate(self, prefs, name):
             args = [ prefs.getString('rcs_bin_rlog'), '-L', '-h', safeRelativePath(self.root, name, prefs, 'rcs_cygwin') ]
             rev = ''
-            for line in strip_eols(popenReadLines(self.root, args, prefs, 'rcs_bash')):
+            for line in popenReadLines(self.root, args, prefs, 'rcs_bash'):
                 if line.startswith('head: '):
                     rev = line[6:]
             return [ (name, rev), (name, None) ]
@@ -1819,7 +1850,7 @@ class VCSs:
             args = [ safeRelativePath(self.root, k, prefs, 'rcs_cygwin') for k in r ]
 
             r, k = {}, ''
-            for line in strip_eols(popenXArgsReadLines(self.root, cmd, args, prefs, 'rcs_bash')):
+            for line in popenXArgsReadLines(self.root, cmd, args, prefs, 'rcs_bash'):
                 if line.startswith('Working file: '):
                     k = prefs.convertToNativePath(line[14:])
                     k = os.path.join(self.root, os.path.normpath(k))
@@ -1834,7 +1865,7 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
-            return popenReadLines(self.root, [ prefs.getString('rcs_bin_co'), '-p', '-q', '-r' + rev, safeRelativePath(self.root, name, prefs, 'rcs_cygwin') ], prefs, 'rcs_bash')
+            return popenRead(self.root, [ prefs.getString('rcs_bin_co'), '-p', '-q', '-r' + rev, safeRelativePath(self.root, name, prefs, 'rcs_cygwin') ], prefs, 'rcs_bash')
 
     # Subversion support
     class Svn:
@@ -1865,7 +1896,7 @@ class VCSs:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'svn_cygwin'))
             # build list of interesting files
-            for s in strip_eols(popenReadLines(self.root, args, prefs, 'svn_bash')):
+            for s in popenReadLines(self.root, args, prefs, 'svn_bash'):
                 if len(s) > 7 and s[0] in 'ACDMR':
                     # subversion 1.6 adds a new column
                     k = 7
@@ -1896,7 +1927,7 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
-            return popenReadLines(self.root, [ prefs.getString('svn_bin'), 'cat', '-r', rev, safeRelativePath(self.root, name, prefs, 'svn_cygwin') ], prefs, 'svn_bash')
+            return popenRead(self.root, [ prefs.getString('svn_bin'), 'cat', '-r', rev, safeRelativePath(self.root, name, prefs, 'svn_cygwin') ], prefs, 'svn_bash')
 
     # SVK support
     def isSvkManaged(self, name):
@@ -1908,7 +1939,7 @@ class VCSs:
             try:
                 # find working copies by parsing the config file
                 f = open(self.svkconfig, 'r')
-                ss = strip_eols(readlines(f))
+                ss = readlines(f)
                 f.close()
                 projs, sep = [], os.sep
                 # find the separator character
@@ -1973,7 +2004,7 @@ class VCSs:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'svk_cygwin'))
             # build list of interesting files
-            for s in strip_eols(popenReadLines(self.root, args, prefs, 'svk_bash')):
+            for s in popenReadLines(self.root, args, prefs, 'svk_bash'):
                 if len(s) > 4 and s[0] in 'ACDMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[4:]))
                     if not isabs:
@@ -1996,7 +2027,7 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
-            return popenReadLines(self.root, [ prefs.getString('svk_bin'), 'cat', '-r', rev, safeRelativePath(self.root, name, prefs, 'svk_cygwin') ], prefs, 'svk_bash')
+            return popenRead(self.root, [ prefs.getString('svk_bin'), 'cat', '-r', rev, safeRelativePath(self.root, name, prefs, 'svk_cygwin') ], prefs, 'svk_bash')
 
     def __init__(self):
         # initialise the VCS objects
@@ -4944,7 +4975,7 @@ class FileDiffViewer(gtk.Table):
     def im_commit_cb(self, im, s):
         if self.mode == CHAR_MODE:
             self.openUndoBlock()
-            self.replaceText(self.prefs.convertToUnicode([ s ])[0][0])
+            self.replaceText(self.prefs.convertToUnicode(s)[0])
             self.closeUndoBlock()
 
     # update the cached preedit text
@@ -4965,7 +4996,7 @@ class FileDiffViewer(gtk.Table):
             s, a, c = self.im_context.get_preedit_string()
             if len(s) > 0:
                 # we have preedit text, draw that instead
-                s = self.prefs.convertToUnicode([ s ])[0][0]
+                s = self.prefs.convertToUnicode(s)[0]
                 p = (s, a, c)
             else:
                 p = None
@@ -5248,7 +5279,7 @@ class FileDiffViewer(gtk.Table):
             needs_block = (self.undoblock is None)
             if needs_block:
                 self.openUndoBlock()
-            self.replaceText(self.prefs.convertToUnicode([ text ])[0][0])
+            self.replaceText(self.prefs.convertToUnicode(nullToEmpty(text))[0])
             if needs_block:
                 self.closeUndoBlock()
 
@@ -6066,17 +6097,9 @@ class FileChooserDialog(gtk.FileChooserDialog):
         label = gtk.Label(_('Encoding: '))
         hbox.pack_start(label, False, False, 0)
         label.show()
-        self.combobox = combobox = gtk.combo_box_new_text()
-        self.encodings = prefs.getEncodings()
-        for e in self.encodings:
-            combobox.append_text(e)
-        if action in [ gtk.FILE_CHOOSER_ACTION_OPEN, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER ]:
-            self.encodings = self.encodings[:]
-            self.encodings.insert(0, None)
-            combobox.prepend_text(_('Auto Detect'))
-            combobox.set_active(0)
-        hbox.pack_start(combobox, False, False, 5)
-        combobox.show()
+        self.encoding = entry = EncodingMenu(prefs, action in [ gtk.FILE_CHOOSER_ACTION_OPEN, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER ])
+        hbox.pack_start(entry, False, False, 5)
+        entry.show()
         if action == gtk.FILE_CHOOSER_ACTION_OPEN:
             self.revision = entry = gtk.Entry()
             hbox.pack_end(entry, False, False, 0)
@@ -6090,15 +6113,10 @@ class FileChooserDialog(gtk.FileChooserDialog):
         self.set_current_folder(unicode(os.path.realpath(os.curdir), sys.getfilesystemencoding()))
 
     def set_encoding(self, encoding):
-        if encoding not in self.encodings:
-            encoding = self.prefs.getDefaultEncoding()
-        if encoding in self.encodings:
-            self.combobox.set_active(self.encodings.index(encoding))
+        self.encoding.set_text(encoding)
 
     def get_encoding(self):
-        i = self.combobox.get_active()
-        if i >= 0:
-            return self.encodings[i]
+        return self.encoding.get_text()
 
     def get_revision(self):
         return self.revision.get_text()
@@ -6500,7 +6518,7 @@ class Diffuse(gtk.Window):
                     if rev is None:
                         # load the contents of a plain file
                         fd = open(name, 'rb')
-                        ss = readlines(fd)
+                        s = fd.read()
                         fd.close()
                         # get the file's modification times so we can detect changes
                         stat = os.stat(name)
@@ -6509,12 +6527,13 @@ class Diffuse(gtk.Window):
                             raise IOError('Not under version control.')
                         fullname = os.path.abspath(name)
                         # retrieve the revision from the version control system
-                        ss = info.vcs.getRevision(self.prefs, fullname, rev)
+                        s = info.vcs.getRevision(self.prefs, fullname, rev)
                     # convert file contents to unicode
                     if encoding is None:
-                        ss, encoding = self.prefs.convertToUnicode(ss)
+                        s, encoding = self.prefs.convertToUnicode(s)
                     else:
-                        ss = [ unicode(s, encoding) for s in ss ]
+                        s = unicode(s, encoding)
+                    ss = splitlines(s)
                 except (IOError, OSError, UnicodeDecodeError, WindowsError, LookupError):
                     # FIXME: this can occur before the toplevel window is drawn
                     if rev is not None:
@@ -6616,6 +6635,8 @@ class Diffuse(gtk.Window):
                 dialog = FileChooserDialog(_('Save %(title)s Pane %(pane)d') % { 'title': self.title, 'pane': f + 1 }, self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_SAVE, gtk.STOCK_SAVE)
                 if name is not None:
                     dialog.set_filename(os.path.abspath(name))
+                if encoding is None:
+                    encoding = self.prefs.getDefaultEncoding()
                 dialog.set_encoding(encoding)
                 name, label = None, None
                 dialog.set_default_response(gtk.RESPONSE_OK)
