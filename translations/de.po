@@ -158,8 +158,8 @@ msgid "Copy Selection _Right"
 msgstr "Auswahl nach _rechts kopieren"
 
 #: ../diffuse/src/usr/bin/diffuse:67
-msgid "Copyright © 2006-2010 Derrick Moser"
-msgstr "Copyright © 2006-2010 Derrick Moser"
+msgid "Copyright © 2006-2011 Derrick Moser"
+msgstr "Copyright © 2006-2011 Derrick Moser"
 
 #: ../diffuse/src/usr/bin/diffuse:6587
 msgid "Cu_t"

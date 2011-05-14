@@ -155,8 +155,8 @@ msgid "Copy Selection _Right"
 msgstr "선택을 오른쪽으로 복사(_R)"
 
 #: ../src/usr/bin/diffuse:67
-msgid "Copyright © 2006-2010 Derrick Moser"
-msgstr "Copyright © 2006-2010 Derrick Moser"
+msgid "Copyright © 2006-2011 Derrick Moser"
+msgstr "Copyright © 2006-2011 Derrick Moser"
 
 #: ../src/usr/bin/diffuse:6607
 msgid "Cu_t"

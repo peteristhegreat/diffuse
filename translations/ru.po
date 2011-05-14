@@ -159,8 +159,8 @@ msgid "Copy Selection _Right"
 msgstr "К_опировать Выборку Вправо"
 
 #: ../src/usr/bin/diffuse:67
-msgid "Copyright © 2006-2010 Derrick Moser"
-msgstr "Copyright © 2006-2010 Derrick Moser"
+msgid "Copyright © 2006-2011 Derrick Moser"
+msgstr "Copyright © 2006-2011 Derrick Moser"
 
 #: ../src/usr/bin/diffuse:6560
 msgid "Cu_t"
