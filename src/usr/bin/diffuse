@@ -7608,30 +7608,31 @@ gobject.signal_new('reload', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_R
 gobject.signal_new('save', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
 gobject.signal_new('save_as', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
 
+# create nested subdirectories and return the complete path
+def make_subdirs(p, ss):
+    for s in ss:
+        p = os.path.join(p, s)
+        if not os.path.exists(p):
+            try:
+                os.mkdir(p)
+            except IOError:
+                pass
+    return p
+
 # process the command line arguments
 if __name__ == '__main__':
-    # find the config directory
-    rc_dir = os.environ.get('XDG_CONFIG_HOME', None)
+    # find the config directory and create it if it didn't exist
+    rc_dir, subdirs = os.environ.get('XDG_CONFIG_HOME', None), ['diffuse']
     if rc_dir is None:
-        rc_dir = os.path.join(os.path.expanduser('~'), '.config')
-    for rc_dir in rc_dir, os.path.join(rc_dir, 'diffuse'):
-        # create the directory if it didn't exist
-        if not os.path.exists(rc_dir):
-            try:
-                os.mkdir(rc_dir)
-            except IOError:
-                pass
-    # find the local data directory
-    data_dir = os.environ.get('XDG_DATA_HOME', None)
+        rc_dir = os.path.expanduser('~')
+        subdirs.insert(0, '.config')
+    rc_dir = make_subdirs(rc_dir, subdirs)
+    # find the local data directory and create it if it didn't exist
+    data_dir, subdirs = os.environ.get('XDG_DATA_HOME', None), ['diffuse']
     if data_dir is None:
-        data_dir = os.path.join(os.path.join(os.path.expanduser('~'), '.local'), 'share')
-    for data_dir in data_dir, os.path.join(data_dir, 'diffuse'):
-        # create the directory if it didn't exist
-        if not os.path.exists(data_dir):
-            try:
-                os.mkdir(data_dir)
-            except IOError:
-                pass
+        data_dir = os.path.expanduser('~')
+        subdirs[:0] = [ '.local', 'share' ]
+    data_dir = make_subdirs(data_dir, subdirs)
     # load resource files
     i, rc_files = 1, []
     if argc == 2 and args[1] == '--no-rcfile':
