@@ -1,3 +1,5 @@
+- fixed a bug that incorrectly encoded pasted text if utf_8 was not specified in the Region Settings preferences
+- state information is now stored in ~/.local/share/diffuse
 - Diffuse now uses a patience diff-based algorithm to align lines
 - added command line option to specify a label to display instead of the file name
 - added preference to display the right margin

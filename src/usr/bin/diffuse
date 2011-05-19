@@ -4975,7 +4975,7 @@ class FileDiffViewer(gtk.Table):
     def im_commit_cb(self, im, s):
         if self.mode == CHAR_MODE:
             self.openUndoBlock()
-            self.replaceText(self.prefs.convertToUnicode(s)[0])
+            self.replaceText(unicode(s, 'utf_8'))
             self.closeUndoBlock()
 
     # update the cached preedit text
@@ -4996,7 +4996,7 @@ class FileDiffViewer(gtk.Table):
             s, a, c = self.im_context.get_preedit_string()
             if len(s) > 0:
                 # we have preedit text, draw that instead
-                s = self.prefs.convertToUnicode(s)[0]
+                s = unicode(s, 'utf_8')
                 p = (s, a, c)
             else:
                 p = None
@@ -5279,7 +5279,7 @@ class FileDiffViewer(gtk.Table):
             needs_block = (self.undoblock is None)
             if needs_block:
                 self.openUndoBlock()
-            self.replaceText(self.prefs.convertToUnicode(nullToEmpty(text))[0])
+            self.replaceText(unicode(nullToEmpty(text), 'utf_8'))
             if needs_block:
                 self.closeUndoBlock()
 
