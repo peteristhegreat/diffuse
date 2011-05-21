@@ -1,3 +1,4 @@
+- fixed a bug that caused deleted files to be ignored when using the '-m' option
 - fixed a bug that incorrectly encoded pasted text if utf_8 was not specified in the Region Settings preferences
 - state information is now stored in ~/.local/share/diffuse
 - Diffuse now uses a patience diff-based algorithm to align lines

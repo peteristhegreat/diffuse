@@ -1430,6 +1430,7 @@ class VCSs:
             return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
 
         def getFolderTemplate(self, prefs, names):
+            fs = _VcsFolderSet(names)
             result = []
             pwd, isabs = os.path.abspath(os.curdir), False
             args = [ prefs.getString('bzr_bin'), 'status', '-SV' ]
@@ -1447,25 +1448,28 @@ class VCSs:
                         k = prefs.convertToNativePath(k)
                         if not k.endswith(os.sep):
                             k = os.path.join(self.root, k)
-                            if not isabs:
-                                k = relpath(pwd, k)
-                            removed[k] = [ (k, prefs.getString('bzr_default_revision')), (None, None) ]
+                            if fs.contains(k):
+                                if not isabs:
+                                    k = relpath(pwd, k)
+                                removed[k] = [ (k, prefs.getString('bzr_default_revision')), (None, None) ]
                     elif s[1] == 'N':
                         # new file
                         k = prefs.convertToNativePath(k)
                         if not k.endswith(os.sep):
                             k = os.path.join(self.root, k)
-                            if not isabs:
-                                k = relpath(pwd, k)
-                            added[k] = [ (None, None), (k, None) ]
+                            if fs.contains(k):
+                                if not isabs:
+                                    k = relpath(pwd, k)
+                                added[k] = [ (None, None), (k, None) ]
                     elif s[1] == 'M':
                         # modified file or merge conflict
                         k = prefs.convertToNativePath(k)
                         if not k.endswith(os.sep):
                             k = os.path.join(self.root, k)
-                            if not isabs:
-                                k = relpath(pwd, k)
-                            modified[k] = self.getFileTemplate(prefs, k)
+                            if fs.contains(k):
+                                if not isabs:
+                                    k = relpath(pwd, k)
+                                modified[k] = self.getFileTemplate(prefs, k)
                     elif s[0] == 'R':
                         # renamed file
                         k = k.split(' => ')
@@ -1475,10 +1479,11 @@ class VCSs:
                             if not k0.endswith(os.sep) and not k1.endswith(os.sep):
                                 k0 = os.path.join(self.root, k0)
                                 k1 = os.path.join(self.root, k1)
-                                if not isabs:
-                                    k0 = relpath(pwd, k0)
-                                    k1 = relpath(pwd, k1)
-                                renamed[k1] = [ (k0, prefs.getString('bzr_default_revision')), (k1, None) ]
+                                if fs.contains(k0) or fs.contains(k1):
+                                    if not isabs:
+                                        k0 = relpath(pwd, k0)
+                                        k1 = relpath(pwd, k1)
+                                    renamed[k1] = [ (k0, prefs.getString('bzr_default_revision')), (k1, None) ]
             # sort the results
             r = set()
             for m in removed, modified, added, renamed:
@@ -1501,6 +1506,7 @@ class VCSs:
             return [ (name, prefs.getString('cvs_default_revision')), (name, None) ]
 
         def getFolderTemplate(self, prefs, names):
+            fs = _VcsFolderSet(names)
             result = []
             pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
@@ -1512,9 +1518,10 @@ class VCSs:
             for s in popenReadLines(self.root, args, prefs, 'cvs_bash'):
                 if len(s) > 2 and s[0] in 'ACMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
-                    if not isabs:
-                        k = relpath(pwd, k)
-                    r[k] = s[0]
+                    if fs.contains(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
+                        r[k] = s[0]
             # sort the results
             for k in sorted(r.keys()):
                 v = r[k]
@@ -1542,6 +1549,7 @@ class VCSs:
             return [ (name, prefs.getString('darcs_default_revision')), (name, None) ]
 
         def getFolderTemplate(self, prefs, names):
+            fs = _VcsFolderSet(names)
             result = []
             pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
@@ -1556,9 +1564,10 @@ class VCSs:
                     k = prefs.convertToNativePath(p[1])
                     if not k.endswith(os.sep):
                         k = os.path.join(self.root, k)
-                        if not isabs:
-                            k = relpath(pwd, k)
-                        r[k] = s[0]
+                        if fs.contains(k):
+                            if not isabs:
+                                k = relpath(pwd, k)
+                            r[k] = s[0]
             # sort the results
             for k in sorted(r.keys()):
                 v = r[k]
@@ -1675,6 +1684,7 @@ class VCSs:
             return [ (name, prefs.getString('hg_default_revision')), (name, None) ]
 
         def getFolderTemplate(self, prefs, names):
+            fs = _VcsFolderSet(names)
             result = []
             pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
@@ -1684,15 +1694,16 @@ class VCSs:
                 args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
             # build list of interesting files
             for s in popenReadLines(self.root, args, prefs, 'hg_bash'):
-                if len(s) > 2 and s[0] in 'ADM':
+                if len(s) > 2 and s[0] in 'AMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[2:]))
-                    if not isabs:
-                        k = relpath(pwd, k)
-                    r[k] = s[0]
+                    if fs.contains(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
+                        r[k] = s[0]
             # sort the results
             for k in sorted(r.keys()):
                 v = r[k]
-                if v == 'D':
+                if v == 'R':
                     # deleted file
                     result.append( [ (k, prefs.getString('hg_default_revision')), (None, None) ] )
                 elif v == 'A':
@@ -1888,6 +1899,7 @@ class VCSs:
             return [ (name, prefs.getString('svn_default_revision')), (name, None) ]
 
         def getFolderTemplate(self, prefs, names):
+            fs = _VcsFolderSet(names)
             result = []
             pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
@@ -1903,10 +1915,10 @@ class VCSs:
                     if k < len(s) and s[k] == ' ':
                         k += 1
                     k = os.path.join(self.root, prefs.convertToNativePath(s[k:]))
-                    if not isabs:
-                        k = relpath(pwd, k)
                     # FIXME: prune dropped directories from the results
-                    if not os.path.isdir(k):
+                    if fs.contains(k) and not os.path.isdir(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
                         r[k] = s[0]
             # sort the results
             for k in sorted(r.keys()):
@@ -1996,6 +2008,7 @@ class VCSs:
             return [ (name, prefs.getString('svk_default_revision')), (name, None) ]
 
         def getFolderTemplate(self, prefs, names):
+            fs = _VcsFolderSet(names)
             result = []
             pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
@@ -2007,10 +2020,10 @@ class VCSs:
             for s in popenReadLines(self.root, args, prefs, 'svk_bash'):
                 if len(s) > 4 and s[0] in 'ACDMR':
                     k = os.path.join(self.root, prefs.convertToNativePath(s[4:]))
-                    if not isabs:
-                        k = relpath(pwd, k)
                     # FIXME: prune dropped directories from the results
-                    if not os.path.isdir(k):
+                    if fs.contains(k) and not os.path.isdir(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
                         r[k] = s[0]
             # sort the results
             for k in sorted(r.keys()):
@@ -7306,9 +7319,12 @@ class Diffuse(gtk.Window):
         new_items = []
         for item in items:
             name, data = item
-            dn = name
-            if os.path.isfile(dn):
-                dn = os.path.dirname(dn)
+            # get full path to an existing ancessor directory
+            dn = os.path.abspath(name)
+            while not os.path.isdir(dn):
+                dn, old_dn = os.path.dirname(dn), dn
+                if dn == old_dn:
+                    break
             if len(new_items) == 0 or dn != new_items[-1][0]:
                 new_items.append([ dn, None, [] ])
             dst = new_items[-1]
