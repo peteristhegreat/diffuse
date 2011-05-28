@@ -102,6 +102,7 @@ General Options:
   ( -r | --revision ) <rev>        File revision <rev>
   ( -s | --separate )              Create a new tab for each file
   ( -t | --tab )                   Start a new tab
+  --line <line>                    Start with line <line> selected
   --null-file                      Create a blank file comparison pane
 
 Display Options:
@@ -1050,7 +1051,6 @@ class Preferences:
                             button = gtk.SpinButton()
                             button.set_range(tpl[4], tpl[5])
                             button.set_value(self.int_prefs[tpl[1]])
-                            button.set_increments(1, 1)
                         widgets[tpl[1]] = button
                         entry.pack_start(button, False, False, 0)
                         button.show()
@@ -2658,6 +2658,7 @@ class FileDiffViewer(gtk.Table):
         self.set_flags(gtk.CAN_FOCUS)
         self.prefs = prefs
         self.string_width_cache = {}
+        self.options = {}
 
         # diff blocks
         self.blocks = []
@@ -2826,13 +2827,20 @@ class FileDiffViewer(gtk.Table):
     # are known and the scroll bar can be moved to the first difference
     def _realise_cb(self, widget):
         self.im_context.set_client_window(self.window)
-        self.first_difference()
+	try:
+	    self.go_to_line(self.options['line'])
+	except KeyError:
+            self.first_difference()
 
     # callback for most menu items and buttons
     def button_cb(self, widget, data):
         self.openUndoBlock()
         self._button_actions[data]()
         self.closeUndoBlock()
+
+    # set startup options
+    def setOptions(self, options):
+        self.options = options
 
     # updates the display font and resizes viewports as necessary
     def setFont(self, font):
@@ -5524,7 +5532,7 @@ class FileDiffViewer(gtk.Table):
         vadj.set_value(y)
 
     # move the cursor from line 'i' to the next difference in direction 'delta'
-    def goto_difference(self, i, delta):
+    def go_to_difference(self, i, delta):
         f = self.current_pane
         nlines = len(self.panes[f].lines)
         # back up to beginning of difference
@@ -5552,25 +5560,25 @@ class FileDiffViewer(gtk.Table):
     # 'first_difference' action
     def first_difference(self):
         self.setLineMode()
-        self.goto_difference(0, 1)
+        self.go_to_difference(0, 1)
 
     # 'previous_difference' action
     def previous_difference(self):
         self.setLineMode()
         i = min(self.current_line, self.selection_line) - 1
-        self.goto_difference(i, -1)
+        self.go_to_difference(i, -1)
 
     # 'next_difference' action
     def next_difference(self):
         self.setLineMode()
         i = max(self.current_line, self.selection_line) + 1
-        self.goto_difference(i, 1)
+        self.go_to_difference(i, 1)
 
     # 'last_difference' action
     def last_difference(self):
         self.setLineMode()
         i = len(self.panes[self.current_pane].lines)
-        self.goto_difference(i, -1)
+        self.go_to_difference(i, -1)
 
     # Undo for changes to the pane ordering
     class SwapPanesUndo:
@@ -7305,17 +7313,17 @@ class Diffuse(gtk.Window):
         return viewer
 
     # create a new viewer for 'items'
-    def createSingleTab(self, items, labels):
+    def createSingleTab(self, items, labels, options):
         if len(items) > 0:
-            self.newLoadedFileDiffViewer(assign_file_labels(items, labels))
+            self.newLoadedFileDiffViewer(assign_file_labels(items, labels)).setOptions(options)
 
     # create a new viewer for each item in 'items'
-    def createSeparateTabs(self, items, labels):
+    def createSeparateTabs(self, items, labels, options):
         for item in assign_file_labels(items, labels):
-            self.newLoadedFileDiffViewer([ item ])
+            self.newLoadedFileDiffViewer([ item ]).setOptions(options)
 
     # create a new viewer for each modified file found in 'items'
-    def createModifiedFileTabs(self, items, labels):
+    def createModifiedFileTabs(self, items, labels, options):
         new_items = []
         for item in items:
             name, data = item
@@ -7339,6 +7347,7 @@ class Diffuse(gtk.Window):
                         for i, spec in enumerate(specs):
                             name, rev = spec
                             viewer.load(i, FileInfo(name, encoding, vcs, rev))
+		        viewer.setOptions(options)
                 except (IOError, OSError, WindowsError):
                     dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving modifications for %s.') % (dn, ))
                     dialog.run()
@@ -7686,7 +7695,7 @@ if __name__ == '__main__':
     funcs = { 'modified': diff.createModifiedFileTabs,
               'separate': diff.createSeparateTabs,
               'single': diff.createSingleTab }
-    mode = 'single'
+    mode, options = 'single', {}
     while i < argc:
         arg = args[i]
         if len(arg) > 0 and arg[0] == '-':
@@ -7711,21 +7720,21 @@ if __name__ == '__main__':
                 encoding = args[i]
                 encoding = encodings.aliases.aliases.get(encoding, encoding)
             elif arg in [ '-m', '--modified' ]:
-                funcs[mode](specs, labels)
-                specs, labels = [], []
+                funcs[mode](specs, labels, options)
+                specs, labels, options = [], [], {}
                 mode = 'modified'
             elif i + 1 < argc and arg in [ '-r', '--revision' ]:
                 # specified revision
                 i += 1
                 revs.append((decode_fs_string(args[i]), encoding))
             elif arg in [ '-s', '--separate' ]:
-                funcs[mode](specs, labels)
-                specs, labels = [], []
+                funcs[mode](specs, labels, options)
+                specs, labels = [], [], {}
                 # open items in separate tabs
                 mode = 'separate'
             elif arg in [ '-t', '--tab' ]:
-                funcs[mode](specs, labels)
-                specs, labels = [], []
+                funcs[mode](specs, labels, options)
+                specs, labels, options = [], [], {}
                 # start a new tab
                 mode = 'single'
             elif arg in [ '-b', '--ignore-space-change' ]:
@@ -7751,6 +7760,12 @@ if __name__ == '__main__':
             elif i + 1 < argc and arg == '-L':
                 i += 1
                 labels.append(decode_fs_string(args[i]))
+            elif i + 1 < argc and arg == '--line':
+	        i += 1
+		try:
+	            options['line'] = int(args[i])
+                except ValueError:
+                    logError(_('Error parsing line number.'))
             elif arg == '--null-file':
                 # add a blank file pane
                 if mode == 'single' or mode == 'separate':
@@ -7779,7 +7794,7 @@ if __name__ == '__main__':
     if mode == 'modified' and len(specs) == 0:
         specs.append((os.curdir, [ (None, encoding) ]))
         had_specs = True
-    funcs[mode](specs, labels)
+    funcs[mode](specs, labels, options)
 
     # create a file diff viewer if the command line arguments haven't
     # implicitly created any
