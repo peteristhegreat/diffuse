@@ -317,8 +317,10 @@ class Resources:
         set_binding('menu', 'previous_difference', 'Ctrl+Up')
         set_binding('menu', 'next_difference', 'Ctrl+Down')
         set_binding('menu', 'last_difference', 'Shift+Ctrl+Down')
+        set_binding('menu', 'first_tab', 'Shift+Ctrl+Page_Up')
         set_binding('menu', 'previous_tab', 'Ctrl+Page_Up')
         set_binding('menu', 'next_tab', 'Ctrl+Page_Down')
+        set_binding('menu', 'last_tab', 'Shift+Ctrl+Page_Down')
         set_binding('menu', 'shift_pane_right', 'Shift+Ctrl+parenright')
         set_binding('menu', 'shift_pane_left', 'Shift+Ctrl+parenleft')
         set_binding('menu', 'convert_to_upper_case', 'Ctrl+u')
@@ -6950,8 +6952,10 @@ class Diffuse(gtk.Window):
                      [_('_Next Difference'), self.button_cb, 'next_difference', gtk.STOCK_GO_DOWN, 'next_difference'],
                      [_('_Last Difference'), self.button_cb, 'last_difference', gtk.STOCK_GOTO_BOTTOM, 'last_difference'],
                      [],
+                     [_('Fir_st Tab'), self.first_tab_cb, None, None, 'first_tab'],
                      [_('Pre_vious Tab'), self.previous_tab_cb, None, None, 'previous_tab'],
                      [_('Next _Tab'), self.next_tab_cb, None, None, 'next_tab'],
+                     [_('Las_t Tab'), self.last_tab_cb, None, None, 'last_tab'],
                      [],
                      [_('Shift Pane _Right'), self.button_cb, 'shift_pane_right', None, 'shift_pane_right'],
                      [_('Shift Pane _Left'), self.button_cb, 'shift_pane_left', None, 'shift_pane_left'] ] ])
@@ -7544,18 +7548,23 @@ class Diffuse(gtk.Window):
         if self.menu_update_depth == 0 and widget.get_active():
             self.getCurrentViewer().setSyntax(data)
 
+    # callback for the first tab menu item
+    def first_tab_cb(self, widget, data):
+        self.notebook.set_current_page(0)
+
     # callback for the previous tab menu item
     def previous_tab_cb(self, widget, data):
-        i = self.notebook.get_current_page() - 1
-        if i >= 0:
-            self.notebook.set_current_page(i)
+        i, n = self.notebook.get_current_page(), self.notebook.get_n_pages()
+        self.notebook.set_current_page((n + i - 1) % n)
 
     # callback for the next tab menu item
     def next_tab_cb(self, widget, data):
-        i = self.notebook.get_current_page() + 1
-        n = self.notebook.get_n_pages()
-        if i < n:
-            self.notebook.set_current_page(i)
+        i, n = self.notebook.get_current_page(), self.notebook.get_n_pages()
+        self.notebook.set_current_page((i + 1) % n)
+
+    # callback for the last tab menu item
+    def last_tab_cb(self, widget, data):
+        self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
 
     # callback for most menu items and buttons
     def button_cb(self, widget, data):

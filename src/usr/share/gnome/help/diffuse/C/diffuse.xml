@@ -894,6 +894,14 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>first_tab</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>First Tab</guimenuitem></menuchoice> menu item</para>
+              <para>Default: <literal>Shift+Ctrl+Page_Up</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>previous_tab</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Previous Tab</guimenuitem></menuchoice> menu item</para>
@@ -906,6 +914,14 @@
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Next Tab</guimenuitem></menuchoice> menu item</para>
               <para>Default: <literal>Ctrl+Page_Down</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>last_tab</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>View</guimenu><guimenuitem>Last Tab</guimenuitem></menuchoice> menu item</para>
+              <para>Default: <literal>Shift+Ctrl+Page_Down</literal></para>
             </listitem>
           </varlistentry>
 
