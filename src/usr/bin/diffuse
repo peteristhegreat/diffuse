@@ -7323,6 +7323,8 @@ class Diffuse(gtk.Window):
 
     # create a new viewer for each item in 'items'
     def createSeparateTabs(self, items, labels, options):
+        # all tabs inherit the first tab's revision and encoding specifications
+        items = [ (name, items[0][1]) for name, data in items ]
         for item in assign_file_labels(items, labels):
             self.newLoadedFileDiffViewer([ item ]).setOptions(options)
 
@@ -7738,7 +7740,7 @@ if __name__ == '__main__':
                 revs.append((decode_fs_string(args[i]), encoding))
             elif arg in [ '-s', '--separate' ]:
                 funcs[mode](specs, labels, options)
-                specs, labels = [], [], {}
+                specs, labels, options = [], [], {}
                 # open items in separate tabs
                 mode = 'separate'
             elif arg in [ '-t', '--tab' ]:
