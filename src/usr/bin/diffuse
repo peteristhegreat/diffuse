@@ -29,7 +29,7 @@ import sys
 if hasattr(sys, 'frozen'):
     app_path = sys.executable
 else:
-    app_path = sys.argv[0]
+    app_path = os.path.realpath(sys.argv[0])
 bin_dir = os.path.dirname(app_path)
 
 # platform test
