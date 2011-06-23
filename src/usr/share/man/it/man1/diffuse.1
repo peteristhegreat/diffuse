@@ -28,12 +28,12 @@ uscirà subito dopo aver visualizzato le informazioni\&.
 .PP
 \fB\-h\fR, \fB\-?\fR, \fB\-\-help\fR
 .RS 4
-Mostra le informazioni di utilizzo
+Mostra le informazioni di utilizzo\&.
 .RE
 .PP
 \fB\-v\fR, \fB\-\-version\fR
 .RS 4
-Mostra la versione e il copyright
+Mostra la versione e il copyright\&.
 .RE
 .SS "Opzioni di configurazione"
 .PP
@@ -41,13 +41,13 @@ Se viene specificata una opzione di configurazione, questa deve essere il primo 
 .PP
 \fB\-\-no\-rcfile\fR
 .RS 4
-Non legge alcun file di inizializzazione
+Non legge alcun file di inizializzazione\&.
 .RE
 .PP
 \fB\-\-rcfile \fR\fB\fIfile\fR\fR
 .RS 4
 Legge i comandi di inizializzazione esclusivamente dal file
-\fIfile\fR
+\fIfile\fR\&.
 .RE
 .SS "Opzioni generali"
 .PP
@@ -57,46 +57,60 @@ Include in una scheda di confronto le revisioni
 \fIrev \- 1\fR
 e
 \fIrev\fR
-del file successivo indicato negli argomenti della linea di comando
+del file successivo indicato negli argomenti della linea di comando\&.
 .RE
 .PP
 \fB\-D\fR, \fB\-\-close\-if\-same\fR
 .RS 4
-Chiude tutte le schede senza differenze
+Chiude tutte le schede senza differenze\&.
 .RE
 .PP
 \fB\-e\fR, \fB\-\-encoding\fR \fIcodec\fR
 .RS 4
 Usa
 \fIcodec\fR
-per leggere e scrivere i file
+per leggere e scrivere i file\&.
+.RE
+.PP
+\fB\-L\fR, \fB\-\-label\fR \fIetichetta\fR
+.RS 4
+Visualizza
+\fIetichetta\fR
+invece del nome del file\&.
 .RE
 .PP
 \fB\-m\fR, \fB\-\-modified\fR
 .RS 4
-Apre tutti i file modificati dai restanti percorsi indicati tra gli argomenti della linea di comando in schede di confronto separate
+Apre tutti i file modificati dai restanti percorsi indicati tra gli argomenti della linea di comando in schede di confronto separate\&.
 .RE
 .PP
 \fB\-r\fR, \fB\-\-revision\fR \fIrev\fR
 .RS 4
 Include nella scheda di comparazione dei file la revisione
 \fIrev\fR
-del file successivo contenuto negli argomenti della linea di comando
+del file successivo contenuto negli argomenti della linea di comando\&.
 .RE
 .PP
 \fB\-s\fR, \fB\-\-separate\fR
 .RS 4
-Apre tutti i restanti file specificati come argomento della linea di comando in schede di confronto separate
+Apre tutti i restanti file specificati come argomento della linea di comando in schede di confronto separate\&.
 .RE
 .PP
 \fB\-t\fR, \fB\-\-tab\fR
 .RS 4
-Apre una nuova scheda per ogni altro file indicato come argomento della riga di comando
+Apre una nuova scheda per ogni altro file indicato come argomento della riga di comando\&.
+.RE
+.PP
+\fB\-\-line \fR\fB\fIlinea\fR\fR
+.RS 4
+Inizia con la
+\fIlinea\fR
+selezionata\&.
 .RE
 .PP
 \fB\-\-null\-file\fR
 .RS 4
-Crea un riquadro di confronto vuoto
+Crea un riquadro di confronto vuoto\&.
 .RE
 .SS "Opzioni di visualizzazione"
 .PP
@@ -104,27 +118,27 @@ Le opzioni di visualizzazione indicate come argomenti della linea di comando han
 .PP
 \fB\-b\fR, \fB\-\-ignore\-space\-change\fR
 .RS 4
-Ignora i cambiamenti del numero di spazi vuoti
+Ignora i cambiamenti del numero di spazi vuoti\&.
 .RE
 .PP
 \fB\-B\fR, \fB\-\-ignore\-blank\-lines\fR
 .RS 4
-Ignora i cambiamenti le cui righe sono tutte vuote
+Ignora i cambiamenti le cui righe sono tutte vuote\&.
 .RE
 .PP
 \fB\-E\fR, \fB\-\-ignore\-end\-of\-line\fR
 .RS 4
-Ignora le differenze alla fine della riga
+Ignora le differenze alla fine della riga\&.
 .RE
 .PP
 \fB\-i\fR, \fB\-\-ignore\-case\fR
 .RS 4
-Ignora le differenze tra lettere maiuscole e minuscole nel contenuto del file
+Ignora le differenze tra lettere maiuscole e minuscole nel contenuto del file\&.
 .RE
 .PP
 \fB\-w\fR, \fB\-\-ignore\-all\-space\fR
 .RS 4
-Ignora tutti gli spazi vuoti
+Ignora tutti gli spazi vuoti\&.
 .RE
 .SH "CONFRONTARE I FILE"
 .PP
@@ -146,9 +160,10 @@ Nel margine destro della finestra è visibile un sommario del confronto dei file
 Le righe di testo possono essere selezionate utilizzando il mouse o la tastiera\&. Selezionare le righe di testo facendovi clic sopra con il puntatore del mouse\&. Fare clic e trascinare il puntatore per selezionare più righe\&. Mantenendo premuto
 Maiusc
 quando si fa clic la selezione corrente verrà estesa\&. Selezionare le righe con la tastiera premendo i tasti
-Pagina_Su,
-Pagina_Giù
-o le frecce\&. Tenere premuto
+Pag_Su,
+Pag_Giù
+o le
+frecce\&. Tenere premuto
 Maiusc
 mentre si usano questi tasti per estendere la selezione\&. Spostare la selezione in un file adiacente utilizzando i tasti delle frecce sinistra e destra\&.
 .SS "Far corrispondere le righe"
@@ -169,12 +184,13 @@ o fare doppio clic nell\*(Aqarea di testo per avviare la modalità di modifica d
 .PP
 Nella modalità di modifica testo, il testo può essere selezionato con il puntatore del mouse facendo clic e trascinando\&. La selezione corrente può essere estesa tenendo premuto il tasto
 Maiusc
-e muovendo il cursore facendo clic con il puntatore del mouse o premendo uno qualsiasi tra i tasti freccia,
-Home,
-Fine,
-Pagina_Su
+e muovendo il cursore facendo clic con il puntatore del mouse o premendo uno qualsiasi tra i
+tasti freccia,
+home,
+fine,
+Pg_Su
 o
-Pagina_Giù\&. Le parole possono essere selezionate individualmente con un doppio clic sopra di esse con il puntatore del mouse\&. L\*(Aqintera riga può essere selezionata con un triplo clic su di essa con il puntatore del mouse\&.
+Pg_Giù\&. Le parole possono essere selezionate individualmente con un doppio clic sopra di esse con il puntatore del mouse\&. L\*(Aqintera riga può essere selezionata con un triplo clic su di essa con il puntatore del mouse\&.
 .PP
 Modificare il testo digitando sulla tastiera\&. Le righe modificate verranno evidenziate in verde\&. Usare le voci di menu
 Annulla
@@ -701,6 +717,15 @@ Predefinito:
 Shift+Ctrl+Down
 .RE
 .PP
+\fBfirst_tab\fR
+.RS 4
+Voce di menu
+Visualizza \(-> Prima scheda
+.sp
+Predefinito:
+Shift+Ctrl+Page_Up
+.RE
+.PP
 \fBprevious_tab\fR
 .RS 4
 Voce di menu
@@ -717,6 +742,15 @@ Visualizza \(-> Scheda successiva
 .sp
 Predefinito:
 Ctrl+Page_Down
+.RE
+.PP
+\fBlast_tab\fR
+.RS 4
+Voce di menu
+Visualizza \(-> Ultima scheda
+.sp
+Predefinito:
+Shift+Ctrl+Page_Down
 .RE
 .PP
 \fBshift_pane_right\fR
@@ -1021,7 +1055,7 @@ Shift+J
 .PP
 \fBleft\fR
 .RS 4
-Sposta il cursore a sinistra di un file
+Sposta il cursore sinistra di un file
 .sp
 Predefiniti:
 Left,
@@ -1250,7 +1284,7 @@ j
 .PP
 \fBleft\fR
 .RS 4
-Sposta il cursore a sinistra di un file
+Sposta il cursore sinistra di un file
 .sp
 Predefiniti:
 Left,
@@ -1320,10 +1354,10 @@ Escape
 .PP
 \fBstringa \fR\fB\fInome\fR\fR\fB \fR\fB\fIvalore\fR\fR
 .RS 4
-Dichiara un stringa chiamata
+Dichiara una stringa chiamata
 \fInome\fR
 con valore
-\fIvalore\fR
+\fIvalore\fR\&.
 .RE
 .sp
 .it 1 an-trap
@@ -1366,7 +1400,7 @@ utilizza le seguenti risorse colore:
 .PP
 \fBalignment\fR
 .RS 4
-Colore utilizzato per indicare una riga selezionata per l\*(Aqallineamento manuale
+Colore utilizzato per indicare una riga selezionata per l\*(Aqallineamento manuale\&.
 .sp
 Predefinito:
 1 1 0
@@ -1374,7 +1408,7 @@ Predefinito:
 .PP
 \fBcharacter_selection\fR
 .RS 4
-Colore usato per evidenziare i caratteri selezionati
+Colore usato per evidenziare i caratteri selezionati\&.
 .sp
 Predefinito:
 0\&.7 0\&.7 1
@@ -1382,7 +1416,7 @@ Predefinito:
 .PP
 \fBcursor\fR
 .RS 4
-Colore utilizzato per il cursore
+Colore utilizzato per il cursore\&.
 .sp
 Predefinito:
 0 0 0
@@ -1390,7 +1424,7 @@ Predefinito:
 .PP
 \fBdifference_1\fR
 .RS 4
-Colore usato per evidenziare le differenze nella prima coppia di file
+Colore usato per evidenziare le differenze nella prima coppia di file\&.
 .sp
 Predefinito:
 1 0\&.625 0\&.625
@@ -1398,7 +1432,7 @@ Predefinito:
 .PP
 \fBdifference_2\fR
 .RS 4
-Colore usato per evidenziare le differenze nella seconda coppia di file
+Colore usato per evidenziare le differenze nella seconda coppia di file\&.
 .sp
 Predefinito:
 0\&.85 0\&.625 0\&.775
@@ -1406,7 +1440,7 @@ Predefinito:
 .PP
 \fBdifference_3\fR
 .RS 4
-Colore usato per evidenziare le differenze nella terza coppia di file
+Colore usato per evidenziare le differenze nella terza coppia di file\&.
 .sp
 Predefinito:
 0\&.85 0\&.775 0\&.625
@@ -1414,7 +1448,7 @@ Predefinito:
 .PP
 \fBedited\fR
 .RS 4
-Colore usato per evidenziare le righe modificate
+Colore usato per evidenziare le righe modificate\&.
 .sp
 Predefinito:
 0\&.5 1 0\&.5
@@ -1422,7 +1456,7 @@ Predefinito:
 .PP
 \fBhatch\fR
 .RS 4
-Colore usato per evidenziare delle discrepanze nell\*(Aqallineamento
+Colore usato per evidenziare delle discrepanze nell\*(Aqallineamento\&.
 .sp
 Predefinito:
 0\&.8 0\&.8 0\&.8
@@ -1430,7 +1464,7 @@ Predefinito:
 .PP
 \fBline_number\fR
 .RS 4
-Colore usato per i numeri di riga
+Colore usato per i numeri di riga\&.
 .sp
 Predefinito:
 0 0 0
@@ -1438,7 +1472,7 @@ Predefinito:
 .PP
 \fBline_number_background\fR
 .RS 4
-Colore di sfondo per l\*(Aqarea del numero di riga
+Colore di sfondo per l\*(Aqarea del numero di riga\&.
 .sp
 Predefinito:
 0\&.75 0\&.75 0\&.75
@@ -1446,7 +1480,7 @@ Predefinito:
 .PP
 \fBline_selection\fR
 .RS 4
-Colore usato per evidenziare le linee selezionate
+Colore usato per evidenziare le linee selezionate\&.
 .sp
 Predefinito:
 0\&.7 0\&.7 1
@@ -1454,15 +1488,23 @@ Predefinito:
 .PP
 \fBmap_background\fR
 .RS 4
-Colore di sfondo per l\*(Aqarea di mappatura
+Colore di sfondo per l\*(Aqarea di mappatura\&.
 .sp
 Predefinito:
 0\&.6 0\&.6 0\&.6
 .RE
 .PP
+\fBmargin\fR
+.RS 4
+Colore usato per indicare il margine destro\&.
+.sp
+Predefinito:
+0\&.8 0\&.8 0\&.8
+.RE
+.PP
 \fBpreedit\fR
 .RS 4
-Colore del testo prima delle modifiche
+Colore del testo prima delle modifiche\&.
 .sp
 Predefinito:
 0 0 0
@@ -1470,7 +1512,7 @@ Predefinito:
 .PP
 \fBtext\fR
 .RS 4
-Colore del testo regolare
+Colore del testo regolare\&.
 .sp
 Predefinito:
 0 0 0
@@ -1478,7 +1520,7 @@ Predefinito:
 .PP
 \fBtext_background\fR
 .RS 4
-Colore di sfondo per l\*(Aqarea di testo
+Colore di sfondo per l\*(Aqarea di testo\&.
 .sp
 Predefinito:
 1 1 1
@@ -1491,7 +1533,7 @@ Predefinito:
 Dichiara una risorsa a virgola mobile chiamata
 \fInome\fR
 con valore
-\fIvalore\fR
+\fIvalore\fR\&.
 .RE
 .sp
 .it 1 an-trap
@@ -1541,7 +1583,8 @@ Predefinito:
 .RS 4
 Valore di trasparenza utilizzato durante la composizione del colore per le differenze di riga
 .sp
-Predefinito: 0\&.3
+Predefinito:
+0\&.3
 .RE
 .PP
 \fBline_selection_opacity\fR

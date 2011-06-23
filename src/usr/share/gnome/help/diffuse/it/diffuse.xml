@@ -26,7 +26,7 @@
       </othercredit>
     </authorgroup>
 
-    <releaseinfo>Questo manuale descrive la versione &app-version; di &app;.</releaseinfo>
+    <releaseinfo>Questo manuale descrive la versione &app-version; di <application>&app;</application>.</releaseinfo>
   </bookinfo>
 
   <chapter id="introduction">
@@ -54,14 +54,14 @@
         <varlistentry>
           <term><userinput>diffuse [ -h | -? | --help | -v | --version ]</userinput></term>
           <listitem>
-            <para>Visualizza le informazioni relative a <application>&app;</application></para>
+            <para>Visualizza le informazioni relative a <application>&app;</application>.</para>
           </listitem>
         </varlistentry>
 
         <varlistentry>
           <term><userinput>diffuse [ [ <replaceable>opzione</replaceable> ]... [ <replaceable>file</replaceable> ]... ]...</userinput></term>
           <listitem>
-            <para>Confronta e unisce file</para>
+            <para>Confronta e unisce file.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -75,14 +75,14 @@
           <varlistentry>
             <term><userinput>-h</userinput>, <userinput>-?</userinput>, <userinput>--help</userinput></term>
             <listitem>
-              <para>Mostra le informazioni di utilizzo</para>
+              <para>Mostra le informazioni di utilizzo.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-v</userinput>, <userinput>--version</userinput></term>
             <listitem>
-              <para>Mostra la versione e il copyright</para>
+              <para>Mostra la versione e il copyright.</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -97,14 +97,14 @@
           <varlistentry>
             <term><userinput>--no-rcfile</userinput></term>
             <listitem>
-              <para>Non legge alcun file di inizializzazione</para>
+              <para>Non legge alcun file di inizializzazione.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>--rcfile <replaceable>file</replaceable></userinput></term>
             <listitem>
-              <para>Legge i comandi di inizializzazione esclusivamente dal file <replaceable>file</replaceable></para>
+              <para>Legge i comandi di inizializzazione esclusivamente dal file <replaceable>file</replaceable>.</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -117,56 +117,70 @@
           <varlistentry>
             <term><userinput>-c</userinput>, <userinput>--commit</userinput> <replaceable>rev</replaceable></term>
             <listitem>
-              <para>Include in una scheda di confronto le revisioni <replaceable>rev - 1</replaceable> e <replaceable>rev</replaceable> del file successivo indicato negli argomenti della linea di comando</para>
+              <para>Include in una scheda di confronto le revisioni <replaceable>rev - 1</replaceable> e <replaceable>rev</replaceable> del file successivo indicato negli argomenti della linea di comando.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-D</userinput>, <userinput>--close-if-same</userinput></term>
             <listitem>
-              <para>Chiude tutte le schede senza differenze</para>
+              <para>Chiude tutte le schede senza differenze.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-e</userinput>, <userinput>--encoding</userinput> <replaceable>codec</replaceable></term>
             <listitem>
-              <para>Usa <replaceable>codec</replaceable> per leggere e scrivere i file</para>
+              <para>Usa <replaceable>codec</replaceable> per leggere e scrivere i file.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>-L</userinput>, <userinput>--label</userinput> <replaceable>etichetta</replaceable></term>
+            <listitem>
+              <para>Visualizza <replaceable>etichetta</replaceable> invece del nome del file.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-m</userinput>, <userinput>--modified</userinput></term>
             <listitem>
-              <para>Apre tutti i file modificati dai restanti percorsi indicati tra gli argomenti della linea di comando in schede di confronto separate</para>
+              <para>Apre tutti i file modificati dai restanti percorsi indicati tra gli argomenti della linea di comando in schede di confronto separate.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-r</userinput>, <userinput>--revision</userinput> <replaceable>rev</replaceable></term>
             <listitem>
-              <para>Include nella scheda di comparazione dei file la revisione <replaceable>rev</replaceable> del file successivo contenuto negli argomenti della linea di comando</para>
+              <para>Include nella scheda di comparazione dei file la revisione <replaceable>rev</replaceable> del file successivo contenuto negli argomenti della linea di comando.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-s</userinput>, <userinput>--separate</userinput></term>
             <listitem>
-              <para>Apre tutti i restanti file specificati come argomento della linea di comando in schede di confronto separate</para>
+              <para>Apre tutti i restanti file specificati come argomento della linea di comando in schede di confronto separate.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-t</userinput>, <userinput>--tab</userinput></term>
             <listitem>
-              <para>Apre una nuova scheda per ogni altro file indicato come argomento della riga di comando</para>
+              <para>Apre una nuova scheda per ogni altro file indicato come argomento della riga di comando.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>--line <replaceable>linea</replaceable></userinput></term>
+            <listitem>
+              <para>Inizia con la <replaceable>linea</replaceable> selezionata.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>--null-file</userinput></term>
             <listitem>
-              <para>Crea un riquadro di confronto vuoto</para>
+              <para>Crea un riquadro di confronto vuoto.</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -181,35 +195,35 @@
           <varlistentry>
             <term><userinput>-b</userinput>, <userinput>--ignore-space-change</userinput></term>
             <listitem>
-              <para>Ignora i cambiamenti del numero di spazi vuoti</para>
+              <para>Ignora i cambiamenti del numero di spazi vuoti.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-B</userinput>, <userinput>--ignore-blank-lines</userinput></term>
             <listitem>
-              <para>Ignora i cambiamenti le cui righe sono tutte vuote</para>
+              <para>Ignora i cambiamenti le cui righe sono tutte vuote.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-E</userinput>, <userinput>--ignore-end-of-line</userinput></term>
             <listitem>
-              <para>Ignora le differenze alla fine della riga</para>
+              <para>Ignora le differenze alla fine della riga.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-i</userinput>, <userinput>--ignore-case</userinput></term>
             <listitem>
-              <para>Ignora le differenze tra lettere maiuscole e minuscole nel contenuto del file</para>
+              <para>Ignora le differenze tra lettere maiuscole e minuscole nel contenuto del file.</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>-w</userinput>, <userinput>--ignore-all-space</userinput></term>
             <listitem>
-              <para>Ignora tutti gli spazi vuoti</para>
+              <para>Ignora tutti gli spazi vuoti.</para>
             </listitem>
           </varlistentry>
         </variablelist>
@@ -233,7 +247,7 @@
     <sect1 id="file-comparison-selecting">
       <title>Selezionare</title>
 
-      <para>Le righe di testo possono essere selezionate utilizzando il mouse o la tastiera. Selezionare le righe di testo facendovi clic sopra con il puntatore del mouse. Fare clic e trascinare il puntatore per selezionare più righe. Mantenendo premuto <keycap>Maiusc</keycap> quando si fa clic la selezione corrente verrà estesa. Selezionare le righe con la tastiera premendo i tasti <keycap>Pagina_Su</keycap>, <keycap>Pagina_Giù</keycap> o le frecce. Tenere premuto <keycap>Maiusc</keycap> mentre si usano questi tasti per estendere la selezione. Spostare la selezione in un file adiacente utilizzando i tasti delle frecce sinistra e destra.</para>
+      <para>Le righe di testo possono essere selezionate utilizzando il mouse o la tastiera. Selezionare le righe di testo facendovi clic sopra con il puntatore del mouse. Fare clic e trascinare il puntatore per selezionare più righe. Mantenendo premuto <keycap>Maiusc</keycap> quando si fa clic la selezione corrente verrà estesa. Selezionare le righe con la tastiera premendo i tasti <keycap>Pag_Su</keycap>, <keycap>Pag_Giù</keycap> o le <keycap>frecce</keycap>. Tenere premuto <keycap>Maiusc</keycap> mentre si usano questi tasti per estendere la selezione. Spostare la selezione in un file adiacente utilizzando i tasti delle frecce sinistra e destra.</para>
     </sect1>
 
     <sect1 id="file-comparison-alignment">
@@ -249,7 +263,7 @@
 
       <para>Premere il tasto <keycap>Invio</keycap> o fare doppio clic nell'area di testo per avviare la modalità di modifica del testo. Il cursore cambierà e nella barra di stato verrà visualizzato il numero della colonna in cui il cursore è posizionato.</para>
 
-      <para>Nella modalità di modifica testo, il testo può essere selezionato con il puntatore del mouse facendo clic e trascinando. La selezione corrente può essere estesa tenendo premuto il tasto <keycap>Maiusc</keycap> e muovendo il cursore facendo clic con il puntatore del mouse o premendo uno qualsiasi tra i tasti freccia, <keycap>Home</keycap>, <keycap>Fine</keycap>, <keycap>Pagina_Su</keycap> o <keycap>Pagina_Giù</keycap>. Le parole possono essere selezionate individualmente con un doppio clic sopra di esse con il puntatore del mouse. L'intera riga può essere selezionata con un triplo clic su di essa con il puntatore del mouse.</para>
+      <para>Nella modalità di modifica testo, il testo può essere selezionato con il puntatore del mouse facendo clic e trascinando. La selezione corrente può essere estesa tenendo premuto il tasto <keycap>Maiusc</keycap> e muovendo il cursore facendo clic con il puntatore del mouse o premendo uno qualsiasi tra i <keycap>tasti freccia</keycap>, <keycap>home</keycap>, <keycap>fine</keycap>, <keycap>Pg_Su</keycap> o <keycap>Pg_Giù</keycap>. Le parole possono essere selezionate individualmente con un doppio clic sopra di esse con il puntatore del mouse. L'intera riga può essere selezionata con un triplo clic su di essa con il puntatore del mouse.</para>
 
       <para>Modificare il testo digitando sulla tastiera. Le righe modificate verranno evidenziate in verde. Usare le voci di menu <menuchoice><guimenuitem>Annulla</guimenuitem></menuchoice> e <menuchoice><guimenuitem>Ripeti</guimenuitem></menuchoice> per annullare e ripetere le operazioni effettuate.</para>
 
@@ -626,6 +640,14 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>first_tab</userinput></term>
+            <listitem>
+              <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Prima scheda</guimenuitem></menuchoice></para>
+              <para>Predefinito: <literal>Shift+Ctrl+Page_Up</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>previous_tab</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Scheda precedente</guimenuitem></menuchoice></para>
@@ -638,6 +660,14 @@
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Scheda successiva</guimenuitem></menuchoice></para>
               <para>Predefinito: <literal>Ctrl+Page_Down</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>last_tab</userinput></term>
+            <listitem>
+              <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Ultima scheda</guimenuitem></menuchoice></para>
+              <para>Predefinito: <literal>Shift+Ctrl+Page_Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -908,7 +938,7 @@
           <varlistentry>
             <term><userinput>left</userinput></term>
             <listitem>
-              <para>Sposta il cursore a sinistra di un file</para>
+              <para>Sposta il cursore sinistra di un file</para>
               <para>Predefiniti: <literal>Left</literal>, <literal>h</literal></para>
             </listitem>
           </varlistentry>
@@ -1116,7 +1146,7 @@
           <varlistentry>
             <term><userinput>left</userinput></term>
             <listitem>
-              <para>Sposta il cursore a sinistra di un file</para>
+              <para>Sposta il cursore sinistra di un file</para>
               <para>Predefiniti: <literal>Left</literal>, <literal>h</literal></para>
             </listitem>
           </varlistentry>
@@ -1179,7 +1209,7 @@
         <varlistentry>
           <term><userinput>stringa <replaceable>nome</replaceable> <replaceable>valore</replaceable></userinput></term>
           <listitem>
-            <para>Dichiara un stringa chiamata <replaceable>nome</replaceable> con valore <replaceable>valore</replaceable></para>
+            <para>Dichiara una stringa chiamata <replaceable>nome</replaceable> con valore <replaceable>valore</replaceable>.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -1223,7 +1253,7 @@
           <varlistentry>
             <term><userinput>alignment</userinput></term>
             <listitem>
-              <para>Colore utilizzato per indicare una riga selezionata per l'allineamento manuale</para>
+              <para>Colore utilizzato per indicare una riga selezionata per l'allineamento manuale.</para>
               <para>Predefinito: <literal>1 1 0</literal></para>
             </listitem>
           </varlistentry>
@@ -1231,7 +1261,7 @@
           <varlistentry>
             <term><userinput>character_selection</userinput></term>
             <listitem>
-              <para>Colore usato per evidenziare i caratteri selezionati</para>
+              <para>Colore usato per evidenziare i caratteri selezionati.</para>
               <para>Predefinito: <literal>0.7 0.7 1</literal></para>
             </listitem>
           </varlistentry>
@@ -1239,7 +1269,7 @@
           <varlistentry>
             <term><userinput>cursor</userinput></term>
             <listitem>
-              <para>Colore utilizzato per il cursore</para>
+              <para>Colore utilizzato per il cursore.</para>
               <para>Predefinito: <literal>0 0 0</literal></para>
             </listitem>
           </varlistentry>
@@ -1247,7 +1277,7 @@
           <varlistentry>
             <term><userinput>difference_1</userinput></term>
             <listitem>
-              <para>Colore usato per evidenziare le differenze nella prima coppia di file</para>
+              <para>Colore usato per evidenziare le differenze nella prima coppia di file.</para>
               <para>Predefinito: <literal>1 0.625 0.625</literal></para>
             </listitem>
           </varlistentry>
@@ -1255,7 +1285,7 @@
           <varlistentry>
             <term><userinput>difference_2</userinput></term>
             <listitem>
-              <para>Colore usato per evidenziare le differenze nella seconda coppia di file</para>
+              <para>Colore usato per evidenziare le differenze nella seconda coppia di file.</para>
               <para>Predefinito: <literal>0.85 0.625 0.775</literal></para>
             </listitem>
           </varlistentry>
@@ -1263,7 +1293,7 @@
           <varlistentry>
             <term><userinput>difference_3</userinput></term>
             <listitem>
-              <para>Colore usato per evidenziare le differenze nella terza coppia di file</para>
+              <para>Colore usato per evidenziare le differenze nella terza coppia di file.</para>
               <para>Predefinito: <literal>0.85 0.775 0.625</literal></para>
             </listitem>
           </varlistentry>
@@ -1271,7 +1301,7 @@
           <varlistentry>
             <term><userinput>edited</userinput></term>
             <listitem>
-              <para>Colore usato per evidenziare le righe modificate</para>
+              <para>Colore usato per evidenziare le righe modificate.</para>
               <para>Predefinito: <literal>0.5 1 0.5</literal></para>
             </listitem>
           </varlistentry>
@@ -1279,7 +1309,7 @@
           <varlistentry>
             <term><userinput>hatch</userinput></term>
             <listitem>
-              <para>Colore usato per evidenziare delle discrepanze nell'allineamento</para>
+              <para>Colore usato per evidenziare delle discrepanze nell'allineamento.</para>
               <para>Predefinito: <literal>0.8 0.8 0.8</literal></para>
             </listitem>
           </varlistentry>
@@ -1287,7 +1317,7 @@
           <varlistentry>
             <term><userinput>line_number</userinput></term>
             <listitem>
-              <para>Colore usato per i numeri di riga</para>
+              <para>Colore usato per i numeri di riga.</para>
               <para>Predefinito: <literal>0 0 0</literal></para>
             </listitem>
           </varlistentry>
@@ -1295,7 +1325,7 @@
           <varlistentry>
             <term><userinput>line_number_background</userinput></term>
             <listitem>
-              <para>Colore di sfondo per l'area del numero di riga</para>
+              <para>Colore di sfondo per l'area del numero di riga.</para>
               <para>Predefinito: <literal>0.75 0.75 0.75</literal></para>
             </listitem>
           </varlistentry>
@@ -1303,7 +1333,7 @@
           <varlistentry>
             <term><userinput>line_selection</userinput></term>
             <listitem>
-              <para>Colore usato per evidenziare le linee selezionate</para>
+              <para>Colore usato per evidenziare le linee selezionate.</para>
               <para>Predefinito: <literal>0.7 0.7 1</literal></para>
             </listitem>
           </varlistentry>
@@ -1311,15 +1341,23 @@
           <varlistentry>
             <term><userinput>map_background</userinput></term>
             <listitem>
-              <para>Colore di sfondo per l'area di mappatura</para>
+              <para>Colore di sfondo per l'area di mappatura.</para>
               <para>Predefinito: <literal>0.6 0.6 0.6</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>margin</userinput></term>
+            <listitem>
+              <para>Colore usato per indicare il margine destro.</para>
+              <para>Predefinito: <literal>0.8 0.8 0.8</literal></para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>preedit</userinput></term>
             <listitem>
-              <para>Colore del testo prima delle modifiche</para>
+              <para>Colore del testo prima delle modifiche.</para>
               <para>Predefinito: <literal>0 0 0</literal></para>
             </listitem>
           </varlistentry>
@@ -1327,7 +1365,7 @@
           <varlistentry>
             <term><userinput>text</userinput></term>
             <listitem>
-              <para>Colore del testo regolare</para>
+              <para>Colore del testo regolare.</para>
               <para>Predefinito: <literal>0 0 0</literal></para>
             </listitem>
           </varlistentry>
@@ -1335,7 +1373,7 @@
           <varlistentry>
             <term><userinput>text_background</userinput></term>
             <listitem>
-              <para>Colore di sfondo per l'area di testo</para>
+              <para>Colore di sfondo per l'area di testo.</para>
               <para>Predefinito: <literal>1 1 1</literal></para>
             </listitem>
           </varlistentry>
@@ -1351,7 +1389,7 @@
         <varlistentry>
           <term><userinput>float <replaceable>nome</replaceable> <replaceable>valore</replaceable></userinput></term>
           <listitem>
-            <para>Dichiara una risorsa a virgola mobile chiamata <replaceable>nome</replaceable> con valore <replaceable>valore</replaceable></para>
+            <para>Dichiara una risorsa a virgola mobile chiamata <replaceable>nome</replaceable> con valore <replaceable>valore</replaceable>.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -1399,7 +1437,7 @@
             <term><userinput>line_difference_alpha</userinput></term>
             <listitem>
               <para>Valore di trasparenza utilizzato durante la composizione del colore per le differenze di riga</para>
-              <para>Predefinito: 0.3</para>
+              <para>Predefinito: <literal>0.3</literal></para>
             </listitem>
           </varlistentry>
 
