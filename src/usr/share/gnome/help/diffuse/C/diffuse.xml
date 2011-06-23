@@ -233,7 +233,7 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>--line</userinput> <replaceable>line</replaceable></term>
+            <term><userinput>--line <replaceable>line</replaceable></userinput></term>
             <listitem>
               <para>
                 Start with line <replaceable>line</replaceable> selected.
