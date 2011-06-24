@@ -1,3 +1,4 @@
+- added syntax highlighting for JSON files
 - added menu items and keyboard shortcuts for "First Tab" and "Last Tab"
 - added "--line" command line option
 - fixed a bug that caused deleted files to be ignored when using the '-m' option
