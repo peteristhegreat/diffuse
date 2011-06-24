@@ -19,6 +19,7 @@
 # (http://www.fsf.org/) or by writing to the Free Software Foundation, Inc.,
 # 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
+import codecs
 import gettext
 import locale
 import os
@@ -67,15 +68,22 @@ VERSION = '0.4.4'
 COPYRIGHT = _('Copyright © 2006-2011 Derrick Moser')
 WEBSITE = 'http://diffuse.sourceforge.net/'
 
+# print a UTF-8 string using the host's native encoding
+def printMessage(s):
+    try:
+        print codecs.encode(unicode(s, 'utf_8'), sys.getfilesystemencoding())
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        pass
+
 # process help options
 if __name__ == '__main__':
     args = sys.argv
     argc = len(args)
     if argc == 2 and args[1] in [ '-v', '--version' ]:
-        print '%s %s\n%s' % (APP_NAME, VERSION, COPYRIGHT)
+        printMessage('%s %s\n%s' % (APP_NAME, VERSION, COPYRIGHT))
         sys.exit(0)
     if argc == 2 and args[1] in [ '-h', '-?', '--help' ]:
-        print _("""Usage:
+        printMessage(_('''Usage:
     diffuse [ [OPTION...] [FILE...] ]...
     diffuse ( -h | -? | --help | -v | --version )
 
@@ -110,14 +118,13 @@ Display Options:
   ( -B | --ignore-blank-lines )    Ignore changes in blank lines
   ( -E | --ignore-end-of-line )    Ignore end of line differences
   ( -i | --ignore-case )           Ignore case differences
-  ( -w | --ignore-all-space )      Ignore white space differences""")
+  ( -w | --ignore-all-space )      Ignore white space differences'''))
         sys.exit(0)
 
 import pygtk
 pygtk.require('2.0')
 import gtk
 
-import codecs
 import difflib
 import encodings
 import glob
@@ -2829,9 +2836,9 @@ class FileDiffViewer(gtk.Table):
     # are known and the scroll bar can be moved to the first difference
     def _realise_cb(self, widget):
         self.im_context.set_client_window(self.window)
-	try:
-	    self.go_to_line(self.options['line'])
-	except KeyError:
+        try:
+            self.go_to_line(self.options['line'])
+        except KeyError:
             self.first_difference()
 
     # callback for most menu items and buttons
@@ -7353,7 +7360,7 @@ class Diffuse(gtk.Window):
                         for i, spec in enumerate(specs):
                             name, rev = spec
                             viewer.load(i, FileInfo(name, encoding, vcs, rev))
-		        viewer.setOptions(options)
+                        viewer.setOptions(options)
                 except (IOError, OSError, WindowsError):
                     dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving modifications for %s.') % (dn, ))
                     dialog.run()
@@ -7772,9 +7779,9 @@ if __name__ == '__main__':
                 i += 1
                 labels.append(decode_fs_string(args[i]))
             elif i + 1 < argc and arg == '--line':
-	        i += 1
-		try:
-	            options['line'] = int(args[i])
+                i += 1
+                try:
+                    options['line'] = int(args[i])
                 except ValueError:
                     logError(_('Error parsing line number.'))
             elif arg == '--null-file':
