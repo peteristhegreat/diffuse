@@ -192,6 +192,15 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>-L</userinput>, <userinput>--label</userinput> <replaceable>label</replaceable></term>
+            <listitem>
+              <para>
+                Отображать <replaceable>label</replaceable> ярлык вместо имени файла.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>-m</userinput>, <userinput>--modified</userinput></term>
             <listitem>
               <para>
@@ -229,6 +238,15 @@
               <para>
                 Запустить новую вкладку для любых остающихся файлов, названных
                 в параметрах командной строки.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>--line <replaceable>line</replaceable></userinput></term>
+            <listitem>
+              <para>
+                Начать с выбранной <replaceable>line</replaceable> строки.
               </para>
             </listitem>
           </varlistentry>
@@ -902,6 +920,14 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>first_tab</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Первая Вкладка</guimenuitem></menuchoice></para>
+              <para>По умолчанию: <literal>Shift+Ctrl+Page_Up</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>previous_tab</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Предыдущая Вкладка</guimenuitem></menuchoice></para>
@@ -914,6 +940,14 @@
             <listitem>
               <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Следующая Вкладка</guimenuitem></menuchoice></para>
               <para>По умолчанию: <literal>Ctrl+Page_Down</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>last_tab</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Последняя Вкладка</guimenuitem></menuchoice></para>
+              <para>По умолчанию: <literal>Shift+Ctrl+Page_Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1612,6 +1646,14 @@
             <listitem>
               <para>цвет фона для области отображения</para>
               <para>По умолчанию: <literal>0.6 0.6 0.6</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>margin</userinput></term>
+            <listitem>
+              <para>цвет, используемый для индикации правого поля</para>
+              <para>По умолчанию: <literal>0.8 0.8 0.8</literal></para>
             </listitem>
           </varlistentry>
 

@@ -71,6 +71,13 @@ Diffuse
 (кодек) для чтения и записи файлов\&.
 .RE
 .PP
+\fB\-L\fR, \fB\-\-label\fR \fIlabel\fR
+.RS 4
+Отображать
+\fIlabel\fR
+ярлык вместо имени файла\&.
+.RE
+.PP
 \fB\-m\fR, \fB\-\-modified\fR
 .RS 4
 Открыть все модифицированные файлы из остающихся путей, определенных в параметрах командной строки, на отдельных вкладках сравнения файлов\&.
@@ -91,6 +98,13 @@ Diffuse
 \fB\-t\fR, \fB\-\-tab\fR
 .RS 4
 Запустить новую вкладку для любых остающихся файлов, названных в параметрах командной строки\&.
+.RE
+.PP
+\fB\-\-line \fR\fB\fIline\fR\fR
+.RS 4
+Начать с выбранной
+\fIline\fR
+строки\&.
 .RE
 .PP
 \fB\-\-null\-file\fR
@@ -658,6 +672,14 @@ Ctrl+Down
 Shift+Ctrl+Down
 .RE
 .PP
+\fBfirst_tab\fR
+.RS 4
+Вид \(-> Первая Вкладка
+.sp
+По умолчанию:
+Shift+Ctrl+Page_Up
+.RE
+.PP
 \fBprevious_tab\fR
 .RS 4
 Вид \(-> Предыдущая Вкладка
@@ -672,6 +694,14 @@ Ctrl+Page_Up
 .sp
 По умолчанию:
 Ctrl+Page_Down
+.RE
+.PP
+\fBlast_tab\fR
+.RS 4
+Вид \(-> Последняя Вкладка
+.sp
+По умолчанию:
+Shift+Ctrl+Page_Down
 .RE
 .PP
 \fBshift_pane_right\fR
@@ -1388,6 +1418,14 @@ Diffuse:
 .sp
 По умолчанию:
 0\&.6 0\&.6 0\&.6
+.RE
+.PP
+\fBmargin\fR
+.RS 4
+цвет, используемый для индикации правого поля
+.sp
+По умолчанию:
+0\&.8 0\&.8 0\&.8
 .RE
 .PP
 \fBpreedit\fR
