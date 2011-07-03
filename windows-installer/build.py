@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2010 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2006-2011 Derrick Moser <derrick_moser@yahoo.com>
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -96,11 +96,10 @@ args = [ sys.executable, 'setup.py', 'py2exe' ]
 if os.spawnv(os.P_WAIT, args[0], args) != 0:
     raise OSError('Could not run setup.py')
 
-# include Python 2.6 specific DLLs and manifests
-if platform.python_version_tuple()[:2] == ('2', '6'):
-    for f in 'msvcm90.dll', 'msvcp90.dll', 'msvcr90.dll':
-        copyFile(os.path.join(os.environ['SYSTEMROOT'], 'WinSxS\\x86_Microsoft.VC90.CRT_1fc8b3b9a1e18e3b_9.0.21022.8_x-ww_d08d0375\\' + f), 'dist\\' + f)
-    copyFile(os.path.join(os.environ['SYSTEMROOT'], 'WinSxS\\Manifests\\x86_Microsoft.VC90.CRT_1fc8b3b9a1e18e3b_9.0.21022.8_x-ww_d08d0375.manifest'), 'dist\\Microsoft.VC90.CRT.manifest')
+# include Microsoft redistributables needed by Python 2.6 and above
+for f in 'msvcm90.dll', 'msvcp90.dll', 'msvcr90.dll':
+    copyFile(os.path.join(os.environ['SYSTEMROOT'], 'WinSxS\\x86_Microsoft.VC90.CRT_1fc8b3b9a1e18e3b_9.0.21022.8_x-ww_d08d0375\\' + f), 'dist\\' + f)
+copyFile(os.path.join(os.environ['SYSTEMROOT'], 'WinSxS\\Manifests\\x86_Microsoft.VC90.CRT_1fc8b3b9a1e18e3b_9.0.21022.8_x-ww_d08d0375.manifest'), 'dist\\Microsoft.VC90.CRT.manifest')
 
 # include GTK dependencies
 gtk_dir = os.environ['GTK_BASEPATH']
@@ -118,9 +117,6 @@ mkdir('dist\\syntax')
 for p in glob.glob('..\\src\\usr\\share\\diffuse\\syntax\\*.syntax'):
     copyFile(p, os.path.join('dist\\syntax', os.path.basename(p)), True)
 copyFile('diffuserc', 'dist\\diffuserc')
-
-# application icon
-copyFile('diffuse.ico', 'dist\\diffuse.ico')
 
 # translations
 mkdir('dist\\share\\locale')

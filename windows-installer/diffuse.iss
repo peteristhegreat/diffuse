@@ -1,8 +1,9 @@
 ; Inno Setup file for Diffuse
 ;
-; Copyright (C) 2009-2010 Derrick Moser <derrick_moser@yahoo.com>
+; Copyright (C) 2009-2011 Derrick Moser <derrick_moser@yahoo.com>
 
 [Setup]
+AppId=Diffuse
 AppName={cm:ToolName}
 AppVerName=Diffuse 0.4.4
 DefaultDirName={pf}\Diffuse

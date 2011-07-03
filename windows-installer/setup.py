@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2009 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2006-2011 Derrick Moser <derrick_moser@yahoo.com>
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -30,8 +30,8 @@ setup(
     windows = [ { 'script': 'temp/diffusew.pyw', 'icon_resources': [(1, 'diffuse.ico')] } ],
     options = { 'py2exe': {
                    'packages': 'encodings, gtk',
-                   'includes': 'cairo, pango, pangocairo, atk, gobject',
-                   'excludes': [ '_ssl', 'pyreadline', 'doctest', 'optparse', 'pickle', 'calendar', 'unittest', 'inspect', 'pdb' ],
+                   'includes': 'cairo, pango, pangocairo, atk, gobject, gio',
+                   'excludes': [ '_ssl', 'pyreadline', 'doctest', 'pickle', 'calendar', 'unittest', 'inspect', 'pdb' ],
                    'dll_excludes': [ 'libglade-2.0-0.dll' ] }
               }
  )
