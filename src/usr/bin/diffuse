@@ -1552,6 +1552,11 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
+            if not os.path.exists(name):
+                # find revision for removed files
+                for s in popenReadLines(self.root, [ prefs.getString('cvs_bin'), 'status', safeRelativePath(self.root, name, prefs, 'cvs_cygwin') ], prefs, 'cvs_bash'):
+                    if s.startswith('   Working revision:\t-'):
+                        rev = s.split('\t')[1][1:]
             return popenRead(self.root, [ prefs.getString('cvs_bin'), '-Q', 'update', '-p', '-r', rev, safeRelativePath(self.root, name, prefs, 'cvs_cygwin') ], prefs, 'cvs_bash')
 
     # Darcs support
