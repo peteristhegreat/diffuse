@@ -20,5 +20,5 @@ Icon=diffuse
 Terminal=false
 Type=Application
 MimeType=text/plain;text/x-csrc;text/x-chdr;
-Categories=Development;GTK;TextEditor;TextTools;
+Categories=Development;GTK;TextEditor;TextTools;Utility;
 StartupNotify=true
