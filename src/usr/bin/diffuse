@@ -1552,7 +1552,7 @@ class VCSs:
             return result
 
         def getRevision(self, prefs, name, rev):
-            if not os.path.exists(name):
+            if rev == 'BASE' and not os.path.exists(name):
                 # find revision for removed files
                 for s in popenReadLines(self.root, [ prefs.getString('cvs_bin'), 'status', safeRelativePath(self.root, name, prefs, 'cvs_cygwin') ], prefs, 'cvs_bash'):
                     if s.startswith('   Working revision:\t-'):
@@ -1573,7 +1573,7 @@ class VCSs:
             result = []
             pwd, isabs = os.path.abspath(os.curdir), False
             r = {}
-            args = [ prefs.getString('darcs_bin'), 'whatsnew', '-l' ]
+            args = [ prefs.getString('darcs_bin'), 'whatsnew', '-s' ]
             for name in names:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'darcs_cygwin'))
@@ -1831,9 +1831,10 @@ class VCSs:
             return [ (name, rev), (name, None) ]
 
         def getFolderTemplate(self, prefs, names):
-            result = []
+            # build command
+            cmd = [ prefs.getString('rcs_bin_rlog'), '-L', '-h' ]
+            # build list of interesting files
             pwd, isabs = os.path.abspath(os.curdir), False
-
             r = []
             for k in names:
                 if os.path.isdir(k):
@@ -1873,15 +1874,13 @@ class VCSs:
                     s[-1] += ',v'
                     if os.path.isfile(os.sep.join(s)):
                         r.append(k)
-
-            # build list of interesting files
             for k in r:
                 isabs |= os.path.isabs(k)
-            cmd = [ prefs.getString('rcs_bin_rlog'), '-L', '-h' ]
             args = [ safeRelativePath(self.root, k, prefs, 'rcs_cygwin') for k in r ]
-
+            # run command
             r, k = {}, ''
             for line in popenXArgsReadLines(self.root, cmd, args, prefs, 'rcs_bash'):
+                # parse response
                 if line.startswith('Working file: '):
                     k = prefs.convertToNativePath(line[14:])
                     k = os.path.join(self.root, os.path.normpath(k))
@@ -1889,11 +1888,8 @@ class VCSs:
                         k = relpath(pwd, k)
                 elif line.startswith('head: '):
                     r[k] = line[6:]
-
             # sort the results
-            for k in sorted(r.keys()):
-                result.append([ (k, r[k]), (k, None) ])
-            return result
+            return [ [ (k, r[k]), (k, None) ] for k in sorted(r.keys()) ]
 
         def getRevision(self, prefs, name, rev):
             return popenRead(self.root, [ prefs.getString('rcs_bin_co'), '-p', '-q', '-r' + rev, safeRelativePath(self.root, name, prefs, 'rcs_cygwin') ], prefs, 'rcs_bash')
@@ -1902,6 +1898,16 @@ class VCSs:
     class Svn:
         def __init__(self, root):
             self.root = root
+            self.url = None
+
+        def getURL(self, prefs):
+            if self.url is None:
+                args = [ prefs.getString('svn_bin'), 'info' ]
+                for s in popenReadLines(self.root, args, prefs, 'svn_bash'):
+                    if s.startswith('URL: '):
+                        self.url = s[5:]
+                        break
+            return self.url
 
         def getFileTemplate(self, prefs, name):
             # merge conflict
@@ -1954,12 +1960,14 @@ class VCSs:
                     result.append(self.getFileTemplate(prefs, k))
                 elif v == 'R':
                     # renamed file
-                    result.append( [ (k + '@BASE', prefs.getString('svn_default_revision')), (None, None) ] )
+                    result.append( [ (k, prefs.getString('svn_default_revision')), (None, None) ] )
                     result.append( [ (None, None), (k, None) ] )
             return result
 
         def getRevision(self, prefs, name, rev):
-            return popenRead(self.root, [ prefs.getString('svn_bin'), 'cat', '-r', rev, safeRelativePath(self.root, name, prefs, 'svn_cygwin') ], prefs, 'svn_bash')
+            if rev in [ 'PREV', 'BASE', 'COMMITTED' ]:
+                return popenRead(self.root, [ prefs.getString('svn_bin'), 'cat', '%s@%s' % (safeRelativePath(self.root, name, prefs, 'svn_cygwin'), rev) ], prefs, 'svn_bash')
+            return popenRead(self.root, [ prefs.getString('svn_bin'), 'cat', '%s/%s@%s' % (self.getURL(prefs), relpath(self.root, os.path.abspath(name)).replace(os.sep, '/'), rev) ], prefs, 'svn_bash')
 
     # SVK support
     def isSvkManaged(self, name):

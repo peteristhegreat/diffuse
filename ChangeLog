@@ -1,4 +1,4 @@
-- fixed a bug in CVS support that prevented Diffuse from displaying removed files
+- fixed a bug in CVS and Subversion support that prevented Diffuse from displaying some removed files
 - added syntax highlighting for JSON files
 - added menu items and keyboard shortcuts for "First Tab" and "Last Tab"
 - added "--line" command line option
