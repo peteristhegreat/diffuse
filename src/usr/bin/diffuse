@@ -1616,79 +1616,80 @@ class VCSs:
             return os.path.join(self.root, prefs.convertToNativePath(s.strip()))
 
         def getFolderTemplate(self, prefs, names):
-            fs = _VcsFolderSet(names)
-            result = []
+            # build command
+            args = [ prefs.getString('git_bin'), 'status', '--porcelain', '-s', '--untracked-files=no' ]
+            # build list of interesting files
             pwd, isabs = os.path.abspath(os.curdir), False
-            args = [ prefs.getString('git_bin'), 'status' ]
             for name in names:
                 isabs |= os.path.isabs(name)
+            # run command
+            prev = prefs.getString('git_default_revision')
+            fs = _VcsFolderSet(names)
+            added, modified, removed, renamed = {}, {}, {}, {}
             # 'git status' will return 1 when a commit would fail
-            ss = popenReadLines(self.root, args, prefs, 'git_bash', [0, 1])
-            # build list of interesting files
-            # files may appear in more than one set
-            i = 0
-            unmerged, removed, added, modified, renamed = {}, {}, {}, {}, {}
-            while i < len(ss):
-                s = ss[i]
-                i += 1
-                if s.startswith('# Untracked files:'):
-                    break
-                elif s.startswith('#\tunmerged:'):
-                    # merge conflict
-                    k = self._extractPath(s[11:], prefs)
+            for s in popenReadLines(self.root, args, prefs, 'git_bash', [0, 1]):
+                # parse response
+                if len(s) < 3:
+                    continue
+                x, y, k = s[0], s[1], s[2:]
+                if (y == 'D' and x not in 'UD') or (x == 'D' and y == ' '):
+                    # removed
+                    k = self._extractPath(k, prefs)
                     if fs.contains(k):
                         if not isabs:
                             k = relpath(pwd, k)
-                        unmerged[k] = [ (k, prefs.getString('git_default_revision')), (k, None), (k, 'MERGE_HEAD') ]
-                elif s.startswith('#\tdeleted:'):
-                    # deleted file
-                    k = self._extractPath(s[10:], prefs)
-                    if fs.contains(k):
-                        if not isabs:
-                            k = relpath(pwd, k)
-                        removed[k] = [ (k, prefs.getString('git_default_revision')), (None, None) ]
-                elif s.startswith('#\tnew file:'):
-                    # new file
-                    k = self._extractPath(s[11:], prefs)
+                        removed[k] = [ (k, prev), (None, None) ]
+                elif x == 'A' and y not in 'UA':
+                    # added
+                    k = self._extractPath(k, prefs)
                     if fs.contains(k):
                         if not isabs:
                             k = relpath(pwd, k)
                         added[k] = [ (None, None), (k, None) ]
-                elif s.startswith('#\tmodified:'):
-                    # modified file
-                    k = self._extractPath(s[11:], prefs)
-                    if fs.contains(k):
-                        if not isabs:
-                            k = relpath(pwd, k)
-                        modified[k] = self.getFileTemplate(prefs, k)
-                elif s.startswith('#\tboth modified:'):
-                    # stash conflict
-                    k = self._extractPath(s[16:], prefs)
-                    if fs.contains(k):
-                        if not isabs:
-                            k = relpath(pwd, k)
-                        unmerged[k] = [ (k, prefs.getString('git_default_revision')), (k, None), (k, ':3') ]
-                elif s.startswith('#\trenamed:'):
-                    # renamed file
-                    keys = s[10:].split(' -> ')
-                    if len(keys) == 2:
-                        k0 = self._extractPath(keys[0], prefs)
-                        k1 = self._extractPath(keys[1], prefs)
+                elif x == 'R':
+                    # renamed
+                    k = k.split(' -> ')
+                    if len(k) == 2:
+                        k0 = self._extractPath(k[0], prefs)
+                        k1 = self._extractPath(k[1], prefs)
                         if fs.contains(k0) or fs.contains(k1):
                             if not isabs:
                                 k0 = relpath(pwd, k0)
                                 k1 = relpath(pwd, k1)
-                            renamed[k1] = [ (k0, prefs.getString('git_default_revision')), (k1, None) ]
+                            renamed[k1] = [ (k0, prev), (k1, None) ]
+                elif x in 'CM' or y == 'M':
+                    # modified
+                    k = self._extractPath(k, prefs)
+                    if fs.contains(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
+                        modified[k] = [ (k, prev), (k, None) ]
+                else:
+                    # merge conflict
+                    k = self._extractPath(k, prefs)
+                    if fs.contains(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
+                        if x == 'D':
+                            panes = [ (None, None) ]
+                        else:
+                            panes = [ (k, ':2') ]
+                        panes.append((k, None))
+                        if y == 'D':
+                            panes.append((None, None))
+                        else:
+                            panes.append((k, ':3'))
+                        if x != 'A' and y != 'A':
+                            panes.append((k, ':1'))
+                        modified[k] = panes
             # sort the results
-            r = set()
-            for m in unmerged, removed, added, modified, renamed:
+            result, r = [], set()
+            for m in added, modified, removed, renamed:
                 r.update(m.keys())
             for k in sorted(r):
-                for m in unmerged, removed, added, modified, renamed:
+                for m in removed, added, modified, renamed:
                     if m.has_key(k):
                         result.append(m[k])
-                        # break so we open no more than one tab per file
-                        break
             return result
 
         def getRevision(self, prefs, name, rev):
@@ -2075,8 +2076,8 @@ class VCSs:
         if svkroot is None:
             svkroot = os.path.expanduser('~/.svk')
         self.svkconfig = os.path.join(svkroot, 'config')
-        self.leaf_dir_repos = [('.svn', VCSs.Svn), ('CVS', VCSs.Cvs), ('RCS', VCSs.Rcs)]
-        self.common_dir_repos = [('.git', VCSs.Git), ('.hg', VCSs.Hg), ('.bzr', VCSs.Bzr), ('_darcs', VCSs.Darcs), ('_MTN', VCSs.Mtn)]
+        self.leaf_dir_repos = [ ('.svn', VCSs.Svn), ('CVS', VCSs.Cvs), ('RCS', VCSs.Rcs) ]
+        self.common_dir_repos = [ ('.git', VCSs.Git), ('.hg', VCSs.Hg), ('.bzr', VCSs.Bzr), ('_darcs', VCSs.Darcs), ('_MTN', VCSs.Mtn) ]
 
     # determines which VCS to use for the named file
     def findByFolder(self, path, prefs):
