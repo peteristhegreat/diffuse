@@ -859,9 +859,3 @@ msgid "translator-credits"
 msgstr ""
 "Henri Menke <henrimenke4@aim.com>\n"
 "Por favor, haga una traducción española mejor porque no soy hablante nativo."
-
-#~ msgid "Henri Menke <henrimenke4@aim.com> (German)"
-#~ msgstr "Henri Menke <henrimenke4@aim.com> (Deutsch)"
-
-#~ msgid "Unexpected directory %s."
-#~ msgstr "Directorio inesperado %s."
