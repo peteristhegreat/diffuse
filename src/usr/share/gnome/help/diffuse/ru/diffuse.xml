@@ -4,7 +4,7 @@
   <!ENTITY app "Diffuse">
   <!ENTITY app-version "0.4.4">
 ]>
-<book id="index" lang="en">
+<book id="index" lang="ru">
   <title>Руководство Пользователя <application>&app;</application></title>
 
   <bookinfo>
@@ -48,7 +48,7 @@
       <para>
         Программа <application>&app;</application> написана Derrick Moser <email>derrick_moser@yahoo.com</email>.
       </para>
-      <para>&copy; 2006-2010 Derrick Moser. Все Права Защищены.</para>
+      <para>&copy; 2006-2011 Derrick Moser. Все Права Защищены.</para>
       <para>Русификация (diffuse.mo; ru.po): О.Ю.Пахтусов <email>oupakhtusov@gmail.com</email></para>
     </sect1>
 

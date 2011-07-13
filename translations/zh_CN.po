@@ -340,11 +340,11 @@ msgstr "分离"
 
 #: ../src/usr/bin/diffuse:6984
 msgid "Las_t Tab"
-msgstr "上一个标签(_T)"
+msgstr "最后一个标签(_T)"
 
 #: ../src/usr/bin/diffuse:7040
 msgid "Last Difference"
-msgstr "上一个不同之处"
+msgstr "最后一个不同之处"
 
 #: ../src/usr/bin/diffuse:906
 msgid "Launch from a Bash login shell"
@@ -392,11 +392,11 @@ msgstr "新建3方文件合并(_3)"
 
 #: ../src/usr/bin/diffuse:7039
 msgid "Next Difference"
-msgstr "下个不同之处"
+msgstr "下一个不同之处"
 
 #: ../src/usr/bin/diffuse:6983
 msgid "Next _Tab"
-msgstr "下个标签(_T)"
+msgstr "下一个标签(_T)"
 
 #: ../src/usr/bin/diffuse:7446
 msgid "No modified files found."
@@ -466,7 +466,7 @@ msgstr "按ESC键结束编辑"
 
 #: ../src/usr/bin/diffuse:7038
 msgid "Previous Difference"
-msgstr "前一个不同"
+msgstr "前一个不同之处"
 
 #: ../src/usr/bin/diffuse:6973
 msgid "Re_align All"
@@ -783,7 +783,7 @@ msgstr "查找(_F)"
 
 #: ../src/usr/bin/diffuse:6976
 msgid "_First Difference"
-msgstr "第一个不同(_F)"
+msgstr "第一个不同之处(_F)"
 
 #: ../src/usr/bin/diffuse:6958
 msgid "_Go To Line..."
@@ -807,7 +807,7 @@ msgstr "分离(_I)"
 
 #: ../src/usr/bin/diffuse:6979
 msgid "_Last Difference"
-msgstr "最后一个不同(_L)"
+msgstr "最后一个不同之处(_L)"
 
 #: ../src/usr/bin/diffuse:7007
 msgid "_Merge"
@@ -819,7 +819,7 @@ msgstr "先左再右合并(_M)"
 
 #: ../src/usr/bin/diffuse:6978
 msgid "_Next Difference"
-msgstr "下一个不同(_N)"
+msgstr "下一个不同之处(_N)"
 
 #: ../src/usr/bin/diffuse:6927
 msgid "_Open File..."
@@ -831,7 +831,7 @@ msgstr "粘贴(_P)"
 
 #: ../src/usr/bin/diffuse:6977
 msgid "_Previous Difference"
-msgstr "前一个不同(_P)"
+msgstr "前一个不同之处(_P)"
 
 #: ../src/usr/bin/diffuse:6941
 msgid "_Quit"

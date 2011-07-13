@@ -30,7 +30,7 @@ setup(
     windows = [ { 'script': 'temp/diffusew.pyw', 'icon_resources': [(1, 'diffuse.ico')] } ],
     options = { 'py2exe': {
                    'packages': 'encodings, gtk',
-                   'includes': 'cairo, pango, pangocairo, atk, gobject, gio',
+                   'includes': 'cairo, pango, pangocairo, atk, gobject',
                    'excludes': [ '_ssl', 'pyreadline', 'doctest', 'pickle', 'calendar', 'unittest', 'inspect', 'pdb' ],
                    'dll_excludes': [ 'libglade-2.0-0.dll' ] }
               }
