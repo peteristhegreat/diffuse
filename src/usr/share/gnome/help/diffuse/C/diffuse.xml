@@ -2,14 +2,14 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
   <!ENTITY app "Diffuse">
-  <!ENTITY app-version "0.4.4">
+  <!ENTITY app-version "0.4.5">
 ]>
 <book id="index" lang="en">
   <title><application>&app;</application> User's Manual</title>
 
   <bookinfo>
     <copyright>
-      <year>2009-2010</year>
+      <year>2009-2011</year>
       <holder>Derrick Moser</holder>
     </copyright>
 
@@ -41,7 +41,7 @@
       <para>
         <application>&app;</application> was written by Derrick Moser <email>derrick_moser@yahoo.com</email>.
       </para>
-      <para>&copy; 2006-2010 Derrick Moser.  All Rights Reserved.</para>
+      <para>&copy; 2006-2011 Derrick Moser.  All Rights Reserved.</para>
     </sect1>
 
     <sect1 id="introduction-licence">

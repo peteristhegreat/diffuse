@@ -1,14 +1,15 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
-<!ENTITY app "Diffuse">
-<!ENTITY app-version "0.4.4">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+  <!ENTITY app "Diffuse">
+<!ENTITY app-version "0.4.5">
 ]>
 <book id="index" lang="it">
   <title>Manuale utente di <application>&app;</application></title>
 
   <bookinfo>
     <copyright>
-      <year>2009-2010</year>
+      <year>2009-2011</year>
       <holder>Derrick Moser</holder>
     </copyright>
 
@@ -37,7 +38,7 @@
     <sect1 id="introduction-about">
       <title>Informazioni</title>
       <para><application>&app;</application> è stato scritto da Derrick Moser <email>derrick_moser@yahoo.com</email>.</para>
-      <para>&copy; 2006-2010 Derrick Moser. Tutti i diritti riservati.</para>
+      <para>&copy; 2006-2011 Derrick Moser. Tutti i diritti riservati.</para>
     </sect1>
 
     <sect1 id="introduction-licence">
