@@ -759,7 +759,7 @@ class FileEntry(gtk.HBox):
         dialog = gtk.FileChooserDialog(self.title, self.toplevel, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         dialog.set_current_folder(unicode(os.path.realpath(os.curdir), sys.getfilesystemencoding()))
         if dialog.run() == gtk.RESPONSE_OK:
-            self.entry.set_text(decodefilename(dialog.get_filename()))
+            self.entry.set_text(decode_fs_string(dialog.get_filename()))
         dialog.destroy()
 
     def set_text(self, s):
