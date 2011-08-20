@@ -1840,28 +1840,14 @@ class VCSs:
             # run command
             prev = 'HEAD'
             fs = _VcsFolderSet(names)
-            added, modified, removed, renamed = {}, {}, {}, {}
+            modified, renamed = {}, {}
             # 'git status' will return 1 when a commit would fail
             for s in popenReadLines(self.root, args, prefs, 'git_bash', [0, 1]):
                 # parse response
                 if len(s) < 3:
                     continue
                 x, y, k = s[0], s[1], s[2:]
-                if (y == 'D' and x not in 'UD') or (x == 'D' and y == ' '):
-                    # removed
-                    k = self._extractPath(k, prefs)
-                    if fs.contains(k):
-                        if not isabs:
-                            k = relpath(pwd, k)
-                        removed[k] = [ (k, prev), (None, None) ]
-                elif x == 'A' and y not in 'UA':
-                    # added
-                    k = self._extractPath(k, prefs)
-                    if fs.contains(k):
-                        if not isabs:
-                            k = relpath(pwd, k)
-                        added[k] = [ (None, None), (k, None) ]
-                elif x == 'R':
+                if x == 'R':
                     # renamed
                     k = k.split(' -> ')
                     if len(k) == 2:
@@ -1872,14 +1858,7 @@ class VCSs:
                                 k0 = relpath(pwd, k0)
                                 k1 = relpath(pwd, k1)
                             renamed[k1] = [ (k0, prev), (k1, None) ]
-                elif x in 'CM' or y == 'M':
-                    # modified
-                    k = self._extractPath(k, prefs)
-                    if fs.contains(k):
-                        if not isabs:
-                            k = relpath(pwd, k)
-                        modified[k] = [ (k, prev), (k, None) ]
-                else:
+                elif x == 'U' or y == 'U' or (x == 'D' and y == 'D'):
                     # merge conflict
                     k = self._extractPath(k, prefs)
                     if fs.contains(k):
@@ -1897,12 +1876,33 @@ class VCSs:
                         if x != 'A' and y != 'A':
                             panes.append((k, ':1'))
                         modified[k] = panes
+                else:
+                    k = self._extractPath(k, prefs)
+                    if fs.contains(k):
+                        if not isabs:
+                            k = relpath(pwd, k)
+                        if x == 'A':
+                            # added
+                            panes = [ (None, None) ]
+                        else:
+                            panes = [ (k, prev) ]
+                        # staged changes
+                        if x == 'D':
+                            panes.append((None, None))
+                        elif x != ' ':
+                            panes.append((k, ':0'))
+                        # working copy changes
+                        if y == 'D':
+                            panes.append((None, None))
+                        elif y != ' ':
+                            panes.append((k, None))
+                        modified[k] = panes
             # sort the results
             result, r = [], set()
-            for m in added, modified, removed, renamed:
+            for m in modified, renamed:
                 r.update(m.keys())
             for k in sorted(r):
-                for m in removed, added, modified, renamed:
+                for m in modified, renamed:
                     if m.has_key(k):
                         result.append(m[k])
             return result
