@@ -759,7 +759,7 @@ class FileEntry(gtk.HBox):
         dialog = gtk.FileChooserDialog(self.title, self.toplevel, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
         dialog.set_current_folder(unicode(os.path.realpath(os.curdir), sys.getfilesystemencoding()))
         if dialog.run() == gtk.RESPONSE_OK:
-            self.entry.set_text(decode_fs_string(dialog.get_filename()))
+            self.entry.set_text(dialog.get_filename())
         dialog.destroy()
 
     def set_text(self, s):
@@ -2261,7 +2261,7 @@ class VCSs:
             if k < len(s) and s[k] == ' ':
                 k += 1
             return s[0], s[k:]
- 
+
         def _getPreviousRevision(self, rev):
             if rev is None:
                 return 'BASE'
@@ -2303,7 +2303,7 @@ class VCSs:
             except ValueError, e:
                 logError(_('Error parsing revision %s.') % (rev, ))
                 return result
- 
+
             # build command
             vcs = self._getVcs()
             vcs_bin, vcs_bash = prefs.getString(vcs + '_bin'), vcs + '_bash'
@@ -2358,7 +2358,7 @@ class VCSs:
                         k = os.path.join(self.root, k)
                         if not isabs:
                             k = relpath(pwd, k)
-                        added[k] = [ (None, None), (k, rev) ]
+                        added[k] = [ (None, None), (k, None) ]
             else:
                 m = {}
                 for k in added:
@@ -2442,7 +2442,7 @@ class VCSs:
 
         def getCommitTemplate(self, prefs, rev, names):
             return self._getCommitTemplate(prefs, rev, names)
- 
+
         def getFolderTemplate(self, prefs, names):
             return self._getCommitTemplate(prefs, None, names)
 
@@ -2525,7 +2525,7 @@ class VCSs:
             if len(s) < 4 or s[0] not in 'ACDMR':
                 return
             return s[0], s[4:]
- 
+
         def _getPreviousRevision(self, rev):
             if rev is None:
                 return 'HEAD'
@@ -6638,7 +6638,7 @@ class FileChooserDialog(gtk.FileChooserDialog):
 
     def get_filename(self):
         # convert from UTF-8 string to unicode
-        return decode_fs_string(gtk.FileChooserDialog.get_filename(self))
+        return unicode(gtk.FileChooserDialog.get_filename(self), 'utf_8')
 
 # dialogue used to search for text
 class GoToLineDialog(gtk.Dialog):
@@ -8275,7 +8275,7 @@ if __name__ == '__main__':
             elif i + 1 < argc and arg in [ '-r', '--revision' ]:
                 # specified revision
                 i += 1
-                revs.append((decode_fs_string(args[i]), encoding))
+                revs.append((unicode(args[i], sys.getfilesystemencoding()), encoding))
             elif arg in [ '-s', '--separate' ]:
                 funcs[mode](specs, labels, options)
                 specs, labels, options = [], [], {}
@@ -8308,7 +8308,7 @@ if __name__ == '__main__':
                 diff.preferences_updated()
             elif i + 1 < argc and arg == '-L':
                 i += 1
-                labels.append(decode_fs_string(args[i]))
+                labels.append(unicode(args[i], sys.getfilesystemencoding()))
             elif i + 1 < argc and arg == '--line':
                 i += 1
                 try:
