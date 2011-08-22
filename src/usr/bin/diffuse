@@ -698,15 +698,6 @@ class Resources:
 
 theResources = Resources()
 
-# convert a string obtained from the file system or command line to unicode
-def decode_fs_string(s):
-    if s is not None:
-        if isWindows():
-            s = unicode(s, 'utf_8')
-        else:
-            s = unicode(s, sys.getfilesystemencoding())
-    return s
-
 # map an encoding name to its standard form
 def norm_encoding(e):
     if e is not None:
