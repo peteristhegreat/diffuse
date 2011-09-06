@@ -1920,8 +1920,7 @@ class VCSs:
                 args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
             # run command
             if rev is None:
-                prev = None
-                rev = 'tip'
+                prev = 'tip'
             else:
                 prev = 'p1(%s)' % (rev, )
             fs = _VcsFolderSet(names)
