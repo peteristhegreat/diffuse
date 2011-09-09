@@ -874,26 +874,25 @@ class Preferences:
                 ])
 
         # create template for Version Control options
-        vcs = [ ('bzr', 'Bazaar', 'bzr', '-1'),
-                ('cvs', 'CVS', 'cvs', 'BASE'),
-                ('darcs', 'Darcs', 'darcs', '1'),
-                ('git', 'Git', 'git', 'HEAD'),
-                ('hg', 'Mercurial', 'hg', 'tip'),
-                ('mtn', 'Monotone', 'mtn', 'h:'),
-                ('rcs', 'RCS', None, None),
-                ('svn', 'Subversion', 'svn', 'BASE'),
-                ('svk', 'SVK', svk_bin, 'HEAD') ]
+        vcs = [ ('bzr', 'Bazaar', 'bzr'),
+                ('cvs', 'CVS', 'cvs'),
+                ('darcs', 'Darcs', 'darcs'),
+                ('git', 'Git', 'git'),
+                ('hg', 'Mercurial', 'hg'),
+                ('mtn', 'Monotone', 'mtn'),
+                ('rcs', 'RCS', None),
+                ('svn', 'Subversion', 'svn'),
+                ('svk', 'SVK', svk_bin) ]
 
         vcs_template = [ 'FolderSet' ]
-        for key, name, cmd, rev in vcs:
+        for key, name, cmd in vcs:
             temp = [ 'List' ]
             if key == 'rcs':
                 # RCS uses multiple commands
                 temp.extend([ [ 'File', key + '_bin_co', 'co', _('"co" command') ],
                               [ 'File', key + '_bin_rlog', 'rlog', _('"rlog" command') ] ])
             else:
-                temp.extend([ [ 'File', key + '_bin', cmd, _('Command') ],
-                              [ 'String', key + '_default_revision', rev, _('Default revision') ] ])
+                temp.extend([ [ 'File', key + '_bin', cmd, _('Command') ] ])
             if isWindows():
                 temp.append([ 'Boolean', key + '_bash', False, _('Launch from a Bash login shell') ])
                 if key != 'git':
@@ -1436,7 +1435,7 @@ class VCSs:
             if os.path.isfile(left) and os.path.isfile(right):
                 return [ (left, None), (name, None), (right, None) ]
             # default case
-            return [ (name, prefs.getString('bzr_default_revision')), (name, None) ]
+            return [ (name, '-1'), (name, None) ]
 
         def getCommitTemplate(self, prefs, rev, names):
             # build command
@@ -1592,7 +1591,7 @@ class VCSs:
             self.root = root
 
         def getFileTemplate(self, prefs, name):
-            return [ (name, prefs.getString('cvs_default_revision')), (name, None) ]
+            return [ (name, 'BASE'), (name, None) ]
 
         def getCommitTemplate(self, prefs, rev, names):
             result = []
@@ -1663,7 +1662,7 @@ class VCSs:
             self.root = root
 
         def getFileTemplate(self, prefs, name):
-            return [ (name, prefs.getString('darcs_default_revision')), (name, None) ]
+            return [ (name, '1'), (name, None) ]
 
         def _getCommitTemplate(self, prefs, names, rev):
             mods = (rev is None)
@@ -1785,7 +1784,7 @@ class VCSs:
             self.root = root
 
         def getFileTemplate(self, prefs, name):
-            return [ (name, prefs.getString('git_default_revision')), (name, None) ]
+            return [ (name, 'HEAD'), (name, None) ]
 
         def getCommitTemplate(self, prefs, rev, names):
             # build command
@@ -1905,9 +1904,25 @@ class VCSs:
     class Hg:
         def __init__(self, root):
             self.root = root
+            self.working_rev = None
+
+        def _getPreviousRevision(self, prefs, rev):
+            if rev is None:
+                if self.working_rev is None:
+                    ss = popenReadLines(self.root, [ prefs.getString('hg_bin'), 'id', '-i', '-t' ], prefs, 'hg_bash')
+                    if len(ss) != 1:
+                        raise IOError('Unknown working revision')
+                    ss = ss[0].split(' ')
+                    prev = ss[-1]
+                    if len(ss) == 1 and prev.endswith('+'):
+                        # remove local modifications indicator
+                        prev = prev[:-1]
+                    self.working_rev = prev
+                return self.working_rev
+            return 'p1(%s)' % (rev, )
 
         def getFileTemplate(self, prefs, name):
-            return [ (name, prefs.getString('hg_default_revision')), (name, None) ]
+            return [ (name, self._getPreviousRevision(prefs, None)), (name, None) ]
 
         def _getCommitTemplate(self, prefs, names, cmd, rev):
             # build command
@@ -1919,10 +1934,7 @@ class VCSs:
                 isabs |= os.path.isabs(name)
                 args.append(safeRelativePath(self.root, name, prefs, 'hg_cygwin'))
             # run command
-            if rev is None:
-                prev = 'tip'
-            else:
-                prev = 'p1(%s)' % (rev, )
+            prev = self._getPreviousRevision(prefs, rev)
             fs = _VcsFolderSet(names)
             modified = {}
             for s in popenReadLines(self.root, args, prefs, 'hg_bash'):
@@ -1961,7 +1973,7 @@ class VCSs:
 
         def getFileTemplate(self, prefs, name):
             # FIXME: merge conflicts?
-            return [ (name, prefs.getString('mtn_default_revision')), (name, None) ]
+            return [ (name, 'h:'), (name, None) ]
 
         def getCommitTemplate(self, prefs, rev, names):
             # build command
@@ -2284,7 +2296,7 @@ class VCSs:
             if len(left) > 0 and len(right) > 0:
                 return [ (left[-1], None), (name, None), (right[0], None) ]
             # default case
-            return [ (name, prefs.getString(self._getVcs() + '_default_revision')), (name, None) ]
+            return [ (name, self._getPreviousRevision(None)), (name, None) ]
 
         def _getCommitTemplate(self, prefs, rev, names):
             result = []

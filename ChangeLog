@@ -1,3 +1,4 @@
+- fixed a bug that caused the wrong revision to be shown when working on a branch in Mercurial
 - Git support distinguishes between staged and unstaged files
 - added syntax highlighting for R files
 
