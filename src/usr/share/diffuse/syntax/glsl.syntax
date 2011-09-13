@@ -1,7 +1,7 @@
 # GLSL syntax file for Diffuse
-# Copyright (C) 2009 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2009-2011 Derrick Moser <derrick_moser@yahoo.com>
 syntax GLSL normal text
-syntax_files GLSL '\.(frag|vert|glsl)$'
+syntax_files GLSL '\.(frag|geom|glsl|vert)$'
 
 # colours
 colour glsl_comment 0.2 0.4 0.64
