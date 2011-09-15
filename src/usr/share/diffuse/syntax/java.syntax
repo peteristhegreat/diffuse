@@ -1,5 +1,5 @@
 # Java syntax file for Diffuse
-# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2011 Derrick Moser <derrick_moser@yahoo.com>
 syntax Java normal text
 syntax_files Java '\.java$'
 
@@ -50,10 +50,10 @@ syntax_pattern normal normal java_literal '\b(true|false|null)\b'
 syntax_pattern normal normal java_import '\b(import|package)\b'
 
 # typing keywords
-syntax_pattern normal normal java_type '\b(abstract|boolean|byte|char|class|const|double|enum|final|float|int|interface|long|native|private|protected|public|short|static|synchronized|transient|void|volatile)\b'
+syntax_pattern normal normal java_type '\b(abstract|boolean|byte|char|class|const|double|enum|extends|final|float|implements|int|interface|long|native|private|protected|public|short|static|strictfp|synchronized|throws|transient|void|volatile)\b'
 
 # keywords
-syntax_pattern normal normal java_keyword '\b(assert|break|case|catch|continue|default|do|else|extends|finally|for|goto|if|implements|instanceof|new|return|strictfp|super|switch|this|throw|throws|try|while)\b'
+syntax_pattern normal normal java_keyword '\b(assert|break|case|catch|continue|default|do|else|finally|for|goto|if|instanceof|new|return|super|switch|this|throw|try|while)\b'
 
 # punctuation
 syntax_pattern normal normal java_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\?]+'
