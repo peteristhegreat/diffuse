@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: diffuse-svn r316\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-07-11 08:13-0400\n"
+"POT-Creation-Date: 2011-10-05 18:27-0400\n"
 "PO-Revision-Date: 2009-10-04 09:31-0400\n"
 "Last-Translator: Derrick Moser <derrick_moser@yahoo.com>\n"
 "Language-Team: Japanese\n"
@@ -16,139 +16,143 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: ../src/usr/bin/diffuse:900
+#: ../src/usr/bin/diffuse:892
 msgid "\"co\" command"
 msgstr "co というコマンド"
 
-#: ../src/usr/bin/diffuse:901
+#: ../src/usr/bin/diffuse:893
 msgid "\"rlog\" command"
 msgstr "rlog というコマンド"
 
-#: ../src/usr/bin/diffuse:7164
+#: ../src/usr/bin/diffuse:7633
 #, python-format
 msgid "%(title)s Pane %(pane)d"
 msgstr "%(title)s の%(pane)d番目の枠"
 
-#: ../src/usr/bin/diffuse:6710
+#: ../src/usr/bin/diffuse:7178
 #, python-format
 msgid "A file named %s already exists.  Do you want to overwrite it?"
 msgstr "%s というファイルは既に存在しています。それを上書きしますか？"
 
-#: ../src/usr/bin/diffuse:4266
+#: ../src/usr/bin/diffuse:4734
 msgid "Align with Selection"
 msgstr "選択と整列"
 
-#: ../src/usr/bin/diffuse:834
+#: ../src/usr/bin/diffuse:826
 msgid "Alignment"
 msgstr "整列"
 
-#: ../src/usr/bin/diffuse:851
+#: ../src/usr/bin/diffuse:843
 msgid "Always show the tab bar"
 msgstr "常にタブバーを表示"
 
-#: ../src/usr/bin/diffuse:724
+#: ../src/usr/bin/diffuse:716
 msgid "Auto Detect"
 msgstr "自動検出"
 
-#: ../src/usr/bin/diffuse:844
+#: ../src/usr/bin/diffuse:836
 msgid "Auto indent"
 msgstr "自動インデント"
 
-#: ../src/usr/bin/diffuse:6952
+#: ../src/usr/bin/diffuse:7421
 msgid "C_lear Edits"
 msgstr "編集をクリア(_L)"
 
-#: ../src/usr/bin/diffuse:7433
+#: ../src/usr/bin/diffuse:7953
+msgid "Choose Folder With Commit"
+msgstr "コミットがあるフォルダを選択"
+
+#: ../src/usr/bin/diffuse:7933
 msgid "Choose Folder With Modified Files"
 msgstr "変更なったファイルがあるフォルダを選択"
 
-#: ../src/usr/bin/diffuse:4275 ../src/usr/bin/diffuse:7054
+#: ../src/usr/bin/diffuse:4743 ../src/usr/bin/diffuse:7523
 msgid "Clear Edits"
 msgstr "編集をクリア"
 
-#: ../src/usr/bin/diffuse:6258
+#: ../src/usr/bin/diffuse:6726
 msgid "Close Tab"
 msgstr "タブを閉じる"
 
-#: ../src/usr/bin/diffuse:7173
+#: ../src/usr/bin/diffuse:7642
 msgid "Close _Without Saving"
 msgstr "保存せずに閉じる(_W)"
 
-#: ../src/usr/bin/diffuse:6134
+#: ../src/usr/bin/diffuse:6602
 #, python-format
 msgid "Closing this tab will quit %s."
 msgstr "このタブを閉じると、%sは終了します。"
 
-#: ../src/usr/bin/diffuse:6396
+#: ../src/usr/bin/diffuse:6864
 #, python-format
 msgid "Column %d"
 msgstr "%d列"
 
-#: ../src/usr/bin/diffuse:903
+#: ../src/usr/bin/diffuse:895
 msgid "Command"
 msgstr "コマンド"
 
-#: ../src/usr/bin/diffuse:6998
+#: ../src/usr/bin/diffuse:7467
 msgid "Convert Leading Spaces To _Tabs"
 msgstr "先頭のスペースをタブに変換(_T)"
 
-#: ../src/usr/bin/diffuse:6997
+#: ../src/usr/bin/diffuse:7466
 msgid "Convert Tabs To _Spaces"
 msgstr "タブをスペースに変換(_S)"
 
-#: ../src/usr/bin/diffuse:7005
+#: ../src/usr/bin/diffuse:7474
 msgid "Convert To Uni_x Format"
 msgstr "Unix 形式に変換(_X)"
 
-#: ../src/usr/bin/diffuse:7003
+#: ../src/usr/bin/diffuse:7472
 msgid "Convert To _DOS Format"
 msgstr "DOS 形式に変換(_D)"
 
-#: ../src/usr/bin/diffuse:6991
+#: ../src/usr/bin/diffuse:7460
 msgid "Convert To _Lower Case"
 msgstr "小文字に変換(_L)"
 
-#: ../src/usr/bin/diffuse:7004
+#: ../src/usr/bin/diffuse:7473
 msgid "Convert To _Mac Format"
 msgstr "Mac 形式に変換(_M)"
 
-#: ../src/usr/bin/diffuse:6990
+#: ../src/usr/bin/diffuse:7459
 msgid "Convert To _Upper Case"
 msgstr "大文字に変換(_U)"
 
-#: ../src/usr/bin/diffuse:4271 ../src/usr/bin/diffuse:7052
+#: ../src/usr/bin/diffuse:4739 ../src/usr/bin/diffuse:7521
 msgid "Copy"
 msgstr "コピー"
 
-#: ../src/usr/bin/diffuse:7044
+#: ../src/usr/bin/diffuse:7513
 msgid "Copy Left Into Selection"
 msgstr "左から選択枠にコピー"
 
-#: ../src/usr/bin/diffuse:7011
+#: ../src/usr/bin/diffuse:7480
 msgid "Copy Left _Into Selection"
 msgstr "左から選択枠にコピー(_I)"
 
-#: ../src/usr/bin/diffuse:7012
+#: ../src/usr/bin/diffuse:7481
 msgid "Copy Right I_nto Selection"
 msgstr "右から選択枠にコピー(_N)"
 
-#: ../src/usr/bin/diffuse:7045
+#: ../src/usr/bin/diffuse:7514
 msgid "Copy Right Into Selection"
 msgstr "右から選択枠にコピー"
 
-#: ../src/usr/bin/diffuse:7043
+#: ../src/usr/bin/diffuse:7512
 msgid "Copy Selection Left"
 msgstr "選択を左にコピー"
 
-#: ../src/usr/bin/diffuse:7042
+#: ../src/usr/bin/diffuse:7511
 msgid "Copy Selection Right"
 msgstr "選択を右にコピー"
 
-#: ../src/usr/bin/diffuse:7009
+#: ../src/usr/bin/diffuse:7478
 msgid "Copy Selection _Left"
 msgstr "選択を左にコピー(_L)"
 
-#: ../src/usr/bin/diffuse:7008
+#: ../src/usr/bin/diffuse:7477
 msgid "Copy Selection _Right"
 msgstr "選択を右にコピー(_R)"
 
@@ -156,309 +160,318 @@ msgstr "選択を右にコピー(_R)"
 msgid "Copyright © 2006-2011 Derrick Moser"
 msgstr "Copyright © 2006-2011 Derrick Moser"
 
-#: ../src/usr/bin/diffuse:6947
+#: ../src/usr/bin/diffuse:7416
 msgid "Cu_t"
 msgstr "切り取り(_T)"
 
-#: ../src/usr/bin/diffuse:4270 ../src/usr/bin/diffuse:7051
+#: ../src/usr/bin/diffuse:4738 ../src/usr/bin/diffuse:7520
 msgid "Cut"
 msgstr "切り取り"
 
-#: ../src/usr/bin/diffuse:880
+#: ../src/usr/bin/diffuse:872
 msgid "Cygdrive prefix"
 msgstr "Cygdrive 接頭辞"
 
-#: ../src/usr/bin/diffuse:877
+#: ../src/usr/bin/diffuse:869
 msgid "Cygwin"
 msgstr "Cygwin"
 
-#: ../src/usr/bin/diffuse:7001
+#: ../src/usr/bin/diffuse:7470
 msgid "De_crease Indenting"
 msgstr "インデントを減らす(_C)"
 
-#: ../src/usr/bin/diffuse:856
+#: ../src/usr/bin/diffuse:848
 msgid "Default codec"
 msgstr "デフォルトのコーデック"
 
-#: ../src/usr/bin/diffuse:850
+#: ../src/usr/bin/diffuse:842
 msgid "Default panes"
 msgstr "枠のデフォルトの数"
 
-#: ../src/usr/bin/diffuse:904
-msgid "Default revision"
-msgstr "デフォルトのリビジョン"
-
-#: ../src/usr/bin/diffuse:6220
+#: ../src/usr/bin/diffuse:6688
 msgid "Derrick Moser <derrick_moser@yahoo.com>"
 msgstr "Derrick Moser <derrick_moser@yahoo.com>"
 
-#: ../src/usr/bin/diffuse:6217
+#: ../src/usr/bin/diffuse:6685
 msgid "Diffuse is a graphical tool for merging and comparing text files."
 msgstr ""
 "Diffuse は、テキストファイルをマージして比較するためのグラフィックツールで"
 "す。"
 
-#: ../src/usr/bin/diffuse:820
+#: ../src/usr/bin/diffuse:812
 msgid "Display"
 msgstr "表示"
 
-#: ../src/usr/bin/diffuse:842
+#: ../src/usr/bin/diffuse:834
 msgid "Editor"
 msgstr "エディタ"
 
-#: ../src/usr/bin/diffuse:6146
+#: ../src/usr/bin/diffuse:6614
 msgid "Encoding: "
 msgstr "エンコーディング: "
 
-#: ../src/usr/bin/diffuse:6757
+#: ../src/usr/bin/diffuse:7225
 #, python-format
 msgid "Error encoding to %s."
 msgstr "%s に変える際にエラーが生じました。"
 
-#: ../src/usr/bin/diffuse:2028
+#: ../src/usr/bin/diffuse:2513
 #, python-format
 msgid "Error parsing %s."
 msgstr "%s をパースする際にエラーが生じました。"
 
-#: ../src/usr/bin/diffuse:6799 ../src/usr/bin/diffuse:7805
+#: ../src/usr/bin/diffuse:7267 ../src/usr/bin/diffuse:8319
 msgid "Error parsing line number."
 msgstr "行番号をパースする際にエラーが生じました。"
 
-#: ../src/usr/bin/diffuse:7750
+#: ../src/usr/bin/diffuse:1615 ../src/usr/bin/diffuse:2178
+#: ../src/usr/bin/diffuse:2306
 #, python-format
 msgid "Error parsing revision %s."
 msgstr "%s というリビジョンをパースする際にエラーが生じました。"
 
-#: ../src/usr/bin/diffuse:7822
+#: ../src/usr/bin/diffuse:8336
 #, python-format
 msgid "Error processing argument \"%s\".  Directory not expected."
 msgstr ""
 "%s の引数を処理しているときにエラーが生じました。ディレクトリは予測できません"
 "でした。"
 
-#: ../src/usr/bin/diffuse:696
+#: ../src/usr/bin/diffuse:697
 #, python-format
 msgid "Error processing line %(line)d of %(file)s."
 msgstr "%(file)s の %(line)d行 を処理しているときにエラーが生じました。"
 
-#: ../src/usr/bin/diffuse:6591 ../src/usr/bin/diffuse:7722
+#: ../src/usr/bin/diffuse:7059 ../src/usr/bin/diffuse:8242
 #, python-format
 msgid "Error reading %s."
 msgstr "%s を読み込む際にエラーが生じました。"
 
-#: ../src/usr/bin/diffuse:6589
+#: ../src/usr/bin/diffuse:7057
 #, python-format
 msgid "Error reading revision %(rev)s of %(file)s."
 msgstr "%(file)s の %(rev)s というリビジョンを読み込む際にエラーが生じました。"
 
-#: ../src/usr/bin/diffuse:7384
+#: ../src/usr/bin/diffuse:7853
+msgid "Error retrieving commits for %s."
+msgstr "%s のコミットの取得中にエラーが生じました。"
+
+#: ../src/usr/bin/diffuse:7884
 #, python-format
 msgid "Error retrieving modifications for %s."
 msgstr "%s の変更の取得中にエラーが生じました。"
 
-#: ../src/usr/bin/diffuse:1013 ../src/usr/bin/diffuse:6761
+#: ../src/usr/bin/diffuse:1004 ../src/usr/bin/diffuse:7229
 #, python-format
 msgid "Error writing %s."
 msgstr "%s へ書き込む際にエラーが生じました。"
 
-#: ../src/usr/bin/diffuse:845
+#: ../src/usr/bin/diffuse:837
 msgid "Expand tabs to spaces"
 msgstr "タブの代わりに空白を挿入"
 
-#: ../src/usr/bin/diffuse:6989
+#: ../src/usr/bin/diffuse:7458
 msgid "F_ormat"
 msgstr "フォーマット(_O)"
 
-#: ../src/usr/bin/diffuse:7281
+#: ../src/usr/bin/diffuse:7750
 #, python-format
 msgid "File Merge %d"
 msgstr "ファイルマージ%d"
 
-#: ../src/usr/bin/diffuse:6957
+#: ../src/usr/bin/diffuse:7426
 msgid "Find Pre_vious"
 msgstr "前の検索(_V)"
 
-#: ../src/usr/bin/diffuse:6956
+#: ../src/usr/bin/diffuse:7425
 msgid "Find _Next"
 msgstr "次の検索(_N)"
 
-#: ../src/usr/bin/diffuse:6084
+#: ../src/usr/bin/diffuse:6552
 msgid "Find..."
 msgstr "検索..."
 
-#: ../src/usr/bin/diffuse:6981
+#: ../src/usr/bin/diffuse:7450
 msgid "Fir_st Tab"
 msgstr "最初のタブ(_S)"
 
-#: ../src/usr/bin/diffuse:7037
+#: ../src/usr/bin/diffuse:7506
 msgid "First Difference"
 msgstr "最初の差分"
 
-#: ../src/usr/bin/diffuse:822
+#: ../src/usr/bin/diffuse:814
 msgid "Font"
 msgstr "フォント"
 
-#: ../src/usr/bin/diffuse:6180
+#: ../src/usr/bin/diffuse:6648
 msgid "Go To Line..."
 msgstr "指定行へジャンプ..."
 
-#: ../src/usr/bin/diffuse:831
+#: ../src/usr/bin/diffuse:823
 msgid "Ignore blank line differences"
 msgstr "空白行の違いを無視"
 
-#: ../src/usr/bin/diffuse:839
+#: ../src/usr/bin/diffuse:831
 msgid "Ignore blank lines"
 msgstr "空白行を無視"
 
-#: ../src/usr/bin/diffuse:836
+#: ../src/usr/bin/diffuse:828
 msgid "Ignore case"
 msgstr "大文字小文字を無視"
 
-#: ../src/usr/bin/diffuse:828
+#: ../src/usr/bin/diffuse:820
 msgid "Ignore case differences"
 msgstr "大文字小文字の違いを無視"
 
-#: ../src/usr/bin/diffuse:830 ../src/usr/bin/diffuse:838
+#: ../src/usr/bin/diffuse:822 ../src/usr/bin/diffuse:830
 msgid "Ignore changes to white space"
 msgstr "空白の変更を無視"
 
-#: ../src/usr/bin/diffuse:840
+#: ../src/usr/bin/diffuse:832
 msgid "Ignore end of line characters"
 msgstr "行の最後の文字を無視"
 
-#: ../src/usr/bin/diffuse:832
+#: ../src/usr/bin/diffuse:824
 msgid "Ignore end of line differences"
 msgstr "行の最後の違いを無視"
 
-#: ../src/usr/bin/diffuse:837
+#: ../src/usr/bin/diffuse:829
 msgid "Ignore white space"
 msgstr "空白を無視"
 
-#: ../src/usr/bin/diffuse:829
+#: ../src/usr/bin/diffuse:821
 msgid "Ignore white space differences"
 msgstr "空白の違いを無視"
 
-#: ../src/usr/bin/diffuse:4267
+#: ../src/usr/bin/diffuse:4735
 msgid "Isolate"
 msgstr "分離"
 
-#: ../src/usr/bin/diffuse:6984
+#: ../src/usr/bin/diffuse:7453
 msgid "Las_t Tab"
 msgstr "最後ののタブ(_T)"
 
-#: ../src/usr/bin/diffuse:7040
+#: ../src/usr/bin/diffuse:7509
 msgid "Last Difference"
 msgstr "最後の差分"
 
-#: ../src/usr/bin/diffuse:906
+#: ../src/usr/bin/diffuse:897
 msgid "Launch from a Bash login shell"
 msgstr "Bashログインシェルから始める"
 
-#: ../src/usr/bin/diffuse:6186
+#: ../src/usr/bin/diffuse:6654
 msgid "Line Number: "
 msgstr "行番号: "
 
-#: ../src/usr/bin/diffuse:7014
+#: ../src/usr/bin/diffuse:7483
 msgid "M_erge From Right Then Left"
 msgstr "右からマージした後、左からマージ(_E)"
 
-#: ../src/usr/bin/diffuse:6115
+#: ../src/usr/bin/diffuse:6583
 msgid "Match Case"
 msgstr "大文字/小文字を区別"
 
-#: ../src/usr/bin/diffuse:7046
+#: ../src/usr/bin/diffuse:7515
 msgid "Merge From Left Then Right"
 msgstr "左からマージした後、右からマージ"
 
-#: ../src/usr/bin/diffuse:7047
+#: ../src/usr/bin/diffuse:7516
 msgid "Merge From Right Then Left"
 msgstr "右からマージした後、左からマージ"
 
-#: ../src/usr/bin/diffuse:4268
+#: ../src/usr/bin/diffuse:4736
 msgid "Merge Selection"
 msgstr "選択をマージ"
 
-#: ../src/usr/bin/diffuse:7033
+#: ../src/usr/bin/diffuse:7502
 msgid "New 2-Way File Merge"
 msgstr "新しい２つのファイルの比較"
 
-#: ../src/usr/bin/diffuse:7034
+#: ../src/usr/bin/diffuse:7503
 msgid "New 3-Way File Merge"
 msgstr "新しい３つのファイルの比較"
 
-#: ../src/usr/bin/diffuse:6936
+#: ../src/usr/bin/diffuse:7405
 msgid "New _2-Way File Merge"
 msgstr "新しい２つのファイルの比較(_2)"
 
-#: ../src/usr/bin/diffuse:6937
+#: ../src/usr/bin/diffuse:7406
 msgid "New _3-Way File Merge"
 msgstr "新しい３つのファイルの比較(_3)"
 
-#: ../src/usr/bin/diffuse:7039
+#: ../src/usr/bin/diffuse:7508
 msgid "Next Difference"
 msgstr "次の差分"
 
-#: ../src/usr/bin/diffuse:6983
+#: ../src/usr/bin/diffuse:7452
 msgid "Next _Tab"
 msgstr "次のタブ(_T)"
 
-#: ../src/usr/bin/diffuse:7446
+#: ../src/usr/bin/diffuse:7966
+msgid "No committed files found."
+msgstr "コミットされたファイルが見つかりませんでした。"
+
+#: ../src/usr/bin/diffuse:7946
 msgid "No modified files found."
 msgstr "変更なったファイルが見つかりませんでした。"
 
-#: ../src/usr/bin/diffuse:6962
+#: ../src/usr/bin/diffuse:7431
 msgid "None"
 msgstr "なし"
 
-#: ../src/usr/bin/diffuse:6614
+#: ../src/usr/bin/diffuse:7398
+msgid "Open Commi_t..."
+msgstr "コミットを開く..."
+
+#: ../src/usr/bin/diffuse:7082
 msgid "Open File"
 msgstr "ファイルを開く"
 
-#: ../src/usr/bin/diffuse:7417
+#: ../src/usr/bin/diffuse:7917
 msgid "Open File In New Tab"
 msgstr "新しいタブにファイルを開く"
 
-#: ../src/usr/bin/diffuse:6928
+#: ../src/usr/bin/diffuse:7396
 msgid "Open File In New _Tab..."
 msgstr "新しいタブにファイルを開く...(_T)"
 
-#: ../src/usr/bin/diffuse:6313
+#: ../src/usr/bin/diffuse:6781
 msgid "Open File..."
 msgstr "ファイルを開く..."
 
-#: ../src/usr/bin/diffuse:6929
+#: ../src/usr/bin/diffuse:7397
 msgid "Open _Modified Files..."
 msgstr "変更のあるファイルを開く...(_M)"
 
-#: ../src/usr/bin/diffuse:857
+#: ../src/usr/bin/diffuse:849
 msgid "Order of codecs used to identify encoding"
 msgstr "エンコーディングを特定するためのコーデックの注文"
 
-#: ../src/usr/bin/diffuse:4272 ../src/usr/bin/diffuse:7053
+#: ../src/usr/bin/diffuse:4740 ../src/usr/bin/diffuse:7522
 msgid "Paste"
 msgstr "貼り付け"
 
-#: ../src/usr/bin/diffuse:7535
+#: ../src/usr/bin/diffuse:8055
 msgid "Phrase not found.  Continue from the end of the file?"
 msgstr "文字列が見つかりませんでした。ファイルの終わりから続けますか。"
 
-#: ../src/usr/bin/diffuse:7537
+#: ../src/usr/bin/diffuse:8057
 msgid "Phrase not found.  Continue from the start of the file?"
 msgstr "文字列が見つかりませんでした。ファイルの始めから続けますか。"
 
-#: ../src/usr/bin/diffuse:6960
+#: ../src/usr/bin/diffuse:7429
 msgid "Pr_eferences..."
 msgstr "設定...(_E)"
 
-#: ../src/usr/bin/diffuse:6982
+#: ../src/usr/bin/diffuse:7451
 msgid "Pre_vious Tab"
 msgstr "前のタブ(_V)"
 
-#: ../src/usr/bin/diffuse:975
+#: ../src/usr/bin/diffuse:966
 msgid "Preferences"
 msgstr "設定"
 
-#: ../src/usr/bin/diffuse:6822
+#: ../src/usr/bin/diffuse:7290
 msgid ""
 "Press the enter key or double click to edit.  Press the space bar or use the "
 "RMB menu to manually align."
@@ -466,92 +479,92 @@ msgstr ""
 "編集するためにエンターキーを押すか、ダブルクリックします。手動で整列させるた"
 "めにスペースバーを押すか、RMBを使います。"
 
-#: ../src/usr/bin/diffuse:6824
+#: ../src/usr/bin/diffuse:7292
 msgid "Press the escape key to finish editing."
 msgstr "ESCキーを押して、編集を終了します。"
 
-#: ../src/usr/bin/diffuse:7038
+#: ../src/usr/bin/diffuse:7507
 msgid "Previous Difference"
 msgstr "前の差分"
 
-#: ../src/usr/bin/diffuse:6973
+#: ../src/usr/bin/diffuse:7442
 msgid "Re_align All"
 msgstr "全て再整列(_A)"
 
-#: ../src/usr/bin/diffuse:7036
+#: ../src/usr/bin/diffuse:7505
 msgid "Realign All"
 msgstr "全て再整列"
 
-#: ../src/usr/bin/diffuse:7050
+#: ../src/usr/bin/diffuse:7519
 msgid "Redo"
 msgstr "やり直す"
 
-#: ../src/usr/bin/diffuse:854
+#: ../src/usr/bin/diffuse:846
 msgid "Regional Settings"
 msgstr "地域設定"
 
-#: ../src/usr/bin/diffuse:6314
+#: ../src/usr/bin/diffuse:6782
 msgid "Reload File"
 msgstr "ファイルを再読込み"
 
-#: ../src/usr/bin/diffuse:6996
+#: ../src/usr/bin/diffuse:7465
 msgid "Remove Trailing _White Space"
 msgstr "末尾の空白を削除(_W)"
 
-#: ../src/usr/bin/diffuse:6156
+#: ../src/usr/bin/diffuse:6624
 msgid "Revision: "
 msgstr "リビジョン: "
 
-#: ../src/usr/bin/diffuse:825
+#: ../src/usr/bin/diffuse:817
 msgid "Right margin"
 msgstr "右マージン"
 
-#: ../src/usr/bin/diffuse:879
+#: ../src/usr/bin/diffuse:871
 msgid "Root directory"
 msgstr "ルートディレクトリ"
 
-#: ../src/usr/bin/diffuse:6684
+#: ../src/usr/bin/diffuse:7152
 #, python-format
 msgid "Save %(title)s Pane %(pane)d"
 msgstr "%(title)s の%(pane)d番目の枠を保存"
 
-#: ../src/usr/bin/diffuse:6934
+#: ../src/usr/bin/diffuse:7403
 msgid "Save A_ll"
 msgstr "全て保存(_L)"
 
-#: ../src/usr/bin/diffuse:6315
+#: ../src/usr/bin/diffuse:6783
 msgid "Save File"
 msgstr "ファイルを保存"
 
-#: ../src/usr/bin/diffuse:6316
+#: ../src/usr/bin/diffuse:6784
 msgid "Save File As..."
 msgstr "ファイルとして保存..."
 
-#: ../src/usr/bin/diffuse:6933
+#: ../src/usr/bin/diffuse:7402
 msgid "Save File _As..."
 msgstr "ファイルとして保存...(_A)"
 
-#: ../src/usr/bin/diffuse:6461
+#: ../src/usr/bin/diffuse:6929
 msgid "Save changes before loading the new file?"
 msgstr "新しいファイルをロードする前に、変更したデータを保存しますか？"
 
-#: ../src/usr/bin/diffuse:6120
+#: ../src/usr/bin/diffuse:6588
 msgid "Search Backwards"
 msgstr "先頭に向かって検索"
 
-#: ../src/usr/bin/diffuse:6090
+#: ../src/usr/bin/diffuse:6558
 msgid "Search For: "
 msgstr "検索する文字列: "
 
-#: ../src/usr/bin/diffuse:4274
+#: ../src/usr/bin/diffuse:4742
 msgid "Select All"
 msgstr "全て選択"
 
-#: ../src/usr/bin/diffuse:6951
+#: ../src/usr/bin/diffuse:7420
 msgid "Select _All"
 msgstr "全て選択(_A)"
 
-#: ../src/usr/bin/diffuse:6826
+#: ../src/usr/bin/diffuse:7294
 msgid ""
 "Select target line and press the space bar to align.  Press the escape key "
 "to cancel."
@@ -559,68 +572,68 @@ msgstr ""
 "目標行を選択してスペースバーを押すと整列します。取り消す場合は、ESCキーを押し"
 "ます。"
 
-#: ../src/usr/bin/diffuse:6987
+#: ../src/usr/bin/diffuse:7456
 msgid "Shift Pane _Left"
 msgstr "枠を左に動かす(_L)"
 
-#: ../src/usr/bin/diffuse:6986
+#: ../src/usr/bin/diffuse:7455
 msgid "Shift Pane _Right"
 msgstr "枠を右に動かす(_R)"
 
-#: ../src/usr/bin/diffuse:826
+#: ../src/usr/bin/diffuse:818
 msgid "Show line numbers"
 msgstr "行番号を表示"
 
-#: ../src/usr/bin/diffuse:824
+#: ../src/usr/bin/diffuse:816
 msgid "Show right margin"
 msgstr "右マージンを表示"
 
-#: ../src/usr/bin/diffuse:827
+#: ../src/usr/bin/diffuse:819
 msgid "Show white space characters"
 msgstr "空白文字を表示"
 
-#: ../src/usr/bin/diffuse:7815
+#: ../src/usr/bin/diffuse:8329
 #, python-format
 msgid "Skipping unknown argument \"%s\"."
 msgstr "未知の引数「%s」を飛ばします。"
 
-#: ../src/usr/bin/diffuse:846
+#: ../src/usr/bin/diffuse:838
 msgid "Soft tab width"
 msgstr "ソフトタブの幅"
 
-#: ../src/usr/bin/diffuse:7158
+#: ../src/usr/bin/diffuse:7627
 msgid ""
 "Some files have unsaved changes.  Select the files to save before closing."
 msgstr ""
 "変更が保存されていないファイルがあります。終了前に保存するファイルを選択しま"
 "す。"
 
-#: ../src/usr/bin/diffuse:6994
+#: ../src/usr/bin/diffuse:7463
 msgid "Sort Lines In D_escending Order"
 msgstr "行を降順に並べる(_E)"
 
-#: ../src/usr/bin/diffuse:6993
+#: ../src/usr/bin/diffuse:7462
 msgid "Sort Lines In _Ascending Order"
 msgstr "行を昇順に並べる(_A)"
 
-#: ../src/usr/bin/diffuse:4277
+#: ../src/usr/bin/diffuse:4745
 msgid "Swap with Selected Pane"
 msgstr "選択された枠と交換"
 
-#: ../src/usr/bin/diffuse:823
+#: ../src/usr/bin/diffuse:815
 msgid "Tab width"
 msgstr "タブの幅"
 
-#: ../src/usr/bin/diffuse:848
+#: ../src/usr/bin/diffuse:840
 msgid "Tabs"
 msgstr "タブ"
 
-#: ../src/usr/bin/diffuse:6664
+#: ../src/usr/bin/diffuse:7132
 #, python-format
 msgid "The file %s changed on disk.  Do you want to reload the file?"
 msgstr "ファイル %s が変更されたようです。 そのファイルを再読み込みしますか？"
 
-#: ../src/usr/bin/diffuse:6715
+#: ../src/usr/bin/diffuse:7183
 #, python-format
 msgid ""
 "The file %s has been modified by another process since reading it.  If you "
@@ -629,7 +642,7 @@ msgstr ""
 "ファイル %s は、変更されています。保存する場合は、これらの変更が失われること"
 "があります。保存しますか?"
 
-#: ../src/usr/bin/diffuse:6224
+#: ../src/usr/bin/diffuse:6692
 msgid ""
 "This program is free software; you can redistribute it and/or modify it "
 "under the terms of the GNU General Public License as published by the Free "
@@ -661,11 +674,11 @@ msgstr ""
 "ください(宛先は the Free Software Foundation, Inc., 59 Temple Place, Suite "
 "330, Boston, MA 02111-1307 USA)。\n"
 
-#: ../src/usr/bin/diffuse:7049
+#: ../src/usr/bin/diffuse:7518
 msgid "Undo"
 msgstr "元に戻す"
 
-#: ../src/usr/bin/diffuse:908
+#: ../src/usr/bin/diffuse:899
 msgid "Update paths for Cygwin"
 msgstr "Cygwin のためにパスを更新"
 
@@ -753,143 +766,143 @@ msgstr ""
 "  ( -i | --ignore-case )           大文字小文字の違いを無視\n"
 "  ( -w | --ignore-all-space )      空白の違いを無視"
 
-#: ../src/usr/bin/diffuse:911
+#: ../src/usr/bin/diffuse:902
 msgid "Version Control"
 msgstr "バージョンコントロール"
 
-#: ../src/usr/bin/diffuse:852
+#: ../src/usr/bin/diffuse:844
 #, python-format
 msgid "Warn me when closing a tab will quit %s"
 msgstr "閉じるとき、タブが %s を終了すると警告"
 
-#: ../src/usr/bin/diffuse:542
+#: ../src/usr/bin/diffuse:543
 #, python-format
 msgid "Warning: unknown colour \"%s\""
 msgstr "警告: 未知の色「%s」"
 
-#: ../src/usr/bin/diffuse:551
+#: ../src/usr/bin/diffuse:552
 #, python-format
 msgid "Warning: unknown float \"%s\""
 msgstr "警告: 未知の浮動小数点数「%s」"
 
-#: ../src/usr/bin/diffuse:560
+#: ../src/usr/bin/diffuse:561
 #, python-format
 msgid "Warning: unknown string \"%s\""
 msgstr "警告: 未知の文字列「%s」"
 
-#: ../src/usr/bin/diffuse:7019
+#: ../src/usr/bin/diffuse:7488
 #, python-format
 msgid "_About %s..."
 msgstr "%s について...(_A)"
 
-#: ../src/usr/bin/diffuse:6939
+#: ../src/usr/bin/diffuse:7408
 msgid "_Close Tab"
 msgstr "タブを閉じる(_C)"
 
-#: ../src/usr/bin/diffuse:6948
+#: ../src/usr/bin/diffuse:7417
 msgid "_Copy"
 msgstr "コピー(_C)"
 
-#: ../src/usr/bin/diffuse:6953
+#: ../src/usr/bin/diffuse:7422
 msgid "_Dismiss All Edits"
 msgstr "全ての編集を破棄(_D)"
 
-#: ../src/usr/bin/diffuse:6943
+#: ../src/usr/bin/diffuse:7412
 msgid "_Edit"
 msgstr "編集(_E)"
 
-#: ../src/usr/bin/diffuse:6926
+#: ../src/usr/bin/diffuse:7394
 msgid "_File"
 msgstr "ファイル(_F)"
 
-#: ../src/usr/bin/diffuse:6955
+#: ../src/usr/bin/diffuse:7424
 msgid "_Find..."
 msgstr "検索...(_F)"
 
-#: ../src/usr/bin/diffuse:6976
+#: ../src/usr/bin/diffuse:7445
 msgid "_First Difference"
 msgstr "最初の差分(_F)"
 
-#: ../src/usr/bin/diffuse:6958
+#: ../src/usr/bin/diffuse:7427
 msgid "_Go To Line..."
 msgstr "指定行へジャンプ...(_G)"
 
-#: ../src/usr/bin/diffuse:7016
+#: ../src/usr/bin/diffuse:7485
 msgid "_Help"
 msgstr "ヘルプ(_H)"
 
-#: ../src/usr/bin/diffuse:7017
+#: ../src/usr/bin/diffuse:7486
 msgid "_Help Contents..."
 msgstr "ヘルプの目次...(_H)"
 
-#: ../src/usr/bin/diffuse:7000
+#: ../src/usr/bin/diffuse:7469
 msgid "_Increase Indenting"
 msgstr "インデントを増やす(_I)"
 
-#: ../src/usr/bin/diffuse:6974
+#: ../src/usr/bin/diffuse:7443
 msgid "_Isolate"
 msgstr "分離(_I)"
 
-#: ../src/usr/bin/diffuse:6979
+#: ../src/usr/bin/diffuse:7448
 msgid "_Last Difference"
 msgstr "最後の差分(_L)"
 
-#: ../src/usr/bin/diffuse:7007
+#: ../src/usr/bin/diffuse:7476
 msgid "_Merge"
 msgstr "マージ(_M)"
 
-#: ../src/usr/bin/diffuse:7013
+#: ../src/usr/bin/diffuse:7482
 msgid "_Merge From Left Then Right"
 msgstr "左からマージした後、右からマージ(_M)"
 
-#: ../src/usr/bin/diffuse:6978
+#: ../src/usr/bin/diffuse:7447
 msgid "_Next Difference"
 msgstr "次の差分(_N)"
 
-#: ../src/usr/bin/diffuse:6927
+#: ../src/usr/bin/diffuse:7395
 msgid "_Open File..."
 msgstr "ファイルを開く...(_O)"
 
-#: ../src/usr/bin/diffuse:6949
+#: ../src/usr/bin/diffuse:7418
 msgid "_Paste"
 msgstr "貼り付け(_P)"
 
-#: ../src/usr/bin/diffuse:6977
+#: ../src/usr/bin/diffuse:7446
 msgid "_Previous Difference"
 msgstr "前の差分(_P)"
 
-#: ../src/usr/bin/diffuse:6941
+#: ../src/usr/bin/diffuse:7410
 msgid "_Quit"
 msgstr "終了(_Q)"
 
-#: ../src/usr/bin/diffuse:6945
+#: ../src/usr/bin/diffuse:7414
 msgid "_Redo"
 msgstr "やり直す(_R)"
 
-#: ../src/usr/bin/diffuse:6930
+#: ../src/usr/bin/diffuse:7399
 msgid "_Reload File"
 msgstr "ファイルの再読込み(_R)"
 
-#: ../src/usr/bin/diffuse:6932
+#: ../src/usr/bin/diffuse:7401
 msgid "_Save File"
 msgstr "ファイルを保存(_S)"
 
-#: ../src/usr/bin/diffuse:6971
+#: ../src/usr/bin/diffuse:7440
 msgid "_Syntax Highlighting"
 msgstr "構文の強調表示(_S)"
 
-#: ../src/usr/bin/diffuse:6944
+#: ../src/usr/bin/diffuse:7413
 msgid "_Undo"
 msgstr "元に戻す(_U)"
 
-#: ../src/usr/bin/diffuse:6940
+#: ../src/usr/bin/diffuse:7409
 msgid "_Undo Close Tab"
 msgstr "タブを閉じて元に戻す(_U)"
 
-#: ../src/usr/bin/diffuse:6970
+#: ../src/usr/bin/diffuse:7439
 msgid "_View"
 msgstr "表示(_V)"
 
-#: ../src/usr/bin/diffuse:6221
+#: ../src/usr/bin/diffuse:6689
 msgid "translator-credits"
 msgstr "Derrick Moser <derrick_moser@yahoo.com>"
