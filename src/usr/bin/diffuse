@@ -2544,8 +2544,8 @@ class VCSs:
         if svkroot is None:
             svkroot = os.path.expanduser('~/.svk')
         self.svkconfig = os.path.join(svkroot, 'config')
-        self.leaf_dir_repos = [ ('.svn', VCSs.Svn), ('CVS', VCSs.Cvs), ('RCS', VCSs.Rcs) ]
-        self.common_dir_repos = [ ('.git', VCSs.Git), ('.hg', VCSs.Hg), ('.bzr', VCSs.Bzr), ('_darcs', VCSs.Darcs), ('_MTN', VCSs.Mtn) ]
+        self.leaf_dir_repos = [ ('CVS', VCSs.Cvs), ('RCS', VCSs.Rcs) ]
+        self.common_dir_repos = [ ('.git', VCSs.Git), ('.hg', VCSs.Hg), ('.svn', VCSs.Svn), ('.bzr', VCSs.Bzr), ('_darcs', VCSs.Darcs), ('_MTN', VCSs.Mtn) ]
 
     # determines which VCS to use for the named file
     def findByFolder(self, path, prefs):

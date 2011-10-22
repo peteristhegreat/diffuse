@@ -1,3 +1,4 @@
+- added support for Subversion 1.7
 - added "Open Commit..." menu item
 - "-c" option now works for all supported version control systems
 - fixed a bug that caused the wrong revision to be shown when working on a branch in Mercurial
