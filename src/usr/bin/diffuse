@@ -6640,7 +6640,9 @@ class FileChooserDialog(gtk.FileChooserDialog):
 
     def get_filename(self):
         # convert from UTF-8 string to unicode
-        return unicode(gtk.FileChooserDialog.get_filename(self), 'utf_8')
+        s = gtk.FileChooserDialog.get_filename(self)
+        if s is not None:
+            return unicode(s, 'utf_8')
 
 # dialogue used to search for text
 class GoToLineDialog(gtk.Dialog):
