@@ -157,9 +157,9 @@
             <term><userinput>-c</userinput>, <userinput>--commit</userinput> <replaceable>rev</replaceable></term>
             <listitem>
               <para>
-                Include revision <replaceable>rev - 1</replaceable> and
-                <replaceable>rev</replaceable> of the next file named in the
-                command line arguments in a file comparison tab.
+                Open separate file comparison tabs for all files affected by
+                commit <replaceable>rev</replaceable> from the remaining paths
+                specified in the command line arguments.
               </para>
             </listitem>
           </varlistentry>
@@ -195,8 +195,8 @@
             <term><userinput>-m</userinput>, <userinput>--modified</userinput></term>
             <listitem>
               <para>
-                Open all modified files from the remaining paths specified in
-                the command line arguments in separate file comparison tabs.
+                Open separate file comparison tabs for all modified files from
+                the remaining paths specified in the command line arguments.
               </para>
             </listitem>
           </varlistentry>
@@ -527,8 +527,8 @@
 
       <para>
         For the <userinput>-c</userinput> option may be used to easily specify
-        a pair of numerically sequential revisions.  For example, this will
-        display a 2-way merge between revision 1.2.2 of
+        a pair of sequential revisions.  For example, this will display a 2-way
+        merge between revision 1.2.2 of
         <filename>foo.C</filename> and revision 1.2.3 of
         <filename>foo.C</filename>:
       </para>
@@ -650,6 +650,14 @@
             <listitem>
               <para><menuchoice><guimenu>File</guimenu><guimenuitem>Open Modified Files...</guimenuitem></menuchoice> menu item</para>
               <para>Default: <literal>Shift+Ctrl+O</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>open_commit</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>File</guimenu><guimenuitem>Open Commit...</guimenuitem></menuchoice> menu item</para>
+              <para>Default: <literal>Shift+Ctrl+T</literal></para>
             </listitem>
           </varlistentry>
 

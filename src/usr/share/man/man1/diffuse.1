@@ -54,11 +54,9 @@ Only read initialisation commands from file
 .PP
 \fB\-c\fR, \fB\-\-commit\fR \fIrev\fR
 .RS 4
-Include revision
-\fIrev \- 1\fR
-and
+Open separate file comparison tabs for all files affected by commit
 \fIrev\fR
-of the next file named in the command line arguments in a file comparison tab\&.
+from the remaining paths specified in the command line arguments\&.
 .RE
 .PP
 \fB\-D\fR, \fB\-\-close\-if\-same\fR
@@ -82,7 +80,7 @@ instead of the file name\&.
 .PP
 \fB\-m\fR, \fB\-\-modified\fR
 .RS 4
-Open all modified files from the remaining paths specified in the command line arguments in separate file comparison tabs\&.
+Open separate file comparison tabs for all modified files from the remaining paths specified in the command line arguments\&.
 .RE
 .PP
 \fB\-r\fR, \fB\-\-revision\fR \fIrev\fR
@@ -315,7 +313,7 @@ $ \fBdiffuse \-r MERGE_HEAD foo\&.C foo\&.C \-r HEAD foo\&.C\fR
 .PP
 For the
 \fB\-c\fR
-option may be used to easily specify a pair of numerically sequential revisions\&. For example, this will display a 2\-way merge between revision 1\&.2\&.2 of
+option may be used to easily specify a pair of sequential revisions\&. For example, this will display a 2\-way merge between revision 1\&.2\&.2 of
 foo\&.C
 and revision 1\&.2\&.3 of
 foo\&.C:
@@ -447,6 +445,15 @@ menu item
 .sp
 Default:
 Shift+Ctrl+O
+.RE
+.PP
+\fBopen_commit\fR
+.RS 4
+File \(-> Open Commit\&.\&.\&.
+menu item
+.sp
+Default:
+Shift+Ctrl+T
 .RE
 .PP
 \fBreload_file\fR
