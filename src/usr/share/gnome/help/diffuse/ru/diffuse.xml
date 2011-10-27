@@ -1872,9 +1872,9 @@
       </varlistentry>
 
       <varlistentry>
-        <term><filename>~/.config/diffuse/state</filename></term>
+        <term><filename>~/.local/share/diffuse/state</filename></term>
         <listitem>
-          <para>данные, не изменяемые на сеансах (<filename>%HOME%\.config\diffuse\state</filename> на Microsoft Windows)</para>
+          <para>данные, не изменяемые на сеансах (<filename>%HOME%\.local\share\diffuse\state</filename> на Microsoft Windows)</para>
         </listitem>
       </varlistentry>
     </variablelist>

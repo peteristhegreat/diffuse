@@ -1525,9 +1525,9 @@
       </varlistentry>
 
       <varlistentry>
-        <term><filename>~/.config/diffuse/state</filename></term>
+        <term><filename>~/.local/share/diffuse/state</filename></term>
         <listitem>
-          <para>Dati persistenti tra le sessioni (<filename>%HOME%\.config\diffuse\state</filename> su Microsoft Windows)</para>
+          <para>Dati persistenti tra le sessioni (<filename>%HOME%\.local\share\diffuse\state</filename> su Microsoft Windows)</para>
         </listitem>
       </varlistentry>
     </variablelist>
