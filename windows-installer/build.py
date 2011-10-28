@@ -144,7 +144,7 @@ for s in glob.glob('..\\translations\\*.po'):
 # license and other documentation
 for p in 'AUTHORS', 'ChangeLog', 'COPYING', 'README':
     copyFile(os.path.join('..', p), os.path.join('dist', p + '.txt'), True)
-for p, enc in [ ('README_ru', 'cp1251') ]:
+for p, enc in [ ('ChangeLog_ru', 'cp1251'), ('README_ru', 'cp1251') ]:
     copyFile(os.path.join('..', p), os.path.join('dist', p + '.txt'), True, enc)
 
 # fetch translations for English text hard coded in the stylesheets
