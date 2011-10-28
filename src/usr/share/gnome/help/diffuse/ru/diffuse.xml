@@ -166,9 +166,9 @@
             <term><userinput>-c</userinput>, <userinput>--commit</userinput> <replaceable>rev</replaceable></term>
             <listitem>
               <para>
-                Включить ревизию <replaceable>rev - 1</replaceable> и
-                <replaceable>rev</replaceable> следующего файла, названного в
-                параметрах командной строки, во вкладку сравнения файлов.
+                Открыть отдельные вкладки сравнения файлов для всех файлов,
+                затрагиваемых фиксацией <replaceable>rev</replaceable> из
+                остающихся путей, определенных в параметрах командной строки. 
               </para>
             </listitem>
           </varlistentry>
@@ -204,9 +204,9 @@
             <term><userinput>-m</userinput>, <userinput>--modified</userinput></term>
             <listitem>
               <para>
-                Открыть все модифицированные файлы из остающихся путей,
-                определенных в параметрах командной строки, на отдельных
-                вкладках сравнения файлов. 
+                Открыть отдельные вкладки сравнения файлов для всех
+                модифицированных файлов из остающихся путей, определенных в
+                параметрах командной строки. 
               </para>
             </listitem>
           </varlistentry>
@@ -216,7 +216,7 @@
             <listitem>
               <para>
                 Включить ревизию <replaceable>rev</replaceable> следующего
-                файла, названного в параметрах командной строки во вкладку
+                файла, названного в параметрах командной строки, во вкладку
                 сравнения файлов.
               </para>
             </listitem>
@@ -550,8 +550,8 @@
 
       <para>
         Опция <userinput>-c</userinput> может использоваться, чтобы легко
-        определить пару в цифровой последовательности ревизий. Например, чтобы
-        отобразить 2-оконное слияние между ревизией 1.2.2 файла
+        определить пару последовательных ревизий. Например, чтобы отобразить
+        2-оконное слияние между ревизией 1.2.2 файла
         <filename>foo.C</filename> и ревизией 1.2.3 файла
         <filename>foo.C</filename>:
       </para>
@@ -561,9 +561,9 @@
       </para>
 
       <para>
-        Программа <application>&app;</application> не ограничивает количество субокон, используемых для
-        сравнения файлов. Вводы к Git octopus слиянию могли бы быть просмотрены
-        с командной строкой, как ниже:
+        Программа <application>&app;</application> не ограничивает количество
+        субокон, используемых для сравнения файлов. Вводы к Git octopus слиянию
+        могли бы быть просмотрены с командной строкой, как ниже:
       </para>
 
       <para>
@@ -676,6 +676,14 @@
             <listitem>
               <para><menuchoice><guimenu>Файл</guimenu><guimenuitem>Открыть Измененные Файлы...</guimenuitem></menuchoice></para>
               <para>По умолчанию: <literal>Shift+Ctrl+O</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>open_commit</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Файл</guimenu><guimenuitem>Открыть Зафиксированные...</guimenuitem></menuchoice></para>
+              <para>По умолчанию: <literal>Shift+Ctrl+T</literal></para>
             </listitem>
           </varlistentry>
 

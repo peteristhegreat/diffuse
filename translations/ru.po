@@ -3,12 +3,12 @@
 # Copyright (C) 2009 Derrick Moser
 # This file is distributed under the same license as the diffuse package.
 # Henri Menke <henrimenke4@aim.com>, 2009.
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: diffuse-svn\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-06-20 19:36-0400\n"
+"POT-Creation-Date: 2011-10-27 20:17-0400\n"
 "PO-Revision-Date: 2010-10-05 12:30+0300\n"
 "Last-Translator: Oleg Pakhtusov <opakhtusov@gmail.com>\n"
 "Language-Team: Russian <opakhtusov@gmail.com>\n"
@@ -20,439 +20,452 @@ msgstr ""
 "X-Poedit-Country: RUSSIAN FEDERATION\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ../src/usr/bin/diffuse:894
+#: ../src/usr/bin/diffuse:892
 msgid "\"co\" command"
 msgstr "\"co\" команда"
 
-#: ../src/usr/bin/diffuse:895
+#: ../src/usr/bin/diffuse:893
 msgid "\"rlog\" command"
 msgstr "\"rlog\" команда"
 
-#: ../src/usr/bin/diffuse:7138
+#: ../src/usr/bin/diffuse:7635
 #, python-format
 msgid "%(title)s Pane %(pane)d"
 msgstr "%(title)s Субокно %(pane)d"
 
-#: ../src/usr/bin/diffuse:6684
+#: ../src/usr/bin/diffuse:7180
 #, python-format
 msgid "A file named %s already exists.  Do you want to overwrite it?"
 msgstr "Файл под именем %s уже существует.  Вы хотите перезаписать его?"
 
-#: ../src/usr/bin/diffuse:4240
+#: ../src/usr/bin/diffuse:4734
 msgid "Align with Selection"
 msgstr "Выровнять с Выборкой"
 
-#: ../src/usr/bin/diffuse:828
+#: ../src/usr/bin/diffuse:826
 msgid "Alignment"
 msgstr "Выравнивание"
 
-#: ../src/usr/bin/diffuse:845
+#: ../src/usr/bin/diffuse:843
 msgid "Always show the tab bar"
 msgstr "Всегда показывать панель вкладок"
 
-#: ../src/usr/bin/diffuse:718
+#: ../src/usr/bin/diffuse:716
 msgid "Auto Detect"
 msgstr "Автообнаружение "
 
-#: ../src/usr/bin/diffuse:838
+#: ../src/usr/bin/diffuse:836
 msgid "Auto indent"
 msgstr "Автоматический отступ"
 
-#: ../src/usr/bin/diffuse:6926
+#: ../src/usr/bin/diffuse:7423
 msgid "C_lear Edits"
 msgstr "Оч_истить Правки"
 
-#: ../src/usr/bin/diffuse:7407
+#: ../src/usr/bin/diffuse:7955
+msgid "Choose Folder With Commit"
+msgstr "Выбрать Папку с Зафиксированными Изменениями"
+
+#: ../src/usr/bin/diffuse:7935
 msgid "Choose Folder With Modified Files"
 msgstr "Выбрать Папку с Измененными Файлами"
 
-#: ../src/usr/bin/diffuse:4249 ../src/usr/bin/diffuse:7028
+#: ../src/usr/bin/diffuse:4743 ../src/usr/bin/diffuse:7525
 msgid "Clear Edits"
 msgstr "Очистить Правки"
 
-#: ../src/usr/bin/diffuse:6232
+#: ../src/usr/bin/diffuse:6728
 msgid "Close Tab"
 msgstr "Закрыть Вкладку"
 
-#: ../src/usr/bin/diffuse:7147
+#: ../src/usr/bin/diffuse:7644
 msgid "Close _Without Saving"
 msgstr "Закр_ыть Без Сохранения"
 
-#: ../src/usr/bin/diffuse:6108
+#: ../src/usr/bin/diffuse:6602
 #, python-format
 msgid "Closing this tab will quit %s."
 msgstr "Закрытие этой вкладки закроет %s."
 
-#: ../src/usr/bin/diffuse:6370
+#: ../src/usr/bin/diffuse:6866
 #, python-format
 msgid "Column %d"
 msgstr "Столбец %d"
 
-#: ../src/usr/bin/diffuse:897
+#: ../src/usr/bin/diffuse:895
 msgid "Command"
 msgstr "Команда"
 
-#: ../src/usr/bin/diffuse:6972
+#: ../src/usr/bin/diffuse:7469
 msgid "Convert Leading Spaces To _Tabs"
 msgstr "Преобра_зовать Вводные Пробелы в Табуляторы"
 
-#: ../src/usr/bin/diffuse:6971
+#: ../src/usr/bin/diffuse:7468
 msgid "Convert Tabs To _Spaces"
 msgstr "Преобр_азовать Табуляторы в Пробелы"
 
-#: ../src/usr/bin/diffuse:6979
+#: ../src/usr/bin/diffuse:7476
 msgid "Convert To Uni_x Format"
 msgstr "Преобразовать в Uni_х Формат"
 
-#: ../src/usr/bin/diffuse:6977
+#: ../src/usr/bin/diffuse:7474
 msgid "Convert To _DOS Format"
 msgstr "Преобразоват_ь в DOS Формат"
 
-#: ../src/usr/bin/diffuse:6965
+#: ../src/usr/bin/diffuse:7462
 msgid "Convert To _Lower Case"
 msgstr "Пре_образовать в Нижний Регистр"
 
-#: ../src/usr/bin/diffuse:6978
+#: ../src/usr/bin/diffuse:7475
 msgid "Convert To _Mac Format"
 msgstr "Преобразовать в Ma_с Формат"
 
-#: ../src/usr/bin/diffuse:6964
+#: ../src/usr/bin/diffuse:7461
 msgid "Convert To _Upper Case"
 msgstr "Пр_еобразовать в Верхний Регистр"
 
-#: ../src/usr/bin/diffuse:4245 ../src/usr/bin/diffuse:7026
+#: ../src/usr/bin/diffuse:4739 ../src/usr/bin/diffuse:7523
 msgid "Copy"
 msgstr "Копировать"
 
-#: ../src/usr/bin/diffuse:7018
+#: ../src/usr/bin/diffuse:7515
 msgid "Copy Left Into Selection"
 msgstr "Копировать Слева в Выборку"
 
-#: ../src/usr/bin/diffuse:6985
+#: ../src/usr/bin/diffuse:7482
 msgid "Copy Left _Into Selection"
 msgstr "Копиро_вать Слева в Выборку"
 
-#: ../src/usr/bin/diffuse:6986
+#: ../src/usr/bin/diffuse:7483
 msgid "Copy Right I_nto Selection"
 msgstr "Копиров_ать Справа в Выборку"
 
-#: ../src/usr/bin/diffuse:7019
+#: ../src/usr/bin/diffuse:7516
 msgid "Copy Right Into Selection"
 msgstr "Копировать Справа в Выборку"
 
-#: ../src/usr/bin/diffuse:7017
+#: ../src/usr/bin/diffuse:7514
 msgid "Copy Selection Left"
 msgstr "Копировать Выборку Влево"
 
-#: ../src/usr/bin/diffuse:7016
+#: ../src/usr/bin/diffuse:7513
 msgid "Copy Selection Right"
 msgstr "Копировать Выборку Вправо"
 
-#: ../src/usr/bin/diffuse:6983
+#: ../src/usr/bin/diffuse:7480
 msgid "Copy Selection _Left"
 msgstr "Ко_пировать Выборку Влево"
 
-#: ../src/usr/bin/diffuse:6982
+#: ../src/usr/bin/diffuse:7479
 msgid "Copy Selection _Right"
 msgstr "К_опировать Выборку Вправо"
 
-#: ../src/usr/bin/diffuse:67
+#: ../src/usr/bin/diffuse:68
 msgid "Copyright © 2006-2011 Derrick Moser"
 msgstr "Copyright © 2006-2011 Derrick Moser"
 
-#: ../src/usr/bin/diffuse:6921
+#: ../src/usr/bin/diffuse:7418
 msgid "Cu_t"
 msgstr "Выре_зать"
 
-#: ../src/usr/bin/diffuse:4244 ../src/usr/bin/diffuse:7025
+#: ../src/usr/bin/diffuse:4738 ../src/usr/bin/diffuse:7522
 msgid "Cut"
 msgstr "Вырезать"
 
-#: ../src/usr/bin/diffuse:874
+#: ../src/usr/bin/diffuse:872
 msgid "Cygdrive prefix"
 msgstr "Cygdrive префикс"
 
-#: ../src/usr/bin/diffuse:871
+#: ../src/usr/bin/diffuse:869
 msgid "Cygwin"
 msgstr "Cygwin"
 
-#: ../src/usr/bin/diffuse:6975
+#: ../src/usr/bin/diffuse:7472
 msgid "De_crease Indenting"
 msgstr "У_меньшить Отступ"
 
-#: ../src/usr/bin/diffuse:850
+#: ../src/usr/bin/diffuse:848
 msgid "Default codec"
 msgstr "Кодек по умолчанию"
 
-#: ../src/usr/bin/diffuse:844
+#: ../src/usr/bin/diffuse:842
 msgid "Default panes"
 msgstr "Субокон по умолчанию"
 
-#: ../src/usr/bin/diffuse:898
-msgid "Default revision"
-msgstr "Ревизия по умолчанию"
-
-#: ../src/usr/bin/diffuse:6194
+#: ../src/usr/bin/diffuse:6690
 msgid "Derrick Moser <derrick_moser@yahoo.com>"
 msgstr "Derrick Moser <derrick_moser@yahoo.com>"
 
-#: ../src/usr/bin/diffuse:6191
+#: ../src/usr/bin/diffuse:6687
 msgid "Diffuse is a graphical tool for merging and comparing text files."
 msgstr ""
 "Diffuse является графическим инструментом для слияния и сравнения текстовых "
 "файлов."
 
-#: ../src/usr/bin/diffuse:814
+#: ../src/usr/bin/diffuse:812
 msgid "Display"
 msgstr "Отображение"
 
-#: ../src/usr/bin/diffuse:836
+#: ../src/usr/bin/diffuse:834
 msgid "Editor"
 msgstr "Редактор"
 
-#: ../src/usr/bin/diffuse:6120
+#: ../src/usr/bin/diffuse:6614
 msgid "Encoding: "
 msgstr "Кодировка: "
 
-#: ../src/usr/bin/diffuse:6731
+#: ../src/usr/bin/diffuse:7227
 #, python-format
 msgid "Error encoding to %s."
 msgstr "Ошибка кодирования в %s."
 
-#: ../src/usr/bin/diffuse:2002
+#: ../src/usr/bin/diffuse:2513
 #, python-format
 msgid "Error parsing %s."
 msgstr "Ошибка анализа %s."
 
-#: ../src/usr/bin/diffuse:6773 ../src/usr/bin/diffuse:7779
+#: ../src/usr/bin/diffuse:7269 ../src/usr/bin/diffuse:8321
 msgid "Error parsing line number."
 msgstr "Ошибка анализа номера строки."
 
-#: ../src/usr/bin/diffuse:7724
+#: ../src/usr/bin/diffuse:1615 ../src/usr/bin/diffuse:2178
+#: ../src/usr/bin/diffuse:2306
 #, python-format
 msgid "Error parsing revision %s."
 msgstr "Ошибка анализа ревизии %s."
 
-#: ../src/usr/bin/diffuse:7796
+#: ../src/usr/bin/diffuse:8338
 #, python-format
 msgid "Error processing argument \"%s\".  Directory not expected."
 msgstr "Ошибка обработки параметра \"%s\".  Каталог не ожидался."
 
-#: ../src/usr/bin/diffuse:690
+#: ../src/usr/bin/diffuse:697
 #, python-format
 msgid "Error processing line %(line)d of %(file)s."
 msgstr "Ошибка обработки строки %(line)d из %(file)s."
 
-#: ../src/usr/bin/diffuse:6565 ../src/usr/bin/diffuse:7696
+#: ../src/usr/bin/diffuse:7061 ../src/usr/bin/diffuse:8244
 #, python-format
 msgid "Error reading %s."
 msgstr "Ошибка чтения %s."
 
-#: ../src/usr/bin/diffuse:6563
+#: ../src/usr/bin/diffuse:7059
 #, python-format
 msgid "Error reading revision %(rev)s of %(file)s."
 msgstr "Ошибка считывания ревизии %(rev)s из %(file)s."
 
-#: ../src/usr/bin/diffuse:7358
+#: ../src/usr/bin/diffuse:7855
+msgid "Error retrieving commits for %s."
+msgstr "Ошибка извлечения фиксаций для %s."
+
+#: ../src/usr/bin/diffuse:7886
 #, python-format
 msgid "Error retrieving modifications for %s."
 msgstr "Ошибка извлечения модификаций для %s."
 
-#: ../src/usr/bin/diffuse:995 ../src/usr/bin/diffuse:6735
+#: ../src/usr/bin/diffuse:1004 ../src/usr/bin/diffuse:7231
 #, python-format
 msgid "Error writing %s."
 msgstr "Ошибка записи %s."
 
-#: ../src/usr/bin/diffuse:839
+#: ../src/usr/bin/diffuse:837
 msgid "Expand tabs to spaces"
 msgstr "Расширить табуляторы до пробелов"
 
-#: ../src/usr/bin/diffuse:6963
+#: ../src/usr/bin/diffuse:7460
 msgid "F_ormat"
 msgstr "Фор_мат"
 
-#: ../src/usr/bin/diffuse:7255
+#: ../src/usr/bin/diffuse:7752
 #, python-format
 msgid "File Merge %d"
 msgstr "Слияние Файлов %d"
 
-#: ../src/usr/bin/diffuse:6931
+#: ../src/usr/bin/diffuse:7428
 msgid "Find Pre_vious"
 msgstr "Най_ти Предыдущее"
 
-#: ../src/usr/bin/diffuse:6930
+#: ../src/usr/bin/diffuse:7427
 msgid "Find _Next"
 msgstr "Н_айти Следующее"
 
-#: ../src/usr/bin/diffuse:6058
+#: ../src/usr/bin/diffuse:6552
 msgid "Find..."
 msgstr "Найти..."
 
-#: ../src/usr/bin/diffuse:6955
+#: ../src/usr/bin/diffuse:7452
 msgid "Fir_st Tab"
 msgstr "Перв_ая Вкладка"
 
-#: ../src/usr/bin/diffuse:7011
+#: ../src/usr/bin/diffuse:7508
 msgid "First Difference"
 msgstr "Первое Различие"
 
-#: ../src/usr/bin/diffuse:816
+#: ../src/usr/bin/diffuse:814
 msgid "Font"
 msgstr "Шрифт"
 
-#: ../src/usr/bin/diffuse:6154
+#: ../src/usr/bin/diffuse:6650
 msgid "Go To Line..."
 msgstr "Перейти на Строку..."
 
-#: ../src/usr/bin/diffuse:825
+#: ../src/usr/bin/diffuse:823
 msgid "Ignore blank line differences"
 msgstr "Игнорировать различия пустых строк"
 
-#: ../src/usr/bin/diffuse:833
+#: ../src/usr/bin/diffuse:831
 msgid "Ignore blank lines"
 msgstr "Игнорировать пустые строки"
 
-#: ../src/usr/bin/diffuse:830
+#: ../src/usr/bin/diffuse:828
 msgid "Ignore case"
 msgstr "Игнорировать регистр символов"
 
-#: ../src/usr/bin/diffuse:822
+#: ../src/usr/bin/diffuse:820
 msgid "Ignore case differences"
 msgstr "Игнорировать различия в регистре"
 
-#: ../src/usr/bin/diffuse:824 ../src/usr/bin/diffuse:832
+#: ../src/usr/bin/diffuse:822 ../src/usr/bin/diffuse:830
 msgid "Ignore changes to white space"
 msgstr "Игнорировать изменения пробелов, символов табуляции и пустой строки"
 
-#: ../src/usr/bin/diffuse:834
+#: ../src/usr/bin/diffuse:832
 msgid "Ignore end of line characters"
 msgstr "Игнорировать символы окончания строк (терминаторы)"
 
-#: ../src/usr/bin/diffuse:826
+#: ../src/usr/bin/diffuse:824
 msgid "Ignore end of line differences"
 msgstr "Игнорировать различия окончания строк (терминаторы)"
 
-#: ../src/usr/bin/diffuse:831
+#: ../src/usr/bin/diffuse:829
 msgid "Ignore white space"
 msgstr "Игнорировать пробелы, символы табуляции и пустой строки"
 
-#: ../src/usr/bin/diffuse:823
+#: ../src/usr/bin/diffuse:821
 msgid "Ignore white space differences"
 msgstr "Игнорировать различия пробелов, символов табуляции и пустой строки"
 
-#: ../src/usr/bin/diffuse:4241
+#: ../src/usr/bin/diffuse:4735
 msgid "Isolate"
 msgstr "Изолировать"
 
-#: ../src/usr/bin/diffuse:6958
+#: ../src/usr/bin/diffuse:7455
 msgid "Las_t Tab"
 msgstr "Послед_няя Вкладка"
 
-#: ../src/usr/bin/diffuse:7014
+#: ../src/usr/bin/diffuse:7511
 msgid "Last Difference"
 msgstr "Последнее Различие"
 
-#: ../src/usr/bin/diffuse:900
+#: ../src/usr/bin/diffuse:897
 msgid "Launch from a Bash login shell"
 msgstr "Запуск из оболочки Bash login"
 
-#: ../src/usr/bin/diffuse:6160
+#: ../src/usr/bin/diffuse:6656
 msgid "Line Number: "
 msgstr "Номер строки: "
 
-#: ../src/usr/bin/diffuse:6988
+#: ../src/usr/bin/diffuse:7485
 msgid "M_erge From Right Then Left"
 msgstr "Сл_ияние Справа Затем Слева"
 
-#: ../src/usr/bin/diffuse:6089
+#: ../src/usr/bin/diffuse:6583
 msgid "Match Case"
 msgstr "Учитывать регистр"
 
-#: ../src/usr/bin/diffuse:7020
+#: ../src/usr/bin/diffuse:7517
 msgid "Merge From Left Then Right"
 msgstr "Слияние Слева Затем Справа"
 
-#: ../src/usr/bin/diffuse:7021
+#: ../src/usr/bin/diffuse:7518
 msgid "Merge From Right Then Left"
 msgstr "Слияние Справа Затем Слева"
 
-#: ../src/usr/bin/diffuse:4242
+#: ../src/usr/bin/diffuse:4736
 msgid "Merge Selection"
 msgstr "Объединить Выборку"
 
-#: ../src/usr/bin/diffuse:7007
+#: ../src/usr/bin/diffuse:7504
 msgid "New 2-Way File Merge"
 msgstr "Новое 2-Оконное Слияние Файлов"
 
-#: ../src/usr/bin/diffuse:7008
+#: ../src/usr/bin/diffuse:7505
 msgid "New 3-Way File Merge"
 msgstr "Новое 3-Оконное Слияние Файлов"
 
-#: ../src/usr/bin/diffuse:6910
+#: ../src/usr/bin/diffuse:7407
 msgid "New _2-Way File Merge"
 msgstr "Новое _2-Оконное Слияние Файлов"
 
-#: ../src/usr/bin/diffuse:6911
+#: ../src/usr/bin/diffuse:7408
 msgid "New _3-Way File Merge"
 msgstr "Новое _3-Оконное Слияние Файлов"
 
-#: ../src/usr/bin/diffuse:7013
+#: ../src/usr/bin/diffuse:7510
 msgid "Next Difference"
 msgstr "Следующее Различие"
 
-#: ../src/usr/bin/diffuse:6957
+#: ../src/usr/bin/diffuse:7454
 msgid "Next _Tab"
 msgstr "С_ледующая Вкладка"
 
-#: ../src/usr/bin/diffuse:7420
+#: ../src/usr/bin/diffuse:7968
+msgid "No committed files found."
+msgstr "Файлы с фиксациями не найдены."
+
+#: ../src/usr/bin/diffuse:7948
 msgid "No modified files found."
 msgstr "Модифицированные файлы не найдены."
 
-#: ../src/usr/bin/diffuse:6936
+#: ../src/usr/bin/diffuse:7433
 msgid "None"
 msgstr "Нет"
 
-#: ../src/usr/bin/diffuse:6588
+#: ../src/usr/bin/diffuse:7400
+msgid "Open Commi_t..."
+msgstr "Открыть Зафи_ксированные..."
+
+#: ../src/usr/bin/diffuse:7084
 msgid "Open File"
 msgstr "Открыть Файл"
 
-#: ../src/usr/bin/diffuse:7391
+#: ../src/usr/bin/diffuse:7919
 msgid "Open File In New Tab"
 msgstr "Открыть Файл в Новой Вкладке"
 
-#: ../src/usr/bin/diffuse:6902
+#: ../src/usr/bin/diffuse:7398
 msgid "Open File In New _Tab..."
 msgstr "Открыт_ь Файл в Новой Вкладке..."
 
-#: ../src/usr/bin/diffuse:6287
+#: ../src/usr/bin/diffuse:6783
 msgid "Open File..."
 msgstr "Открыть Файл..."
 
-#: ../src/usr/bin/diffuse:6903
+#: ../src/usr/bin/diffuse:7399
 msgid "Open _Modified Files..."
 msgstr "Открыть И_змененные Файлы..."
 
-#: ../src/usr/bin/diffuse:851
+#: ../src/usr/bin/diffuse:849
 msgid "Order of codecs used to identify encoding"
 msgstr "Порядок кодеков, используемых для распознания кодировки"
 
-#: ../src/usr/bin/diffuse:4246 ../src/usr/bin/diffuse:7027
+#: ../src/usr/bin/diffuse:4740 ../src/usr/bin/diffuse:7524
 msgid "Paste"
 msgstr "Вставить"
 
-#: ../src/usr/bin/diffuse:7509
+#: ../src/usr/bin/diffuse:8057
 msgid "Phrase not found.  Continue from the end of the file?"
 msgstr "Фраза не найдена.  Продолжить с конца файла?"
 
-#: ../src/usr/bin/diffuse:7511
+#: ../src/usr/bin/diffuse:8059
 msgid "Phrase not found.  Continue from the start of the file?"
 msgstr "Фраза не найдена.  Продолжить с начала файла?"
 
-#: ../src/usr/bin/diffuse:6934
+#: ../src/usr/bin/diffuse:7431
 msgid "Pr_eferences..."
 msgstr "Предпо_чтения..."
 
-#: ../src/usr/bin/diffuse:6956
+#: ../src/usr/bin/diffuse:7453
 msgid "Pre_vious Tab"
 msgstr "Предыдуща_я Вкладка"
 
@@ -460,7 +473,7 @@ msgstr "Предыдуща_я Вкладка"
 msgid "Preferences"
 msgstr "Предпочтения"
 
-#: ../src/usr/bin/diffuse:6796
+#: ../src/usr/bin/diffuse:7292
 msgid ""
 "Press the enter key or double click to edit.  Press the space bar or use the "
 "RMB menu to manually align."
@@ -468,92 +481,92 @@ msgstr ""
 "Нажатие Enter или двойной щелчок для редактирования.  Нажатие Space или меню "
 "правого щелчка для выравнивания вручную."
 
-#: ../src/usr/bin/diffuse:6798
+#: ../src/usr/bin/diffuse:7294
 msgid "Press the escape key to finish editing."
 msgstr "Нажмите клавишу Escape, чтобы закончить редактирование."
 
-#: ../src/usr/bin/diffuse:7012
+#: ../src/usr/bin/diffuse:7509
 msgid "Previous Difference"
 msgstr "Предыдущее Различие"
 
-#: ../src/usr/bin/diffuse:6947
+#: ../src/usr/bin/diffuse:7444
 msgid "Re_align All"
 msgstr "Пере_строить Все"
 
-#: ../src/usr/bin/diffuse:7010
+#: ../src/usr/bin/diffuse:7507
 msgid "Realign All"
 msgstr "Перестроить Все"
 
-#: ../src/usr/bin/diffuse:7024
+#: ../src/usr/bin/diffuse:7521
 msgid "Redo"
 msgstr "Вернуть"
 
-#: ../src/usr/bin/diffuse:848
+#: ../src/usr/bin/diffuse:846
 msgid "Regional Settings"
 msgstr "Настройки Региона"
 
-#: ../src/usr/bin/diffuse:6288
+#: ../src/usr/bin/diffuse:6784
 msgid "Reload File"
 msgstr "Перезагрузить Файл"
 
-#: ../src/usr/bin/diffuse:6970
+#: ../src/usr/bin/diffuse:7467
 msgid "Remove Trailing _White Space"
 msgstr "Уда_лить Замыкающие Пробелы"
 
-#: ../src/usr/bin/diffuse:6130
+#: ../src/usr/bin/diffuse:6624
 msgid "Revision: "
 msgstr "Ревизия: "
 
-#: ../src/usr/bin/diffuse:819
+#: ../src/usr/bin/diffuse:817
 msgid "Right margin"
 msgstr "Правое поле"
 
-#: ../src/usr/bin/diffuse:873
+#: ../src/usr/bin/diffuse:871
 msgid "Root directory"
 msgstr "Корневой каталог"
 
-#: ../src/usr/bin/diffuse:6658
+#: ../src/usr/bin/diffuse:7154
 #, python-format
 msgid "Save %(title)s Pane %(pane)d"
 msgstr "Сохранить %(title)s Субокно %(pane)d"
 
-#: ../src/usr/bin/diffuse:6908
+#: ../src/usr/bin/diffuse:7405
 msgid "Save A_ll"
 msgstr "Сохран_ить Все"
 
-#: ../src/usr/bin/diffuse:6289
+#: ../src/usr/bin/diffuse:6785
 msgid "Save File"
 msgstr "Сохранить Файл"
 
-#: ../src/usr/bin/diffuse:6290
+#: ../src/usr/bin/diffuse:6786
 msgid "Save File As..."
 msgstr "Сохранить Файл Как..."
 
-#: ../src/usr/bin/diffuse:6907
+#: ../src/usr/bin/diffuse:7404
 msgid "Save File _As..."
 msgstr "Сохра_нить Файл Как..."
 
-#: ../src/usr/bin/diffuse:6435
+#: ../src/usr/bin/diffuse:6931
 msgid "Save changes before loading the new file?"
 msgstr "Сохранить изменения перед загрузкой нового файла?"
 
-#: ../src/usr/bin/diffuse:6094
+#: ../src/usr/bin/diffuse:6588
 msgid "Search Backwards"
 msgstr "Поиск в обратном направлении"
 
-#: ../src/usr/bin/diffuse:6064
+#: ../src/usr/bin/diffuse:6558
 msgid "Search For: "
 msgstr "Искать: "
 
-#: ../src/usr/bin/diffuse:4248
+#: ../src/usr/bin/diffuse:4742
 msgid "Select All"
 msgstr "Выбрать Все"
 
-#: ../src/usr/bin/diffuse:6925
+#: ../src/usr/bin/diffuse:7422
 msgid "Select _All"
 msgstr "В_ыбрать Все"
 
-#: ../src/usr/bin/diffuse:6800
+#: ../src/usr/bin/diffuse:7296
 msgid ""
 "Select target line and press the space bar to align.  Press the escape key "
 "to cancel."
@@ -561,68 +574,68 @@ msgstr ""
 "Выберите целевую строку и нажмите клавишу Space, чтобы выровнять.  Нажмите "
 "Еscape для отмены."
 
-#: ../src/usr/bin/diffuse:6961
+#: ../src/usr/bin/diffuse:7458
 msgid "Shift Pane _Left"
 msgstr "Перемест_ить Субокно Влево"
 
-#: ../src/usr/bin/diffuse:6960
+#: ../src/usr/bin/diffuse:7457
 msgid "Shift Pane _Right"
 msgstr "Пере_местить Субокно Вправо"
 
-#: ../src/usr/bin/diffuse:820
+#: ../src/usr/bin/diffuse:818
 msgid "Show line numbers"
 msgstr "Показывать номера строк"
 
-#: ../src/usr/bin/diffuse:818
+#: ../src/usr/bin/diffuse:816
 msgid "Show right margin"
 msgstr "Показывать правое поле"
 
-#: ../src/usr/bin/diffuse:821
+#: ../src/usr/bin/diffuse:819
 msgid "Show white space characters"
 msgstr "Показывать символы пробелов"
 
-#: ../src/usr/bin/diffuse:7789
+#: ../src/usr/bin/diffuse:8331
 #, python-format
 msgid "Skipping unknown argument \"%s\"."
 msgstr "Пропуск неизвестного параметра \"%s\"."
 
-#: ../src/usr/bin/diffuse:840
+#: ../src/usr/bin/diffuse:838
 msgid "Soft tab width"
 msgstr "Ширина мягкого табулятора"
 
-#: ../src/usr/bin/diffuse:7132
+#: ../src/usr/bin/diffuse:7629
 msgid ""
 "Some files have unsaved changes.  Select the files to save before closing."
 msgstr ""
 "Некоторые файлы имеют несохраненные изменения.\n"
 "Выберите файлы для сохранения перед закрытием."
 
-#: ../src/usr/bin/diffuse:6968
+#: ../src/usr/bin/diffuse:7465
 msgid "Sort Lines In D_escending Order"
 msgstr "Сорт_ировать Строки в Порядке Убывания"
 
-#: ../src/usr/bin/diffuse:6967
+#: ../src/usr/bin/diffuse:7464
 msgid "Sort Lines In _Ascending Order"
 msgstr "Сор_тировать Строки в Порядке Возрастания"
 
-#: ../src/usr/bin/diffuse:4251
+#: ../src/usr/bin/diffuse:4745
 msgid "Swap with Selected Pane"
 msgstr "Обменять с Выбранным Субокном"
 
-#: ../src/usr/bin/diffuse:817
+#: ../src/usr/bin/diffuse:815
 msgid "Tab width"
 msgstr "Ширина табулятора"
 
-#: ../src/usr/bin/diffuse:842
+#: ../src/usr/bin/diffuse:840
 msgid "Tabs"
 msgstr "Вкладки"
 
-#: ../src/usr/bin/diffuse:6638
+#: ../src/usr/bin/diffuse:7134
 #, python-format
 msgid "The file %s changed on disk.  Do you want to reload the file?"
 msgstr "Файл %s изменен на диске.  Вы хотите перезагрузить этот файл?"
 
-#: ../src/usr/bin/diffuse:6689
+#: ../src/usr/bin/diffuse:7185
 #, python-format
 msgid ""
 "The file %s has been modified by another process since reading it.  If you "
@@ -631,7 +644,7 @@ msgstr ""
 "Файл %s был изменен другим процессом после его прочтения.  На сохранении все "
 "внешние изменения будут потеряны.  Сохранить все равно?"
 
-#: ../src/usr/bin/diffuse:6198
+#: ../src/usr/bin/diffuse:6694
 msgid ""
 "This program is free software; you can redistribute it and/or modify it "
 "under the terms of the GNU General Public License as published by the Free "
@@ -665,15 +678,15 @@ msgstr ""
 "написав по адресу: Free Software Foundation, Inc., 51 Franklin St, Fifth "
 "Floor, Boston, MA  02110-1301  USA\n"
 
-#: ../src/usr/bin/diffuse:7023
+#: ../src/usr/bin/diffuse:7520
 msgid "Undo"
 msgstr "Отменить"
 
-#: ../src/usr/bin/diffuse:902
+#: ../src/usr/bin/diffuse:899
 msgid "Update paths for Cygwin"
 msgstr "Обновлять пути для Cygwin"
 
-#: ../src/usr/bin/diffuse:78
+#: ../src/usr/bin/diffuse:86
 msgid ""
 "Usage:\n"
 "    diffuse [ [OPTION...] [FILE...] ]...\n"
@@ -740,11 +753,15 @@ msgstr ""
 "Общие Параметры:\n"
 "  ( -c | --commit ) <rev>          Ревизии файла <rev-1> и <rev>\n"
 "  ( -D | --close-if-same )         Закрыть все не имеющие различий вкладки\n"
-"  ( -e | --encoding ) <codec>      Использовать <codec> для чтения и записи файлов\n"
-"  ( -L | --label ) <label>         Отображать <label> ярлык вместо имени файла\n"
-"  ( -m | --modified )              Создавать новую вкладку для каждого измененного файла\n"
+"  ( -e | --encoding ) <codec>      Использовать <codec> для чтения и записи "
+"файлов\n"
+"  ( -L | --label ) <label>         Отображать <label> ярлык вместо имени "
+"файла\n"
+"  ( -m | --modified )              Создавать новую вкладку для каждого "
+"измененного файла\n"
 "  ( -r | --revision ) <rev>        Файл ревизии <rev>\n"
-"  ( -s | --separate )              Создавать новую вкладку для каждого файла\n"
+"  ( -s | --separate )              Создавать новую вкладку для каждого "
+"файла\n"
 "  ( -t | --tab )                   Запустить новую вкладку\n"
 "  --line <line>                    Начать с выбранной <line> строки\n"
 "  --null-file                      Создать пустое субокно сравнения файла\n"
@@ -756,143 +773,143 @@ msgstr ""
 "  ( -i | --ignore-case )           Игнорировать различия регистра символов\n"
 "  ( -w | --ignore-all-space )      Игнорировать различия свободного места"
 
-#: ../src/usr/bin/diffuse:905
+#: ../src/usr/bin/diffuse:902
 msgid "Version Control"
 msgstr "Контроль Версий"
 
-#: ../src/usr/bin/diffuse:846
+#: ../src/usr/bin/diffuse:844
 #, python-format
 msgid "Warn me when closing a tab will quit %s"
 msgstr "Предупреждение, когда закрытие вкладки закроет %s"
 
-#: ../src/usr/bin/diffuse:536
+#: ../src/usr/bin/diffuse:543
 #, python-format
 msgid "Warning: unknown colour \"%s\""
 msgstr "Внимание: неизвестный цвет \"%s\""
 
-#: ../src/usr/bin/diffuse:545
+#: ../src/usr/bin/diffuse:552
 #, python-format
 msgid "Warning: unknown float \"%s\""
 msgstr "Внимание: неизвестное плавающее значение \"%s\""
 
-#: ../src/usr/bin/diffuse:554
+#: ../src/usr/bin/diffuse:561
 #, python-format
 msgid "Warning: unknown string \"%s\""
 msgstr "Внимание: неизвестная строка \"%s\""
 
-#: ../src/usr/bin/diffuse:6993
+#: ../src/usr/bin/diffuse:7490
 #, python-format
 msgid "_About %s..."
 msgstr "О пр_ограмме %s..."
 
-#: ../src/usr/bin/diffuse:6913
+#: ../src/usr/bin/diffuse:7410
 msgid "_Close Tab"
 msgstr "З_акрыть Вкладку"
 
-#: ../src/usr/bin/diffuse:6922
+#: ../src/usr/bin/diffuse:7419
 msgid "_Copy"
 msgstr "Ко_пировать"
 
-#: ../src/usr/bin/diffuse:6927
+#: ../src/usr/bin/diffuse:7424
 msgid "_Dismiss All Edits"
 msgstr "Сбр_осить Все Правки"
 
-#: ../src/usr/bin/diffuse:6917
+#: ../src/usr/bin/diffuse:7414
 msgid "_Edit"
 msgstr "Пра_вка"
 
-#: ../src/usr/bin/diffuse:6900
+#: ../src/usr/bin/diffuse:7396
 msgid "_File"
 msgstr "Фа_йл"
 
-#: ../src/usr/bin/diffuse:6929
+#: ../src/usr/bin/diffuse:7426
 msgid "_Find..."
 msgstr "На_йти..."
 
-#: ../src/usr/bin/diffuse:6950
+#: ../src/usr/bin/diffuse:7447
 msgid "_First Difference"
 msgstr "Пер_вое Различие"
 
-#: ../src/usr/bin/diffuse:6932
+#: ../src/usr/bin/diffuse:7429
 msgid "_Go To Line..."
 msgstr "Пер_ейти на Строку..."
 
-#: ../src/usr/bin/diffuse:6990
+#: ../src/usr/bin/diffuse:7487
 msgid "_Help"
 msgstr "Спр_авка"
 
-#: ../src/usr/bin/diffuse:6991
+#: ../src/usr/bin/diffuse:7488
 msgid "_Help Contents..."
 msgstr "Содер_жание Справки..."
 
-#: ../src/usr/bin/diffuse:6974
+#: ../src/usr/bin/diffuse:7471
 msgid "_Increase Indenting"
 msgstr "У_величить Отступ"
 
-#: ../src/usr/bin/diffuse:6948
+#: ../src/usr/bin/diffuse:7445
 msgid "_Isolate"
 msgstr "И_золировать"
 
-#: ../src/usr/bin/diffuse:6953
+#: ../src/usr/bin/diffuse:7450
 msgid "_Last Difference"
 msgstr "П_оследнее Различие"
 
-#: ../src/usr/bin/diffuse:6981
+#: ../src/usr/bin/diffuse:7478
 msgid "_Merge"
 msgstr "С_лияние"
 
-#: ../src/usr/bin/diffuse:6987
+#: ../src/usr/bin/diffuse:7484
 msgid "_Merge From Left Then Right"
 msgstr "С_лияние Слева Затем Справа"
 
-#: ../src/usr/bin/diffuse:6952
+#: ../src/usr/bin/diffuse:7449
 msgid "_Next Difference"
 msgstr "Следу_ющее Различие"
 
-#: ../src/usr/bin/diffuse:6901
+#: ../src/usr/bin/diffuse:7397
 msgid "_Open File..."
 msgstr "О_ткрыть Файл..."
 
-#: ../src/usr/bin/diffuse:6923
+#: ../src/usr/bin/diffuse:7420
 msgid "_Paste"
 msgstr "В_ставить"
 
-#: ../src/usr/bin/diffuse:6951
+#: ../src/usr/bin/diffuse:7448
 msgid "_Previous Difference"
 msgstr "Предыдуще_е Различие"
 
-#: ../src/usr/bin/diffuse:6915
+#: ../src/usr/bin/diffuse:7412
 msgid "_Quit"
 msgstr "В_ыход"
 
-#: ../src/usr/bin/diffuse:6919
+#: ../src/usr/bin/diffuse:7416
 msgid "_Redo"
 msgstr "Вер_нуть"
 
-#: ../src/usr/bin/diffuse:6904
+#: ../src/usr/bin/diffuse:7401
 msgid "_Reload File"
 msgstr "Пер_езагрузить Файл"
 
-#: ../src/usr/bin/diffuse:6906
+#: ../src/usr/bin/diffuse:7403
 msgid "_Save File"
 msgstr "С_охранить Файл"
 
-#: ../src/usr/bin/diffuse:6945
+#: ../src/usr/bin/diffuse:7442
 msgid "_Syntax Highlighting"
 msgstr "Подсве_тка Синтаксиса"
 
-#: ../src/usr/bin/diffuse:6918
+#: ../src/usr/bin/diffuse:7415
 msgid "_Undo"
 msgstr "От_менить"
 
-#: ../src/usr/bin/diffuse:6914
+#: ../src/usr/bin/diffuse:7411
 msgid "_Undo Close Tab"
 msgstr "От_менить Закрытие Вкладки"
 
-#: ../src/usr/bin/diffuse:6944
+#: ../src/usr/bin/diffuse:7441
 msgid "_View"
 msgstr "В_ид"
 
-#: ../src/usr/bin/diffuse:6195
+#: ../src/usr/bin/diffuse:6691
 msgid "translator-credits"
 msgstr "v.01 О.Ю.Пахтусов (Oleg Pakhtusov) <oupakhtusov@gmail.com> "
