@@ -44,7 +44,7 @@ if isWindows():
     # gettext looks for the language using environment variables which
     # are normally not set on Windows so we try setting it for them
     for v in 'LANGUAGE', 'LC_ALL', 'LC_MESSAGES', 'LANG':
-        if os.environ.has_key(v):
+        if v in os.environ:
             lang = os.environ[v]
             # remove any additional languages, encodings, or modifications
             for v in ':.@':
@@ -225,7 +225,7 @@ class SyntaxParser:
     def addPattern(self, prev_state, next_state, token_type, pattern):
         lookup = self.transitions_lookup
         for state in prev_state, next_state:
-            if not lookup.has_key(state):
+            if state not in lookup:
                 lookup[state] = []
         lookup[prev_state].append([pattern, token_type, next_state])
 
@@ -435,8 +435,6 @@ class Resources:
             'preedit' : Colour(0.0, 0.0, 0.0),
             'text' : Colour(0.0, 0.0, 0.0),
             'text_background' : Colour(1.0, 1.0, 1.0) }
-        # list of unknown colour resources we have already issued warnings for
-        self.unknown_colours = set()
 
         # default floats
         self.floats = {
@@ -446,16 +444,9 @@ class Resources:
             'edited_opacity' : 0.4,
             'line_difference_opacity' : 0.3,
             'line_selection_opacity' : 0.4 }
-        # list of unknown float resources we have already issued warnings for
-        self.unknown_floats = set()
 
         # default strings
         self.strings = {}
-
-        # list of unknown string resources we have already issued warnings for
-        self.unknown_strings = set()
-
-        self.default_colour = Colour(0.0, 0.0, 0.0)
 
         # syntax highlighting support
         self.syntaxes = {}
@@ -492,11 +483,11 @@ class Resources:
         key_tuple = (ctx, (key, modifiers))
 
         # remove any existing binding
-        if self.keybindings_lookup.has_key(key_tuple):
+        if key_tuple in self.keybindings_lookup:
             self._removeKeyBinding(key_tuple)
 
         # ensure we have a set to hold this action
-        if not self.keybindings.has_key(action_tuple):
+        if action_tuple not in self.keybindings:
             self.keybindings[action_tuple] = {}
         bindings = self.keybindings[action_tuple]
 
@@ -515,15 +506,16 @@ class Resources:
         del self.keybindings[action_tuple][key_tuple]
 
     def getActionForKey(self, ctx, key, modifiers):
-        tuple = (ctx, (key, modifiers))
-        if self.keybindings_lookup.has_key(tuple):
-            return self.keybindings_lookup[tuple][1]
+        try:
+            return self.keybindings_lookup[(ctx, (key, modifiers))][1]
+        except KeyError:
+            pass
 
     def getKeyBindings(self, ctx, s):
-        tuple = (ctx, s)
-        if self.keybindings.has_key(tuple):
-            return [ t for c, t in self.keybindings[tuple].keys() ]
-        return []
+        try:
+            return [ t for c, t in self.keybindings[(ctx, s)].keys() ]
+        except KeyError:
+            return []
 
     # colours used for indicating differences
     def setDifferenceColours(self, s):
@@ -537,29 +529,30 @@ class Resources:
 
     # colour resources
     def getColour(self, symbol):
-        if self.colours.has_key(symbol):
+        try:
             return self.colours[symbol]
-        if symbol not in self.unknown_colours:
+        except KeyError:
             logError(_('Warning: unknown colour "%s"') % (symbol, ))
-            self.unknown_colours.add(symbol)
-        return self.default_colour
+            self.colours[symbol] = v = Colour(0.0, 0.0, 0.0)
+            return v
 
     # float resources
     def getFloat(self, symbol):
-        if self.floats.has_key(symbol):
+        try:
             return self.floats[symbol]
-        if symbol not in self.unknown_floats:
+        except KeyError:
             logError(_('Warning: unknown float "%s"') % (symbol, ))
-            self.unknown_floats.add(symbol)
-        return 0.5
+            self.floats[symbol] = v = 0.5
+            return v
 
     # string resources
     def getString(self, symbol):
-        if self.strings.has_key(symbol):
+        try:
             return self.strings[symbol]
-        if symbol not in self.unknown_strings:
+        except KeyError:
             logError(_('Warning: unknown string "%s"') % (symbol, ))
-            self.unknown_strings.add(symbol)
+            self.strings[symbols] = v = ''
+            return v
 
     # syntax highlighting
     def getSyntaxNames(self):
@@ -583,118 +576,132 @@ class Resources:
     # parse resource files
     def parse(self, file_name):
         # only process files once
-        if file_name not in self.resource_files:
-            self.resource_files.add(file_name)
-            f = open(file_name, 'r')
-            ss = readlines(f)
-            f.close()
+        if file_name in self.resource_files:
+            return
 
-            # FIXME: improve validation
-            for i, s in enumerate(ss):
-                args = shlex.split(s, True)
-                if len(args) > 0:
-                    try:
-                        # eg. add Python syntax highlighting:
-                        #    import /usr/share/diffuse/syntax/python.syntax
-                        if args[0] == 'import' and len(args) == 2:
-                            path = os.path.expanduser(args[1])
-                            # relative paths are relative to the parsed file
-                            path = os.path.join(os.path.dirname(file_name), path)
-                            paths = glob.glob(path)
-                            if len(paths) == 0:
-                                paths = [ path ]
-                            for path in paths:
-                                # convert to absolute path so the location of
-                                # any processing errors are reported with
-                                # normalised file names
-                                self.parse(os.path.abspath(path))
-                        # eg. make Ctrl+o trigger the open_file menu item
-                        #    keybinding menu open_file Ctrl+o
-                        elif args[0] == 'keybinding' and len(args) == 4:
-                            self.setKeyBinding(args[1], args[2], args[3])
-                        # eg. set the regular background colour to white
-                        #    colour text_background 1.0 1.0 1.0
-                        elif args[0] in [ 'colour', 'color' ] and len(args) == 5:
-                            self.colours[args[1]] = Colour(float(args[2]), float(args[3]), float(args[4]))
-                        # eg. set opacity of the line_selection colour
-                        #    float line_selection_opacity 0.4
-                        elif args[0] == 'float' and len(args) == 3:
-                            self.floats[args[1]] = float(args[2])
-                        # eg. set the help browser
-                        #    string help_browser gnome-help
-                        elif args[0] == 'string' and len(args) == 3:
-                            self.strings[args[1]] = args[2]
-                            if args[1] == 'difference_colours':
-                                self.setDifferenceColours(args[2])
-                        # eg. start a syntax specification for Python
-                        #    syntax Python normal text
-                        # where 'normal' is the name of the default state and
-                        # 'text' is the classification of all characters not
-                        # explicitly matched by a syntax highlighting rule
-                        elif args[0] == 'syntax' and (len(args) == 2 or len(args) == 4):
-                            key = args[1]
-                            if len(args) == 2:
-                                # remove file pattern for a syntax specification
-                                if self.syntax_file_patterns.has_key(key):
-                                    del self.syntax_file_patterns[key]
-                                # remove magic pattern for a syntax specification
-                                if self.syntax_magic_patterns.has_key(key):
-                                    del self.syntax_magic_patterns[key]
-                                # remove a syntax specification
-                                self.current_syntax = None
-                                if self.syntaxes.has_key(key):
-                                    del self.syntaxes[key]
-                            else:
-                                self.current_syntax = SyntaxParser(args[2], args[3])
-                                self.syntaxes[key] = self.current_syntax
-                        # eg. transition from state 'normal' to 'comment' when
-                        # the pattern '#' is matched and classify the matched
-                        # characters as 'python_comment'
-                        #    syntax_pattern normal comment python_comment '#'
-                        elif args[0] == 'syntax_pattern' and self.current_syntax is not None and len(args) >= 5:
-                            flags = 0
-                            for arg in args[5:]:
-                                if arg == 'ignorecase':
-                                    flags |= re.IGNORECASE
-                                else:
-                                    raise ValueError()
-                            self.current_syntax.addPattern(args[1], args[2], args[3], re.compile(args[4], flags))
-                        # eg. default to the Python syntax rules when viewing
-                        # a file ending with '.py' or '.pyw'
-                        #    syntax_files Python '\.pyw?$'
-                        elif args[0] == 'syntax_files' and (len(args) == 2 or len(args) == 3):
-                            key = args[1]
-                            if len(args) == 2:
-                                # remove file pattern for a syntax specification
-                                if self.syntax_file_patterns.has_key(key):
-                                    del self.syntax_file_patterns[key]
-                            else:
-                                flags = 0
-                                if isWindows():
-                                    flags |= re.IGNORECASE
-                                self.syntax_file_patterns[key] = re.compile(args[2], flags)
-                        # eg. default to the Python syntax rules when viewing
-                        # a files starting with patterns like #!/usr/bin/python
-                        #    syntax_magic Python '^#!/usr/bin/python$'
-                        elif args[0] == 'syntax_magic' and len(args) > 1:
-                            key = args[1]
-                            if len(args) == 2:
-                                # remove magic pattern for a syntax specification
-                                if self.syntax_magic_patterns.has_key(key):
-                                    del self.syntax_magic_patterns[key]
-                            else:
-                                flags = 0
-                                for arg in args[3:]:
-                                    if arg == 'ignorecase':
-                                        flags |= re.IGNORECASE
-                                    else:
-                                        raise ValueError()
-                                self.syntax_magic_patterns[key] = re.compile(args[2], flags)
+        self.resource_files.add(file_name)
+        f = open(file_name, 'r')
+        ss = readlines(f)
+        f.close()
+
+        # FIXME: improve validation
+        for i, s in enumerate(ss):
+            args = shlex.split(s, True)
+            if len(args) == 0:
+                continue
+
+            try:
+                # eg. add Python syntax highlighting:
+                #    import /usr/share/diffuse/syntax/python.syntax
+                if args[0] == 'import' and len(args) == 2:
+                    path = os.path.expanduser(args[1])
+                    # relative paths are relative to the parsed file
+                    path = os.path.join(os.path.dirname(file_name), path)
+                    paths = glob.glob(path)
+                    if len(paths) == 0:
+                        paths = [ path ]
+                    for path in paths:
+                        # convert to absolute path so the location of
+                        # any processing errors are reported with
+                        # normalised file names
+                        self.parse(os.path.abspath(path))
+                # eg. make Ctrl+o trigger the open_file menu item
+                #    keybinding menu open_file Ctrl+o
+                elif args[0] == 'keybinding' and len(args) == 4:
+                    self.setKeyBinding(args[1], args[2], args[3])
+                # eg. set the regular background colour to white
+                #    colour text_background 1.0 1.0 1.0
+                elif args[0] in [ 'colour', 'color' ] and len(args) == 5:
+                    self.colours[args[1]] = Colour(float(args[2]), float(args[3]), float(args[4]))
+                # eg. set opacity of the line_selection colour
+                #    float line_selection_opacity 0.4
+                elif args[0] == 'float' and len(args) == 3:
+                    self.floats[args[1]] = float(args[2])
+                # eg. set the help browser
+                #    string help_browser gnome-help
+                elif args[0] == 'string' and len(args) == 3:
+                    self.strings[args[1]] = args[2]
+                    if args[1] == 'difference_colours':
+                        self.setDifferenceColours(args[2])
+                # eg. start a syntax specification for Python
+                #    syntax Python normal text
+                # where 'normal' is the name of the default state and
+                # 'text' is the classification of all characters not
+                # explicitly matched by a syntax highlighting rule
+                elif args[0] == 'syntax' and (len(args) == 2 or len(args) == 4):
+                    key = args[1]
+                    if len(args) == 2:
+                        # remove file pattern for a syntax specification
+                        try:
+                            del self.syntax_file_patterns[key]
+                        except KeyError:
+                            pass
+                        # remove magic pattern for a syntax specification
+                        try:
+                            del self.syntax_magic_patterns[key]
+                        except KeyError:
+                            pass
+                        # remove a syntax specification
+                        self.current_syntax = None
+                        try:
+                            del self.syntaxes[key]
+                        except KeyError:
+                            pass
+                    else:
+                        self.current_syntax = SyntaxParser(args[2], args[3])
+                        self.syntaxes[key] = self.current_syntax
+                # eg. transition from state 'normal' to 'comment' when
+                # the pattern '#' is matched and classify the matched
+                # characters as 'python_comment'
+                #    syntax_pattern normal comment python_comment '#'
+                elif args[0] == 'syntax_pattern' and self.current_syntax is not None and len(args) >= 5:
+                    flags = 0
+                    for arg in args[5:]:
+                        if arg == 'ignorecase':
+                            flags |= re.IGNORECASE
                         else:
                             raise ValueError()
-                    except: # Grr... the 're' module throws weird errors
-                    #except ValueError:
-                        logError(_('Error processing line %(line)d of %(file)s.') % { 'line': i + 1, 'file': file_name })
+                    self.current_syntax.addPattern(args[1], args[2], args[3], re.compile(args[4], flags))
+                # eg. default to the Python syntax rules when viewing
+                # a file ending with '.py' or '.pyw'
+                #    syntax_files Python '\.pyw?$'
+                elif args[0] == 'syntax_files' and (len(args) == 2 or len(args) == 3):
+                    key = args[1]
+                    if len(args) == 2:
+                        # remove file pattern for a syntax specification
+                        try:
+                            del self.syntax_file_patterns[key]
+                        except KeyError:
+                            pass
+                    else:
+                        flags = 0
+                        if isWindows():
+                            flags |= re.IGNORECASE
+                        self.syntax_file_patterns[key] = re.compile(args[2], flags)
+                # eg. default to the Python syntax rules when viewing
+                # a files starting with patterns like #!/usr/bin/python
+                #    syntax_magic Python '^#!/usr/bin/python$'
+                elif args[0] == 'syntax_magic' and len(args) > 1:
+                    key = args[1]
+                    if len(args) == 2:
+                        # remove magic pattern for a syntax specification
+                        try:
+                            del self.syntax_magic_patterns[key]
+                        except KeyError:
+                            pass
+                    else:
+                        flags = 0
+                        for arg in args[3:]:
+                            if arg == 'ignorecase':
+                                flags |= re.IGNORECASE
+                            else:
+                                raise ValueError()
+                        self.syntax_magic_patterns[key] = re.compile(args[2], flags)
+                else:
+                    raise ValueError()
+            except: # Grr... the 're' module throws weird errors
+            #except ValueError:
+                logError(_('Error processing line %(line)d of %(file)s.') % { 'line': i + 1, 'file': file_name })
 
 theResources = Resources()
 
@@ -916,11 +923,11 @@ class Preferences:
                         a = shlex.split(s, True)
                         if len(a) > 0:
                             p = a[0]
-                            if len(a) == 2 and self.bool_prefs.has_key(p):
+                            if len(a) == 2 and p in self.bool_prefs:
                                 self.bool_prefs[p] = (a[1] == 'True')
-                            elif len(a) == 2 and self.int_prefs.has_key(p):
+                            elif len(a) == 2 and p in self.int_prefs:
                                 self.int_prefs[p] = max(self.int_prefs_min[p], min(int(a[1]), self.int_prefs_max[p]))
-                            elif len(a) == 2 and self.string_prefs.has_key(p):
+                            elif len(a) == 2 and p in self.string_prefs:
                                 self.string_prefs[p] = a[1]
                             else:
                                 raise ValueError()
@@ -1138,7 +1145,7 @@ def createMenu(specs, radio=None, accel_group=None):
         if len(spec) > 0:
             if len(spec) > 7 and spec[7] is not None:
                 g, k = spec[7]
-                if not radio.has_key(g):
+                if g not in radio:
                     item = gtk.RadioMenuItem(None, spec[0])
                     radio[g] = (item, {})
                 else:
@@ -1510,7 +1517,7 @@ class VCSs:
                 r.update(m.keys())
             for k in sorted(r):
                 for m in removed, added, modified, renamed:
-                    if m.has_key(k):
+                    if k in m:
                         result.append(m[k])
             return result
 
@@ -1578,7 +1585,7 @@ class VCSs:
                 r.update(m.keys())
             for k in sorted(r):
                 for m in removed, added, modified, renamed:
-                    if m.has_key(k):
+                    if k in m:
                         result.append(m[k])
             return result
 
@@ -1759,7 +1766,7 @@ class VCSs:
                 r.update(m.keys())
             for k in sorted(r):
                 for m in removed, added, modified, renamed:
-                    if m.has_key(k):
+                    if k in m:
                         result.append(m[k])
             return result
 
@@ -1893,7 +1900,7 @@ class VCSs:
                 r.update(m.keys())
             for k in sorted(r):
                 for m in modified, renamed:
-                    if m.has_key(k):
+                    if k in m:
                         result.append(m[k])
             return result
 
@@ -2136,7 +2143,7 @@ class VCSs:
                 r.update(m.keys())
             for k in sorted(r):
                 for m in removed, added, modified, renamed:
-                    if m.has_key(k):
+                    if k in m:
                         result.append(m[k])
             return result
 
@@ -2365,13 +2372,13 @@ class VCSs:
                 m = {}
                 for k in added:
                     d, b = os.path.dirname(k), os.path.basename(k)
-                    if not m.has_key(d):
+                    if d not in m:
                         m[d] = set()
                     m[d].add(b)
                 # remove items we can easily determine to be directories
                 for k in m.keys():
                     d = os.path.dirname(k)
-                    if m.has_key(d):
+                    if d in m:
                         m[d].discard(os.path.basename(k))
                         if not m[d]:
                             del m[d]
@@ -2399,7 +2406,7 @@ class VCSs:
                 m = {}
                 for k in removed:
                     d, b = os.path.dirname(k), os.path.basename(k)
-                    if not m.has_key(d):
+                    if d not in m:
                         m[d] = set()
                     m[d].add(b)
                 removed_dir, removed = set(), {}
@@ -2438,7 +2445,7 @@ class VCSs:
                 r.update(m.keys())
             for k in sorted(r):
                 for m in removed, added, modified:
-                    if m.has_key(k):
+                    if k in m:
                         result.append(m[k])
             return result
 
@@ -2562,7 +2569,7 @@ class VCSs:
             # the user specified an invalid folder name
             pass
         # $GIT_DIR takes precedence over .git folders
-        if os.environ.has_key('GIT_DIR'):
+        if 'GIT_DIR' in os.environ:
             try:
                 d = path
                 ss = popenReadLines(d, [ prefs.getString('git_bin'), 'rev-parse', '--show-prefix' ], prefs, 'git_bash')
@@ -5558,7 +5565,7 @@ class FileDiffViewer(gtk.Table):
         if self.mode == LINE_MODE:
             # check if the keyval matches a line mode action
             action = theResources.getActionForKey('line_mode', event.keyval, mask)
-            if self._line_mode_actions.has_key(action):
+            if action in self._line_mode_actions:
                 self._line_mode_actions[action]()
                 retval = True
         elif self.mode == CHAR_MODE:
@@ -5571,7 +5578,7 @@ class FileDiffViewer(gtk.Table):
             retval = True
             # check if the keyval matches a character mode action
             action = theResources.getActionForKey('character_mode', event.keyval, mask)
-            if self._character_mode_actions.has_key(action):
+            if action in self._character_mode_actions:
                 self._character_mode_actions[action]()
             # allow CTRL-Tab for widget navigation
             elif event.keyval == gtk.keysyms.Tab and event.state & gtk.gdk.CONTROL_MASK:
@@ -5771,7 +5778,7 @@ class FileDiffViewer(gtk.Table):
         elif self.mode == ALIGN_MODE:
             # check if the keyval matches an align mode action
             action = theResources.getActionForKey('align_mode', event.keyval, mask)
-            if self._align_mode_actions.has_key(action):
+            if action in self._align_mode_actions:
                 self._align_mode_actions[action]()
                 retval = True
         self.closeUndoBlock()
@@ -7575,9 +7582,9 @@ class Diffuse(gtk.Window):
                     try:
                         a = shlex.split(s, True)
                         if len(a) > 0:
-                            if len(a) == 2 and self.bool_state.has_key(a[0]):
+                            if len(a) == 2 and a[0] in self.bool_state:
                                 self.bool_state[a[0]] = (a[1] == 'True')
-                            elif len(a) == 2 and self.int_state.has_key(a[0]):
+                            elif len(a) == 2 and a[0] in self.int_state:
                                 self.int_state[a[0]] = int(a[1])
                             else:
                                 raise ValueError()
@@ -7715,7 +7722,7 @@ class Diffuse(gtk.Window):
         t = self.radio_menus.get('syntax', None)
         if t is not None:
             t = t[1]
-            if t.has_key(s):
+            if s in t:
                 self.menu_update_depth += 1
                 t[s].set_active(True)
                 self.menu_update_depth -= 1
