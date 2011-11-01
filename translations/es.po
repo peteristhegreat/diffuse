@@ -741,21 +741,6 @@ msgstr "Control de versión"
 msgid "Warn me when closing a tab will quit %s"
 msgstr "Avísame sí cerrar la ultima solapa cierres la aplicación %s"
 
-#: ../src/usr/bin/diffuse:543
-#, python-format
-msgid "Warning: unknown colour \"%s\""
-msgstr "Advertencia: color desconocido \"%s\""
-
-#: ../src/usr/bin/diffuse:552
-#, python-format
-msgid "Warning: unknown float \"%s\""
-msgstr "Advertencia: coma flotante desconocido \"%s\""
-
-#: ../src/usr/bin/diffuse:561
-#, python-format
-msgid "Warning: unknown string \"%s\""
-msgstr "Advertencia: frase desconocido \"%s\""
-
 #: ../src/usr/bin/diffuse:7488
 #, python-format
 msgid "_About %s..."

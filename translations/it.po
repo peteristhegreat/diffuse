@@ -742,21 +742,6 @@ msgstr "Controllo di versione"
 msgid "Warn me when closing a tab will quit %s"
 msgstr "Avvisami se chiudendo una scheda anche %s verrà chiuso"
 
-#: ../src/usr/bin/diffuse:543
-#, python-format
-msgid "Warning: unknown colour \"%s\""
-msgstr "Attenzione: colore \"%s\" sconosciuto"
-
-#: ../src/usr/bin/diffuse:552
-#, python-format
-msgid "Warning: unknown float \"%s\""
-msgstr "Attenzione: float \"%s\" sconosciuto"
-
-#: ../src/usr/bin/diffuse:561
-#, python-format
-msgid "Warning: unknown string \"%s\""
-msgstr "Attenzione: stringa \"%s\" sconosciuta"
-
 #: ../src/usr/bin/diffuse:7488
 #, python-format
 msgid "_About %s..."

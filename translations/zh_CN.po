@@ -737,21 +737,6 @@ msgstr "版本控制"
 msgid "Warn me when closing a tab will quit %s"
 msgstr "当关闭标签会退出%s的时候提醒我"
 
-#: ../src/usr/bin/diffuse:542
-#, python-format
-msgid "Warning: unknown colour \"%s\""
-msgstr "警告：未知的颜色\"%s\""
-
-#: ../src/usr/bin/diffuse:551
-#, python-format
-msgid "Warning: unknown float \"%s\""
-msgstr "警告：未知的浮点数\"%s\""
-
-#: ../src/usr/bin/diffuse:560
-#, python-format
-msgid "Warning: unknown string \"%s\""
-msgstr "警告：未知字符串\"%s\""
-
 #: ../src/usr/bin/diffuse:7019
 #, python-format
 msgid "_About %s..."

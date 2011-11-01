@@ -775,21 +775,6 @@ msgstr "バージョンコントロール"
 msgid "Warn me when closing a tab will quit %s"
 msgstr "閉じるとき、タブが %s を終了すると警告"
 
-#: ../src/usr/bin/diffuse:543
-#, python-format
-msgid "Warning: unknown colour \"%s\""
-msgstr "警告: 未知の色「%s」"
-
-#: ../src/usr/bin/diffuse:552
-#, python-format
-msgid "Warning: unknown float \"%s\""
-msgstr "警告: 未知の浮動小数点数「%s」"
-
-#: ../src/usr/bin/diffuse:561
-#, python-format
-msgid "Warning: unknown string \"%s\""
-msgstr "警告: 未知の文字列「%s」"
-
 #: ../src/usr/bin/diffuse:7488
 #, python-format
 msgid "_About %s..."

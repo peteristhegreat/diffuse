@@ -782,21 +782,6 @@ msgstr "Контроль Версий"
 msgid "Warn me when closing a tab will quit %s"
 msgstr "Предупреждение, когда закрытие вкладки закроет %s"
 
-#: ../src/usr/bin/diffuse:543
-#, python-format
-msgid "Warning: unknown colour \"%s\""
-msgstr "Внимание: неизвестный цвет \"%s\""
-
-#: ../src/usr/bin/diffuse:552
-#, python-format
-msgid "Warning: unknown float \"%s\""
-msgstr "Внимание: неизвестное плавающее значение \"%s\""
-
-#: ../src/usr/bin/diffuse:561
-#, python-format
-msgid "Warning: unknown string \"%s\""
-msgstr "Внимание: неизвестная строка \"%s\""
-
 #: ../src/usr/bin/diffuse:7490
 #, python-format
 msgid "_About %s..."

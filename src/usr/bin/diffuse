@@ -532,7 +532,7 @@ class Resources:
         try:
             return self.colours[symbol]
         except KeyError:
-            logError(_('Warning: unknown colour "%s"') % (symbol, ))
+            logDebug('Warning: unknown colour "%s"' % (symbol, ))
             self.colours[symbol] = v = Colour(0.0, 0.0, 0.0)
             return v
 
@@ -541,7 +541,7 @@ class Resources:
         try:
             return self.floats[symbol]
         except KeyError:
-            logError(_('Warning: unknown float "%s"') % (symbol, ))
+            logDebug('Warning: unknown float "%s"' % (symbol, ))
             self.floats[symbol] = v = 0.5
             return v
 
@@ -550,7 +550,7 @@ class Resources:
         try:
             return self.strings[symbol]
         except KeyError:
-            logError(_('Warning: unknown string "%s"') % (symbol, ))
+            logDebug('Warning: unknown string "%s"' % (symbol, ))
             self.strings[symbols] = v = ''
             return v
 

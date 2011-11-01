@@ -769,21 +769,6 @@ msgstr "버전 컨트롤"
 msgid "Warn me when closing a tab will quit %s"
 msgstr "탭을 닫을때 %s 종료 및 경고"
 
-#: ../src/usr/bin/diffuse:543
-#, python-format
-msgid "Warning: unknown colour \"%s\""
-msgstr "경고: 알수 없는 색깔「%s」"
-
-#: ../src/usr/bin/diffuse:552
-#, python-format
-msgid "Warning: unknown float \"%s\""
-msgstr "경고: 알수 없는 부동 소수점「%s」"
-
-#: ../src/usr/bin/diffuse:561
-#, python-format
-msgid "Warning: unknown string \"%s\""
-msgstr "경고: 알수 없는 문자열「%s」"
-
 #: ../src/usr/bin/diffuse:7488
 #, python-format
 msgid "_About %s..."

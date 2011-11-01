@@ -747,21 +747,6 @@ msgstr "Versionsverwaltung"
 msgid "Warn me when closing a tab will quit %s"
 msgstr "Warnen, wenn schließen des Tabs %s beendet"
 
-#: ../src/usr/bin/diffuse:543
-#, python-format
-msgid "Warning: unknown colour \"%s\""
-msgstr "Warnung: Unbekannte Farbe \"%s\""
-
-#: ../src/usr/bin/diffuse:552
-#, python-format
-msgid "Warning: unknown float \"%s\""
-msgstr "Warnung: Unbekannter Gleitkommawert \"%s\""
-
-#: ../src/usr/bin/diffuse:561
-#, python-format
-msgid "Warning: unknown string \"%s\""
-msgstr "Warnung: Unbekannte Zeichenkette \"%s\""
-
 #: ../src/usr/bin/diffuse:7488
 #, python-format
 msgid "_About %s..."
