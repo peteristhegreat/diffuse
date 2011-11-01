@@ -18,7 +18,7 @@ Diffuse
 Diffuse
 è in grado di confrontare uno a fianco all\*(Aqaltro un qualsiasi numero di file e fornisce all\*(Aqutente la possibilità di correggere manualmente la corrispondenza fra le righe e di modificare i file\&.
 Diffuse
-è anche in grado di recuperare le revisioni dei file dai repository Bazaar, CVS, Darcs, Git, Mercurial, Monotone, RCS, Subversion, e SVK per confrontarle e unirle\&.
+è anche in grado di recuperare le revisioni dei file dai repository Bazaar, CVS, Darcs, Git, Mercurial, Monotone, RCS, Subversion e SVK per confrontarle e unirle\&.
 .SH "OPZIONI"
 .SS "Opzioni di aiuto"
 .PP
@@ -53,11 +53,9 @@ Legge i comandi di inizializzazione esclusivamente dal file
 .PP
 \fB\-c\fR, \fB\-\-commit\fR \fIrev\fR
 .RS 4
-Include in una scheda di confronto le revisioni
-\fIrev \- 1\fR
-e
+Apre delle schede di confronto separate per tutti i file interessati dal commit
 \fIrev\fR
-del file successivo indicato negli argomenti della linea di comando\&.
+dai restanti percorsi indicati tra gli argomenti della linea di comando\&.
 .RE
 .PP
 \fB\-D\fR, \fB\-\-close\-if\-same\fR
@@ -81,12 +79,12 @@ invece del nome del file\&.
 .PP
 \fB\-m\fR, \fB\-\-modified\fR
 .RS 4
-Apre tutti i file modificati dai restanti percorsi indicati tra gli argomenti della linea di comando in schede di confronto separate\&.
+Apre delle schede di confronto separate per tutti gli elementi modificati dai restanti percorsi indicati tra gli argomenti della linea di comando\&.
 .RE
 .PP
 \fB\-r\fR, \fB\-\-revision\fR \fIrev\fR
 .RS 4
-Include nella scheda di comparazione dei file la revisione
+Include nella scheda di confronto dei file la revisione
 \fIrev\fR
 del file successivo contenuto negli argomenti della linea di comando\&.
 .RE
@@ -448,6 +446,15 @@ File \(-> Apri file modificati\&.\&.\&.
 .sp
 Predefinito:
 Shift+Ctrl+O
+.RE
+.PP
+\fBopen_commit\fR
+.RS 4
+Voce di menu
+File \(-> Apri commit\&.\&.\&.
+.sp
+Predefinito:
+Shift+Ctrl+T
 .RE
 .PP
 \fBreload_file\fR
@@ -1676,7 +1683,7 @@ su Microsoft Windows)
 .PP
 ~/\&.local/share/diffuse/state
 .RS 4
-Dati persistenti tra le sessioni (%HOME%\e\&.local\eshare\ediffuse\estate
+dati persistenti tra le sessioni (%HOME%\e\&.local\eshare\ediffuse\estate
 su Microsoft Windows)
 .RE
 .SH "AUTORE"
