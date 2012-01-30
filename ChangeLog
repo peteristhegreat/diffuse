@@ -1,3 +1,5 @@
+- added syntax highlighting for Erlang files
+
 Diffuse 0.4.6 - 2011-11-02
 - added support for Subversion 1.7
 - added "Open Commit..." menu item
