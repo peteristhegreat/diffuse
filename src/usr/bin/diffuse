@@ -152,15 +152,16 @@ whitespace = ' \t\n\r\x0b\x0c'
 # associate our icon with all of our windows
 if __name__ == '__main__':
     # handle platform specific icon
-    # icon will be provided by py2exe on Windows
-    if not isWindows():
+    if isWindows():
+        iconpath = os.path.join(bin_dir, 'diffuse.ico')
+    else:
         iconpath = os.path.join(bin_dir, '../share/pixmaps/diffuse.png')
-        if os.path.isfile(iconpath):
-            gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(iconpath))
-        else:
-            # this can occur if we are run without a proper install
-            # it is just cosmetic, don't bother the user
-            logDebug('Missing icon %s' % (iconpath, ))
+    if os.path.isfile(iconpath):
+        gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(iconpath))
+    else:
+        # this can occur if we are run without a proper install
+        # it is just cosmetic, don't bother the user
+        logDebug('Missing icon %s' % (iconpath, ))
 
 # convenience class for displaying a message dialogue
 class MessageDialog(gtk.MessageDialog):

@@ -118,6 +118,9 @@ for p in glob.glob('..\\src\\usr\\share\\diffuse\\syntax\\*.syntax'):
     copyFile(p, os.path.join('dist\\syntax', os.path.basename(p)), True)
 copyFile('diffuserc', 'dist\\diffuserc')
 
+# application icon
+copyFile('diffuse.ico', 'dist\\diffuse.ico')
+
 # translations
 mkdir('dist\\share\\locale')
 locale_dir = os.path.join(gtk_dir, 'share\\locale')
