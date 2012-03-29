@@ -315,12 +315,14 @@
 
     <para>
       Use the <menuchoice><guimenu>File</guimenu><guimenuitem>New 2-Way File
-      Merge</guimenuitem></menuchoice> and
+      Merge</guimenuitem></menuchoice>,
       <menuchoice><guimenu>File</guimenu><guimenuitem>New 3-Way File
+      Merge</guimenuitem></menuchoice>, and
+      <menuchoice><guimenu>File</guimenu><guimenuitem>New N-Way File
       Merge</guimenuitem></menuchoice> menu items to create additional tabs
       for comparing text files.  File names and revisions can be specified
-      either in the command line arguments used to invoke <application>&app;</application> or in fields
-      on the Open File dialogue.
+      either in the command line arguments used to invoke
+      <application>&app;</application> or in fields on the Open File dialogue.
     </para>
 
     <para>
@@ -706,6 +708,14 @@
             <listitem>
               <para><menuchoice><guimenu>File</guimenu><guimenuitem>New 3-Way File Merge</guimenuitem></menuchoice> menu item</para>
               <para>Default: <literal>Ctrl+3</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>new_n_way_file_merge</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>File</guimenu><guimenuitem>New N-Way File Merge</guimenuitem></menuchoice> menu item</para>
+              <para>Default: <literal>Ctrl+4</literal></para>
             </listitem>
           </varlistentry>
 

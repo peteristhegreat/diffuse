@@ -304,6 +304,7 @@ class Resources:
         set_binding('menu', 'save_all', 'Shift+Ctrl+S')
         set_binding('menu', 'new_2_way_file_merge', 'Ctrl+2')
         set_binding('menu', 'new_3_way_file_merge', 'Ctrl+3')
+        set_binding('menu', 'new_n_way_file_merge', 'Ctrl+4')
         set_binding('menu', 'close_tab', 'Ctrl+w')
         set_binding('menu', 'undo_close_tab', 'Shift+Ctrl+W')
         set_binding('menu', 'quit', 'Ctrl+q')
@@ -1061,9 +1062,7 @@ class Preferences:
                             button = FontButton()
                             button.set_font_name(self.string_prefs[tpl[1]])
                         else:
-                            button = gtk.SpinButton()
-                            button.set_range(tpl[4], tpl[5])
-                            button.set_value(self.int_prefs[tpl[1]])
+                            button = gtk.SpinButton(gtk.Adjustment(self.int_prefs[tpl[1]], tpl[4], tpl[5], 1))
                         widgets[tpl[1]] = button
                         entry.pack_start(button, False, False, 0)
                         button.show()
@@ -6653,21 +6652,22 @@ class FileChooserDialog(gtk.FileChooserDialog):
             return unicode(s, 'utf_8')
 
 # dialogue used to search for text
-class GoToLineDialog(gtk.Dialog):
-    def __init__(self, parent):
-        gtk.Dialog.__init__(self, _('Go To Line...'), parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+class NumericDialog(gtk.Dialog):
+    def __init__(self, parent, title, text, val, lower, upper, step=1, page=0):
+        gtk.Dialog.__init__(self, title, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
 
         vbox = gtk.VBox()
         vbox.set_border_width(10)
 
         hbox = gtk.HBox()
-        label = gtk.Label(_('Line Number: '))
+        label = gtk.Label(text)
         hbox.pack_start(label, False, False, 0)
         label.show()
-        self.entry = entry = gtk.Entry()
-        entry.connect('activate', self.entry_cb)
-        hbox.pack_start(entry, True, True, 0)
-        entry.show()
+        adj = gtk.Adjustment(val, lower, upper, step, page)
+        self.button = button = gtk.SpinButton(adj)
+        button.connect('activate', self.button_cb)
+        hbox.pack_start(button, True, True, 0)
+        button.show()
 
         vbox.pack_start(hbox, True, True, 0)
         hbox.show()
@@ -6675,7 +6675,7 @@ class GoToLineDialog(gtk.Dialog):
         self.vbox.pack_start(vbox, False, False, 0)
         vbox.show()
 
-    def entry_cb(self, widget):
+    def button_cb(self, widget):
         self.response(gtk.RESPONSE_ACCEPT)
 
 # establish callback for the about dialog's link to Diffuse's web site
@@ -7266,17 +7266,12 @@ class Diffuse(gtk.Window):
         # callback for go to line menu item
         def go_to_line_cb(self, widget, data):
             parent = self.get_toplevel()
-            dialog = GoToLineDialog(parent)
+            dialog = NumericDialog(parent, _('Go To Line...'), _('Line Number: '), 1, 1, self.panes[self.current_pane].max_line_number + 1)
             okay = (dialog.run() == gtk.RESPONSE_ACCEPT)
-            i = dialog.entry.get_text().strip()
+            i = dialog.button.get_value_as_int()
             dialog.destroy()
             if okay:
-                try:
-                    self.go_to_line(int(i))
-                except ValueError:
-                    m = MessageDialog(parent, gtk.MESSAGE_ERROR, _('Error parsing line number.'))
-                    m.run()
-                    m.destroy()
+                self.go_to_line(i)
 
         # callback to receive notification when the name of a file changes
         def swapped_panes_cb(self, widget, f_dst, f_src):
@@ -7412,8 +7407,9 @@ class Diffuse(gtk.Window):
                      [_('Save File _As...'), self.save_file_as_cb, None, gtk.STOCK_SAVE_AS, 'save_file_as'],
                      [_('Save A_ll'), self.save_all_cb, None, None, 'save_all'],
                      [],
-                     [_('New _2-Way File Merge'), self.new_2way_file_merge_cb, None, DIFFUSE_STOCK_NEW_2WAY_MERGE, 'new_2_way_file_merge'],
-                     [_('New _3-Way File Merge'), self.new_3way_file_merge_cb, None, DIFFUSE_STOCK_NEW_3WAY_MERGE, 'new_3_way_file_merge'],
+                     [_('New _2-Way File Merge'), self.new_2_way_file_merge_cb, None, DIFFUSE_STOCK_NEW_2WAY_MERGE, 'new_2_way_file_merge'],
+                     [_('New _3-Way File Merge'), self.new_3_way_file_merge_cb, None, DIFFUSE_STOCK_NEW_3WAY_MERGE, 'new_3_way_file_merge'],
+                     [_('New _N-Way File Merge...'), self.new_n_way_file_merge_cb, None, None, 'new_n_way_file_merge'],
                      [],
                      [_('_Close Tab'), self.close_tab_cb, None, gtk.STOCK_CLOSE, 'close_tab'],
                      [_('_Undo Close Tab'), self.undo_close_tab_cb, None, None, 'undo_close_tab'],
@@ -7509,8 +7505,8 @@ class Diffuse(gtk.Window):
         # create button bar
         hbox = gtk.HBox()
         appendButtons(hbox, gtk.ICON_SIZE_LARGE_TOOLBAR, [
-           [ DIFFUSE_STOCK_NEW_2WAY_MERGE, self.new_2way_file_merge_cb, None, _('New 2-Way File Merge') ],
-           [ DIFFUSE_STOCK_NEW_3WAY_MERGE, self.new_3way_file_merge_cb, None, _('New 3-Way File Merge') ],
+           [ DIFFUSE_STOCK_NEW_2WAY_MERGE, self.new_2_way_file_merge_cb, None, _('New 2-Way File Merge') ],
+           [ DIFFUSE_STOCK_NEW_3WAY_MERGE, self.new_3_way_file_merge_cb, None, _('New 3-Way File Merge') ],
            [],
            [ gtk.STOCK_EXECUTE, self.button_cb, 'realign_all', _('Realign All') ],
            [ gtk.STOCK_GOTO_TOP, self.button_cb, 'first_difference', _('First Difference') ],
@@ -7995,16 +7991,28 @@ class Diffuse(gtk.Window):
             self.notebook.get_nth_page(i).save_all_cb(widget, data)
 
     # callback for the new 2-way file merge menu item
-    def new_2way_file_merge_cb(self, widget, data):
+    def new_2_way_file_merge_cb(self, widget, data):
         viewer = self.newFileDiffViewer(2)
         self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
         viewer.grab_focus()
 
     # callback for the new 3-way file merge menu item
-    def new_3way_file_merge_cb(self, widget, data):
+    def new_3_way_file_merge_cb(self, widget, data):
         viewer = self.newFileDiffViewer(3)
         self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
         viewer.grab_focus()
+
+    # callback for the new n-way file merge menu item
+    def new_n_way_file_merge_cb(self, widget, data):
+        parent = self.get_toplevel()
+        dialog = NumericDialog(parent, _('New N-Way File Merge...'), _('Number of panes: '), 4, 2, 16)
+        okay = (dialog.run() == gtk.RESPONSE_ACCEPT)
+        npanes = dialog.button.get_value_as_int()
+        dialog.destroy()
+        if okay:
+            viewer = self.newFileDiffViewer(npanes)
+            self.notebook.set_current_page(self.notebook.get_n_pages() - 1)
+            viewer.grab_focus()
 
     # callback for the close tab menu item
     def close_tab_cb(self, widget, data):
