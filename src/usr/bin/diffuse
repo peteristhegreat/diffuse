@@ -198,10 +198,7 @@ class Colour:
 
     # over operator
     def over(self, other):
-        a = self.alpha
-        c = self + other * (1 - a)
-        c.alpha = 1 - (1 - a) * (1 - other.alpha)
-        return c
+        return self + other * (1 - self.alpha)
 
 # class to build and run a finite state machine for identifying syntax tokens
 class SyntaxParser:
