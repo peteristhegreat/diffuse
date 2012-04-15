@@ -1102,8 +1102,16 @@ class Preferences:
 
     # attempt to convert a string to unicode from an unknown encoding
     def convertToUnicode(self, s):
+        # a BOM is required for autodetecting UTF16 and UTF32
+        magic = { 'utf16': [ '\xfe\xff', '\xff\xfe' ],
+                  'utf32': [ '\x00\x00\xfe\xff', '\xff\xfe\x00\x00' ] }
         for encoding in self._getDefaultEncodings():
             try:
+                for m in magic.get(encoding.lower().replace('-', '').replace('_', ''), [ '' ]):
+                    if s.startswith(m):
+                        break
+                else:
+                    continue
                 return unicode(s, encoding), encoding
             except (UnicodeDecodeError, LookupError):
                 pass
