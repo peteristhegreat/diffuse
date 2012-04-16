@@ -819,7 +819,7 @@ class Preferences:
             [ 'List',
               [ 'Font', 'display_font', 'Monospace 10', _('Font') ],
               [ 'Integer', 'display_tab_width', 8, _('Tab width'), 1, 1024 ],
-              [ 'Boolean', 'display_show_right_margin', False, _('Show right margin') ],
+              [ 'Boolean', 'display_show_right_margin', True, _('Show right margin') ],
               [ 'Integer', 'display_right_margin', 80, _('Right margin'), 1, 8192 ],
               [ 'Boolean', 'display_show_line_numbers', True, _('Show line numbers') ],
               [ 'Boolean', 'display_show_whitespace', False, _('Show white space characters') ],
@@ -839,7 +839,7 @@ class Preferences:
             ],
             _('Editor'),
             [ 'List',
-              [ 'Boolean', 'editor_auto_indent', False, _('Auto indent') ],
+              [ 'Boolean', 'editor_auto_indent', True, _('Auto indent') ],
               [ 'Boolean', 'editor_expand_tabs', False, _('Expand tabs to spaces') ],
               [ 'Integer', 'editor_soft_tab_width', 8, _('Soft tab width'), 1, 1024 ]
             ],
