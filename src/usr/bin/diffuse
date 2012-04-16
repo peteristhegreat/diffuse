@@ -791,12 +791,12 @@ class Preferences:
         else:
             svk_bin = 'svk'
 
-        auto_detect_codecs = [ 'utf_8', 'latin_1' ]
+        auto_detect_codecs = [ 'utf_8', 'utf_16', 'latin_1' ]
         e = norm_encoding(sys.getfilesystemencoding())
         if e not in auto_detect_codecs:
             # insert after UTF-8 as the default encoding may prevent UTF-8 from
             # being tried
-            auto_detect_codecs.insert(1, e)
+            auto_detect_codecs.insert(2, e)
 
         # self.template describes how preference dialogue layout
         #
@@ -1103,8 +1103,8 @@ class Preferences:
     # attempt to convert a string to unicode from an unknown encoding
     def convertToUnicode(self, s):
         # a BOM is required for autodetecting UTF16 and UTF32
-        magic = { 'utf16': [ '\xfe\xff', '\xff\xfe' ],
-                  'utf32': [ '\x00\x00\xfe\xff', '\xff\xfe\x00\x00' ] }
+        magic = { 'utf16': [ codecs.BOM_UTF16_BE, codecs.BOM_UTF16_LE ],
+                  'utf32': [ codecs.BOM_UTF32_BE, codecs.BOM_UTF32_LE ] }
         for encoding in self._getDefaultEncodings():
             try:
                 for m in magic.get(encoding.lower().replace('-', '').replace('_', ''), [ '' ]):
