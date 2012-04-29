@@ -7208,18 +7208,17 @@ class Diffuse(gtk.Window):
                 # convert the text to the output encoding
                 # refresh the lines to contain new objects with updated line
                 # numbers and no local edits
-                ss, encoded = [], []
+                ss = []
                 for line in self.panes[f].lines:
                     if line is not None:
                         s = line.getText()
                         if s is not None:
                             ss.append(s)
-                            encoded.append(codecs.encode(s, encoding))
+                encoded = codecs.encode(u''.join(ss), encoding)
 
                 # write file
                 fd = open(name, 'wb')
-                for s in encoded:
-                    fd.write(s)
+                fd.write(encoded)
                 fd.close()
 
                 # make the edits look permanent
