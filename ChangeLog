@@ -1,3 +1,4 @@
+- added Miś Uszatek's Polish translation
 - improved auto-detection of utf_16 and utf_32
 - added "New N-Way File Merge..." menu item
 - added syntax highlighting for Erlang files
