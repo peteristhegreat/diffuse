@@ -1,8 +1,8 @@
 [CustomMessages]
 ;cp1250
-ToolName=Diffuse NarzÄ™dzie Scalania
-UninstallTool=Odinstaluj NarzÄ™dzie Scalania Diffuse
-OpenWithTool=OtwÃ³rz za pomocÄ… narzÄ™dzia scalania Diffuse
-MainFiles=GÅ‚Ã³wne Pliki
-ShellIntegration=Integracja z PowÅ‚okÄ… Windows
-AddToPath=Dodaj Å›cieÅ¼kÄ™ instalacji do Å›cieÅ¼ki wyszukiwania
+ToolName=Diffuse Narzêdzie Scalania
+UninstallTool=Odinstaluj Narzêdzie Scalania Diffuse
+OpenWithTool=Otwórz za pomoc¹ narzêdzia scalania Diffuse
+MainFiles=G³ówne Pliki
+ShellIntegration=Integracja z Pow³ok¹ Windows
+AddToPath=Dodaj œcie¿kê instalacji do œcie¿ki wyszukiwania
