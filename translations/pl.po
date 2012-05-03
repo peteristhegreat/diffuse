@@ -314,11 +314,11 @@ msgstr "Idź Do Linii..."
 
 #: ../src/usr/bin/diffuse:830
 msgid "Ignore blank line differences"
-msgstr "Ignoruj ​​różnice pustych linii"
+msgstr "Ignoruj różnice pustych linii"
 
 #: ../src/usr/bin/diffuse:838
 msgid "Ignore blank lines"
-msgstr "Ignoruj ​​puste wiersze"
+msgstr "Ignoruj puste wiersze"
 
 #: ../src/usr/bin/diffuse:835
 msgid "Ignore case"
@@ -331,7 +331,7 @@ msgstr "Ignoruj różnice w wielkość liter"
 #: ../src/usr/bin/diffuse:829
 #: ../src/usr/bin/diffuse:837
 msgid "Ignore changes to white space"
-msgstr "Ignoruj ​​zmiany w spacji"
+msgstr "Ignoruj zmiany w spacji"
 
 #: ../src/usr/bin/diffuse:839
 msgid "Ignore end of line characters"
@@ -343,11 +343,11 @@ msgstr "Ignoruj różnice na końcu linii"
 
 #: ../src/usr/bin/diffuse:836
 msgid "Ignore white space"
-msgstr "Ignoruj ​​spacje"
+msgstr "Ignoruj spacje"
 
 #: ../src/usr/bin/diffuse:828
 msgid "Ignore white space differences"
-msgstr "Ignoruj ​​różnice spacji"
+msgstr "Ignoruj różnice spacji"
 
 #: ../src/usr/bin/diffuse:4742
 msgid "Isolate"
