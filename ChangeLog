@@ -1,7 +1,7 @@
 - added Miś Uszatek's Polish translation
 - improved auto-detection of utf_16 and utf_32
 - added "New N-Way File Merge..." menu item
-- added syntax highlighting for Erlang files
+- added syntax highlighting for Erlang and OpenCL files
 
 Diffuse 0.4.6 - 2011-11-02
 - added support for Subversion 1.7
