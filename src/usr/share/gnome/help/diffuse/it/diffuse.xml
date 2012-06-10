@@ -620,7 +620,7 @@
             <term><userinput>first_difference</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Prima differenza</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Shift+Ctrl+Up</literal></para>
+              <para>Predefinito: <literal>Shift+Meta+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -628,7 +628,7 @@
             <term><userinput>previous_difference</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Differenza precedente</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Ctrl+Up</literal></para>
+              <para>Predefinito: <literal>Meta+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -636,7 +636,7 @@
             <term><userinput>next_difference</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Differenza successiva</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Ctrl+Down</literal></para>
+              <para>Predefinito: <literal>Meta+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -644,7 +644,7 @@
             <term><userinput>last_difference</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Ultima differenza</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Shift+Ctrl+Down</literal></para>
+              <para>Predefinito: <literal>Shift+Meta+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -796,7 +796,7 @@
             <term><userinput>copy_selection_right</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia selezione a destra</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Shift+Ctrl+Right</literal></para>
+              <para>Predefinito: <literal>Shift+Meta+Right</literal></para>
             </listitem>
           </varlistentry>
 
@@ -804,7 +804,7 @@
             <term><userinput>copy_selection_left</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia selezione a sinistra</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Shift+Ctrl+Left</literal></para>
+              <para>Predefinito: <literal>Shift+Meta+Left</literal></para>
             </listitem>
           </varlistentry>
 
@@ -812,7 +812,7 @@
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia sinistra nella selezione</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Ctrl+Right</literal></para>
+              <para>Predefinito: <literal>Meta+Right</literal></para>
             </listitem>
           </varlistentry>
 
@@ -820,7 +820,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia destra nella selezione</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Ctrl+Left</literal></para>
+              <para>Predefinito: <literal>Meta+Left</literal></para>
             </listitem>
           </varlistentry>
 

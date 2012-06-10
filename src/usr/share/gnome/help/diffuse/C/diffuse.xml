@@ -883,7 +883,7 @@
             <term><userinput>first_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>First Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Shift+Ctrl+Up</literal></para>
+              <para>Default: <literal>Shift+Meta+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -891,7 +891,7 @@
             <term><userinput>previous_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Previous Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Ctrl+Up</literal></para>
+              <para>Default: <literal>Meta+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -899,7 +899,7 @@
             <term><userinput>next_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Next Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Ctrl+Down</literal></para>
+              <para>Default: <literal>Meta+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -907,7 +907,7 @@
             <term><userinput>last_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Last Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Shift+Ctrl+Down</literal></para>
+              <para>Default: <literal>Shift+Meta+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1059,7 +1059,7 @@
             <term><userinput>copy_selection_right</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Copy Selection Right</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Shift+Ctrl+Right</literal></para>
+              <para>Default: <literal>Shift+Meta+Right</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1067,7 +1067,7 @@
             <term><userinput>copy_selection_left</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Copy Selection Left</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Shift+Ctrl+Left</literal></para>
+              <para>Default: <literal>Shift+Meta+Left</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1075,7 +1075,7 @@
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Copy Left Into Selection</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Ctrl+Right</literal></para>
+              <para>Default: <literal>Meta+Right</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1083,7 +1083,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Merge</guimenu><guimenuitem>Copy Right Into Selection</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Ctrl+Left</literal></para>
+              <para>Default: <literal>Meta+Left</literal></para>
             </listitem>
           </varlistentry>
 

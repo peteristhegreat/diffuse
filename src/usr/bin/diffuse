@@ -319,10 +319,10 @@ class Resources:
         set_binding('menu', 'go_to_line', 'Shift+Ctrl+L')
         set_binding('menu', 'realign_all', 'Ctrl+l')
         set_binding('menu', 'isolate', 'Ctrl+i')
-        set_binding('menu', 'first_difference', 'Shift+Ctrl+Up')
-        set_binding('menu', 'previous_difference', 'Ctrl+Up')
-        set_binding('menu', 'next_difference', 'Ctrl+Down')
-        set_binding('menu', 'last_difference', 'Shift+Ctrl+Down')
+        set_binding('menu', 'first_difference', 'Shift+Meta+Up')
+        set_binding('menu', 'previous_difference', 'Meta+Up')
+        set_binding('menu', 'next_difference', 'Meta+Down')
+        set_binding('menu', 'last_difference', 'Shift+Meta+Down')
         set_binding('menu', 'first_tab', 'Shift+Ctrl+Page_Up')
         set_binding('menu', 'previous_tab', 'Ctrl+Page_Up')
         set_binding('menu', 'next_tab', 'Ctrl+Page_Down')
@@ -341,10 +341,10 @@ class Resources:
         set_binding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
         set_binding('menu', 'convert_to_mac', 'Shift+Ctrl+C')
         set_binding('menu', 'convert_to_unix', 'Ctrl+e')
-        set_binding('menu', 'copy_selection_right', 'Shift+Ctrl+Right')
-        set_binding('menu', 'copy_selection_left', 'Shift+Ctrl+Left')
-        set_binding('menu', 'copy_left_into_selection', 'Ctrl+Right')
-        set_binding('menu', 'copy_right_into_selection', 'Ctrl+Left')
+        set_binding('menu', 'copy_selection_right', 'Shift+Meta+Right')
+        set_binding('menu', 'copy_selection_left', 'Shift+Meta+Left')
+        set_binding('menu', 'copy_left_into_selection', 'Meta+Right')
+        set_binding('menu', 'copy_right_into_selection', 'Meta+Left')
         set_binding('menu', 'merge_from_left_then_right', 'Ctrl+m')
         set_binding('menu', 'merge_from_right_then_left', 'Shift+Ctrl+M')
         set_binding('menu', 'help_contents', 'F1')
@@ -469,6 +469,8 @@ class Resources:
                 modifiers |= gtk.gdk.SHIFT_MASK
             elif token == 'Ctrl':
                 modifiers |= gtk.gdk.CONTROL_MASK
+            elif token == 'Meta':
+                modifiers |= gtk.gdk.META_MASK
             elif len(token) == 0 or token[0] == '_':
                 raise ValueError()
             else:
@@ -2895,13 +2897,17 @@ ALIGN_MODE = 2
 # mapping to column width of a character (tab will never be in this map)
 char_width_cache = {}
 
+ALPHANUMERIC_CLASS = 0
+WHITESPACE_CLASS = 1
+OTHER_CLASS = 2
+
 # maps similar types of characters to a group
 def getCharacterClass(c):
     if c.isalnum() or c == u'_':
-        return 0
+        return ALPHANUMERIC_CLASS
     elif c.isspace():
-        return 1
-    return 2
+        return WHITESPACE_CLASS
+    return OTHER_CLASS
 
 # longest common subsequence of unique elements common to 'a' and 'b'
 def __patience_subsequence(a, b):
@@ -5640,25 +5646,35 @@ class FileDiffViewer(gtk.Table):
                     i = self.current_line
                     j = self.getMaxCharPosition(i)
                 self.setCurrentChar(i, j, si, sj)
-            # cursor left navigation
-            elif event.keyval == gtk.keysyms.Left:
+            # cursor left and cursor right navigation
+            elif event.keyval == gtk.keysyms.Left or event.keyval == gtk.keysyms.Right:
                 i = self.current_line
                 j = self.current_char
-                if j > 0:
-                    j -= 1
-                elif i > 0:
-                    i -= 1
-                    j = self.getMaxCharPosition(i)
-                self.setCurrentChar(i, j, si, sj)
-            # cursor right navigation
-            elif event.keyval == gtk.keysyms.Right:
-                i = self.current_line
-                j = self.current_char
-                if j < self.getMaxCharPosition(i):
-                    j += 1
-                elif i < len(self.panes[f].lines):
-                    i += 1
-                    j = 0
+                while True:
+                    if event.keyval == gtk.keysyms.Left:
+                        if j > 0:
+                            j -= 1
+                        elif i > 0:
+                            i -= 1
+                            j = self.getMaxCharPosition(i)
+                        else:
+                            break
+                    else:
+                        if j < self.getMaxCharPosition(i):
+                            j += 1
+                        elif i < len(self.panes[f].lines):
+                            i += 1
+                            j = 0
+                        else:
+                            break
+                    if event.state & gtk.gdk.CONTROL_MASK == 0:
+                        break
+                    # break if we are at the beginning of a word
+                    text = self.getLineText(f, i)
+                    if text is not None and j < len(text):
+                        c = getCharacterClass(text[j])
+                        if c != WHITESPACE_CLASS and (j < 1 or j - 1 >= len(text) or getCharacterClass(text[j - 1]) != c):
+                            break
                 self.setCurrentChar(i, j, si, sj)
             # backspace
             elif event.keyval == gtk.keysyms.BackSpace:
