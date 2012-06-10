@@ -1016,22 +1016,6 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>increase_indenting</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Increase Indenting</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Shift+Ctrl+greater</literal></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>decrease_indenting</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Decrease Indenting</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Shift+Ctrl+less</literal></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><userinput>convert_to_dos</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Format</guimenu><guimenuitem>Convert To DOS Format</guimenuitem></menuchoice> menu item</para>

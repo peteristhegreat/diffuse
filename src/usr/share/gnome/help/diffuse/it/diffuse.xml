@@ -753,22 +753,6 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>increase_indenting</userinput></term>
-            <listitem>
-              <para>Voce di menu <menuchoice><guimenu>Formato</guimenu><guimenuitem>Aumenta indentazione</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Shift+Ctrl+greater</literal></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>decrease_indenting</userinput></term>
-            <listitem>
-              <para>Voce di menu <menuchoice><guimenu>Formato</guimenu><guimenuitem>Diminuisci indentazione</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Shift+Ctrl+less</literal></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><userinput>convert_to_dos</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Formato</guimenu><guimenuitem>Converti nel formato DOS</guimenuitem></menuchoice></para>

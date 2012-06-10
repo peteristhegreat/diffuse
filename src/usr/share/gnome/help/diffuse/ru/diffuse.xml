@@ -1032,22 +1032,6 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>increase_indenting</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Формат</guimenu><guimenuitem>Увеличить Отступ</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Shift+Ctrl+greater</literal></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term><userinput>decrease_indenting</userinput></term>
-            <listitem>
-              <para><menuchoice><guimenu>Формат</guimenu><guimenuitem>Уменьшить Отступ</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Shift+Ctrl+less</literal></para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term><userinput>convert_to_dos</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Формат</guimenu><guimenuitem>Преобразовать в DOS Формат</guimenuitem></menuchoice></para>

@@ -336,8 +336,6 @@ class Resources:
         set_binding('menu', 'remove_trailing_white_space', 'Ctrl+k')
         set_binding('menu', 'convert_tabs_to_spaces', 'Ctrl+b')
         set_binding('menu', 'convert_leading_spaces_to_tabs', 'Shift+Ctrl+B')
-        set_binding('menu', 'increase_indenting', 'Shift+Ctrl+greater')
-        set_binding('menu', 'decrease_indenting', 'Shift+Ctrl+less')
         set_binding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
         set_binding('menu', 'convert_to_mac', 'Shift+Ctrl+C')
         set_binding('menu', 'convert_to_unix', 'Ctrl+e')
@@ -3268,8 +3266,6 @@ class FileDiffViewer(gtk.Table):
             'remove_trailing_white_space': self.remove_trailing_white_space,
             'convert_tabs_to_spaces': self.convert_tabs_to_spaces,
             'convert_leading_spaces_to_tabs': self.convert_leading_spaces_to_tabs,
-            'increase_indenting': self.increase_indenting,
-            'decrease_indenting': self.decrease_indenting,
             'convert_to_dos': self.convert_to_dos,
             'convert_to_mac': self.convert_to_mac,
             'convert_to_unix': self.convert_to_unix,
@@ -5757,42 +5753,74 @@ class FileDiffViewer(gtk.Table):
                             s += u' ' * (w % tab_width)
                 self.replaceText(s)
             # insert key
-            elif event.keyval == gtk.keysyms.Tab:
-                # insert soft-tabs if there are only spaces and tabs from the
-                # beginning of the line to the cursor location
+            elif event.keyval in [ gtk.keysyms.Tab, gtk.keysyms.ISO_Left_Tab ]:
                 start_i, start_j = self.selection_line, self.selection_char
                 end_i, end_j = self.current_line, self.current_char
-                if end_i < start_i or (end_i == start_i and end_j < start_j):
-                    start_i, start_j, end_i, end_j = end_i, end_j, start_i, start_j
-                temp = start_j
-                if temp > 0:
-                    text = self.getLineText(f, start_i)[:start_j]
-                    w = self.stringWidth(text)
-                    while temp > 0 and text[temp - 1] in ' \t':
-                        temp -= 1
+                if start_i != end_i or start_j != end_j or event.keyval == gtk.keysyms.ISO_Left_Tab:
+                    # find range of lines to operate upon
+                    start, end, offset = start_i, end_i, 1
+                    if end < start:
+                        start, end = end, start
+                    if event.keyval == gtk.keysyms.ISO_Left_Tab:
+                        offset = -1
+                    self.recordEditMode()
+                    for i in range(start, end + 1):
+                        text = self.getLineText(f, i)
+                        if text is not None and len_minus_line_ending(text) > 0:
+                            # count spacing before the first non-whitespace character
+                            j, w = 0, 0
+                            while j < len(text) and text[j] in ' \t':
+                                w += self.characterWidth(w, text[j])
+                                j += 1
+                            # adjust by a multiple of the soft tab width
+                            ws = max(0, w + offset * self.prefs.getInt('editor_soft_tab_width'))
+                            if ws != w:
+                                if self.prefs.getBool('editor_expand_tabs'):
+                                    s = u' ' * ws
+                                else:
+                                    tab_width = self.prefs.getInt('display_tab_width')
+                                    s = u'\t' * (ws // tab_width) + u' ' * (ws % tab_width)
+                                if i == start_i:
+                                    start_j = len(s) + max(0, start_j - j)
+                                if i == end_i:
+                                    end_j = len(s) + max(0, end_j - j)
+                                self.updateText(f, i, s + text[j:])
+                    self.setCurrentChar(end_i, end_j, start_i, start_j)
+                    self.recordEditMode()
                 else:
-                    w = 0
-                tab_width = self.prefs.getInt('display_tab_width')
-                if temp > 0:
-                    # insert a regular tab
-                    ws = tab_width - w % tab_width
-                else:
-                    # insert a soft tab
-                    self.selection_line = start_i
-                    self.selection_char = 0
-                    self.current_line = end_i
-                    self.current_char = end_j
-                    width = self.prefs.getInt('editor_soft_tab_width')
-                    ws = w + width - w % width
-                    w = 0
-                if self.prefs.getBool('editor_expand_tabs'):
-                    # convert to spaces
-                    s = u' ' * ws
-                else:
-                    # replace with tab characters where possible
-                    s = u'\t' * ((w + ws) // tab_width - w // tab_width)
-                    s += u' ' * ((w + ws) % tab_width)
-                self.replaceText(s)
+                    # insert soft-tabs if there are only spaces and tabs from the
+                    # beginning of the line to the cursor location
+                    if end_i < start_i or (end_i == start_i and end_j < start_j):
+                        start_i, start_j, end_i, end_j = end_i, end_j, start_i, start_j
+                    temp = start_j
+                    if temp > 0:
+                        text = self.getLineText(f, start_i)[:start_j]
+                        w = self.stringWidth(text)
+                        while temp > 0 and text[temp - 1] in ' \t':
+                            temp -= 1
+                    else:
+                        w = 0
+                    tab_width = self.prefs.getInt('display_tab_width')
+                    if temp > 0:
+                        # insert a regular tab
+                        ws = tab_width - w % tab_width
+                    else:
+                        # insert a soft tab
+                        self.selection_line = start_i
+                        self.selection_char = 0
+                        self.current_line = end_i
+                        self.current_char = end_j
+                        width = self.prefs.getInt('editor_soft_tab_width')
+                        ws = w + width - w % width
+                        w = 0
+                    if self.prefs.getBool('editor_expand_tabs'):
+                        # convert to spaces
+                        s = u' ' * ws
+                    else:
+                        # replace with tab characters where possible
+                        s = u'\t' * ((w + ws) // tab_width - w // tab_width)
+                        s += u' ' * ((w + ws) % tab_width)
+                    self.replaceText(s)
             # handle all other printable characters
             elif len(event.string) > 0:
                 self.replaceText(event.string)
@@ -6356,47 +6384,6 @@ class FileDiffViewer(gtk.Table):
             # ensure the cursor position is valid
             self.setCurrentChar(self.current_line, 0, self.selection_line, 0)
         self.recordEditMode()
-
-    # adjust indenting of the selected lines by 'offset' soft tabs
-    def _adjust_indenting(self, offset):
-        if self.mode != CHAR_MODE:
-            self.setLineMode()
-        # find range of lines to operate upon
-        f = self.current_pane
-        start, end = self.selection_line, self.current_line
-        if end < start:
-            start, end = end, start
-
-        self.recordEditMode()
-        for i in range(start, end + 1):
-            text = self.getLineText(f, i)
-            if text is not None and len_minus_line_ending(text) > 0:
-                # count spacing before the first non-whitespace character
-                j, w = 0, 0
-                while j < len(text) and text[j] in ' \t':
-                    w += self.characterWidth(w, text[j])
-                    j += 1
-                # adjust by a multiple of the soft tab width
-                ws = max(0, w + offset * self.prefs.getInt('editor_soft_tab_width'))
-                if ws != w:
-                    if self.prefs.getBool('editor_expand_tabs'):
-                        s = u' ' * ws
-                    else:
-                        tab_width = self.prefs.getInt('display_tab_width')
-                        s = u'\t' * (ws // tab_width) + u' ' * (ws % tab_width)
-                    self.updateText(f, i, s + text[j:])
-        if self.mode == CHAR_MODE:
-            # ensure the cursor position is valid
-            self.setCurrentChar(self.current_line, 0, self.selection_line, 0)
-        self.recordEditMode()
-
-    # 'increase_indenting' action
-    def increase_indenting(self):
-        self._adjust_indenting(1)
-
-    # 'decrease_indenting' action
-    def decrease_indenting(self):
-        self._adjust_indenting(-1)
 
     def convert_format(self, format):
         self.setLineMode()
@@ -7491,9 +7478,6 @@ class Diffuse(gtk.Window):
                      [_('Remove Trailing _White Space'), self.button_cb, 'remove_trailing_white_space', None, 'remove_trailing_white_space'],
                      [_('Convert Tabs To _Spaces'), self.button_cb, 'convert_tabs_to_spaces', None, 'convert_tabs_to_spaces'],
                      [_('Convert Leading Spaces To _Tabs'), self.button_cb, 'convert_leading_spaces_to_tabs', None, 'convert_leading_spaces_to_tabs'],
-                     [],
-                     [_('_Increase Indenting'), self.button_cb, 'increase_indenting', gtk.STOCK_INDENT, 'increase_indenting'],
-                     [_('De_crease Indenting'), self.button_cb, 'decrease_indenting', gtk.STOCK_UNINDENT, 'decrease_indenting'],
                      [],
                      [_('Convert To _DOS Format'), self.button_cb, 'convert_to_dos', None, 'convert_to_dos'],
                      [_('Convert To _Mac Format'), self.button_cb, 'convert_to_mac', None, 'convert_to_mac'],
