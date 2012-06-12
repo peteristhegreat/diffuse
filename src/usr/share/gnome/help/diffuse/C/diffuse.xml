@@ -883,7 +883,7 @@
             <term><userinput>first_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>First Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Shift+Alt+Up</literal></para>
+              <para>Default: <literal>Shift+Ctrl+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -891,7 +891,7 @@
             <term><userinput>previous_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Previous Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Alt+Up</literal></para>
+              <para>Default: <literal>Ctrl+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -899,7 +899,7 @@
             <term><userinput>next_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Next Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Alt+Down</literal></para>
+              <para>Default: <literal>Ctrl+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -907,7 +907,7 @@
             <term><userinput>last_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>View</guimenu><guimenuitem>Last Difference</guimenuitem></menuchoice> menu item</para>
-              <para>Default: <literal>Shift+Alt+Down</literal></para>
+              <para>Default: <literal>Shift+Ctrl+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1309,10 +1309,26 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>copy_selection_left</userinput></term>
+            <listitem>
+              <para>copy lines from the selection into the file on the left</para>
+              <para>Default: <literal>Shift+Ctrl+Left</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>copy_selection_right</userinput></term>
+            <listitem>
+              <para>copy lines from the selection into the file on the right</para>
+              <para>Default: <literal>Shift+Ctrl+Right</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para>copy lines from the file on the left into the selection</para>
-              <para>Default: <literal>Shift+L</literal></para>
+              <para>Defaults: <literal>Ctrl+Right</literal>, <literal>Shift+L</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1320,7 +1336,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para>copy lines from the file on the right into the selection</para>
-              <para>Default: <literal>Shift+H</literal></para>
+              <para>Defaults: <literal>Ctrl+Left</literal>, <literal>Shift+H</literal></para>
             </listitem>
           </varlistentry>
 

@@ -702,7 +702,7 @@ View \(-> First Difference
 menu item
 .sp
 Default:
-Shift+Alt+Up
+Shift+Ctrl+Up
 .RE
 .PP
 \fBprevious_difference\fR
@@ -711,7 +711,7 @@ View \(-> Previous Difference
 menu item
 .sp
 Default:
-Alt+Up
+Ctrl+Up
 .RE
 .PP
 \fBnext_difference\fR
@@ -720,7 +720,7 @@ View \(-> Next Difference
 menu item
 .sp
 Default:
-Alt+Down
+Ctrl+Down
 .RE
 .PP
 \fBlast_difference\fR
@@ -729,7 +729,7 @@ View \(-> Last Difference
 menu item
 .sp
 Default:
-Shift+Alt+Down
+Shift+Ctrl+Down
 .RE
 .PP
 \fBfirst_tab\fR
@@ -1172,11 +1172,28 @@ Default:
 r
 .RE
 .PP
+\fBcopy_selection_left\fR
+.RS 4
+copy lines from the selection into the file on the left
+.sp
+Default:
+Shift+Ctrl+Left
+.RE
+.PP
+\fBcopy_selection_right\fR
+.RS 4
+copy lines from the selection into the file on the right
+.sp
+Default:
+Shift+Ctrl+Right
+.RE
+.PP
 \fBcopy_left_into_selection\fR
 .RS 4
 copy lines from the file on the left into the selection
 .sp
-Default:
+Defaults:
+Ctrl+Right,
 Shift+L
 .RE
 .PP
@@ -1184,7 +1201,8 @@ Shift+L
 .RS 4
 copy lines from the file on the right into the selection
 .sp
-Default:
+Defaults:
+Ctrl+Left,
 Shift+H
 .RE
 .PP
