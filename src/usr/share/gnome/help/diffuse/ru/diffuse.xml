@@ -899,7 +899,7 @@
             <term><userinput>first_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Первое Различие</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Shift+Meta+Up</literal></para>
+              <para>По умолчанию: <literal>Shift+Alt+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -907,7 +907,7 @@
             <term><userinput>previous_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Предыдущее Различие</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Meta+Up</literal></para>
+              <para>По умолчанию: <literal>Alt+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -915,7 +915,7 @@
             <term><userinput>next_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Следующее Различие</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Meta+Down</literal></para>
+              <para>По умолчанию: <literal>Alt+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -923,7 +923,7 @@
             <term><userinput>last_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Последнее Различие</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Shift+Meta+Down</literal></para>
+              <para>По умолчанию: <literal>Shift+Alt+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1059,7 +1059,7 @@
             <term><userinput>copy_selection_right</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Слияние</guimenu><guimenuitem>Копировать Выборку Вправо</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Shift+Meta+Right</literal></para>
+              <para>По умолчанию: <literal>Shift+Alt+Right</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1067,7 +1067,7 @@
             <term><userinput>copy_selection_left</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Слияние</guimenu><guimenuitem>Копировать Выборку Влево</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Shift+Meta+Left</literal></para>
+              <para>По умолчанию: <literal>Shift+Alt+Left</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1075,7 +1075,7 @@
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Слияние</guimenu><guimenuitem>Копировать Слева в Выборку</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Meta+Right</literal></para>
+              <para>По умолчанию: <literal>Alt+Right</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1083,7 +1083,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Слияние</guimenu><guimenuitem>Копировать Справа в Выборку</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Meta+Left</literal></para>
+              <para>По умолчанию: <literal>Alt+Left</literal></para>
             </listitem>
           </varlistentry>
 

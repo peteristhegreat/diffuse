@@ -319,10 +319,10 @@ class Resources:
         set_binding('menu', 'go_to_line', 'Shift+Ctrl+L')
         set_binding('menu', 'realign_all', 'Ctrl+l')
         set_binding('menu', 'isolate', 'Ctrl+i')
-        set_binding('menu', 'first_difference', 'Shift+Meta+Up')
-        set_binding('menu', 'previous_difference', 'Meta+Up')
-        set_binding('menu', 'next_difference', 'Meta+Down')
-        set_binding('menu', 'last_difference', 'Shift+Meta+Down')
+        set_binding('menu', 'first_difference', 'Shift+Alt+Up')
+        set_binding('menu', 'previous_difference', 'Alt+Up')
+        set_binding('menu', 'next_difference', 'Alt+Down')
+        set_binding('menu', 'last_difference', 'Shift+Alt+Down')
         set_binding('menu', 'first_tab', 'Shift+Ctrl+Page_Up')
         set_binding('menu', 'previous_tab', 'Ctrl+Page_Up')
         set_binding('menu', 'next_tab', 'Ctrl+Page_Down')
@@ -339,10 +339,10 @@ class Resources:
         set_binding('menu', 'convert_to_dos', 'Shift+Ctrl+E')
         set_binding('menu', 'convert_to_mac', 'Shift+Ctrl+C')
         set_binding('menu', 'convert_to_unix', 'Ctrl+e')
-        set_binding('menu', 'copy_selection_right', 'Shift+Meta+Right')
-        set_binding('menu', 'copy_selection_left', 'Shift+Meta+Left')
-        set_binding('menu', 'copy_left_into_selection', 'Meta+Right')
-        set_binding('menu', 'copy_right_into_selection', 'Meta+Left')
+        set_binding('menu', 'copy_selection_right', 'Shift+Alt+Right')
+        set_binding('menu', 'copy_selection_left', 'Shift+Alt+Left')
+        set_binding('menu', 'copy_left_into_selection', 'Alt+Right')
+        set_binding('menu', 'copy_right_into_selection', 'Alt+Left')
         set_binding('menu', 'merge_from_left_then_right', 'Ctrl+m')
         set_binding('menu', 'merge_from_right_then_left', 'Shift+Ctrl+M')
         set_binding('menu', 'help_contents', 'F1')
@@ -467,8 +467,8 @@ class Resources:
                 modifiers |= gtk.gdk.SHIFT_MASK
             elif token == 'Ctrl':
                 modifiers |= gtk.gdk.CONTROL_MASK
-            elif token == 'Meta':
-                modifiers |= gtk.gdk.META_MASK
+            elif token == 'Alt':
+                modifiers |= gtk.gdk.MOD1_MASK
             elif len(token) == 0 or token[0] == '_':
                 raise ValueError()
             else:
