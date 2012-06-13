@@ -694,7 +694,7 @@ Voce di menu
 Visualizza \(-> Prima differenza
 .sp
 Predefinito:
-Shift+Alt+Up
+Shift+Ctrl+Up
 .RE
 .PP
 \fBprevious_difference\fR
@@ -703,7 +703,7 @@ Voce di menu
 Visualizza \(-> Differenza precedente
 .sp
 Predefinito:
-Alt+Up
+Ctrl+Up
 .RE
 .PP
 \fBnext_difference\fR
@@ -712,7 +712,7 @@ Voce di menu
 Visualizza \(-> Differenza successiva
 .sp
 Predefinito:
-Alt+Down
+Ctrl+Down
 .RE
 .PP
 \fBlast_difference\fR
@@ -721,7 +721,7 @@ Voce di menu
 Visualizza \(-> Ultima differenza
 .sp
 Predefinito:
-Shift+Alt+Down
+Shift+Ctrl+Down
 .RE
 .PP
 \fBfirst_tab\fR
@@ -1164,11 +1164,28 @@ Predefinito:
 r
 .RE
 .PP
+\fBcopy_selection_left\fR
+.RS 4
+copy lines from the file on the left into the selection
+.sp
+Predefinito:
+Shift+Ctrl+Left
+.RE
+.PP
+\fBcopy_selection_right\fR
+.RS 4
+copy lines from the file on the left into the selection
+.sp
+Predefinito:
+Shift+Ctrl+Right
+.RE
+.PP
 \fBcopy_left_into_selection\fR
 .RS 4
 Copia le righe dal file a sinistra nella selezione
 .sp
-Predefinito:
+Predefiniti:
+Ctrl+Right,
 Shift+L
 .RE
 .PP
@@ -1176,7 +1193,8 @@ Shift+L
 .RS 4
 Copia le righe dal file a destra nella selezione
 .sp
-Predefinito:
+Predefiniti:
+Ctrl+Left,
 Shift+H
 .RE
 .PP

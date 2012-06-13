@@ -899,7 +899,7 @@
             <term><userinput>first_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Первое Различие</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Shift+Alt+Up</literal></para>
+              <para>По умолчанию: <literal>Shift+Ctrl+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -907,7 +907,7 @@
             <term><userinput>previous_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Предыдущее Различие</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Alt+Up</literal></para>
+              <para>По умолчанию: <literal>Ctrl+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -915,7 +915,7 @@
             <term><userinput>next_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Следующее Различие</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Alt+Down</literal></para>
+              <para>По умолчанию: <literal>Ctrl+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -923,7 +923,7 @@
             <term><userinput>last_difference</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Вид</guimenu><guimenuitem>Последнее Различие</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Shift+Alt+Down</literal></para>
+              <para>По умолчанию: <literal>Shift+Ctrl+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1325,10 +1325,28 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>copy_selection_right</userinput></term>
+            <listitem>
+              <!-- FIXME: needs translation -->
+              <para>copy lines from the file on the right into the selection</para>
+              <para>По умолчанию: <literal>Shift+Ctrl+Right</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>copy_selection_left</userinput></term>
+            <listitem>
+              <!-- FIXME: needs translation -->
+              <para>copy lines from the file on the left into the selection</para>
+              <para>По умолчанию: <literal>Shift+Ctrl+Left</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para>копировать строки из файла слева в выборку</para>
-              <para>По умолчанию: <literal>Shift+L</literal></para>
+              <para>По умолчаниям: <literal>Ctrl+Right</literal>, <literal>Shift+L</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1336,7 +1354,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para>копировать строки из файла справа в выборку</para>
-              <para>По умолчанию: <literal>Shift+H</literal></para>
+              <para>По умолчаниям: <literal>Ctrl+Left</literal>, <literal>Shift+H</literal></para>
             </listitem>
           </varlistentry>
 

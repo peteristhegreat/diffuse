@@ -620,7 +620,7 @@
             <term><userinput>first_difference</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Prima differenza</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Shift+Alt+Up</literal></para>
+              <para>Predefinito: <literal>Shift+Ctrl+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -628,7 +628,7 @@
             <term><userinput>previous_difference</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Differenza precedente</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Alt+Up</literal></para>
+              <para>Predefinito: <literal>Ctrl+Up</literal></para>
             </listitem>
           </varlistentry>
 
@@ -636,7 +636,7 @@
             <term><userinput>next_difference</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Differenza successiva</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Alt+Down</literal></para>
+              <para>Predefinito: <literal>Ctrl+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -644,7 +644,7 @@
             <term><userinput>last_difference</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Visualizza</guimenu><guimenuitem>Ultima differenza</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Shift+Alt+Down</literal></para>
+              <para>Predefinito: <literal>Shift+Ctrl+Down</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1041,10 +1041,28 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>copy_selection_left</userinput></term>
+            <listitem>
+              <!-- FIXME: needs translation -->
+              <para>copy lines from the file on the left into the selection</para>
+              <para>Predefinito: <literal>Shift+Ctrl+Left</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>copy_selection_right</userinput></term>
+            <listitem>
+              <!-- FIXME: needs translation -->
+              <para>copy lines from the file on the left into the selection</para>
+              <para>Predefinito: <literal>Shift+Ctrl+Right</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para>Copia le righe dal file a sinistra nella selezione</para>
-              <para>Predefinito: <literal>Shift+L</literal></para>
+              <para>Predefiniti: <literal>Ctrl+Right</literal>, <literal>Shift+L</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1052,7 +1070,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para>Copia le righe dal file a destra nella selezione</para>
-              <para>Predefinito: <literal>Shift+H</literal></para>
+              <para>Predefiniti: <literal>Ctrl+Left</literal>, <literal>Shift+H</literal></para>
             </listitem>
           </varlistentry>
 

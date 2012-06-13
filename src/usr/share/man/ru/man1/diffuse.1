@@ -651,7 +651,7 @@ Ctrl+i
 Вид \(-> Первое Различие
 .sp
 По умолчанию:
-Shift+Alt+Up
+Shift+Ctrl+Up
 .RE
 .PP
 \fBprevious_difference\fR
@@ -659,7 +659,7 @@ Shift+Alt+Up
 Вид \(-> Предыдущее Различие
 .sp
 По умолчанию:
-Alt+Up
+Ctrl+Up
 .RE
 .PP
 \fBnext_difference\fR
@@ -667,7 +667,7 @@ Alt+Up
 Вид \(-> Следующее Различие
 .sp
 По умолчанию:
-Alt+Down
+Ctrl+Down
 .RE
 .PP
 \fBlast_difference\fR
@@ -675,7 +675,7 @@ Alt+Down
 Вид \(-> Последнее Различие
 .sp
 По умолчанию:
-Shift+Alt+Down
+Shift+Ctrl+Down
 .RE
 .PP
 \fBfirst_tab\fR
@@ -1093,11 +1093,28 @@ Shift+N
 r
 .RE
 .PP
+\fBcopy_selection_right\fR
+.RS 4
+copy lines from the file on the right into the selection
+.sp
+По умолчанию:
+Shift+Ctrl+Right
+.RE
+.PP
+\fBcopy_selection_left\fR
+.RS 4
+copy lines from the file on the left into the selection
+.sp
+По умолчанию:
+Shift+Ctrl+Left
+.RE
+.PP
 \fBcopy_left_into_selection\fR
 .RS 4
 копировать строки из файла слева в выборку
 .sp
-По умолчанию:
+По умолчаниям:
+Ctrl+Right,
 Shift+L
 .RE
 .PP
@@ -1105,7 +1122,8 @@ Shift+L
 .RS 4
 копировать строки из файла справа в выборку
 .sp
-По умолчанию:
+По умолчаниям:
+Ctrl+Left,
 Shift+H
 .RE
 .PP
