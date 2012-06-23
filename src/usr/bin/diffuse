@@ -146,7 +146,7 @@ def logDebug(s):
     pass #sys.stderr.write('%s: %s\n', (APP_NAME, s))
 
 # avoid some dictionary lookups when string.whitespace is used in loops
-# this is sorted based upon frequency to speed up code for striping whitespace
+# this is sorted based upon frequency to speed up code for stripping whitespace
 whitespace = ' \t\n\r\x0b\x0c'
 
 # associate our icon with all of our windows
@@ -7622,33 +7622,55 @@ class Diffuse(gtk.Window):
             # bad $HOME value? -- don't bother the user
             logDebug('Error writing %s.' % (statepath, ))
 
+    # select viewer for a newly selected file in the confirm close dialogue
+    def __confirmClose_row_activated_cb(self, tree, path, col, model):
+        self.notebook.set_current_page(self.notebook.page_num(model[path][3]))
+
+    # toggle save state for a file listed in the confirm close dialogue
+    def __confirmClose_toggle_cb(self, cell, path, model):
+        model[path][0] = not model[path][0]
+
     # returns True if the list of viewers can be closed.  The user will be
     # given a chance to save any modified files before this method completes.
     def confirmCloseViewers(self, viewers):
         # make a list of modified files
-        modified = []
+        model = gtk.ListStore(gobject.TYPE_BOOLEAN, gobject.TYPE_STRING, gobject.TYPE_INT, gobject.TYPE_OBJECT)
         for v in viewers:
             for f, h in enumerate(v.headers):
                 if h.has_edits:
-                    modified.append((v, f))
-        if len(modified) == 0:
+                    model.append((True, v.title, f + 1, v))
+        if len(model) == 0:
             # there are no modified files, the viewers can be closed
             return True
 
         # ask the user which files should be saved
         dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, _('Some files have unsaved changes.  Select the files to save before closing.'))
+        dialog.set_resizable(True)
         dialog.set_title(APP_NAME)
         # add list of files with unsaved changes
-        vbox = gtk.VBox()
-        buttons = []
-        for v, f in modified:
-            button = gtk.CheckButton(_('%(title)s Pane %(pane)d') % { 'title': v.title, 'pane': f + 1 }, False)
-            button.set_active(True)
-            vbox.pack_start(button, False, False, 0)
-            button.show()
-            buttons.append(button)
-        dialog.vbox.pack_start(vbox, False, False, 0)
-        vbox.show()
+        sw = gtk.ScrolledWindow()
+        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        treeview = gtk.TreeView(model)
+        r = gtk.CellRendererToggle()
+        r.connect('toggled', self.__confirmClose_toggle_cb, model)
+        column = gtk.TreeViewColumn(None, r)
+        column.add_attribute(r, 'active', 0)
+        treeview.append_column(column)
+        r = gtk.CellRendererText()
+        column = gtk.TreeViewColumn(_('Tab'), r, text=1)
+        column.set_resizable(True)
+        column.set_expand(True)
+        column.set_sort_column_id(1)
+        treeview.append_column(column)
+        column = gtk.TreeViewColumn(_('Pane'), r, text=2)
+        column.set_resizable(True)
+        column.set_sort_column_id(2)
+        treeview.append_column(column)
+        treeview.connect('row_activated', self.__confirmClose_row_activated_cb, model)
+        sw.add(treeview)
+        treeview.show()
+        dialog.vbox.pack_start(sw, True, True, 0)
+        sw.show()
         # add custom set of action buttons
         dialog.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         button = gtk.Button(_('Close _Without Saving'))
@@ -7660,12 +7682,15 @@ class Diffuse(gtk.Window):
         dialog.destroy()
         if response == gtk.RESPONSE_OK:
             # save all checked files
-            for i, button in enumerate(buttons):
-                if button.get_active():
-                    v, f = modified[i]
+            it = store.get_iter_first()
+            while it:
+                if store.get_value(it, 0):
+                    f = store.get_value(it, 2) - 1
+                    v = store.get_value(it, 3)
                     if not v.save_file(f):
                         # cancel if we failed to save a file
                         return False
+                it = store.iter_next(it)
             return True
         # cancel if the user did not choose 'Close Without Saving' or 'Save'
         return response == gtk.RESPONSE_REJECT
