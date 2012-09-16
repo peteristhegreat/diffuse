@@ -261,11 +261,20 @@ if not files_only:
     print 'Performing post %s tasks.' % (stage, )
 
     if install:
-        cmds = [ 'update-desktop-database',
-                 'scrollkeeper-update -q -o %s' % (os.path.join(destdir, os.path.join(prefix, 'share/omf/diffuse')[1:])) ]
+        cmds = [ [ 'update-desktop-database' ],
+                 [ 'scrollkeeper-update', '-q', '-o', os.path.join(destdir, os.path.join(prefix, 'share/omf/diffuse')[1:]) ] ]
     else:
-        cmds = [ 'update-desktop-database',
-                 'scrollkeeper-update -q' ]
+        cmds = [ [ 'update-desktop-database' ],
+                 [ 'scrollkeeper-update', '-q' ] ]
     for c in cmds:
-        print c
-        os.system(c)
+        for p in os.environ['PATH'].split(os.pathsep):
+            if os.path.exists(os.path.join(p, c[0])):
+                print ' '.join(c)
+                try:
+                    if subprocess.Popen(c).wait() != 0:
+                        raise OSError()
+                except OSError:
+                    logError('WARNING: Failed to update documentation database with %s.' % (c[0], ))
+                break
+        else:
+            print 'WARNING: %s is not installed' % (c[0], )
