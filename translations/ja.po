@@ -349,7 +349,7 @@ msgstr "分離"
 
 #: ../src/usr/bin/diffuse:7453
 msgid "Las_t Tab"
-msgstr "最後ののタブ(_T)"
+msgstr "最後のタブ(_T)"
 
 #: ../src/usr/bin/diffuse:7509
 msgid "Last Difference"
@@ -421,7 +421,7 @@ msgstr "なし"
 
 #: ../src/usr/bin/diffuse:7398
 msgid "Open Commi_t..."
-msgstr "コミットを開く..."
+msgstr "コミットを開く...(_T)"
 
 #: ../src/usr/bin/diffuse:7082
 msgid "Open File"
@@ -445,7 +445,7 @@ msgstr "変更のあるファイルを開く...(_M)"
 
 #: ../src/usr/bin/diffuse:849
 msgid "Order of codecs used to identify encoding"
-msgstr "エンコーディングを特定するためのコーデックの注文"
+msgstr "エンコーディングを特定するためのコーデックの優先順位"
 
 #: ../src/usr/bin/diffuse:4740 ../src/usr/bin/diffuse:7522
 msgid "Paste"
@@ -773,7 +773,7 @@ msgstr "バージョンコントロール"
 #: ../src/usr/bin/diffuse:844
 #, python-format
 msgid "Warn me when closing a tab will quit %s"
-msgstr "閉じるとき、タブが %s を終了すると警告"
+msgstr "タブを閉じるとき、%s を終了すると警告"
 
 #: ../src/usr/bin/diffuse:7488
 #, python-format
@@ -882,7 +882,7 @@ msgstr "元に戻す(_U)"
 
 #: ../src/usr/bin/diffuse:7409
 msgid "_Undo Close Tab"
-msgstr "タブを閉じて元に戻す(_U)"
+msgstr "閉じたタブを元に戻す(_U)"
 
 #: ../src/usr/bin/diffuse:7439
 msgid "_View"
