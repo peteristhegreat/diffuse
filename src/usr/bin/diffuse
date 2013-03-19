@@ -135,6 +135,7 @@ import shlex
 import stat
 import string
 import subprocess
+import unicodedata
 import webbrowser
 
 if not hasattr(__builtins__, 'WindowsError'):
@@ -3370,10 +3371,10 @@ class FileDiffViewer(gtk.Table):
         if not self.prefs.getBool('display_show_whitespace'):
             s = strip_eol(s)
         col = 0
-        get = char_width_cache.get
         for c in s:
-            w = get(c, 0)
-            if w == 0:
+            try:
+                w = char_width_cache[c]
+            except KeyError:
                 v = ord(c)
                 if v < 32:
                     if c == '\t':
@@ -3385,51 +3386,35 @@ class FileDiffViewer(gtk.Table):
                     else:
                         w = 2
                         char_width_cache[c] = w
-                elif v >= 0x1100 and (v <= 0x115f
-                    or v == 0x2329
-                    or v == 0x232a
-                    or (v >= 0x2e80 and v <= 0xa4cf and v != 0x303f)
-                    or (v >= 0xac00 and v <= 0xd7a3)
-                    or (v >= 0xf900 and v <= 0xfaff)
-                    or (v >= 0xfe30 and v <= 0xfe6f)
-                    or (v >= 0xff00 and v <= 0xff60)
-                    or (v >= 0xffe0 and v <= 0xffe6)
-                    or (v >= 0x20000 and v <= 0x2ffff)):
-                    w = 2
-                    char_width_cache[c] = w
                 else:
-                    w = 1
+                    if unicodedata.east_asian_width(c) in 'WF':
+                        w = 2
+                    else:
+                        w = 1
                     char_width_cache[c] = w
             col += w
         return col
 
     # returns the 'column width' for a single character created at column 'i'
     def characterWidth(self, i, c):
-        w = char_width_cache.get(c, 0)
-        if w == 0:
+        try:
+            return char_width_cache[c]
+        except KeyError:
             v = ord(c)
             if v < 32:
                 if c == '\t':
                     tab_width = self.prefs.getInt('display_tab_width')
-                    w = tab_width - i % tab_width
+                    return tab_width - i % tab_width
                 elif c == '\n':
                     w = 1
-                    char_width_cache[c] = w
                 else:
                     w = 2
-                    char_width_cache[c] = w
-            elif v >= 0x1100 and (v <= 0x115f
-                or v == 0x2329 or v == 0x232a
-                or (v >= 0x2e80 and v <= 0xa4cf and v != 0x303f)
-                or (v >= 0xac00 and v <= 0xd7a3)
-                or (v >= 0xf900 and v <= 0xfaff)
-                or (v >= 0xfe30 and v <= 0xfe6f)
-                or (v >= 0xff00 and v <= 0xff60)
-                or (v >= 0xffe0 and v <= 0xffe6)
-                or (v >= 0x20000 and v <= 0x2ffff)):
+            elif unicodedata.east_asian_width(c) in 'WF':
                 w = 2
-                char_width_cache[c] = w
-        return w
+            else:
+                w = 1
+            char_width_cache[c] = w
+            return w
 
     # translates a string into an array of the printable representation for
     # each character
