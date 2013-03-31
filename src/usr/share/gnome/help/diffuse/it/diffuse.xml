@@ -753,6 +753,22 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>increase_indenting</userinput></term>
+            <listitem>
+              <para>Voce di menu <menuchoice><guimenu>Formato</guimenu><guimenuitem>Aumenta indentazione</guimenuitem></menuchoice></para>
+              <para>Predefinito: <literal>Shift+Ctrl+greater</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>decrease_indenting</userinput></term>
+            <listitem>
+              <para>Voce di menu <menuchoice><guimenu>Formato</guimenu><guimenuitem>Diminuisci indentazione</guimenuitem></menuchoice></para>
+              <para>Predefinito: <literal>Shift+Ctrl+less</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>convert_to_dos</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Formato</guimenu><guimenuitem>Converti nel formato DOS</guimenuitem></menuchoice></para>
@@ -780,7 +796,7 @@
             <term><userinput>copy_selection_right</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia selezione a destra</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Shift+Alt+Right</literal></para>
+              <para>Predefinito: <literal>Shift+Ctrl+Right</literal></para>
             </listitem>
           </varlistentry>
 
@@ -788,7 +804,7 @@
             <term><userinput>copy_selection_left</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia selezione a sinistra</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Shift+Alt+Left</literal></para>
+              <para>Predefinito: <literal>Shift+Ctrl+Left</literal></para>
             </listitem>
           </varlistentry>
 
@@ -796,7 +812,7 @@
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia sinistra nella selezione</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Alt+Right</literal></para>
+              <para>Predefinito: <literal>Ctrl+Right</literal></para>
             </listitem>
           </varlistentry>
 
@@ -804,7 +820,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia destra nella selezione</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Alt+Left</literal></para>
+              <para>Predefinito: <literal>Ctrl+Left</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1043,18 +1059,16 @@
           <varlistentry>
             <term><userinput>copy_selection_left</userinput></term>
             <listitem>
-              <!-- FIXME: needs translation -->
-              <para>copy lines from the file on the left into the selection</para>
-              <para>Predefinito: <literal>Shift+Ctrl+Left</literal></para>
+              <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia selezione a destra</guimenuitem></menuchoice></para>
+              <para>Predefinito: Nessuno</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>copy_selection_right</userinput></term>
             <listitem>
-              <!-- FIXME: needs translation -->
-              <para>copy lines from the file on the left into the selection</para>
-              <para>Predefinito: <literal>Shift+Ctrl+Right</literal></para>
+              <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia selezione a sinistra</guimenuitem></menuchoice></para>
+              <para>Predefinito: Nessuno</para>
             </listitem>
           </varlistentry>
 
@@ -1062,7 +1076,7 @@
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para>Copia le righe dal file a sinistra nella selezione</para>
-              <para>Predefiniti: <literal>Ctrl+Right</literal>, <literal>Shift+L</literal></para>
+              <para>Predefinito: <literal>Shift+L</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1070,7 +1084,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para>Copia le righe dal file a destra nella selezione</para>
-              <para>Predefiniti: <literal>Ctrl+Left</literal>, <literal>Shift+H</literal></para>
+              <para>Predefinito: <literal>Shift+H</literal></para>
             </listitem>
           </varlistentry>
 

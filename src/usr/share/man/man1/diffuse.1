@@ -849,6 +849,24 @@ Default:
 Shift+Ctrl+B
 .RE
 .PP
+\fBincrease_indenting\fR
+.RS 4
+Format \(-> Increase Indenting
+menu item
+.sp
+Default:
+Shift+Ctrl+greater
+.RE
+.PP
+\fBdecrease_indenting\fR
+.RS 4
+Format \(-> Decrease Indenting
+menu item
+.sp
+Default:
+Shift+Ctrl+less
+.RE
+.PP
 \fBconvert_to_dos\fR
 .RS 4
 Format \(-> Convert To DOS Format
@@ -882,7 +900,7 @@ Merge \(-> Copy Selection Right
 menu item
 .sp
 Default:
-Shift+Alt+Right
+Shift+Ctrl+Right
 .RE
 .PP
 \fBcopy_selection_left\fR
@@ -891,7 +909,7 @@ Merge \(-> Copy Selection Left
 menu item
 .sp
 Default:
-Shift+Alt+Left
+Shift+Ctrl+Left
 .RE
 .PP
 \fBcopy_left_into_selection\fR
@@ -900,7 +918,7 @@ Merge \(-> Copy Left Into Selection
 menu item
 .sp
 Default:
-Alt+Right
+Ctrl+Right
 .RE
 .PP
 \fBcopy_right_into_selection\fR
@@ -909,7 +927,7 @@ Merge \(-> Copy Right Into Selection
 menu item
 .sp
 Default:
-Alt+Left
+Ctrl+Left
 .RE
 .PP
 \fBmerge_from_left_then_right\fR
@@ -1176,24 +1194,21 @@ r
 .RS 4
 copy lines from the selection into the file on the left
 .sp
-Default:
-Shift+Ctrl+Left
+Default: None
 .RE
 .PP
 \fBcopy_selection_right\fR
 .RS 4
 copy lines from the selection into the file on the right
 .sp
-Default:
-Shift+Ctrl+Right
+Default: None
 .RE
 .PP
 \fBcopy_left_into_selection\fR
 .RS 4
 copy lines from the file on the left into the selection
 .sp
-Defaults:
-Ctrl+Right,
+Default:
 Shift+L
 .RE
 .PP
@@ -1201,8 +1216,7 @@ Shift+L
 .RS 4
 copy lines from the file on the right into the selection
 .sp
-Defaults:
-Ctrl+Left,
+Default:
 Shift+H
 .RE
 .PP

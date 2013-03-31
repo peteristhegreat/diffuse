@@ -1032,6 +1032,22 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>increase_indenting</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Формат</guimenu><guimenuitem>Увеличить Отступ</guimenuitem></menuchoice></para>
+              <para>По умолчанию: <literal>Shift+Ctrl+greater</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>decrease_indenting</userinput></term>
+            <listitem>
+              <para><menuchoice><guimenu>Формат</guimenu><guimenuitem>Уменьшить Отступ</guimenuitem></menuchoice></para>
+              <para>По умолчанию: <literal>Shift+Ctrl+less</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>convert_to_dos</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Формат</guimenu><guimenuitem>Преобразовать в DOS Формат</guimenuitem></menuchoice></para>
@@ -1059,7 +1075,7 @@
             <term><userinput>copy_selection_right</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Слияние</guimenu><guimenuitem>Копировать Выборку Вправо</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Shift+Alt+Right</literal></para>
+              <para>По умолчанию: <literal>Shift+Ctrl+Right</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1067,7 +1083,7 @@
             <term><userinput>copy_selection_left</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Слияние</guimenu><guimenuitem>Копировать Выборку Влево</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Shift+Alt+Left</literal></para>
+              <para>По умолчанию: <literal>Shift+Ctrl+Left</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1075,7 +1091,7 @@
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Слияние</guimenu><guimenuitem>Копировать Слева в Выборку</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Alt+Right</literal></para>
+              <para>По умолчанию: <literal>Ctrl+Right</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1083,7 +1099,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para><menuchoice><guimenu>Слияние</guimenu><guimenuitem>Копировать Справа в Выборку</guimenuitem></menuchoice></para>
-              <para>По умолчанию: <literal>Alt+Left</literal></para>
+              <para>По умолчанию: <literal>Ctrl+Left</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1327,18 +1343,16 @@
           <varlistentry>
             <term><userinput>copy_selection_right</userinput></term>
             <listitem>
-              <!-- FIXME: needs translation -->
-              <para>copy lines from the file on the right into the selection</para>
-              <para>По умолчанию: <literal>Shift+Ctrl+Right</literal></para>
+              <para><menuchoice><guimenu>Слияние</guimenu><guimenuitem>Копировать Выборку Вправо</guimenuitem></menuchoice></para>
+              <para>По умолчанию: Нет</para>
             </listitem>
           </varlistentry>
 
           <varlistentry>
             <term><userinput>copy_selection_left</userinput></term>
             <listitem>
-              <!-- FIXME: needs translation -->
-              <para>copy lines from the file on the left into the selection</para>
-              <para>По умолчанию: <literal>Shift+Ctrl+Left</literal></para>
+              <para><menuchoice><guimenu>Слияние</guimenu><guimenuitem>Копировать Выборку Влево</guimenuitem></menuchoice></para>
+              <para>По умолчанию: Нет</para>
             </listitem>
           </varlistentry>
 
@@ -1346,7 +1360,7 @@
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para>копировать строки из файла слева в выборку</para>
-              <para>По умолчаниям: <literal>Ctrl+Right</literal>, <literal>Shift+L</literal></para>
+              <para>По умолчанию: <literal>Shift+L</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1354,7 +1368,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para>копировать строки из файла справа в выборку</para>
-              <para>По умолчаниям: <literal>Ctrl+Left</literal>, <literal>Shift+H</literal></para>
+              <para>По умолчанию: <literal>Shift+H</literal></para>
             </listitem>
           </varlistentry>
 

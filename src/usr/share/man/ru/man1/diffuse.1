@@ -782,6 +782,22 @@ Ctrl+b
 Shift+Ctrl+B
 .RE
 .PP
+\fBincrease_indenting\fR
+.RS 4
+Формат \(-> Увеличить Отступ
+.sp
+По умолчанию:
+Shift+Ctrl+greater
+.RE
+.PP
+\fBdecrease_indenting\fR
+.RS 4
+Формат \(-> Уменьшить Отступ
+.sp
+По умолчанию:
+Shift+Ctrl+less
+.RE
+.PP
 \fBconvert_to_dos\fR
 .RS 4
 Формат \(-> Преобразовать в DOS Формат
@@ -811,7 +827,7 @@ Ctrl+e
 Слияние \(-> Копировать Выборку Вправо
 .sp
 По умолчанию:
-Shift+Alt+Right
+Shift+Ctrl+Right
 .RE
 .PP
 \fBcopy_selection_left\fR
@@ -819,7 +835,7 @@ Shift+Alt+Right
 Слияние \(-> Копировать Выборку Влево
 .sp
 По умолчанию:
-Shift+Alt+Left
+Shift+Ctrl+Left
 .RE
 .PP
 \fBcopy_left_into_selection\fR
@@ -827,7 +843,7 @@ Shift+Alt+Left
 Слияние \(-> Копировать Слева в Выборку
 .sp
 По умолчанию:
-Alt+Right
+Ctrl+Right
 .RE
 .PP
 \fBcopy_right_into_selection\fR
@@ -835,7 +851,7 @@ Alt+Right
 Слияние \(-> Копировать Справа в Выборку
 .sp
 По умолчанию:
-Alt+Left
+Ctrl+Left
 .RE
 .PP
 \fBmerge_from_left_then_right\fR
@@ -1095,26 +1111,23 @@ r
 .PP
 \fBcopy_selection_right\fR
 .RS 4
-copy lines from the file on the right into the selection
+Слияние \(-> Копировать Выборку Вправо
 .sp
-По умолчанию:
-Shift+Ctrl+Right
+По умолчанию: Нет
 .RE
 .PP
 \fBcopy_selection_left\fR
 .RS 4
-copy lines from the file on the left into the selection
+Слияние \(-> Копировать Выборку Влево
 .sp
-По умолчанию:
-Shift+Ctrl+Left
+По умолчанию: Нет
 .RE
 .PP
 \fBcopy_left_into_selection\fR
 .RS 4
 копировать строки из файла слева в выборку
 .sp
-По умолчаниям:
-Ctrl+Right,
+По умолчанию:
 Shift+L
 .RE
 .PP
@@ -1122,8 +1135,7 @@ Shift+L
 .RS 4
 копировать строки из файла справа в выборку
 .sp
-По умолчаниям:
-Ctrl+Left,
+По умолчанию:
 Shift+H
 .RE
 .PP
