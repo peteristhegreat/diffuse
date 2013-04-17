@@ -7713,15 +7713,15 @@ class Diffuse(gtk.Window):
         dialog.destroy()
         if response == gtk.RESPONSE_OK:
             # save all checked files
-            it = store.get_iter_first()
+            it = model.get_iter_first()
             while it:
-                if store.get_value(it, 0):
-                    f = store.get_value(it, 2) - 1
-                    v = store.get_value(it, 3)
+                if model.get_value(it, 0):
+                    f = model.get_value(it, 2) - 1
+                    v = model.get_value(it, 3)
                     if not v.save_file(f):
                         # cancel if we failed to save a file
                         return False
-                it = store.iter_next(it)
+                it = model.iter_next(it)
             return True
         # cancel if the user did not choose 'Close Without Saving' or 'Save'
         return response == gtk.RESPONSE_REJECT
