@@ -633,7 +633,6 @@ msgid "Swap with Selected Pane"
 msgstr "選択された枠と交換"
 
 #: ../src/usr/bin/diffuse:7691
-#, fuzzy
 msgid "Tab"
 msgstr "タブ"
 
