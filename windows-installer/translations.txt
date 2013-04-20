@@ -1,3 +1,6 @@
+cs:Table of Contents:Obsah
+cs:Chapter:Kapitola
+
 it:Table of Contents:Sommario
 it:Chapter:Capitolo
 

@@ -16,6 +16,7 @@ ShowLanguageDialog=auto
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl,.\en.isl"
+Name: "cs"; MessagesFile: "compiler:Languages\Czech.isl,.\cs.isl"
 Name: "de"; MessagesFile: "compiler:Languages\German.isl,.\de.isl"
 Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl,.\es.isl"
 Name: "it"; MessagesFile: "compiler:Languages\Italian.isl,.\it.isl"

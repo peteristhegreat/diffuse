@@ -1,3 +1,4 @@
+- added Jindřich Šesták's Czech translation
 - improved character editing to allow easy indenting and moving the cursor by whole words
 - added Miś Uszatek's Polish translation
 - improved auto-detection of utf_16 and utf_32

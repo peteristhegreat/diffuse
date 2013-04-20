@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Diffuse Merge Tool
+Name[cs]=Diffuse
 Name[de]=Diffuse Mischwerkzeug
 Name[es]=Diffuse utillaje de textos
 Name[it]=Diffuse - strumento di unione
@@ -9,6 +10,7 @@ Name[pl]=Diffuse Narzędzie Scalania
 Name[ru]=Diffuse Инструмент Слияния
 Name[zh_CN]=Diffuse 比较合并工具
 Comment=Graphical tool for merging and comparing text files
+Comment[cs]=Grafický nástroj pro slučování a porovnávání textových souborů
 Comment[de]=Werzeug zum Mischen und Vergleichen von Textdateien
 Comment[es]=Un utillaje para juntar y comparar archivos de texto
 Comment[it]=Strumento grafico per l'unione e il confronto di file

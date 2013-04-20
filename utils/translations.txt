@@ -1,3 +1,12 @@
+cs:Diffuse Manual:Příručka programu diffuse
+cs:.SH "NAME":.SH "NÁZEV"
+cs:.SH "SYNOPSIS":.SH "POUŽITÍ"
+cs:graphical tool for merging and comparing text files:grafický nástroj pro slučování a porovnávání textových souborů
+cs:.SH "DESCRIPTION":.SH "POPIS"
+cs:.SH "OPTIONS":.SH "MOŽNOSTI"
+cs:.SH "AUTHOR":.SH "AUTOR"
+cs:.SH "COPYING":.SH "LICENCE"
+
 it:Diffuse Manual:Manuale di Diffuse
 it:.SH "NAME":.SH "NOME"
 it:.SH "SYNOPSIS":.SH "SINOSSI"
