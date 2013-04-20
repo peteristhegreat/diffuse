@@ -235,7 +235,7 @@
   <chapter id="file-comparison">
     <title>Confrontare i file</title>
 
-    <para>Usare le voci del menu <menuchoice><guimenu>File</guimenu><guimenuitem>Nuova unione a 2 file</guimenuitem></menuchoice> e <menuchoice><guimenu>File</guimenu><guimenuitem>Nuova unione a 3 file</guimenuitem></menuchoice> per creare ulteriori schede di confronto tra file di testo. I nomi dei file e le revisioni possono essere indicati sia come argomenti della linea di comando di <application>&app;</application> sia nei campi della finestra di apertura file.</para>
+    <para>Usare le voci del menu <menuchoice><guimenu>File</guimenu><guimenuitem>Nuova unione a 2 file</guimenuitem></menuchoice>, <menuchoice><guimenu>File</guimenu><guimenuitem>Nuova unione a 3 file</guimenuitem></menuchoice> e <menuchoice><guimenu>File</guimenu><guimenuitem>Nuova unione a N file</guimenuitem></menuchoice> per creare ulteriori schede di confronto tra file di testo. I nomi dei file e le revisioni possono essere indicati sia come argomenti della linea di comando di <application>&app;</application> sia nei campi della finestra di apertura file.</para>
 
     <para><application>&app;</application> visualizza i file uno a fianco all'altro inserendo degli spazi per allineare le righe di testo simili. Le differenze sono evidenziate con diversi colori di sfondo.</para>
 
@@ -453,6 +453,14 @@
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>File</guimenu><guimenuitem>Nuova unione a 3 file</guimenuitem></menuchoice></para>
               <para>Predefinito: <literal>Ctrl+3</literal></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><userinput>new_n_way_file_merge</userinput></term>
+            <listitem>
+              <para>Voce di menu <menuchoice><guimenu>File</guimenu><guimenuitem>Nuova unione a N file</guimenuitem></menuchoice></para>
+              <para>Predefinito: <literal>Ctrl+4</literal></para>
             </listitem>
           </varlistentry>
 
@@ -812,7 +820,7 @@
             <term><userinput>copy_left_into_selection</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia sinistra nella selezione</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Ctrl+Right</literal></para>
+              <para>Predefinito: <literal>Ctrl+Destra</literal></para>
             </listitem>
           </varlistentry>
 
@@ -820,7 +828,7 @@
             <term><userinput>copy_right_into_selection</userinput></term>
             <listitem>
               <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia destra nella selezione</guimenuitem></menuchoice></para>
-              <para>Predefinito: <literal>Ctrl+Left</literal></para>
+              <para>Predefinito: <literal>Ctrl+Sinistra</literal></para>
             </listitem>
           </varlistentry>
 
@@ -1059,7 +1067,7 @@
           <varlistentry>
             <term><userinput>copy_selection_left</userinput></term>
             <listitem>
-              <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia selezione a destra</guimenuitem></menuchoice></para>
+              <para>Copia le righe selezionate nel file di sinistra</para>
               <para>Predefinito: Nessuno</para>
             </listitem>
           </varlistentry>
@@ -1067,7 +1075,7 @@
           <varlistentry>
             <term><userinput>copy_selection_right</userinput></term>
             <listitem>
-              <para>Voce di menu <menuchoice><guimenu>Unione</guimenu><guimenuitem>Copia selezione a sinistra</guimenuitem></menuchoice></para>
+              <para>Copia le righe selezionate nel file di destra</para>
               <para>Predefinito: Nessuno</para>
             </listitem>
           </varlistentry>

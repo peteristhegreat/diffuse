@@ -141,9 +141,10 @@ Ignora tutti gli spazi vuoti\&.
 .SH "CONFRONTARE I FILE"
 .PP
 Usare le voci del menu
-File \(-> Nuova unione a 2 file
-e
+File \(-> Nuova unione a 2 file,
 File \(-> Nuova unione a 3 file
+e
+File \(-> Nuova unione a N file
 per creare ulteriori schede di confronto tra file di testo\&. I nomi dei file e le revisioni possono essere indicati sia come argomenti della linea di comando di
 Diffuse
 sia nei campi della finestra di apertura file\&.
@@ -509,6 +510,15 @@ File \(-> Nuova unione a 3 file
 .sp
 Predefinito:
 Ctrl+3
+.RE
+.PP
+\fBnew_n_way_file_merge\fR
+.RS 4
+Voce di menu
+File \(-> Nuova unione a N file
+.sp
+Predefinito:
+Ctrl+4
 .RE
 .PP
 \fBclose_tab\fR
@@ -910,7 +920,7 @@ Voce di menu
 Unione \(-> Copia sinistra nella selezione
 .sp
 Predefinito:
-Ctrl+Right
+Ctrl+Destra
 .RE
 .PP
 \fBcopy_right_into_selection\fR
@@ -919,7 +929,7 @@ Voce di menu
 Unione \(-> Copia destra nella selezione
 .sp
 Predefinito:
-Ctrl+Left
+Ctrl+Sinistra
 .RE
 .PP
 \fBmerge_from_left_then_right\fR
@@ -1184,16 +1194,14 @@ r
 .PP
 \fBcopy_selection_left\fR
 .RS 4
-Voce di menu
-Unione \(-> Copia selezione a destra
+Copia le righe selezionate nel file di sinistra
 .sp
 Predefinito: Nessuno
 .RE
 .PP
 \fBcopy_selection_right\fR
 .RS 4
-Voce di menu
-Unione \(-> Copia selezione a sinistra
+Copia le righe selezionate nel file di destra
 .sp
 Predefinito: Nessuno
 .RE
