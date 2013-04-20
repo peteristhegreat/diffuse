@@ -70,11 +70,13 @@ for lang in os.listdir(d):
     fd.close()
     if proc.wait() != 0:
         raise OSError('Could not run xsltproc')
+    os.unlink(a)
 
     # read resulting man page
     f = open('diffuse.1', 'rb')
     s = f.read()
     f.close()
+    os.unlink('diffuse.1')
     # remove comments
     s = '\n'.join([ c for c in s.split('\n') if not c.startswith('.\\"') ])
     # fix arrow
