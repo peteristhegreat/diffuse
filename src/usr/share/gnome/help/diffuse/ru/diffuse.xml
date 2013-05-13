@@ -2,14 +2,14 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
   <!ENTITY app "Diffuse">
-  <!ENTITY app-version "0.4.6">
+  <!ENTITY app-version "0.4.7">
 ]>
 <book id="index" lang="ru">
   <title>Руководство Пользователя <application>&app;</application></title>
 
   <bookinfo>
     <copyright>
-      <year>2009-2011</year>
+      <year>2009-2013</year>
       <holder>Derrick Moser</holder>
     </copyright>
 
@@ -48,7 +48,7 @@
       <para>
         Программа <application>&app;</application> написана Derrick Moser <email>derrick_moser@yahoo.com</email>.
       </para>
-      <para>&copy; 2006-2011 Derrick Moser. Все Права Защищены.</para>
+      <para>&copy; 2006-2013 Derrick Moser. Все Права Защищены.</para>
       <para>Русификация (diffuse.mo; ru.po): О.Ю.Пахтусов <email>oupakhtusov@gmail.com</email></para>
     </sect1>
 

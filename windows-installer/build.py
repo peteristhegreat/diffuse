@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2011 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2006-2013 Derrick Moser <derrick_moser@yahoo.com>
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -25,7 +25,7 @@ import platform
 import subprocess
 import sys
 
-VERSION='0.4.6'
+VERSION='0.4.7'
 PACKAGE='1'
 PLATFORM='win' + ''.join([ c for c in platform.architecture()[0] if c.isdigit() ])
 INSTALLER='diffuse-%s-%s.%s' % (VERSION, PACKAGE, PLATFORM)

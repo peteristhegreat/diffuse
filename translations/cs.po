@@ -23,7 +23,7 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 
 #: diffuse:68
-msgid "Copyright © 2006-2011 Derrick Moser"
+msgid "Copyright © 2006-2013 Derrick Moser"
 msgstr "Copyright © 2006-2013 Derrick Moser"
 
 #: diffuse:86
