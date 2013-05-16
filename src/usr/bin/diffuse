@@ -470,8 +470,8 @@ class Resources:
                 modifiers |= gtk.gdk.SHIFT_MASK
             elif token == 'Ctrl':
                 modifiers |= gtk.gdk.CONTROL_MASK
-            elif token == 'Meta':
-                modifiers |= gtk.gdk.META_MASK
+            elif token == 'Alt':
+                modifiers |= gtk.gdk.MOD1_MASK
             elif len(token) == 0 or token[0] == '_':
                 raise ValueError()
             else:
