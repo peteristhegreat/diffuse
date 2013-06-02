@@ -232,7 +232,7 @@ processFiles(install, os.path.join(destdir, prefix[1:]), 'src/usr/', {
         'share/diffuse/syntax/*.syntax': None,
         'share/gnome/help/diffuse/*/diffuse.xml': [ ('/usr/', prefix), ('/etc/', sysconfdir) ],
         'share/omf/diffuse/diffuse-*.omf': [ ('/usr/', prefix) ],
-        'share/pixmaps/diffuse.png': None
+        'share/icons/hicolor/*/apps/diffuse.png': None
     })
 
 # install manual
@@ -260,12 +260,12 @@ if not install:
 if not files_only:
     print 'Performing post %s tasks.' % (stage, )
 
+    cmds = [ [ 'update-desktop-database' ],
+             [ 'gtk-update-icon-cache', os.path.join(destdir, os.path.join(prefix, 'icons/hicolor')[1:]) ] ]
     if install:
-        cmds = [ [ 'update-desktop-database' ],
-                 [ 'scrollkeeper-update', '-q', '-o', os.path.join(destdir, os.path.join(prefix, 'share/omf/diffuse')[1:]) ] ]
+        cmds.append([ 'scrollkeeper-update', '-q', '-o', os.path.join(destdir, os.path.join(prefix, 'share/omf/diffuse')[1:]) ])
     else:
-        cmds = [ [ 'update-desktop-database' ],
-                 [ 'scrollkeeper-update', '-q' ] ]
+        cmds.append([ 'scrollkeeper-update', '-q' ])
     for c in cmds:
         for p in os.environ['PATH'].split(os.pathsep):
             if os.path.exists(os.path.join(p, c[0])):
