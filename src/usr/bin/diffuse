@@ -4556,6 +4556,10 @@ class FileDiffViewer(gtk.Table):
         # scroll vertically to current line
         self._ensure_line_is_visible(i)
 
+    def __set_clipboard_text(self, clipboard, s):
+        # remove embedded nulls as the clipboard cannot handle them
+        gtk.clipboard_get(clipboard).set_text(s.replace('\0', ''))
+
     # change the current selection in CHAR_MODE
     # use extend=True to extend the selection
     def setCurrentChar(self, i, j, si=None, sj=None):
@@ -4576,8 +4580,7 @@ class FileDiffViewer(gtk.Table):
         self.selection_char = sj
 
         if extend:
-            # remove embedded nulls as the clipboard cannot handle them
-            gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).set_text(self.getSelectedText().replace('\0', ''))
+            self.__set_clipboard_text(gtk.gdk.SELECTION_PRIMARY, self.getSelectedText())
 
         self._cursor_position_changed(True)
         self.emit('cursor_changed')
@@ -5825,7 +5828,7 @@ class FileDiffViewer(gtk.Table):
     # 'copy' action
     def copy(self):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
-            gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD).set_text(self.getSelectedText())
+            self.__set_clipboard_text(gtk.gdk.SELECTION_CLIPBOARD, self.getSelectedText())
 
     # 'cut' action
     def cut(self):
