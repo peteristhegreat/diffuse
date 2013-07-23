@@ -4047,7 +4047,7 @@ class FileDiffViewer(gtk.Table):
             text = text.upper()
         return text
 
-    # align sets of lines by insertting null spacers and updating the size
+    # align sets of lines by inserting null spacers and updating the size
     # of blocks to which they belong
     #
     # Leftlines and rightlines are list of list of lines.  Only the inner list
@@ -5528,7 +5528,7 @@ class FileDiffViewer(gtk.Table):
         if self.mode == CHAR_MODE:
             # notify input method of text surrounding the cursor
             s = nullToEmpty(self.getLineText(self.current_pane, self.current_line))
-            s, n = codecs.encode(s, 'utf_8'), len(codecs.encode(s[:self.current_char]), 'utf_8')
+            s, n = codecs.encode(s, 'utf_8'), len(codecs.encode(s[:self.current_char], 'utf_8'))
             im.set_surrounding(s, len(s), n)
 
     # callback for 'focus_in_event'
