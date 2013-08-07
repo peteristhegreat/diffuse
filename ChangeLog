@@ -1,3 +1,7 @@
+- fixed a bug that prevented drag-and-drop of files with non-ASCII characters
+- improved image quality of icons used on POSIX systems
+- added Chi Ming and Wei-Lun Chao's Traditional Chinese translation
+
 Diffuse 0.4.7 - 2013-05-13
 - added Jindřich Šesták's Czech translation
 - improved character editing to allow easy indenting and moving the cursor by whole words

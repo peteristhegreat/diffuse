@@ -7021,7 +7021,7 @@ class Diffuse(gtk.Window):
                 if i > start:
                     p = url2path(s[start:i])
                     if p is not None:
-                        ss.append(p)
+                        ss.append(unicode(p, 'utf_8'))
             # load the first valid file
             for s in ss:
                 if os.path.isfile(s):
