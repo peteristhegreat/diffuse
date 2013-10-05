@@ -119,7 +119,7 @@ for p in glob.glob('..\\src\\usr\\share\\diffuse\\syntax\\*.syntax'):
 copyFile('diffuserc', 'dist\\diffuserc')
 
 # application icon
-copyFile('diffuse.ico', 'dist\\diffuse.ico')
+copyFile('..\\src\\usr\\share\\icons\\hicolor\\48x48\\apps\\diffuse.png', 'dist\\diffuse.png')
 
 # translations
 mkdir('dist\\share\\locale')

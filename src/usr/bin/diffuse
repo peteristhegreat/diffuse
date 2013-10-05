@@ -154,7 +154,7 @@ whitespace = ' \t\n\r\x0b\x0c'
 if __name__ == '__main__':
     # handle platform specific icon
     if isWindows():
-        iconpath = os.path.join(bin_dir, 'diffuse.ico')
+        iconpath = os.path.join(bin_dir, 'diffuse.png')
     else:
         iconpath = os.path.join(bin_dir, '../share/pixmaps/diffuse.png')
     if os.path.isfile(iconpath):
