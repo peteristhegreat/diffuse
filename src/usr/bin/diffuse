@@ -7364,7 +7364,9 @@ class Diffuse(gtk.Window):
 
         # state information that should persist across sessions
         self.bool_state = { 'window_maximized': False, 'search_matchcase': False, 'search_backwards': False }
-        self.int_state = { 'window_x': 0, 'window_y': 0, 'window_width': 1024, 'window_height': 768 }
+        self.int_state = { 'window_width': 1024, 'window_height': 768 }
+        self.int_state['window_x'] = max(0, (gtk.gdk.screen_width() - self.int_state['window_width']) / 2)
+        self.int_state['window_y'] = max(0, (gtk.gdk.screen_height() - self.int_state['window_height']) / 2)
         self.connect('configure_event', self.configure_cb)
         self.connect('window_state_event', self.window_state_cb)
 
