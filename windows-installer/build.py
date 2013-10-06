@@ -103,9 +103,10 @@ copyFile(os.path.join(os.environ['SYSTEMROOT'], 'WinSxS\\Manifests\\x86_Microsof
 
 # include GTK dependencies
 gtk_dir = os.environ['GTK_BASEPATH']
-copyDir(os.path.join(gtk_dir, 'lib'), 'dist\\lib')
 copyDir(os.path.join(gtk_dir, 'etc'), 'dist\\etc')
+copyDir(os.path.join(gtk_dir, 'lib'), 'dist\\lib')
 mkdir('dist\\share')
+copyDir(os.path.join(gtk_dir, 'share\\icons'), 'dist\\share\\icons')
 copyDir(os.path.join(gtk_dir, 'share\\themes'), 'dist\\share\\themes')
 
 #
