@@ -60,7 +60,7 @@ syntax_pattern string string c++_string '.[^\\"]*'
 # raw string
 syntax_pattern normal raw_string c++_string '(u|u8|U|L)?R"[^\(]*\('
 syntax_pattern raw_string normal c++_string '\)[^\)]*"'
-syntax_pattern raw_string raw_string c++_string '.[^\\\)"]*'
+syntax_pattern raw_string raw_string c++_string '.[^\)]*'
 
 # literals
 syntax_pattern normal normal c++_literal '((([0-9]+\.[0-9]*|\.[0-9]+)(e[\+\-]?[0-9]+)?|[0-9]+e[\+\-]?[0-9]+)[fl]?|(0|[1-9][0-9]*)f|(0x[0-9a-f]+|0[0-7]*|[1-9][0-9]*)(ul?|lu?)?)' ignorecase
