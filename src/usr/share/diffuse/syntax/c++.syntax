@@ -1,5 +1,5 @@
 # C++ syntax file for Diffuse
-# Copyright (C) 2008-2009 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2008-2013 Derrick Moser <derrick_moser@yahoo.com>
 syntax C++ normal text
 syntax_files C++ '\.(h|c|C|cc|cxx|c\+\+|cpp)$'
 
@@ -59,13 +59,13 @@ syntax_pattern string string c++_string '.[^\\"]*'
 
 # literals
 syntax_pattern normal normal c++_literal '((([0-9]+\.[0-9]*|\.[0-9]+)(e[\+\-]?[0-9]+)?|[0-9]+e[\+\-]?[0-9]+)[fl]?|(0|[1-9][0-9]*)f|(0x[0-9a-f]+|0[0-7]*|[1-9][0-9]*)(ul?|lu?)?)' ignorecase
-syntax_pattern normal normal c++_literal '\b(true|false|M_E|M_LOG2E|M_LOG10E|M_LN2|M_LN10|M_PI|M_PI_2|M_PI_4|M_1_PI|M_2_PI|M_2_SQRTPI|M_SQRT2|M_SQRT1_2|NULL)\b'
+syntax_pattern normal normal c++_literal '\b(true|false|M_E|M_LOG2E|M_LOG10E|M_LN2|M_LN10|M_PI|M_PI_2|M_PI_4|M_1_PI|M_2_PI|M_2_SQRTPI|M_SQRT2|M_SQRT1_2|NULL|nullptr)\b'
 
 # typing keywords
-syntax_pattern normal normal c++_type '\b(auto|bool|char|class|const|double|enum|explicit|export|extern|float|inline|int|long|mutable|namespace|register|short|signed|static|struct|template|typedef|typename|union|unsigned|virtual|void|volatile|wchar_t)\b'
+syntax_pattern normal normal c++_type '\b(_Alignas|_Atomic|_Bool|_Complex|_Imaginary|_Noreturn|_Thread_local|alignas|auto|bool|char|char16_t|char32_t|class|const|constexpr|double|enum|explicit|export|extern|float|inline|int|long|mutable|namespace|noreturn|register|restrict|short|signed|static|struct|template|thread_local|typedef|typename|union|unsigned|virtual|void|volatile|wchar_t)\b'
 
 # keywords
-syntax_pattern normal normal c++_keyword '\b(asm|break|case|catch|const_cast|continue|default|delete|do|dynamic_cast|else|for|friend|goto|if|new|operator|private|protected|public|reinterpret_cast|return|sizeof|static_cast|switch|this|throw|try|typeid|using|while)\b'
+syntax_pattern normal normal c++_keyword '\b(_Alignof|_Generic|_Static_assert|alignof|and|and_eq|asm|bitand|bitor|break|case|catch|compl|const_cast|continue|decltype|default|delete|do|dynamic_cast|else|for|friend|goto|if|new|noexcept|not|not_eq|operator|or|or_eq|private|protected|public|reinterpret_cast|return|sizeof|static_assert|static_cast|switch|this|throw|try|typeid|using|while|xor|xor_eq)\b'
 
 # punctuation
 syntax_pattern normal normal c++_punctuation '[!~%\|\&\^\(\)\<\>\*\-\+=\{\}\[\]:;,\?]+'

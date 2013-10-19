@@ -1,3 +1,4 @@
+- updated C/C++ syntax highlighting to recognise C11/C++11 keywords
 - fixed a bug that prevented drag-and-drop of files with non-ASCII characters
 - improved image quality of icons used on POSIX systems
 - added Chi Ming and Wei-Lun Chao's Traditional Chinese translation
