@@ -1803,7 +1803,7 @@ class VCSs:
 
         def getCommitTemplate(self, prefs, rev, names):
             # build command
-            args = [ prefs.getString('git_bin'), 'log', '-1', '--pretty=format:', '--name-status', rev ]
+            args = [ prefs.getString('git_bin'), 'show', '--pretty=format:', '--name-status', rev ]
             # build list of interesting files
             pwd, isabs = os.path.abspath(os.curdir), False
             for name in names:
@@ -1816,7 +1816,7 @@ class VCSs:
                 # parse response
                 if len(s) < 2 or s[0] not in 'ADM':
                     continue
-                k = self._extractPath(s[1:], prefs)
+                k = self._extractPath(s[2:], prefs)
                 if fs.contains(k):
                     if not isabs:
                         k = relpath(pwd, k)
