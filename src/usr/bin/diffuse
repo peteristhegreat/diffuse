@@ -991,7 +991,7 @@ class Preferences:
             for k in self.int_prefs.keys():
                 self.int_prefs[k] = widgets[k].get_value_as_int()
             for k in self.string_prefs.keys():
-                self.string_prefs[k] = widgets[k].get_text()
+                self.string_prefs[k] = nullToEmpty(widgets[k].get_text())
             try:
                 ss = []
                 for k, v in self.bool_prefs.items():
