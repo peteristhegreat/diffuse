@@ -6655,6 +6655,13 @@ def confirmTabClose(parent):
 # custom dialogue for picking files with widgets for specifying the encoding
 # and revision
 class FileChooserDialog(gtk.FileChooserDialog):
+    # record last chosen folder so the file chooser can start at a more useful
+    # location for empty panes
+    last_chosen_folder = os.path.realpath(os.curdir)
+
+    def __current_folder_changed_cb(self, widget):
+        FileChooserDialog.last_chosen_folder = widget.get_current_folder()
+
     def __init__(self, title, parent, prefs, action, accept, rev=False):
         gtk.FileChooserDialog.__init__(self, title, parent, action, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, accept, gtk.RESPONSE_OK))
         self.prefs = prefs
@@ -6675,7 +6682,8 @@ class FileChooserDialog(gtk.FileChooserDialog):
 
         self.vbox.pack_start(hbox, False, False, 0)
         hbox.show()
-        self.set_current_folder(unicode(os.path.realpath(os.curdir), sys.getfilesystemencoding()))
+        self.set_current_folder(unicode(self.last_chosen_folder, sys.getfilesystemencoding()))
+	self.connect('current-folder-changed', self.__current_folder_changed_cb)
 
     def set_encoding(self, encoding):
         self.encoding.set_text(encoding)
