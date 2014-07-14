@@ -155,14 +155,12 @@ if __name__ == '__main__':
     # handle platform specific icon
     if isWindows():
         iconpath = os.path.join(bin_dir, 'diffuse.png')
-    else:
-        iconpath = os.path.join(bin_dir, '../share/pixmaps/diffuse.png')
-    if os.path.isfile(iconpath):
-        gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(iconpath))
-    else:
-        # this can occur if we are run without a proper install
-        # it is just cosmetic, don't bother the user
-        logDebug('Missing icon %s' % (iconpath, ))
+        if os.path.isfile(iconpath):
+            gtk.window_set_default_icon(gtk.gdk.pixbuf_new_from_file(iconpath))
+        else:
+            # this can occur if we are run without a proper install
+            # it is just cosmetic, don't bother the user
+            logDebug('Missing icon %s' % (iconpath, ))
 
 # convenience class for displaying a message dialogue
 class MessageDialog(gtk.MessageDialog):
@@ -6683,7 +6681,7 @@ class FileChooserDialog(gtk.FileChooserDialog):
         self.vbox.pack_start(hbox, False, False, 0)
         hbox.show()
         self.set_current_folder(unicode(self.last_chosen_folder, sys.getfilesystemencoding()))
-	self.connect('current-folder-changed', self.__current_folder_changed_cb)
+        self.connect('current-folder-changed', self.__current_folder_changed_cb)
 
     def set_encoding(self, encoding):
         self.encoding.set_text(encoding)
@@ -6737,6 +6735,8 @@ gtk.about_dialog_set_url_hook(url_hook, None)
 class AboutDialog(gtk.AboutDialog):
     def __init__(self):
         gtk.AboutDialog.__init__(self)
+        if not isWindows():
+            self.set_logo_icon_name('diffuse')
         if hasattr(self, 'set_program_name'):
             # only available in pygtk >= 2.12
             self.set_program_name(APP_NAME)
