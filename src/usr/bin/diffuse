@@ -161,6 +161,9 @@ if __name__ == '__main__':
             # this can occur if we are run without a proper install
             # it is just cosmetic, don't bother the user
             logDebug('Missing icon %s' % (iconpath, ))
+    else:
+        # this is not automatically set on some older version of PyGTK
+        gtk.window_set_default_icon_name('diffuse')
 
 # convenience class for displaying a message dialogue
 class MessageDialog(gtk.MessageDialog):
