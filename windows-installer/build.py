@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013 Derrick Moser <derrick_moser@yahoo.com>
+# Copyright (C) 2006-2014 Derrick Moser <derrick_moser@yahoo.com>
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -120,7 +120,9 @@ for p in glob.glob('..\\src\\usr\\share\\diffuse\\syntax\\*.syntax'):
 copyFile('diffuserc', 'dist\\diffuserc')
 
 # application icon
-copyFile('..\\src\\usr\\share\\icons\\hicolor\\48x48\\apps\\diffuse.png', 'dist\\diffuse.png')
+for p in 16, 22, 24, 32, 48, 256:
+    s = '\\share\\icons\\hicolor\\%dx%d\\apps\\diffuse.png' % (p, p)
+    copyFile('..\\src\\usr' + s, 'dist' + s)
 
 # translations
 mkdir('dist\\share\\locale')
