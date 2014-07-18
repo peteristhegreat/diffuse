@@ -1,6 +1,9 @@
+Diffuse 0.4.8 - 2014-07-18
+- updated use of gtk.SpinButton and gtk.Entry to avoid quirks seen on some platforms
+- fixed a bug that prevented Diffuse from reviewing large git merge conflicts
 - updated C/C++ syntax highlighting to recognise C11/C++11 keywords
-- fixed a bug that prevented drag-and-drop of files with non-ASCII characters
-- improved image quality of icons used on POSIX systems
+- fixed a bug that prevented drag-and-drop of file paths with non-ASCII characters
+- improved image quality of icons
 - added Chi Ming and Wei-Lun Chao's Traditional Chinese translation
 
 Diffuse 0.4.7 - 2013-05-13

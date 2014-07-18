@@ -1,5 +1,5 @@
 '\" t
-.TH "DIFFUSE" "1" "2013\-05\-13" "diffuse 0\&.4\&.7" "Diffuse Manual"
+.TH "DIFFUSE" "1" "2014\-07\-18" "diffuse 0\&.4\&.8" "Diffuse Manual"
 .ie \n(.g .ds Aq \(aq
 .el       .ds Aq '
 .nh
@@ -13,7 +13,6 @@ diffuse \- graphical tool for merging and comparing text files
 \fBdiffuse\fR [\fB\-\-no\-rcfile\fR | \fB\-\-rcfile\ \fR\fB\fIfile\fR\fR] [[\fIoption\fR...] | [\fIfile\fR...]...]
 .SH "DESCRIPTION"
 .PP
-
 Diffuse
 is a graphical tool for merging and comparing text files\&.
 Diffuse
@@ -149,7 +148,6 @@ menu items to create additional tabs for comparing text files\&. File names and 
 Diffuse
 or in fields on the Open File dialogue\&.
 .PP
-
 Diffuse
 displays files side\-by\-side inserting gaps to align similar lines of text\&. Differences are highlighted with a different background colour\&.
 .SS "Comparison Summary"
@@ -200,7 +198,6 @@ Clear Edits
 menu item regardless of the order the edits were performed\&.
 .SH "VERSION CONTROL"
 .PP
-
 Diffuse
 can retrieve file revisions from several version control systems via their command line interface\&. The Microsoft Windows build of
 Diffuse
@@ -222,8 +219,6 @@ option will cause
 Diffuse
 to open comparison tabs for each file the version control system indicates has uncommitted modifications\&. This is convenient for reviewing all changes before committing or resolving a merge conflict\&. If no paths are specified the current working directory will be used\&. For example, view all of your uncommitted modifications with this command line:
 .PP
-
-.sp
 .if n \{\
 .RS 4
 .\}
@@ -240,8 +235,6 @@ and the local
 foo\&.C
 file:
 .PP
-
-.sp
 .if n \{\
 .RS 4
 .\}
@@ -262,8 +255,6 @@ and the local
 foo\&.C
 file:
 .PP
-
-.sp
 .if n \{\
 .RS 4
 .\}
@@ -281,8 +272,6 @@ foo\&.C
 and revision 321 of
 foo\&.C:
 .PP
-
-.sp
 .if n \{\
 .RS 4
 .\}
@@ -299,8 +288,6 @@ foo\&.C
 file, and revision HEAD of
 foo\&.C:
 .PP
-
-.sp
 .if n \{\
 .RS 4
 .\}
@@ -318,8 +305,6 @@ foo\&.C
 and revision 1\&.2\&.3 of
 foo\&.C:
 .PP
-
-.sp
 .if n \{\
 .RS 4
 .\}
@@ -330,12 +315,9 @@ $ \fBdiffuse \-c 1\&.2\&.3 foo\&.C\fR
 .RE
 .\}
 .PP
-
 Diffuse
 does not limit the number of panes that can be used for comparing files\&. The inputs to a Git octopus merge could be viewed with a command line like this:
 .PP
-
-.sp
 .if n \{\
 .RS 4
 .\}
@@ -1711,15 +1693,13 @@ on Microsoft Windows)
 .RE
 .SH "AUTHOR"
 .PP
-
 Diffuse
 was written by Derrick Moser
-derrick_moser@yahoo\&.com\&.
+<derrick_moser@yahoo\&.com>\&.
 .PP
-\(co 2006\-2013 Derrick Moser\&. All Rights Reserved\&.
+\(co 2006\-2014 Derrick Moser\&. All Rights Reserved\&.
 .SH "COPYING"
 .PP
-
 Diffuse
 is free software; you may redistribute it and/or modify it under the terms of the
 GNU General Public License

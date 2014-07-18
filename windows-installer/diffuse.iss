@@ -1,11 +1,11 @@
 ; Inno Setup file for Diffuse
 ;
-; Copyright (C) 2009-2013 Derrick Moser <derrick_moser@yahoo.com>
+; Copyright (C) 2009-2014 Derrick Moser <derrick_moser@yahoo.com>
 
 [Setup]
 AppId=Diffuse
 AppName={cm:ToolName}
-AppVerName=Diffuse 0.4.7
+AppVerName=Diffuse 0.4.8
 DefaultDirName={pf}\Diffuse
 DefaultGroupName=Diffuse
 UninstallDisplayIcon={app}\diffusew.exe

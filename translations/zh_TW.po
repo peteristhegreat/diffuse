@@ -7,7 +7,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: diffuse 0.4.7\n"
+"Project-Id-Version: diffuse 0.4.8\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-04-20 10:40-0400\n"
 "PO-Revision-Date: 2013-05-25 14:07+0800\n"
@@ -154,8 +154,8 @@ msgid "Copy Selection _Right"
 msgstr "複製選擇區域到右邊(_R)"
 
 #: ../src/usr/bin/diffuse:68
-msgid "Copyright © 2006-2013 Derrick Moser"
-msgstr "著作權 © 2006-2013 Derrick Moser"
+msgid "Copyright © 2006-2014 Derrick Moser"
+msgstr "著作權 © 2006-2014 Derrick Moser"
 
 #: ../src/usr/bin/diffuse:7459
 msgid "Cu_t"
