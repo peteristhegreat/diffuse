@@ -120,9 +120,7 @@ for p in glob.glob('..\\src\\usr\\share\\diffuse\\syntax\\*.syntax'):
 copyFile('diffuserc', 'dist\\diffuserc')
 
 # application icon
-for p in 16, 22, 24, 32, 48, 256:
-    s = '\\share\\icons\\hicolor\\%dx%d\\apps\\diffuse.png' % (p, p)
-    copyFile('..\\src\\usr' + s, 'dist' + s)
+copyDir('..\\src\\usr\\share\\icons', 'dist\\share\\icons')
 
 # translations
 mkdir('dist\\share\\locale')
