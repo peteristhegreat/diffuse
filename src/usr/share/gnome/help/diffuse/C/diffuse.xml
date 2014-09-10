@@ -1751,9 +1751,9 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>line_difference_alpha</userinput></term>
+            <term><userinput>line_difference_opacity</userinput></term>
             <listitem>
-              <para>alpha value used when compositing line difference colours</para>
+              <para>opacity used when compositing line difference colours</para>
               <para>Defaults: <literal>0.3</literal></para>
             </listitem>
           </varlistentry>

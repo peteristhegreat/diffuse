@@ -1469,9 +1469,9 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>line_difference_alpha</userinput></term>
+            <term><userinput>line_difference_opacity</userinput></term>
             <listitem>
-              <para>Valore di trasparenza utilizzato durante la composizione del colore per le differenze di riga</para>
+              <para>Opacità utilizzata durante la composizione del colore per le differenze di riga</para>
               <para>Predefinito: <literal>0.3</literal></para>
             </listitem>
           </varlistentry>

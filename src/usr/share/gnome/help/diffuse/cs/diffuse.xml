@@ -1484,7 +1484,7 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>line_difference_alpha</userinput></term>
+            <term><userinput>line_difference_opacity</userinput></term>
             <listitem>
               <para>průhlednost použitá při míchání barev pro zvýraznění rozdílných řádků</para>
               <para>Výchozí: <literal>0.3</literal></para>

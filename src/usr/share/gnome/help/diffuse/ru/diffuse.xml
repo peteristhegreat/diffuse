@@ -1767,9 +1767,9 @@
           </varlistentry>
 
           <varlistentry>
-            <term><userinput>line_difference_alpha</userinput></term>
+            <term><userinput>line_difference_opacity</userinput></term>
             <listitem>
-              <para>значение альфы, используемое при составлении цветов различия строк</para>
+              <para>непрозрачность, используемое при составлении цветов различия строк</para>
               <para>По умолчаниям: <literal>0.3</literal></para>
             </listitem>
           </varlistentry>
