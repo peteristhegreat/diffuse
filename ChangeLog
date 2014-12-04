@@ -1,3 +1,5 @@
+- added a preference and command line option to specify the version control system search order
+
 Diffuse 0.4.8 - 2014-07-18
 - updated use of gtk.SpinButton and gtk.Entry to avoid quirks seen on some platforms
 - fixed a bug that prevented Diffuse from reviewing large git merge conflicts

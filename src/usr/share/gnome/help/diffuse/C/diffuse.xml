@@ -235,6 +235,16 @@
           </varlistentry>
 
           <varlistentry>
+            <term><userinput>-V</userinput>, <userinput>--vcs</userinput> <replaceable>vcs-list</replaceable></term>
+            <listitem>
+              <para>
+                Search for version control systems in the ordering:
+                <replaceable>vcs-list</replaceable>.
+              </para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
             <term><userinput>--line <replaceable>line</replaceable></userinput></term>
             <listitem>
               <para>
