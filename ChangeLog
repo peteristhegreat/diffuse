@@ -1,3 +1,4 @@
+- updated Python highlighting for Python 3 grammar
 - added a preference and command line option to specify the version control system search order
 
 Diffuse 0.4.8 - 2014-07-18
