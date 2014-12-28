@@ -54,7 +54,7 @@ syntax_pattern normal normal python_literal '(([0-9]+\.[0-9]*|\.[0-9]+)(e[\+\-]?
 syntax_pattern normal normal python_literal '\b(None|True|False)\b'
 
 # types
-syntax_pattern normal normal python_type '\b(bool|buffer|builtin_function_or_method|classobj|code|complex|dict|dictproxy|ellipsis|file|float|frame|function|generator|instance|instancemethod|int|list|long|module|object|slice|str|traceback|tuple|type|unicode|xrange|NoneType|NotImplementedType)\b'
+syntax_pattern normal normal python_type '\b(bool|buffer|builtin_function_or_method|bytes|bytearray|classobj|code|complex|dict|dictproxy|ellipsis|file|float|frame|frozenset|function|generator|instance|instancemethod|int|list|long|module|object|range|slice|str|traceback|tuple|type|unicode|xrange|NoneType|NotImplementedType)\b'
 
 # keywords
 syntax_pattern normal normal python_keyword '\b(and|as|assert|break|continue|del|elif|else|except|exec|finally|for|global|if|in|is|lambda|nonlocal|not|or|pass|print|raise|return|try|while|with|yield)\b'
