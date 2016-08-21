@@ -1,3 +1,4 @@
+- added Guillaume Hoffmann's Darcs support improvements
 - add support for Git submodules
 - added Akom Chotiphantawanon's Thai translation
 - updated Python highlighting for Python 3 grammar

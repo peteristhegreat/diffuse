@@ -1712,11 +1712,11 @@ class _Darcs:
         if mods:
             args.extend(['whatsnew', '-s'])
         else:
-            args.extend(['changes', '--number', '-s'])
+            args.extend(['log', '--number', '-s'])
             try:
                 args.extend(['-n', str(int(rev))])
             except ValueError:
-                args.extend(['--max-count', '1', '-p', rev])
+                args.extend(['-h', rev])
         # build list of interesting files
         pwd, isabs = os.path.abspath(os.curdir), False
         for name in names:
@@ -1779,7 +1779,8 @@ class _Darcs:
                     if fs.contains(k):
                         if not isabs:
                             k = relpath(pwd, k)
-                        modified[k] = [ (k, prev), (k, rev) ]
+                        if k not in renamed:
+                            modified[k] = [ (k, prev), (k, rev) ]
             elif x == ' ':
                 # renamed
                 k = s[1:].split(' -> ')
@@ -1815,7 +1816,7 @@ class _Darcs:
         try:
             args.extend([ '-n', str(int(rev)) ])
         except ValueError:
-            args.extend([ '-p', rev ])
+            args.extend([ '-h', rev ])
         args.append(safeRelativePath(self.root, name, prefs, 'darcs_cygwin'))
         return popenRead(self.root, args, prefs, 'darcs_bash')
 
