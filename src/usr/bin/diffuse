@@ -6897,6 +6897,7 @@ class Diffuse(gtk.Window):
 
                 self.label = label = gtk.Label()
                 label.set_size_request(0, label.get_size_request()[1])
+                label.set_selectable(True)
                 self.pack_start(label, True, True, 0)
                 label.show()
 
