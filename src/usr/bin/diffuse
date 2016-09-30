@@ -8435,7 +8435,7 @@ if __name__ == '__main__':
                 specs, labels, options = [], [], {}
                 # start a new tab
                 mode = 'single'
-            elif i + 1 < argc and arg in [ '-V', '--vcs-order' ]:
+            elif i + 1 < argc and arg in [ '-V', '--vcs' ]:
                 i += 1
                 diff.prefs.setString('vcs_search_order', unicode(args[i], sys.getfilesystemencoding()))
                 diff.preferences_updated()
