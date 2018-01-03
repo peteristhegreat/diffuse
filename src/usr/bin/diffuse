@@ -132,7 +132,6 @@ import glob
 import gobject
 import pango
 import re
-import shlex
 import stat
 import string
 import subprocess
@@ -150,6 +149,47 @@ def logDebug(s):
 # avoid some dictionary lookups when string.whitespace is used in loops
 # this is sorted based upon frequency to speed up code for stripping whitespace
 whitespace = ' \t\n\r\x0b\x0c'
+
+# unfortunately some Python implementations of shlex.split do not support
+# unicode
+def shlex_split(s, allow_comments=False):
+    r = []
+    idx, n = 0, len(s)
+    while idx < n:
+        while idx < n and s[idx] in whitespace:
+            idx += 1
+        if idx == n or (allow_comments and s[idx] == u'#'):
+            break
+        v = []
+        while idx < n and s[idx] not in whitespace:
+            c = s[idx]
+            if c == u'\\':
+                idx += 1
+                if idx < n:
+                    v.append(s[idx])
+                    idx += 1
+            elif c == u"'":
+                idx += 1
+                while idx < n and s[idx] != u"'":
+                    v.append(s[idx])
+                    idx += 1
+                if idx < n and s[idx] == u"'":
+                    idx += 1
+            elif c == u'"':
+                idx += 1
+                while idx < n and s[idx] != u'"':
+                    if s[idx] == u'\\':
+                        idx += 1
+                    if idx < n:
+                        v.append(s[idx])
+                        idx += 1
+                if idx < n and s[idx] == u'"':
+                    idx += 1
+            else:
+                v.append(s[idx])
+                idx += 1
+        r.append(u''.join(v))
+    return r
 
 # escape special glob characters
 def globEscape(s):
@@ -588,7 +628,7 @@ class Resources:
 
         # FIXME: improve validation
         for i, s in enumerate(ss):
-            args = shlex.split(s, True)
+            args = shlex_split(s, True)
             if len(args) == 0:
                 continue
 
@@ -925,7 +965,7 @@ class Preferences:
                 f.close()
                 for j, s in enumerate(ss):
                     try:
-                        a = shlex.split(s, True)
+                        a = shlex_split(s, True)
                         if len(a) > 0:
                             p = a[0]
                             if len(a) == 2 and p in self.bool_prefs:
@@ -2080,7 +2120,7 @@ class _Mtn:
         i = 0
         while i < len(ss):
             # process results
-            s = shlex.split(ss[i])
+            s = shlex_split(ss[i])
             i += 1
             if len(s) < 2:
                 continue
@@ -2108,7 +2148,7 @@ class _Mtn:
                 if fs.contains(k):
                     modified[arg1] = k
             elif arg == 'rename':
-                s = shlex.split(ss[i])
+                s = shlex_split(ss[i])
                 i += 1
                 if len(s) > 1 and s[0] == 'to':
                     # renamed file
@@ -2120,7 +2160,7 @@ class _Mtn:
             # remove directories
             removed_dirs = set()
             for s in popenReadLines(self.root, [ vcs_bin, 'automate', 'get_manifest_of', prev ], prefs, 'mtn_bash'):
-                s = shlex.split(s)
+                s = shlex_split(s)
                 if len(s) > 1 and s[0] == 'dir':
                     removed_dirs.add(s[1])
             for k in removed_dirs:
@@ -2176,7 +2216,7 @@ class _Mtn:
                 s = ss[i]
                 i += 1
                 # properties are terminated by a blank line
-                s = shlex.split(s)
+                s = shlex_split(s)
                 if len(s) == 0:
                     break
                 m[s[0]] = s[1:]
@@ -7542,7 +7582,7 @@ class Diffuse(gtk.Window):
         names = theResources.getSyntaxNames()
         if len(names) > 0:
             submenudef.append([])
-            names.sort(key=str.lower)
+            names.sort(key=unicode.lower)
             for name in names:
                 submenudef.append([name, self.syntax_cb, name, None, 'syntax_highlighting_' + name, True, None, ('syntax', name) ])
 
@@ -7681,7 +7721,7 @@ class Diffuse(gtk.Window):
                 f.close()
                 for j, s in enumerate(ss):
                     try:
-                        a = shlex.split(s, True)
+                        a = shlex_split(s, True)
                         if len(a) > 0:
                             if len(a) == 2 and a[0] in self.bool_state:
                                 self.bool_state[a[0]] = (a[1] == 'True')
