@@ -1,3 +1,11 @@
+2023 News:
+
+ - Copied from SVN to Git!
+ - Port to Python3 and Gtk 3 started!  Testing in Ubuntu
+
+--------------
+--------------
+
 Diffuse
 Version 0.4.8
 
@@ -20,6 +28,7 @@ Some key features of Diffuse:
 - Unicode support
 - unlimited undo
 - easy keyboard navigation
+
 
 ----
 

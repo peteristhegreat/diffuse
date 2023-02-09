@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2006-2014 Derrick Moser <derrick_moser@yahoo.com>
@@ -71,7 +71,7 @@ WEBSITE = 'http://diffuse.sourceforge.net/'
 # print a UTF-8 string using the host's native encoding
 def printMessage(s):
     try:
-        print codecs.encode(unicode(s, 'utf_8'), sys.getfilesystemencoding())
+        print(codecs.encode(str(s, 'utf_8'), sys.getfilesystemencoding()))
     except UnicodeEncodeError:
         pass
 
@@ -122,15 +122,17 @@ Display Options:
   ( -w | --ignore-all-space )      Ignore white space differences'''))
         sys.exit(0)
 
-import pygtk
-pygtk.require('2.0')
-import gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+gi.require_version('Gdk', '3.0')
+from gi.repository import Gdk, GdkPixbuf
 
 import difflib
 import encodings
 import glob
-import gobject
-import pango
+from gi.repository import GObject
+from gi.repository import Pango
 import re
 import stat
 import string
@@ -161,41 +163,41 @@ def shlex_split(s, allow_comments=False):
             idx += 1
 
         # skip comments
-        if idx == n or (allow_comments and s[idx] == u'#'):
+        if idx == n or (allow_comments and s[idx] == '#'):
             break
 
         v = []
         while idx < n and s[idx] not in whitespace:
             c = s[idx]
-            if c == u'\\':
+            if c == '\\':
                 # parse escaped character
                 idx += 1
                 if idx < n:
                     v.append(s[idx])
                     idx += 1
-            elif c == u"'":
+            elif c == "'":
                 # parse '-quoted string
                 idx += 1
-                end = s.find(u"'", idx)
+                end = s.find("'", idx)
                 if end < 0:
                     v.append(s[idx:])
                     idx = n
                 else:
                     v.append(s[idx:end])
                     idx = end + 1
-            elif c == u'"':
+            elif c == '"':
                 # parse "-quoted string
                 idx += 1
                 while idx < n:
-                    if s[idx] == u'"':
+                    if s[idx] == '"':
                         idx += 1
                         break
-                    end = s.find(u'"', idx)
+                    end = s.find('"', idx)
                     end1 = end
                     if end1 < 0:
                         end1 = n
                     while idx < end1:
-                        b = s.find(u'\\', idx, end1)
+                        b = s.find('\\', idx, end1)
                         if b < 0:
                             v.append(s[idx:end1])
                             idx = end1
@@ -209,32 +211,32 @@ def shlex_split(s, allow_comments=False):
                 # parse unescaped character
                 v.append(s[idx])
                 idx += 1
-        r.append(u''.join(v))
+        r.append(''.join(v))
     return r
 
 # escape special glob characters
 def globEscape(s):
-    m = dict([ (c, u'[%s]' % (c, )) for c in u'[]?*' ])
-    return u''.join([ m.get(c, c) for c in s ])
+    m = dict([ (c, '[%s]' % (c, )) for c in '[]?*' ])
+    return ''.join([ m.get(c, c) for c in s ])
 
 # associate our icon with all of our windows
 if __name__ == '__main__':
     # this is not automatically set on some older version of PyGTK
-    gtk.window_set_default_icon_name('diffuse')
+    Gtk.Window.set_default_icon_name('diffuse')
 
 # convenience class for displaying a message dialogue
-class MessageDialog(gtk.MessageDialog):
+class MessageDialog(Gtk.MessageDialog):
     def __init__(self, parent, type, s):
-        if type == gtk.MESSAGE_ERROR:
-            buttons = gtk.BUTTONS_OK
+        if type == Gtk.MessageType.ERROR:
+            buttons = Gtk.ButtonsType.OK
         else:
-            buttons = gtk.BUTTONS_OK_CANCEL
-        gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, type, buttons, s)
+            buttons = Gtk.ButtonsType.OK_CANCEL
+        GObject.GObject.__init__(self, parent, Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT, type, buttons, s)
         self.set_title(APP_NAME)
 
 # report error messages
 def logError(s):
-    m = MessageDialog(None, gtk.MESSAGE_ERROR, s)
+    m = MessageDialog(None, Gtk.MessageType.ERROR, s)
     m.run()
     m.destroy()
 
@@ -339,7 +341,7 @@ def readlines(fd):
     return strip_eols(splitlines(fd.read()))
 
 def readconfiglines(fd):
-    return unicode(fd.read(), 'utf_8').replace(u'\r', u'').split(u'\n')
+    return str(fd.read()).replace('\r', '').split('\n')
 
 # This class to hold all customisable behaviour not exposed in the preferences
 # dialogue: hotkey assignment, colours, syntax highlighting, etc.
@@ -528,22 +530,26 @@ class Resources:
         key = None
         for token in v.split('+'):
             if token == 'Shift':
-                modifiers |= gtk.gdk.SHIFT_MASK
+                modifiers |= Gdk.ModifierType.SHIFT_MASK
             elif token == 'Ctrl':
-                modifiers |= gtk.gdk.CONTROL_MASK
+                modifiers |= Gdk.ModifierType.CONTROL_MASK
             elif token == 'Alt':
-                modifiers |= gtk.gdk.MOD1_MASK
+                modifiers |= Gdk.ModifierType.MOD1_MASK
             elif len(token) == 0 or token[0] == '_':
                 raise ValueError()
             else:
-                if token[0].isdigit():
-                    token = '_' + token
-                if not hasattr(gtk.keysyms, token):
-                    raise ValueError()
-                key = getattr(gtk.keysyms, token)
+                key, mods = Gtk.accelerator_parse(token)
+                #print("acc", modifiers, key)
+                #if token[0].isdigit():
+                #    token = '_' + token
+                # print("key", token)
+                # key = ord(token.lower())
+                # if not hasattr(Gtk.keysyms, token):
+                #     raise ValueError()
+                # key = getattr(Gtk.keysyms, token)
         if key is None:
             raise ValueError()
-        key_tuple = (ctx, (key, modifiers))
+        key_tuple = (ctx, (key, Gdk.ModifierType(modifiers)))
 
         # remove any existing binding
         if key_tuple in self.keybindings_lookup:
@@ -556,7 +562,7 @@ class Resources:
 
         # menu items can only have one binding
         if ctx == 'menu':
-            for k in bindings.keys():
+            for k in list(bindings.keys()):
                 self._removeKeyBinding(k)
 
         # add the binding
@@ -576,7 +582,7 @@ class Resources:
 
     def getKeyBindings(self, ctx, s):
         try:
-            return [ t for c, t in self.keybindings[(ctx, s)].keys() ]
+            return [ t for c, t in list(self.keybindings[(ctx, s)].keys()) ]
         except KeyError:
             return []
 
@@ -619,20 +625,20 @@ class Resources:
 
     # syntax highlighting
     def getSyntaxNames(self):
-        return self.syntaxes.keys()
+        return list(self.syntaxes.keys())
 
     def getSyntax(self, name):
         return self.syntaxes.get(name, None)
 
     def guessSyntaxForFile(self, name, ss):
         name = os.path.basename(name)
-        for key, pattern in self.syntax_file_patterns.items():
+        for key, pattern in list(self.syntax_file_patterns.items()):
             if pattern.search(name):
                 return key
         # fallback to analysing the first line of the file
         if len(ss) > 0:
             s = ss[0]
-            for key, pattern in self.syntax_magic_patterns.items():
+            for key, pattern in list(self.syntax_magic_patterns.items()):
                 if pattern.search(s):
                     return key
 
@@ -656,7 +662,7 @@ class Resources:
             try:
                 # eg. add Python syntax highlighting:
                 #    import /usr/share/diffuse/syntax/python.syntax
-                if args[0] == u'import' and len(args) == 2:
+                if args[0] == 'import' and len(args) == 2:
                     path = os.path.expanduser(args[1])
                     # relative paths are relative to the parsed file
                     path = os.path.join(globEscape(os.path.dirname(file_name)), path)
@@ -670,28 +676,28 @@ class Resources:
                         self.parse(os.path.abspath(path))
                 # eg. make Ctrl+o trigger the open_file menu item
                 #    keybinding menu open_file Ctrl+o
-                elif args[0] == u'keybinding' and len(args) == 4:
+                elif args[0] == 'keybinding' and len(args) == 4:
                     self.setKeyBinding(args[1], args[2], args[3])
                 # eg. set the regular background colour to white
                 #    colour text_background 1.0 1.0 1.0
-                elif args[0] in [ u'colour', u'color' ] and len(args) == 5:
+                elif args[0] in [ 'colour', 'color' ] and len(args) == 5:
                     self.colours[args[1]] = Colour(float(args[2]), float(args[3]), float(args[4]))
                 # eg. set opacity of the line_selection colour
                 #    float line_selection_opacity 0.4
-                elif args[0] == u'float' and len(args) == 3:
+                elif args[0] == 'float' and len(args) == 3:
                     self.floats[args[1]] = float(args[2])
                 # eg. set the help browser
                 #    string help_browser gnome-help
-                elif args[0] == u'string' and len(args) == 3:
+                elif args[0] == 'string' and len(args) == 3:
                     self.strings[args[1]] = args[2]
-                    if args[1] == u'difference_colours':
+                    if args[1] == 'difference_colours':
                         self.setDifferenceColours(args[2])
                 # eg. start a syntax specification for Python
                 #    syntax Python normal text
                 # where 'normal' is the name of the default state and
                 # 'text' is the classification of all characters not
                 # explicitly matched by a syntax highlighting rule
-                elif args[0] == u'syntax' and (len(args) == 2 or len(args) == 4):
+                elif args[0] == 'syntax' and (len(args) == 2 or len(args) == 4):
                     key = args[1]
                     if len(args) == 2:
                         # remove file pattern for a syntax specification
@@ -717,18 +723,21 @@ class Resources:
                 # the pattern '#' is matched and classify the matched
                 # characters as 'python_comment'
                 #    syntax_pattern normal comment python_comment '#'
-                elif args[0] == u'syntax_pattern' and self.current_syntax is not None and len(args) >= 5:
+                elif args[0] == 'syntax_pattern' and self.current_syntax is not None and len(args) >= 5:
                     flags = 0
                     for arg in args[5:]:
-                        if arg == u'ignorecase':
+                        if arg == 'ignorecase':
                             flags |= re.IGNORECASE
                         else:
                             raise ValueError()
+                    # print("args", args)
+                    if "\\C" in args[4]:
+                        continue
                     self.current_syntax.addPattern(args[1], args[2], args[3], re.compile(args[4], flags))
                 # eg. default to the Python syntax rules when viewing
                 # a file ending with '.py' or '.pyw'
                 #    syntax_files Python '\.pyw?$'
-                elif args[0] == u'syntax_files' and (len(args) == 2 or len(args) == 3):
+                elif args[0] == 'syntax_files' and (len(args) == 2 or len(args) == 3):
                     key = args[1]
                     if len(args) == 2:
                         # remove file pattern for a syntax specification
@@ -744,7 +753,7 @@ class Resources:
                 # eg. default to the Python syntax rules when viewing
                 # a files starting with patterns like #!/usr/bin/python
                 #    syntax_magic Python '^#!/usr/bin/python$'
-                elif args[0] == u'syntax_magic' and len(args) > 1:
+                elif args[0] == 'syntax_magic' and len(args) > 1:
                     key = args[1]
                     if len(args) == 2:
                         # remove magic pattern for a syntax specification
@@ -755,7 +764,7 @@ class Resources:
                     else:
                         flags = 0
                         for arg in args[3:]:
-                            if arg == u'ignorecase':
+                            if arg == 'ignorecase':
                                 flags |= re.IGNORECASE
                             else:
                                 raise ValueError()
@@ -774,10 +783,10 @@ def norm_encoding(e):
         return e.replace('-', '_').lower()
 
 # widget to help pick an encoding
-class EncodingMenu(gtk.HBox):
+class EncodingMenu(Gtk.HBox):
     def __init__(self, prefs, autodetect=False):
-        gtk.HBox.__init__(self)
-        self.combobox = combobox = gtk.combo_box_new_text()
+        GObject.GObject.__init__(self)
+        self.combobox = combobox = Gtk.ComboBoxText()
         self.encodings = prefs.getEncodings()[:]
         for e in self.encodings:
             combobox.append_text(e)
@@ -798,17 +807,17 @@ class EncodingMenu(gtk.HBox):
             return self.encodings[i]
 
 # text entry widget with a button to help pick file names
-class FileEntry(gtk.HBox):
+class FileEntry(Gtk.HBox):
     def __init__(self, parent, title):
-        gtk.HBox.__init__(self)
+        GObject.GObject.__init__(self)
         self.toplevel = parent
         self.title = title
-        self.entry = entry = gtk.Entry()
+        self.entry = entry = Gtk.Entry()
         self.pack_start(entry, True, True, 0)
         entry.show()
-        button = gtk.Button()
-        image = gtk.Image()
-        image.set_from_stock(gtk.STOCK_OPEN, gtk.ICON_SIZE_MENU)
+        button = Gtk.Button()
+        image = Gtk.Image()
+        image.set_from_stock(Gtk.STOCK_OPEN, Gtk.IconSize.MENU)
         button.add(image)
         image.show()
         button.connect('clicked', self.chooseFile)
@@ -817,9 +826,9 @@ class FileEntry(gtk.HBox):
 
     # action performed when the pick file button is pressed
     def chooseFile(self, widget):
-        dialog = gtk.FileChooserDialog(self.title, self.toplevel, gtk.FILE_CHOOSER_ACTION_OPEN, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        dialog.set_current_folder(unicode(os.path.realpath(os.curdir), sys.getfilesystemencoding()))
-        if dialog.run() == gtk.RESPONSE_OK:
+        dialog = Gtk.FileChooserDialog(self.title, self.toplevel, Gtk.FileChooserAction.OPEN, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        dialog.set_current_folder(str(os.path.realpath(os.curdir), sys.getfilesystemencoding()))
+        if dialog.run() == Gtk.ResponseType.OK:
             self.entry.set_text(dialog.get_filename())
         dialog.destroy()
 
@@ -829,10 +838,10 @@ class FileEntry(gtk.HBox):
     def get_text(self):
         return self.entry.get_text()
 
-# adaptor class to allow a gtk.FontButton to be read like a gtk.Entry
-class FontButton(gtk.FontButton):
+# adaptor class to allow a Gtk.FontButton to be read like a Gtk.Entry
+class FontButton(Gtk.FontButton):
     def __init__(self):
-        gtk.FontButton.__init__(self)
+        GObject.GObject.__init__(self)
 
     def get_text(self):
         return self.get_font_name()
@@ -1028,7 +1037,7 @@ class Preferences:
     # callback used when a preference is toggled
     def _toggled_cb(self, widget, widgets, name):
         # disable any preferences than are no longer relevant
-        for k, v in self.disable_when.items():
+        for k, v in list(self.disable_when.items()):
             p, t = v
             if p == name:
                 widgets[k].set_sensitive(widgets[p].get_active() != t)
@@ -1036,35 +1045,35 @@ class Preferences:
     # display the dialogue and update the preference values if the accept
     # button was pressed
     def runDialog(self, parent):
-        dialog = gtk.Dialog(_('Preferences'), parent, gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_OK))
+        dialog = Gtk.Dialog(_('Preferences'), parent, Gtk.DialogFlags.MODAL|Gtk.DialogFlags.DESTROY_WITH_PARENT, (Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT, Gtk.STOCK_OK, Gtk.ResponseType.OK))
 
         widgets = {}
         w = self._buildPrefsDialog(parent, widgets, self.template)
         # disable any preferences than are not relevant
-        for k, v in self.disable_when.items():
+        for k, v in list(self.disable_when.items()):
             p, t = v
             if widgets[p].get_active() == t:
                 widgets[k].set_sensitive(False)
         dialog.vbox.add(w)
         w.show()
 
-        accept = (dialog.run() == gtk.RESPONSE_OK)
+        accept = (dialog.run() == Gtk.ResponseType.OK)
         if accept:
-            for k in self.bool_prefs.keys():
+            for k in list(self.bool_prefs.keys()):
                 self.bool_prefs[k] = widgets[k].get_active()
-            for k in self.int_prefs.keys():
+            for k in list(self.int_prefs.keys()):
                 self.int_prefs[k] = widgets[k].get_value_as_int()
-            for k in self.string_prefs.keys():
+            for k in list(self.string_prefs.keys()):
                 self.string_prefs[k] = nullToEmpty(widgets[k].get_text())
             try:
                 ss = []
-                for k, v in self.bool_prefs.items():
+                for k, v in list(self.bool_prefs.items()):
                     if v != self.default_bool_prefs[k]:
                         ss.append('%s %s\n' % (k, v))
-                for k, v in self.int_prefs.items():
+                for k, v in list(self.int_prefs.items()):
                     if v != self.default_int_prefs[k]:
                         ss.append('%s %s\n' % (k, v))
-                for k, v in self.string_prefs.items():
+                for k, v in list(self.string_prefs.items()):
                     if v != self.default_string_prefs[k]:
                         ss.append('%s "%s"\n' % (k, v.replace('\\', '\\\\').replace('"', '\\"')))
                 ss.sort()
@@ -1074,7 +1083,7 @@ class Preferences:
                     f.write(s)
                 f.close()
             except IOError:
-                m = MessageDialog(parent, gtk.MESSAGE_ERROR, _('Error writing %s.') % (self.path, ))
+                m = MessageDialog(parent, Gtk.MessageType.ERROR, _('Error writing %s.') % (self.path, ))
                 m.run()
                 m.destroy()
         dialog.destroy()
@@ -1086,11 +1095,11 @@ class Preferences:
     def _buildPrefsDialog(self, parent, widgets, template):
         type = template[0]
         if type == 'FolderSet':
-            notebook = gtk.Notebook()
+            notebook = Gtk.Notebook()
             notebook.set_border_width(10)
             i = 1
             while i < len(template):
-                label = gtk.Label(template[i])
+                label = Gtk.Label(label=template[i])
                 i += 1
                 w = self._buildPrefsDialog(parent, widgets, template[i])
                 i += 1
@@ -1100,33 +1109,33 @@ class Preferences:
             return notebook
         else:
             n = len(template) - 1
-            table = gtk.Table(2, n)
+            table = Gtk.Table(2, n)
             table.set_border_width(10)
             for i, tpl in enumerate(template[1:]):
                 type = tpl[0]
                 if type == 'FolderSet':
                     w = self._buildPrefsDialog(parent, widgets, tpl)
-                    table.attach(w, 0, 2, i, i + 1, gtk.FILL, gtk.FILL)
+                    table.attach(w, 0, 2, i, i + 1, Gtk.AttachOptions.FILL, Gtk.AttachOptions.FILL)
                     w.show()
                 elif type == 'Boolean':
-                    button = gtk.CheckButton(tpl[3])
+                    button = Gtk.CheckButton(tpl[3])
                     button.set_active(self.bool_prefs[tpl[1]])
                     widgets[tpl[1]] = button
-                    table.attach(button, 1, 2, i, i + 1, gtk.FILL, gtk.FILL)
+                    table.attach(button, 1, 2, i, i + 1, Gtk.AttachOptions.FILL, Gtk.AttachOptions.FILL)
                     button.connect('toggled', self._toggled_cb, widgets, tpl[1])
                     button.show()
                 else:
-                    label = gtk.Label(tpl[3] + ': ')
+                    label = Gtk.Label(label=tpl[3] + ': ')
                     label.set_alignment(1.0, 0.5)
-                    table.attach(label, 0, 1, i, i + 1, gtk.FILL, gtk.FILL)
+                    table.attach(label, 0, 1, i, i + 1, Gtk.AttachOptions.FILL, Gtk.AttachOptions.FILL)
                     label.show()
                     if tpl[0] in [ 'Font', 'Integer' ]:
-                        entry = gtk.HBox()
+                        entry = Gtk.HBox()
                         if tpl[0] == 'Font':
                             button = FontButton()
                             button.set_font_name(self.string_prefs[tpl[1]])
                         else:
-                            button = gtk.SpinButton(gtk.Adjustment(self.int_prefs[tpl[1]], tpl[4], tpl[5], 1), 0)
+                            button = Gtk.SpinButton(Gtk.Adjustment(self.int_prefs[tpl[1]], tpl[4], tpl[5], 1), 0)
                         widgets[tpl[1]] = button
                         entry.pack_start(button, False, False, 0)
                         button.show()
@@ -1137,10 +1146,10 @@ class Preferences:
                         elif tpl[0] == 'File':
                             entry = FileEntry(parent, tpl[3])
                         else:
-                            entry = gtk.Entry()
+                            entry = Gtk.Entry()
                         widgets[tpl[1]] = entry
                         entry.set_text(self.string_prefs[tpl[1]])
-                    table.attach(entry, 1, 2, i, i + 1, gtk.EXPAND|gtk.FILL, gtk.FILL)
+                    table.attach(entry, 1, 2, i, i + 1, Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, Gtk.AttachOptions.FILL)
                     entry.show()
                 table.show()
             return table
@@ -1182,15 +1191,15 @@ class Preferences:
                         break
                 else:
                     continue
-                return unicode(s, encoding), encoding
+                return str(s, encoding), encoding
             except (UnicodeDecodeError, LookupError):
                 pass
-        return u''.join([ unichr(ord(c)) for c in s ]), None
+        return ''.join([ chr(ord(c)) for c in s ]), None
 
     # cygwin and native applications can be used on windows, use this method
     # to convert a path to the usual form expected on sys.platform
     def convertToNativePath(self, s):
-        s = unicode(s, sys.getfilesystemencoding())
+        s = str(s, sys.getfilesystemencoding())
         if isWindows() and s.find('/') >= 0:
             # treat as a cygwin path
             s = s.replace(os.sep, '/')
@@ -1215,47 +1224,47 @@ class Preferences:
 
 # convenience method for creating a menu according to a template
 def createMenu(specs, radio=None, accel_group=None):
-    menu = gtk.Menu()
+    menu = Gtk.Menu()
     for spec in specs:
         if len(spec) > 0:
             if len(spec) > 7 and spec[7] is not None:
                 g, k = spec[7]
                 if g not in radio:
-                    item = gtk.RadioMenuItem(None, spec[0])
+                    item = Gtk.RadioMenuItem(None, spec[0])
                     radio[g] = (item, {})
                 else:
-                    item = gtk.RadioMenuItem(radio[g][0], spec[0])
+                    item = Gtk.RadioMenuItem(radio[g][0], spec[0])
                 radio[g][1][k] = item
             else:
-                item = gtk.ImageMenuItem(spec[0])
+                item = Gtk.ImageMenuItem(spec[0])
             cb = spec[1]
             if cb is not None:
                 data = spec[2]
                 item.connect('activate', cb, data)
             if len(spec) > 3 and spec[3] is not None:
-                image = gtk.Image()
-                image.set_from_stock(spec[3], gtk.ICON_SIZE_MENU)
+                image = Gtk.Image()
+                image.set_from_stock(spec[3], Gtk.IconSize.MENU)
                 item.set_image(image)
             if accel_group is not None and len(spec) > 4:
                 a = theResources.getKeyBindings('menu', spec[4])
                 if len(a) > 0:
                     key, modifier = a[0]
-                    item.add_accelerator('activate', accel_group, key, modifier, gtk.ACCEL_VISIBLE)
+                    item.add_accelerator('activate', accel_group, key, modifier, Gtk.AccelFlags.VISIBLE)
             if len(spec) > 5:
                 item.set_sensitive(spec[5])
             if len(spec) > 6 and spec[6] is not None:
                 item.set_submenu(createMenu(spec[6], radio, accel_group))
         else:
-            item = gtk.SeparatorMenuItem()
+            item = Gtk.SeparatorMenuItem()
         menu.append(item)
         item.show()
     return menu
 
 # convenience method for creating a menu bar according to a template
 def createMenuBar(specs, radio, accel_group):
-    menu_bar = gtk.MenuBar()
+    menu_bar = Gtk.MenuBar()
     for label, spec in specs:
-        menu = gtk.MenuItem(label)
+        menu = Gtk.MenuItem(label)
         menu.set_submenu(createMenu(spec, radio, accel_group))
         menu_bar.append(menu)
         menu.show()
@@ -1268,7 +1277,7 @@ def set_tooltip(widget, tip):
         widget.set_tooltip_text(tip)
     else:
         # fallback on old tooltip method (pygtk < 2.12)
-        widget.tooltip = gtk.Tooltips()
+        widget.tooltip = Gtk.Tooltips()
         widget.tooltip.set_tip(widget, tip)
 
 # convenience method for packing buttons into a container according to a
@@ -1276,10 +1285,10 @@ def set_tooltip(widget, tip):
 def appendButtons(box, size, specs):
     for spec in specs:
         if len(spec) > 0:
-            button = gtk.Button()
-            button.set_relief(gtk.RELIEF_NONE)
-            button.unset_flags(gtk.CAN_FOCUS)
-            image = gtk.Image()
+            button = Gtk.Button()
+            button.set_relief(Gtk.ReliefStyle.NONE)
+            button.unset_flags(Gtk.CAN_FOCUS)
+            image = Gtk.Image()
             image.set_from_stock(spec[0], size)
             button.add(image)
             image.show()
@@ -1290,7 +1299,7 @@ def appendButtons(box, size, specs):
             box.pack_start(button, False, False, 0)
             button.show()
         else:
-            separator = gtk.VSeparator()
+            separator = Gtk.VSeparator()
             box.pack_start(separator, False, False, 5)
             separator.show()
 
@@ -1438,7 +1447,7 @@ def popenXArgsReadLines(dn, cmd, args, prefs, bash_pref):
     # os.sysconf() is only available on Unix
     if hasattr(os, 'sysconf'):
         maxsize = os.sysconf('SC_ARG_MAX')
-        maxsize -= sum([ len(k) + len(v) + 2 for k, v in os.environ.items() ])
+        maxsize -= sum([ len(k) + len(v) + 2 for k, v in list(os.environ.items()) ])
     else:
         # assume the Window's limit to CreateProcess()
         maxsize = 32767
@@ -1600,7 +1609,7 @@ class _Bzr:
         # sort the results
         result, r = [], set()
         for m in removed, added, modified, renamed:
-            r.update(m.keys())
+            r.update(list(m.keys()))
         for k in sorted(r):
             for m in removed, added, modified, renamed:
                 if k in m:
@@ -1668,7 +1677,7 @@ class _Bzr:
         # sort the results
         result, r = [], set()
         for m in removed, added, modified, renamed:
-            r.update(m.keys())
+            r.update(list(m.keys()))
         for k in sorted(r):
             for m in removed, added, modified, renamed:
                 if k in m:
@@ -1859,7 +1868,7 @@ class _Darcs:
         # sort the results
         result, r = [], set()
         for m in added, modified, removed, renamed:
-            r.update(m.keys())
+            r.update(list(m.keys()))
         for k in sorted(r):
             for m in removed, added, modified, renamed:
                 if k in m:
@@ -1998,7 +2007,7 @@ class _Git:
         # sort the results
         result, r = [], set()
         for m in modified, renamed:
-            r.update(m.keys())
+            r.update(list(m.keys()))
         for k in sorted(r):
             for m in modified, renamed:
                 if k in m:
@@ -2188,7 +2197,7 @@ class _Mtn:
                 for m in removed, modified:
                     if k in m:
                         del m[k]
-            for k, v in renamed.items():
+            for k, v in list(renamed.items()):
                 arg1, k0, k1 = v
                 if arg1 in removed_dirs:
                     del renamed[k]
@@ -2280,7 +2289,7 @@ class _Mtn:
         # sort the results
         r = set()
         for m in removed, added, modified, renamed:
-            r.update(m.keys())
+            r.update(list(m.keys()))
         for k in sorted(r):
             for m in removed, added, modified, renamed:
                 if k in m:
@@ -2447,14 +2456,14 @@ class _Svn:
         # FIXME: verify this
         # merge conflict
         escaped_name = globEscape(name)
-        left = glob.glob(escaped_name + u'.merge-left.r*')
-        right = glob.glob(escaped_name + u'.merge-right.r*')
+        left = glob.glob(escaped_name + '.merge-left.r*')
+        right = glob.glob(escaped_name + '.merge-right.r*')
         if len(left) > 0 and len(right) > 0:
             return [ (left[-1], None), (name, None), (right[-1], None) ]
         # update conflict
-        left = sorted(glob.glob(escaped_name + u'.r*'))
-        right = glob.glob(escaped_name + u'.mine')
-        right.extend(glob.glob(escaped_name + u'.working'))
+        left = sorted(glob.glob(escaped_name + '.r*'))
+        right = glob.glob(escaped_name + '.mine')
+        right.extend(glob.glob(escaped_name + '.working'))
         if len(left) > 0 and len(right) > 0:
             return [ (left[-1], None), (name, None), (right[0], None) ]
         # default case
@@ -2464,7 +2473,7 @@ class _Svn:
         result = []
         try:
             prev = self._getPreviousRevision(rev)
-        except ValueError, e:
+        except ValueError as e:
             logError(_('Error parsing revision %s.') % (rev, ))
             return result
 
@@ -2531,7 +2540,7 @@ class _Svn:
                     m[d] = set()
                 m[d].add(b)
             # remove items we can easily determine to be directories
-            for k in m.keys():
+            for k in list(m.keys()):
                 d = os.path.dirname(k)
                 if d in m:
                     m[d].discard(os.path.basename(k))
@@ -2539,7 +2548,7 @@ class _Svn:
                         del m[d]
             # determine which are directories
             added = {}
-            for p, v in m.items():
+            for p, v in list(m.items()):
                 for s in popenReadLines(self.root, [ vcs_bin, 'list', '-r', rev, '%s/%s' % (self._getURL(prefs), p.replace(os.sep, '/')) ], prefs, vcs_bash):
                     if s in v:
                         # confirmed as added file
@@ -2565,7 +2574,7 @@ class _Svn:
                     m[d] = set()
                 m[d].add(b)
             removed_dir, removed = set(), {}
-            for p, v in m.items():
+            for p, v in list(m.items()):
                 for s in popenReadLines(self.root, [ vcs_bin, 'list', '-r', prev, '%s/%s' % (self._getURL(prefs), p.replace(os.sep, '/')) ], prefs, vcs_bash):
                     if s.endswith('/'):
                         s = s[:-1]
@@ -2597,7 +2606,7 @@ class _Svn:
         # sort the results
         r = set()
         for m in removed, added, modified:
-            r.update(m.keys())
+            r.update(list(m.keys()))
         for k in sorted(r):
             for m in removed, added, modified:
                 if k in m:
@@ -2740,21 +2749,21 @@ def step_adjustment(adj, delta):
     v = min(v, int(adj.upper - adj.page_size))
     adj.set_value(v)
 
-# This is a replacement for gtk.ScrolledWindow as it forced expose events to be
+# This is a replacement for Gtk.ScrolledWindow as it forced expose events to be
 # handled immediately after changing the viewport position.  This could cause
 # the application to become unresponsive for a while as it processed a large
 # queue of keypress and expose event pairs.
-class ScrolledWindow(gtk.Table):
-    scroll_directions = set((gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_DOWN, gtk.gdk.SCROLL_LEFT, gtk.gdk.SCROLL_RIGHT))
+class ScrolledWindow(Gtk.Table):
+    scroll_directions = set((Gdk.ScrollDirection.UP, Gdk.ScrollDirection.DOWN, Gdk.ScrollDirection.LEFT, Gdk.ScrollDirection.RIGHT))
     def __init__(self, hadj, vadj):
-        gtk.Table.__init__(self, 2, 2)
+        GObject.GObject.__init__(self, 2, 2)
         self.position = (0, 0)
         self.scroll_count = 0
         self.partial_redraw = False
 
         self.hadj, self.vadj = hadj, vadj
-        vport = gtk.Viewport()
-        darea = gtk.DrawingArea()
+        vport = Gtk.Viewport()
+        darea = Gtk.DrawingArea()
         self.darea = darea
         # replace darea's queue_draw_area with our own so we can tell when
         # to disable/enable our scrolling optimisation
@@ -2765,12 +2774,12 @@ class ScrolledWindow(gtk.Table):
         self.attach(vport, 0, 1, 0, 1)
         vport.show()
 
-        self.vbar = bar = gtk.VScrollbar(vadj)
-        self.attach(bar, 1, 2, 0, 1, gtk.FILL, gtk.EXPAND|gtk.FILL)
+        self.vbar = bar = Gtk.VScrollbar(vadj)
+        self.attach(bar, 1, 2, 0, 1, Gtk.AttachOptions.FILL, Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL)
         bar.show()
 
-        self.hbar = bar = gtk.HScrollbar(hadj)
-        self.attach(bar, 0, 1, 1, 2, gtk.EXPAND|gtk.FILL, gtk.FILL)
+        self.hbar = bar = Gtk.HScrollbar(hadj)
+        self.attach(bar, 0, 1, 1, 2, Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, Gtk.AttachOptions.FILL)
         bar.show()
 
         # listen to our signals
@@ -2795,10 +2804,10 @@ class ScrolledWindow(gtk.Table):
         d = event.direction
         if d in self.scroll_directions:
             delta = 100
-            if d in (gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_LEFT):
+            if d in (Gdk.ScrollDirection.UP, Gdk.ScrollDirection.LEFT):
                 delta = -delta
-            vertical = (d in (gtk.gdk.SCROLL_UP, gtk.gdk.SCROLL_DOWN))
-            if event.state & gtk.gdk.SHIFT_MASK:
+            vertical = (d in (Gdk.ScrollDirection.UP, Gdk.ScrollDirection.DOWN))
+            if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 vertical = not vertical
             if vertical:
                 adj = self.vadj
@@ -2942,9 +2951,9 @@ def isBlank(s):
         s = s.replace(c, '')
     return len(s) == 0
 
-# use pango.SCALE instead of pango.PIXELS to avoid overflow exception
+# use Pango.SCALE instead of Pango.PIXELS to avoid overflow exception
 def pixels(size):
-    return int(size / pango.SCALE + 0.5)
+    return int(size / Pango.SCALE + 0.5)
 
 # constructs a full URL for the named file
 def path2url(path, proto='file'):
@@ -3017,7 +3026,7 @@ OTHER_CLASS = 2
 
 # maps similar types of characters to a group
 def getCharacterClass(c):
-    if c.isalnum() or c == u'_':
+    if c.isalnum() or c == '_':
         return ALPHANUMERIC_CLASS
     elif c.isspace():
         return WHITESPACE_CLASS
@@ -3096,12 +3105,12 @@ def __lcs_approx(a, b):
         popular = {}
         n = len(a)
         if n > 200:
-            for k, v in count1.items():
+            for k, v in list(count1.items()):
                 if 100 * v > n:
                     popular[k] = 1
         n = len(b)
         if n > 200:
-            for k, v in lookup.items():
+            for k, v in list(lookup.items()):
                 if 100 * len(v) > n:
                     popular[k] = 1
         # while walk through entries in 'a', incrementally update the list of
@@ -3231,7 +3240,7 @@ def patience_diff(a, b):
     return matches
 
 # widget used to compare and merge text files
-class FileDiffViewer(gtk.Table):
+class FileDiffViewer(Gtk.Table):
     # class describing a text pane
     class Pane:
         def __init__(self):
@@ -3282,8 +3291,8 @@ class FileDiffViewer(gtk.Table):
         if n < 2:
             raise ValueError('Invalid number of panes')
 
-        gtk.Table.__init__(self, 3, n + 1)
-        self.set_flags(gtk.CAN_FOCUS)
+        GObject.GObject.__init__(self, 3, n + 1)
+        self.set_flags(Gtk.CAN_FOCUS)
         self.prefs = prefs
         self.string_width_cache = {}
         self.options = {}
@@ -3397,8 +3406,8 @@ class FileDiffViewer(gtk.Table):
         # create panes
         self.dareas = []
         self.panes = []
-        self.hadj = gtk.Adjustment()
-        self.vadj = gtk.Adjustment()
+        self.hadj = Gtk.Adjustment()
+        self.vadj = Gtk.Adjustment()
         for i in range(n):
             pane = FileDiffViewer.Pane()
             self.panes.append(pane)
@@ -3406,7 +3415,7 @@ class FileDiffViewer(gtk.Table):
             # pane contents
             sw = ScrolledWindow(self.hadj, self.vadj)
             darea = sw.darea
-            darea.add_events(gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON1_MOTION_MASK)
+            darea.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON1_MOTION_MASK)
             darea.connect('button_press_event', self.darea_button_press_cb, i)
             darea.connect('motion_notify_event', self.darea_motion_notify_cb, i)
             darea.connect('expose_event', self.darea_expose_cb, i)
@@ -3418,22 +3427,22 @@ class FileDiffViewer(gtk.Table):
         self.vadj.connect('value_changed', self.vadj_changed_cb)
 
         # add diff map
-        self.map = map = gtk.DrawingArea()
-        map.add_events(gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON1_MOTION_MASK)
+        self.map = map = Gtk.DrawingArea()
+        map.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON1_MOTION_MASK)
         map.connect('button_press_event', self.map_button_press_cb)
         map.connect('motion_notify_event', self.map_button_press_cb)
         map.connect('scroll_event', self.map_scroll_cb)
         map.connect('expose_event', self.map_expose_cb)
-        self.attach(map, n, n + 1, 1, 2, gtk.FILL, gtk.FILL)
+        self.attach(map, n, n + 1, 1, 2, Gtk.AttachOptions.FILL, Gtk.AttachOptions.FILL)
         map.show()
         map.set_size_request(16 * n, 0)
-        self.add_events(gtk.gdk.KEY_PRESS_MASK | gtk.gdk.FOCUS_CHANGE)
+        self.add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.FOCUS_CHANGE)
         self.connect('focus_in_event', self.focus_in_cb)
         self.connect('focus_out_event', self.focus_out_cb)
         self.connect('key_press_event', self.key_press_cb)
 
         # input method
-        self.im_context = im = gtk.IMMulticontext()
+        self.im_context = im = Gtk.IMMulticontext()
         im.connect('commit', self.im_commit_cb)
         im.connect('preedit_changed', self.im_preedit_changed_cb)
         im.connect('retrieve_surrounding', self.im_retrieve_surrounding_cb)
@@ -3444,7 +3453,7 @@ class FileDiffViewer(gtk.Table):
         self.has_focus = False
 
         # font
-        self.setFont(pango.FontDescription(prefs.getString('display_font')))
+        self.setFont(Pango.FontDescription(prefs.getString('display_font')))
         self.cursor_pos = (0, 0)
 
         # scroll to first difference when realised
@@ -3546,22 +3555,22 @@ class FileDiffViewer(gtk.Table):
                 if c == ' ':
                     if visible:
                         # show spaces using a centre-dot
-                        result.append(u'\u00b7');
+                        result.append('\u00b7');
                     else:
                         result.append(c);
                 elif c == '\t':
                     width = tab_width - col % tab_width
                     if visible:
                         # show tabs using a right double angle quote
-                        result.append(u'\u00bb' + (width - 1) * u' ')
+                        result.append('\u00bb' + (width - 1) * ' ')
                     else:
-                        result.append(width * u' ')
+                        result.append(width * ' ')
                 elif c == '\n' and visible:
                     # show newlines using a pilcrow
-                    result.append(u'\u00b6')
+                    result.append('\u00b6')
                 else:
                     # prefix with a ^
-                    result.append(u'^' + chr(v + 64))
+                    result.append('^' + chr(v + 64))
             else:
                 result.append(c)
             col += self.characterWidth(col, c)
@@ -4671,7 +4680,7 @@ class FileDiffViewer(gtk.Table):
 
     def __set_clipboard_text(self, clipboard, s):
         # remove embedded nulls as the clipboard cannot handle them
-        gtk.clipboard_get(clipboard).set_text(s.replace('\0', ''))
+        Gtk.clipboard_get(clipboard).set_text(s.replace('\0', ''))
 
     # change the current selection in CHAR_MODE
     # use extend=True to extend the selection
@@ -4693,7 +4702,7 @@ class FileDiffViewer(gtk.Table):
         self.selection_char = sj
 
         if extend:
-            self.__set_clipboard_text(gtk.gdk.SELECTION_PRIMARY, self.getSelectedText())
+            self.__set_clipboard_text(Gdk.SELECTION_PRIMARY, self.getSelectedText())
 
         self._cursor_position_changed(True)
         self.emit('cursor_changed')
@@ -4797,7 +4806,7 @@ class FileDiffViewer(gtk.Table):
         i = min(y // self.font_height, nlines)
         if event.button == 1:
             # left mouse button
-            if event.type == gtk.gdk._2BUTTON_PRESS:
+            if event.type == Gdk._2BUTTON_PRESS:
                 # double click
                 if self.mode == ALIGN_MODE:
                     self.setLineMode()
@@ -4824,14 +4833,14 @@ class FileDiffViewer(gtk.Table):
                             while j < n and getCharacterClass(text[j]) == c:
                                 j += 1
                             self.setCurrentChar(i, j, i, k)
-            elif event.type == gtk.gdk._3BUTTON_PRESS:
+            elif event.type == Gdk._3BUTTON_PRESS:
                 # triple click, select a whole line
                 if self.mode == CHAR_MODE and self.current_pane == f:
                     i2 = min(i + 1, nlines)
                     self.setCurrentChar(i2, 0, i, 0)
             else:
                 # update the selection
-                is_shifted = event.state & gtk.gdk.SHIFT_MASK
+                is_shifted = event.get_state() & Gdk.ModifierType.SHIFT_MASK
                 extend = (is_shifted and f == self.current_pane)
                 self.button_press(f, x, y, extend)
         elif event.button == 2:
@@ -4839,7 +4848,7 @@ class FileDiffViewer(gtk.Table):
             if self.mode == CHAR_MODE and f == self.current_pane:
                 self.button_press(f, x, y, False)
                 self.openUndoBlock()
-                gtk.clipboard_get(gtk.gdk.SELECTION_PRIMARY).request_text(self.receive_clipboard_text_cb)
+                Gtk.clipboard_get(Gdk.SELECTION_PRIMARY).request_text(self.receive_clipboard_text_cb)
                 self.closeUndoBlock()
         elif event.button == 3:
             # right mouse button, raise context sensitive menu
@@ -4850,23 +4859,23 @@ class FileDiffViewer(gtk.Table):
             can_swap = (f != self.current_pane)
 
             menu = createMenu(
-                      [ [_('Align with Selection'), self.align_with_selection_cb, [f, i], gtk.STOCK_EXECUTE, None, can_align],
+                      [ [_('Align with Selection'), self.align_with_selection_cb, [f, i], Gtk.STOCK_EXECUTE, None, can_align],
                       [_('Isolate'), self.button_cb, 'isolate', None, None, can_isolate ],
                       [_('Merge Selection'), self.merge_lines_cb, f, None, None, can_merge],
                       [],
-                      [_('Cut'), self.button_cb, 'cut', gtk.STOCK_CUT, None, can_select],
-                      [_('Copy'), self.button_cb, 'copy', gtk.STOCK_COPY, None, can_select],
-                      [_('Paste'), self.button_cb, 'paste', gtk.STOCK_PASTE, None, can_select],
+                      [_('Cut'), self.button_cb, 'cut', Gtk.STOCK_CUT, None, can_select],
+                      [_('Copy'), self.button_cb, 'copy', Gtk.STOCK_COPY, None, can_select],
+                      [_('Paste'), self.button_cb, 'paste', Gtk.STOCK_PASTE, None, can_select],
                       [],
                       [_('Select All'), self.button_cb, 'select_all', None, None, can_select],
-                      [_('Clear Edits'), self.button_cb, 'clear_edits', gtk.STOCK_CLEAR, None, can_isolate],
+                      [_('Clear Edits'), self.button_cb, 'clear_edits', Gtk.STOCK_CLEAR, None, can_isolate],
                       [],
                       [_('Swap with Selected Pane'), self.swap_panes_cb, f, None, None, can_swap] ])
             menu.popup(None, None, None, event.button, event.time)
 
     # callback used to notify us about click and drag motion
     def darea_motion_notify_cb(self, widget, event, f):
-        if event.state & gtk.gdk.BUTTON1_MASK:
+        if event.get_state() & Gdk.ModifierType.BUTTON1_MASK:
             # left mouse button
             extend = (f == self.current_pane)
             x = int(event.x + self.hadj.get_value())
@@ -5001,7 +5010,7 @@ class FileDiffViewer(gtk.Table):
         y = offset_y + int(self.vadj.get_value())
 
         # draw to a pixmap to avoid screen flicker
-        pixmap = gtk.gdk.Pixmap(widget.window, width, height)
+        pixmap = Gdk.Pixmap(widget.window, width, height)
 
         cr = pixmap.cairo_create()
         cr.translate(-x, -y)
@@ -5359,9 +5368,9 @@ class FileDiffViewer(gtk.Table):
     # callback to handle mouse scrollwheel events
     def map_scroll_cb(self, widget, event):
         delta = 100
-        if event.direction == gtk.gdk.SCROLL_UP:
+        if event.direction == Gdk.ScrollDirection.UP:
             step_adjustment(self.vadj, -delta)
-        elif event.direction == gtk.gdk.SCROLL_DOWN:
+        elif event.direction == Gdk.ScrollDirection.DOWN:
             step_adjustment(self.vadj, delta)
 
     # redraws the overview map when a portion is exposed
@@ -5414,7 +5423,7 @@ class FileDiffViewer(gtk.Table):
 
         # draw to a pixmap to avoid screen flicker
         x, y, width, height = event.area
-        pixmap = gtk.gdk.Pixmap(widget.window, width, height)
+        pixmap = Gdk.Pixmap(widget.window, width, height)
         cr = pixmap.cairo_create()
         cr.translate(-x, -y)
 
@@ -5611,7 +5620,7 @@ class FileDiffViewer(gtk.Table):
     def im_commit_cb(self, im, s):
         if self.mode == CHAR_MODE:
             self.openUndoBlock()
-            self.replaceText(unicode(s, 'utf_8'))
+            self.replaceText(str(s, 'utf_8'))
             self.closeUndoBlock()
 
     # update the cached preedit text
@@ -5632,7 +5641,7 @@ class FileDiffViewer(gtk.Table):
             s, a, c = self.im_context.get_preedit_string()
             if len(s) > 0:
                 # we have preedit text, draw that instead
-                s = unicode(s, 'utf_8')
+                s = str(s, 'utf_8')
                 p = (s, a, c)
             else:
                 p = None
@@ -5670,9 +5679,9 @@ class FileDiffViewer(gtk.Table):
                 return True
         retval = False
         # determine the modified keys used
-        mask = event.state & (gtk.gdk.SHIFT_MASK | gtk.gdk.CONTROL_MASK)
-        if event.state & gtk.gdk.LOCK_MASK:
-            mask ^= gtk.gdk.SHIFT_MASK
+        mask = event.get_state() & (Gdk.ModifierType.SHIFT_MASK | Gdk.ModifierType.CONTROL_MASK)
+        if event.get_state() & Gdk.ModifierType.LOCK_MASK:
+            mask ^= Gdk.ModifierType.SHIFT_MASK
         self.openUndoBlock()
         if self.mode == LINE_MODE:
             # check if the keyval matches a line mode action
@@ -5682,21 +5691,21 @@ class FileDiffViewer(gtk.Table):
                 retval = True
         elif self.mode == CHAR_MODE:
             f = self.current_pane
-            if event.state & gtk.gdk.SHIFT_MASK:
+            if event.get_state() & Gdk.ModifierType.SHIFT_MASK:
                 si, sj = self.selection_line, self.selection_char
             else:
                 si, sj = None, None
-            is_ctrl = event.state & gtk.gdk.CONTROL_MASK
+            is_ctrl = event.get_state() & Gdk.ModifierType.CONTROL_MASK
             retval = True
             # check if the keyval matches a character mode action
             action = theResources.getActionForKey('character_mode', event.keyval, mask)
             if action in self._character_mode_actions:
                 self._character_mode_actions[action]()
             # allow CTRL-Tab for widget navigation
-            elif event.keyval == gtk.keysyms.Tab and event.state & gtk.gdk.CONTROL_MASK:
+            elif event.keyval == Gdk.KEY_Tab and event.get_state() & Gdk.ModifierType.CONTROL_MASK:
                 retval = False
             # up/down cursor navigation
-            elif event.keyval in [ gtk.keysyms.Up, gtk.keysyms.Down, gtk.keysyms.Page_Up, gtk.keysyms.Page_Down ]:
+            elif event.keyval in [ Gdk.KEY_Up, Gdk.KEY_Down, Gdk.KEY_Page_Up, Gdk.KEY_Page_Down ]:
                 i = self.current_line
                 # move back to the remembered cursor column if possible
                 col = self.cursor_column
@@ -5704,11 +5713,11 @@ class FileDiffViewer(gtk.Table):
                     # find the current cursor column
                     s = nullToEmpty(self.getLineText(f, i))[:self.current_char]
                     col = self.stringWidth(s)
-                if event.keyval in [ gtk.keysyms.Up, gtk.keysyms.Down ]:
+                if event.keyval in [ Gdk.KEY_Up, Gdk.KEY_Down ]:
                     delta = 1
                 else:
                     delta = int(self.vadj.page_size // self.font_height)
-                if event.keyval in [ gtk.keysyms.Up, gtk.keysyms.Page_Up ]:
+                if event.keyval in [ Gdk.KEY_Up, Gdk.KEY_Page_Up ]:
                     delta = -delta
                 i += delta
                 j = 0
@@ -5732,14 +5741,14 @@ class FileDiffViewer(gtk.Table):
                 self.setCurrentChar(i, j, si, sj)
                 self.cursor_column = col
             # home key
-            elif event.keyval == gtk.keysyms.Home:
+            elif event.keyval == Gdk.KEY_Home:
                 if is_ctrl:
                     i = 0
                 else:
                     i = self.current_line
                 self.setCurrentChar(i, 0, si, sj)
             # end key
-            elif event.keyval == gtk.keysyms.End:
+            elif event.keyval == Gdk.KEY_End:
                 if is_ctrl:
                     i = len(self.panes[f].lines)
                     j = 0
@@ -5748,11 +5757,11 @@ class FileDiffViewer(gtk.Table):
                     j = self.getMaxCharPosition(i)
                 self.setCurrentChar(i, j, si, sj)
             # cursor left and cursor right navigation
-            elif event.keyval == gtk.keysyms.Left or event.keyval == gtk.keysyms.Right:
+            elif event.keyval == Gdk.KEY_Left or event.keyval == Gdk.KEY_Right:
                 i = self.current_line
                 j = self.current_char
                 while True:
-                    if event.keyval == gtk.keysyms.Left:
+                    if event.keyval == Gdk.KEY_Left:
                         if j > 0:
                             j -= 1
                         elif i > 0:
@@ -5768,7 +5777,7 @@ class FileDiffViewer(gtk.Table):
                             j = 0
                         else:
                             break
-                    if event.state & gtk.gdk.CONTROL_MASK == 0:
+                    if event.get_state() & Gdk.ModifierType.CONTROL_MASK == 0:
                         break
                     # break if we are at the beginning of a word
                     text = self.getLineText(f, i)
@@ -5778,7 +5787,7 @@ class FileDiffViewer(gtk.Table):
                             break
                 self.setCurrentChar(i, j, si, sj)
             # backspace
-            elif event.keyval == gtk.keysyms.BackSpace:
+            elif event.keyval == Gdk.KEY_BackSpace:
                 s = ''
                 i = self.current_line
                 j = self.current_char
@@ -5797,10 +5806,10 @@ class FileDiffViewer(gtk.Table):
                             width = self.prefs.getInt('editor_soft_tab_width')
                             w = (w - 1) // width * width
                             if self.prefs.getBool('editor_expand_tabs'):
-                                s = u' ' * w
+                                s = ' ' * w
                             else:
                                 width = self.prefs.getInt('display_tab_width')
-                                s = u'\t' * (w // width) + u' ' * (w % width)
+                                s = '\t' * (w // width) + ' ' * (w % width)
                             j = 0
                     else:
                         # delete back to an end of line character from the
@@ -5815,7 +5824,7 @@ class FileDiffViewer(gtk.Table):
                     self.current_char = j
                 self.replaceText(s)
             # delete key
-            elif event.keyval == gtk.keysyms.Delete:
+            elif event.keyval == Gdk.KEY_Delete:
                 i = self.current_line
                 j = self.current_char
                 if self.selection_line == i and self.selection_char == j:
@@ -5836,8 +5845,8 @@ class FileDiffViewer(gtk.Table):
                     self.current_char = j
                 self.replaceText('')
             # return key, add the platform specific end of line characters
-            elif event.keyval in [ gtk.keysyms.Return, gtk.keysyms.KP_Enter ]:
-                s = unicode(os.linesep)
+            elif event.keyval in [ Gdk.KEY_Return, Gdk.KEY_KP_Enter ]:
+                s = str(os.linesep)
                 if self.prefs.getBool('editor_auto_indent'):
                     start_i, start_j = self.selection_line, self.selection_char
                     end_i, end_j = self.current_line, self.current_char
@@ -5850,23 +5859,23 @@ class FileDiffViewer(gtk.Table):
                         w = self.stringWidth(text[:j])
                         if self.prefs.getBool('editor_expand_tabs'):
                             # convert to spaces
-                            s += u' ' * w
+                            s += ' ' * w
                         else:
                             tab_width = self.prefs.getInt('display_tab_width')
                             # replace with tab characters where possible
-                            s += u'\t' * (w // tab_width)
-                            s += u' ' * (w % tab_width)
+                            s += '\t' * (w // tab_width)
+                            s += ' ' * (w % tab_width)
                 self.replaceText(s)
             # insert key
-            elif event.keyval in [ gtk.keysyms.Tab, gtk.keysyms.ISO_Left_Tab ]:
+            elif event.keyval in [ Gdk.KEY_Tab, Gdk.KEY_ISO_Left_Tab ]:
                 start_i, start_j = self.selection_line, self.selection_char
                 end_i, end_j = self.current_line, self.current_char
-                if start_i != end_i or start_j != end_j or event.keyval == gtk.keysyms.ISO_Left_Tab:
+                if start_i != end_i or start_j != end_j or event.keyval == Gdk.KEY_ISO_Left_Tab:
                     # find range of lines to operate upon
                     start, end, offset = start_i, end_i, 1
                     if end < start:
                         start, end = end, start
-                    if event.keyval == gtk.keysyms.ISO_Left_Tab:
+                    if event.keyval == Gdk.KEY_ISO_Left_Tab:
                         offset = -1
                     self.recordEditMode()
                     for i in range(start, end + 1):
@@ -5881,10 +5890,10 @@ class FileDiffViewer(gtk.Table):
                             ws = max(0, w + offset * self.prefs.getInt('editor_soft_tab_width'))
                             if ws != w:
                                 if self.prefs.getBool('editor_expand_tabs'):
-                                    s = u' ' * ws
+                                    s = ' ' * ws
                                 else:
                                     tab_width = self.prefs.getInt('display_tab_width')
-                                    s = u'\t' * (ws // tab_width) + u' ' * (ws % tab_width)
+                                    s = '\t' * (ws // tab_width) + ' ' * (ws % tab_width)
                                 if i == start_i:
                                     start_j = len(s) + max(0, start_j - j)
                                 if i == end_i:
@@ -5920,11 +5929,11 @@ class FileDiffViewer(gtk.Table):
                         w = 0
                     if self.prefs.getBool('editor_expand_tabs'):
                         # convert to spaces
-                        s = u' ' * ws
+                        s = ' ' * ws
                     else:
                         # replace with tab characters where possible
-                        s = u'\t' * ((w + ws) // tab_width - w // tab_width)
-                        s += u' ' * ((w + ws) % tab_width)
+                        s = '\t' * ((w + ws) // tab_width - w // tab_width)
+                        s += ' ' * ((w + ws) % tab_width)
                     self.replaceText(s)
             # handle all other printable characters
             elif len(event.string) > 0:
@@ -5941,7 +5950,7 @@ class FileDiffViewer(gtk.Table):
     # 'copy' action
     def copy(self):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
-            self.__set_clipboard_text(gtk.gdk.SELECTION_CLIPBOARD, self.getSelectedText())
+            self.__set_clipboard_text(Gdk.SELECTION_CLIPBOARD, self.getSelectedText())
 
     # 'cut' action
     def cut(self):
@@ -5953,17 +5962,17 @@ class FileDiffViewer(gtk.Table):
     def receive_clipboard_text_cb(self, clipboard, text, data):
         if self.mode == LINE_MODE or self.mode == CHAR_MODE:
             # there is no guarantee this will be called before finishing
-            # gtk.clipboard_get so we may need to create our own undo block
+            # Gtk.clipboard_get so we may need to create our own undo block
             needs_block = (self.undoblock is None)
             if needs_block:
                 self.openUndoBlock()
-            self.replaceText(unicode(nullToEmpty(text), 'utf_8'))
+            self.replaceText(str(nullToEmpty(text), 'utf_8'))
             if needs_block:
                 self.closeUndoBlock()
 
     # 'paste' action
     def paste(self):
-         gtk.clipboard_get(gtk.gdk.SELECTION_CLIPBOARD).request_text(self.receive_clipboard_text_cb)
+         Gtk.clipboard_get(Gdk.SELECTION_CLIPBOARD).request_text(self.receive_clipboard_text_cb)
 
     # 'clear_edits' action
     def clear_edits(self):
@@ -6068,7 +6077,7 @@ class FileDiffViewer(gtk.Table):
     def prefsUpdated(self):
         # clear cache as tab width may have changed
         self.string_width_cache = {}
-        self.setFont(pango.FontDescription(self.prefs.getString('display_font')))
+        self.setFont(Pango.FontDescription(self.prefs.getString('display_font')))
         # update preedit text
         self._cursor_position_changed(True)
 
@@ -6433,7 +6442,7 @@ class FileDiffViewer(gtk.Table):
                     w = self.characterWidth(col, c)
                     # replace tab with spaces
                     if c == '\t':
-                        c = w * u' '
+                        c = w * ' '
                     ss.append(c)
                     col += w
                 # determine the range of interest
@@ -6481,7 +6490,7 @@ class FileDiffViewer(gtk.Table):
                     j += 1
                 if col >= tab_width:
                     # convert to tabs
-                    s = ''.join([ u'\t' * (col // tab_width), u' ' * (col % tab_width), text[j:] ])
+                    s = ''.join([ '\t' * (col // tab_width), ' ' * (col % tab_width), text[j:] ])
                     # update line only if it changed
                     if text != s:
                         self.updateText(f, i, s)
@@ -6513,10 +6522,10 @@ class FileDiffViewer(gtk.Table):
                 ws = max(0, w + offset * self.prefs.getInt('editor_soft_tab_width'))
                 if ws != w:
                     if self.prefs.getBool('editor_expand_tabs'):
-                        s = u' ' * ws
+                        s = ' ' * ws
                     else:
                         tab_width = self.prefs.getInt('display_tab_width')
-                        s = u'\t' * (ws // tab_width) + u' ' * (ws % tab_width)
+                        s = '\t' * (ws // tab_width) + ' ' * (ws % tab_width)
                     self.updateText(f, i, s + text[j:])
         if self.mode == CHAR_MODE:
             # ensure the cursor position is valid
@@ -6700,35 +6709,35 @@ class FileDiffViewer(gtk.Table):
         self._mergeBoth(True)
 
 # create 'title_changed' signal for FileDiffViewer
-gobject.signal_new('swapped_panes', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, int))
-gobject.signal_new('num_edits_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, ))
-gobject.signal_new('mode_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-gobject.signal_new('cursor_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-gobject.signal_new('syntax_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
-gobject.signal_new('format_changed', FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (int, int))
+GObject.signal_new('swapped_panes', FileDiffViewer, GObject.SignalFlags.RUN_LAST, None, (int, int))
+GObject.signal_new('num_edits_changed', FileDiffViewer, GObject.SignalFlags.RUN_LAST, None, (int, ))
+GObject.signal_new('mode_changed', FileDiffViewer, GObject.SignalFlags.RUN_LAST, None, ())
+GObject.signal_new('cursor_changed', FileDiffViewer, GObject.SignalFlags.RUN_LAST, None, ())
+GObject.signal_new('syntax_changed', FileDiffViewer, GObject.SignalFlags.RUN_LAST, None, (str, ))
+GObject.signal_new('format_changed', FileDiffViewer, GObject.SignalFlags.RUN_LAST, None, (int, int))
 
 # dialogue used to search for text
-class SearchDialog(gtk.Dialog):
+class SearchDialog(Gtk.Dialog):
     def __init__(self, parent, pattern=None, history=None):
-        gtk.Dialog.__init__(self, _('Find...'), parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+        GObject.GObject.__init__(self, _('Find...'), parent, Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT, (Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT, Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT))
 
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         vbox.set_border_width(10)
 
-        hbox = gtk.HBox()
-        label = gtk.Label(_('Search For: '))
+        hbox = Gtk.HBox()
+        label = Gtk.Label(label=_('Search For: '))
         hbox.pack_start(label, False, False, 0)
         label.show()
-        combo = gtk.combo_box_entry_new_text()
-        self.entry = combo.child
+        combo = Gtk.combo_box_entry_new_text()
+        self.entry = combo.get_child()
         self.entry.connect('activate', self.entry_cb)
 
         if pattern is not None:
             self.entry.set_text(pattern)
 
         if history is not None:
-            completion = gtk.EntryCompletion()
-            liststore = gtk.ListStore(gobject.TYPE_STRING)
+            completion = Gtk.EntryCompletion()
+            liststore = Gtk.ListStore(GObject.TYPE_STRING)
             completion.set_model(liststore)
             completion.set_text_column(0)
             for h in history:
@@ -6741,12 +6750,12 @@ class SearchDialog(gtk.Dialog):
         vbox.pack_start(hbox, False, False, 0)
         hbox.show()
 
-        button = gtk.CheckButton(_('Match Case'))
+        button = Gtk.CheckButton(_('Match Case'))
         self.match_case_button = button
         vbox.pack_start(button, False, False, 0)
         button.show()
 
-        button = gtk.CheckButton(_('Search Backwards'))
+        button = Gtk.CheckButton(_('Search Backwards'))
         self.backwards_button = button
         vbox.pack_start(button, False, False, 0)
         button.show()
@@ -6756,18 +6765,18 @@ class SearchDialog(gtk.Dialog):
 
     # callback used when the Enter key is pressed
     def entry_cb(self, widget):
-        self.response(gtk.RESPONSE_ACCEPT)
+        self.response(Gtk.ResponseType.ACCEPT)
 
 # convenience method to request confirmation when closing the last tab
 def confirmTabClose(parent):
-    dialog = MessageDialog(parent, gtk.MESSAGE_WARNING, _('Closing this tab will quit %s.') % (APP_NAME, ))
-    end = (dialog.run() == gtk.RESPONSE_OK)
+    dialog = MessageDialog(parent, Gtk.MessageType.WARNING, _('Closing this tab will quit %s.') % (APP_NAME, ))
+    end = (dialog.run() == Gtk.ResponseType.OK)
     dialog.destroy()
     return end
 
 # custom dialogue for picking files with widgets for specifying the encoding
 # and revision
-class FileChooserDialog(gtk.FileChooserDialog):
+class FileChooserDialog(Gtk.FileChooserDialog):
     # record last chosen folder so the file chooser can start at a more useful
     # location for empty panes
     last_chosen_folder = os.path.realpath(os.curdir)
@@ -6776,26 +6785,26 @@ class FileChooserDialog(gtk.FileChooserDialog):
         FileChooserDialog.last_chosen_folder = widget.get_current_folder()
 
     def __init__(self, title, parent, prefs, action, accept, rev=False):
-        gtk.FileChooserDialog.__init__(self, title, parent, action, (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL, accept, gtk.RESPONSE_OK))
+        GObject.GObject.__init__(self, title, parent, action, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, accept, Gtk.ResponseType.OK))
         self.prefs = prefs
-        hbox = gtk.HBox()
-        label = gtk.Label(_('Encoding: '))
+        hbox = Gtk.HBox()
+        label = Gtk.Label(label=_('Encoding: '))
         hbox.pack_start(label, False, False, 0)
         label.show()
-        self.encoding = entry = EncodingMenu(prefs, action in [ gtk.FILE_CHOOSER_ACTION_OPEN, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER ])
+        self.encoding = entry = EncodingMenu(prefs, action in [ Gtk.FileChooserAction.OPEN, Gtk.FileChooserAction.SELECT_FOLDER ])
         hbox.pack_start(entry, False, False, 5)
         entry.show()
         if rev:
-            self.revision = entry = gtk.Entry()
+            self.revision = entry = Gtk.Entry()
             hbox.pack_end(entry, False, False, 0)
             entry.show()
-            label = gtk.Label(_('Revision: '))
+            label = Gtk.Label(label=_('Revision: '))
             hbox.pack_end(label, False, False, 0)
             label.show()
 
         self.vbox.pack_start(hbox, False, False, 0)
         hbox.show()
-        self.set_current_folder(unicode(self.last_chosen_folder, sys.getfilesystemencoding()))
+        self.set_current_folder(str(self.last_chosen_folder, sys.getfilesystemencoding()))
         self.connect('current-folder-changed', self.__current_folder_changed_cb)
 
     def set_encoding(self, encoding):
@@ -6809,24 +6818,24 @@ class FileChooserDialog(gtk.FileChooserDialog):
 
     def get_filename(self):
         # convert from UTF-8 string to unicode
-        s = gtk.FileChooserDialog.get_filename(self)
+        s = Gtk.FileChooserDialog.get_filename(self)
         if s is not None:
-            return unicode(s, 'utf_8')
+            return str(s, 'utf_8')
 
 # dialogue used to search for text
-class NumericDialog(gtk.Dialog):
+class NumericDialog(Gtk.Dialog):
     def __init__(self, parent, title, text, val, lower, upper, step=1, page=0):
-        gtk.Dialog.__init__(self, title, parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+        GObject.GObject.__init__(self, title, parent, Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT, (Gtk.STOCK_CANCEL, Gtk.ResponseType.REJECT, Gtk.STOCK_OK, Gtk.ResponseType.ACCEPT))
 
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         vbox.set_border_width(10)
 
-        hbox = gtk.HBox()
-        label = gtk.Label(text)
+        hbox = Gtk.HBox()
+        label = Gtk.Label(label=text)
         hbox.pack_start(label, False, False, 0)
         label.show()
-        adj = gtk.Adjustment(val, lower, upper, step, page)
-        self.button = button = gtk.SpinButton(adj, 0)
+        adj = Gtk.Adjustment(val, lower, upper, step, page)
+        self.button = button = Gtk.SpinButton(adj, 0)
         button.connect('activate', self.button_cb)
         hbox.pack_start(button, True, True, 0)
         button.show()
@@ -6838,18 +6847,18 @@ class NumericDialog(gtk.Dialog):
         vbox.show()
 
     def button_cb(self, widget):
-        self.response(gtk.RESPONSE_ACCEPT)
+        self.response(Gtk.ResponseType.ACCEPT)
 
 # establish callback for the about dialog's link to Diffuse's web site
-def url_hook(dialog, link, userdata):
-    webbrowser.open(link)
+# def url_hook(dialog, link, userdata):
+#     webbrowser.open(link)
 
-gtk.about_dialog_set_url_hook(url_hook, None)
+# Gtk.about_dialog_set_url_hook(url_hook, None)
 
 # the about dialogue
-class AboutDialog(gtk.AboutDialog):
+class AboutDialog(Gtk.AboutDialog):
     def __init__(self):
-        gtk.AboutDialog.__init__(self)
+        GObject.GObject.__init__(self)
         self.set_logo_icon_name('diffuse')
         if hasattr(self, 'set_program_name'):
             # only available in pygtk >= 2.12
@@ -6873,27 +6882,27 @@ You should have received a copy of the GNU General Public License along with thi
 
 # widget classed to create notebook tabs with labels and a close button
 # use notebooktab.button.connect() to be notified when the button is pressed
-# make this a gtk.EventBox so signals can be connected for MMB and RMB button
+# make this a Gtk.EventBox so signals can be connected for MMB and RMB button
 # presses.
-class NotebookTab(gtk.EventBox):
+class NotebookTab(Gtk.EventBox):
     def __init__(self, name, stock):
-        gtk.EventBox.__init__(self)
+        GObject.GObject.__init__(self)
         self.set_visible_window(False)
-        hbox = gtk.HBox()
+        hbox = Gtk.HBox()
         if stock is not None:
-            image = gtk.Image()
-            image.set_from_stock(stock, gtk.ICON_SIZE_MENU)
+            image = Gtk.Image()
+            image.set_from_stock(stock, Gtk.IconSize.MENU)
             hbox.pack_start(image, False, False, 5)
             image.show()
-        self.label = label = gtk.Label(name)
+        self.label = label = Gtk.Label(label=name)
         # left justify the widget
         label.set_alignment(0, 0.5)
         hbox.pack_start(label, True, True, 0)
         label.show()
-        self.button = button = gtk.Button()
-        button.set_relief(gtk.RELIEF_NONE)
-        image = gtk.Image()
-        image.set_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_MENU)
+        self.button = button = Gtk.Button()
+        button.set_relief(Gtk.ReliefStyle.NONE)
+        image = Gtk.Image()
+        image.set_from_stock(Gtk.STOCK_CLOSE, Gtk.IconSize.MENU)
         button.add(image)
         image.show()
         set_tooltip(button, _('Close Tab'))
@@ -6943,20 +6952,20 @@ def assign_file_labels(items, labels):
 # the main application class containing a set of file viewers
 # this class displays tab for switching between viewers and dispatches menu
 # commands to the current viewer
-class Diffuse(gtk.Window):
+class Diffuse(Gtk.Window):
     # specialisation of FileDiffViewer for Diffuse
     class FileDiffViewer(FileDiffViewer):
         # pane header
-        class PaneHeader(gtk.HBox):
+        class PaneHeader(Gtk.HBox):
             def __init__(self):
-                gtk.HBox.__init__(self)
-                appendButtons(self, gtk.ICON_SIZE_MENU, [
-                   [ gtk.STOCK_OPEN, self.button_cb, 'open', _('Open File...') ],
-                   [ gtk.STOCK_REFRESH, self.button_cb, 'reload', _('Reload File') ],
-                   [ gtk.STOCK_SAVE, self.button_cb, 'save', _('Save File') ],
-                   [ gtk.STOCK_SAVE_AS, self.button_cb, 'save_as', _('Save File As...') ] ])
+                GObject.GObject.__init__(self)
+                appendButtons(self, Gtk.IconSize.MENU, [
+                   [ Gtk.STOCK_OPEN, self.button_cb, 'open', _('Open File...') ],
+                   [ Gtk.STOCK_REFRESH, self.button_cb, 'reload', _('Reload File') ],
+                   [ Gtk.STOCK_SAVE, self.button_cb, 'save', _('Save File') ],
+                   [ Gtk.STOCK_SAVE_AS, self.button_cb, 'save_as', _('Save File As...') ] ])
 
-                self.label = label = gtk.Label()
+                self.label = label = Gtk.Label()
                 label.set_size_request(0, label.get_size_request()[1])
                 label.set_selectable(True)
                 self.pack_start(label, True, True, 0)
@@ -6998,31 +7007,31 @@ class Diffuse(gtk.Window):
                     self.updateTitle()
 
         # pane footer
-        class PaneFooter(gtk.HBox):
+        class PaneFooter(Gtk.HBox):
             def __init__(self):
-                gtk.HBox.__init__(self)
+                GObject.GObject.__init__(self)
 
-                self.cursor = label = gtk.Label()
+                self.cursor = label = Gtk.Label()
                 self.pack_start(label, False, False, 0)
                 label.show()
 
-                separator = gtk.VSeparator()
+                separator = Gtk.VSeparator()
                 self.pack_end(separator, False, False, 10)
                 separator.show()
 
-                self.encoding = label = gtk.Label()
+                self.encoding = label = Gtk.Label()
                 self.pack_end(label, False, False, 0)
                 label.show()
 
-                separator = gtk.VSeparator()
+                separator = Gtk.VSeparator()
                 self.pack_end(separator, False, False, 10)
                 separator.show()
 
-                self.format = label = gtk.Label()
+                self.format = label = Gtk.Label()
                 self.pack_end(label, False, False, 0)
                 label.show()
 
-                separator = gtk.VSeparator()
+                separator = Gtk.VSeparator()
                 self.pack_end(separator, False, False, 10)
                 separator.show()
 
@@ -7069,7 +7078,7 @@ class Diffuse(gtk.Window):
                 # pane header
                 w = Diffuse.FileDiffViewer.PaneHeader()
                 self.headers.append(w)
-                self.attach(w, i, i + 1, 0, 1, gtk.FILL, gtk.FILL)
+                self.attach(w, i, i + 1, 0, 1, Gtk.AttachOptions.FILL, Gtk.AttachOptions.FILL)
                 w.connect('title_changed', self.title_changed_cb)
                 w.connect('open', self.open_file_button_cb, i)
                 w.connect('reload', self.reload_file_button_cb, i)
@@ -7080,7 +7089,7 @@ class Diffuse(gtk.Window):
                 # pane footer
                 w = Diffuse.FileDiffViewer.PaneFooter()
                 self.footers.append(w)
-                self.attach(w, i, i + 1, 2, 3, gtk.FILL, gtk.FILL)
+                self.attach(w, i, i + 1, 2, 3, Gtk.AttachOptions.FILL, Gtk.AttachOptions.FILL)
                 w.show()
 
             self.connect('swapped_panes', self.swapped_panes_cb)
@@ -7090,7 +7099,7 @@ class Diffuse(gtk.Window):
             self.connect('format_changed', self.format_changed_cb)
 
             for i, darea in enumerate(self.dareas):
-                darea.drag_dest_set(gtk.DEST_DEFAULT_ALL, [ ('text/uri-list', 0, 0) ], gtk.gdk.ACTION_COPY)
+                darea.drag_dest_set(Gtk.DestDefaults.ALL, [ ('text/uri-list', 0, 0) ], Gdk.DragAction.COPY)
                 darea.connect('drag_data_received', self.drag_data_received_cb, i)
             # initialise status
             self.updateStatus()
@@ -7100,20 +7109,20 @@ class Diffuse(gtk.Window):
         def loadFromInfo(self, f, info):
             if self.headers[f].has_edits:
                 # warn users of any unsaved changes they might lose
-                dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, _('Save changes before loading the new file?'))
+                dialog = Gtk.MessageDialog(self.get_toplevel(), Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT, Gtk.MessageType.WARNING, Gtk.ButtonsType.NONE, _('Save changes before loading the new file?'))
                 dialog.set_title(APP_NAME)
-                dialog.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-                dialog.add_button(gtk.STOCK_NO, gtk.RESPONSE_REJECT)
-                dialog.add_button(gtk.STOCK_YES, gtk.RESPONSE_OK)
-                dialog.set_default_response(gtk.RESPONSE_CANCEL)
+                dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+                dialog.add_button(Gtk.STOCK_NO, Gtk.ResponseType.REJECT)
+                dialog.add_button(Gtk.STOCK_YES, Gtk.ResponseType.OK)
+                dialog.set_default_response(Gtk.ResponseType.CANCEL)
                 response = dialog.run()
                 dialog.destroy()
-                if response == gtk.RESPONSE_OK:
+                if response == Gtk.ResponseType.OK:
                     # save the current pane contents
                     if not self.save_file(f):
                         # cancel if the save failed
                         return
-                elif response != gtk.RESPONSE_REJECT:
+                elif response != Gtk.ResponseType.REJECT:
                     # cancel if the user did not choose 'yes' or 'no'
                     return
             self.openUndoBlock()
@@ -7144,7 +7153,7 @@ class Diffuse(gtk.Window):
                 if i > start:
                     p = url2path(s[start:i])
                     if p is not None:
-                        ss.append(unicode(p, 'utf_8'))
+                        ss.append(str(p, 'utf_8'))
             # load the first valid file
             for s in ss:
                 if os.path.isfile(s):
@@ -7223,7 +7232,7 @@ class Diffuse(gtk.Window):
                     if encoding is None:
                         s, encoding = self.prefs.convertToUnicode(s)
                     else:
-                        s = unicode(s, encoding)
+                        s = str(s, encoding)
                     ss = splitlines(s)
                 except (IOError, OSError, UnicodeDecodeError, WindowsError, LookupError):
                     # FIXME: this can occur before the toplevel window is drawn
@@ -7231,7 +7240,7 @@ class Diffuse(gtk.Window):
                         msg = _('Error reading revision %(rev)s of %(file)s.') % { 'rev': rev, 'file': name }
                     else:
                         msg = _('Error reading %s.') % (name, )
-                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, msg)
+                    dialog = MessageDialog(self.get_toplevel(), Gtk.MessageType.ERROR, msg)
                     dialog.run()
                     dialog.destroy()
                     return
@@ -7253,12 +7262,12 @@ class Diffuse(gtk.Window):
             if not reload:
                 # we need to ask for a file name if we are not reloading the
                 # existing file
-                dialog = FileChooserDialog(_('Open File'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN, True)
+                dialog = FileChooserDialog(_('Open File'), self.get_toplevel(), self.prefs, Gtk.FileChooserAction.OPEN, Gtk.STOCK_OPEN, True)
                 if info.name is not None:
                     dialog.set_filename(os.path.realpath(info.name))
                 dialog.set_encoding(info.encoding)
-                dialog.set_default_response(gtk.RESPONSE_OK)
-                end = (dialog.run() != gtk.RESPONSE_OK)
+                dialog.set_default_response(Gtk.ResponseType.OK)
+                end = (dialog.run() != Gtk.ResponseType.OK)
                 name = dialog.get_filename()
                 rev = None
                 vcs = None
@@ -7304,8 +7313,8 @@ class Diffuse(gtk.Window):
                             else:
                                 s = info.name
                             msg = _('The file %s changed on disk.  Do you want to reload the file?') % (s, )
-                            dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
-                            ok = (dialog.run() == gtk.RESPONSE_OK)
+                            dialog = MessageDialog(self.get_toplevel(), Gtk.MessageType.QUESTION, msg)
+                            ok = (dialog.run() == Gtk.ResponseType.OK)
                             dialog.destroy()
                             if ok:
                                 self.open_file(f, True)
@@ -7323,15 +7332,15 @@ class Diffuse(gtk.Window):
                 save_as = True
             if save_as:
                 # prompt for a file name
-                dialog = FileChooserDialog(_('Save %(title)s Pane %(pane)d') % { 'title': self.title, 'pane': f + 1 }, self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_SAVE, gtk.STOCK_SAVE)
+                dialog = FileChooserDialog(_('Save %(title)s Pane %(pane)d') % { 'title': self.title, 'pane': f + 1 }, self.get_toplevel(), self.prefs, Gtk.FileChooserAction.SAVE, Gtk.STOCK_SAVE)
                 if name is not None:
                     dialog.set_filename(os.path.abspath(name))
                 if encoding is None:
                     encoding = self.prefs.getDefaultEncoding()
                 dialog.set_encoding(encoding)
                 name, label = None, None
-                dialog.set_default_response(gtk.RESPONSE_OK)
-                if dialog.run() == gtk.RESPONSE_OK:
+                dialog.set_default_response(Gtk.ResponseType.OK)
+                if dialog.run() == Gtk.ResponseType.OK:
                     name = dialog.get_filename()
                     encoding = dialog.get_encoding()
                     if encoding is None:
@@ -7356,8 +7365,8 @@ class Diffuse(gtk.Window):
                     if info.stat[stat.ST_MTIME] < os.stat(name)[stat.ST_MTIME]:
                         msg = _('The file %s has been modified by another process since reading it.  If you save, all the external changes could be lost.  Save anyways?') % (name, )
                 if msg is not None:
-                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
-                    end = (dialog.run() != gtk.RESPONSE_OK)
+                    dialog = MessageDialog(self.get_toplevel(), Gtk.MessageType.QUESTION, msg)
+                    end = (dialog.run() != Gtk.ResponseType.OK)
                     dialog.destroy()
                     if end:
                         return False
@@ -7373,7 +7382,7 @@ class Diffuse(gtk.Window):
                         s = line.getText()
                         if s is not None:
                             ss.append(s)
-                encoded = codecs.encode(u''.join(ss), encoding)
+                encoded = codecs.encode(''.join(ss), encoding)
 
                 # write file
                 fd = open(name, 'wb')
@@ -7395,11 +7404,11 @@ class Diffuse(gtk.Window):
                     self.setSyntax(syntax)
                 return True
             except (UnicodeEncodeError, LookupError):
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error encoding to %s.') % (encoding, ))
+                dialog = MessageDialog(self.get_toplevel(), Gtk.MessageType.ERROR, _('Error encoding to %s.') % (encoding, ))
                 dialog.run()
                 dialog.destroy()
             except IOError:
-                dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error writing %s.') % (name, ))
+                dialog = MessageDialog(self.get_toplevel(), Gtk.MessageType.ERROR, _('Error writing %s.') % (name, ))
                 dialog.run()
                 dialog.destroy()
             return False
@@ -7430,7 +7439,7 @@ class Diffuse(gtk.Window):
         def go_to_line_cb(self, widget, data):
             parent = self.get_toplevel()
             dialog = NumericDialog(parent, _('Go To Line...'), _('Line Number: '), 1, 1, self.panes[self.current_pane].max_line_number + 1)
-            okay = (dialog.run() == gtk.RESPONSE_ACCEPT)
+            okay = (dialog.run() == Gtk.ResponseType.ACCEPT)
             i = dialog.button.get_value_as_int()
             dialog.destroy()
             if okay:
@@ -7479,7 +7488,7 @@ class Diffuse(gtk.Window):
             self.footers[f].setFormat(format)
 
     def __init__(self, rc_dir):
-        gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
+        GObject.GObject.__init__(self) #, Gtk.WindowType.TOPLEVEL)
 
         self.prefs = Preferences(os.path.join(rc_dir, 'prefs'))
         # number of created viewers (used to label some tabs)
@@ -7488,8 +7497,8 @@ class Diffuse(gtk.Window):
         # state information that should persist across sessions
         self.bool_state = { 'window_maximized': False, 'search_matchcase': False, 'search_backwards': False }
         self.int_state = { 'window_width': 1024, 'window_height': 768 }
-        self.int_state['window_x'] = max(0, (gtk.gdk.screen_width() - self.int_state['window_width']) / 2)
-        self.int_state['window_y'] = max(0, (gtk.gdk.screen_height() - self.int_state['window_height']) / 2)
+        self.int_state['window_x'] = max(0, (Gdk.Screen.width() - self.int_state['window_width']) / 2)
+        self.int_state['window_y'] = max(0, (Gdk.Screen.height() - self.int_state['window_height']) / 2)
         self.connect('configure_event', self.configure_cb)
         self.connect('window_state_event', self.window_state_cb)
 
@@ -7498,10 +7507,10 @@ class Diffuse(gtk.Window):
         self.search_history = []
 
         self.connect('delete-event', self.delete_cb)
-        accel_group = gtk.AccelGroup()
+        accel_group = Gtk.AccelGroup()
 
         # create a VBox for our contents
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
 
         # create some custom icons for merging
         DIFFUSE_STOCK_NEW_2WAY_MERGE = 'diffuse-new-2way-merge'
@@ -7509,114 +7518,114 @@ class Diffuse(gtk.Window):
         DIFFUSE_STOCK_LEFT_RIGHT = 'diffuse-left-right'
         DIFFUSE_STOCK_RIGHT_LEFT = 'diffuse-right-left'
 
-        factory = gtk.IconFactory()
+        factory = Gtk.IconFactory()
         # render the base item used to indicate a new document
-        p0 = self.render_icon(gtk.STOCK_NEW, gtk.ICON_SIZE_LARGE_TOOLBAR)
+        p0 = self.render_icon(Gtk.STOCK_NEW, Gtk.IconSize.LARGE_TOOLBAR)
         w, h = p0.get_width(), p0.get_height()
 
         # render new 2-way merge icon
         s = 0.8
         sw, sh = int(s * w), int(s * h)
         w1, h1 = w - sw, h - sh
-        p = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, w, h)
+        p = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, w, h)
         p.fill(0)
-        p0.composite(p, 0, 0, sw, sh, 0, 0, s, s, gtk.gdk.INTERP_BILINEAR, 255)
-        p0.composite(p, w1, h1, sw, sh, w1, h1, s, s, gtk.gdk.INTERP_BILINEAR, 255)
-        factory.add(DIFFUSE_STOCK_NEW_2WAY_MERGE, gtk.IconSet(p))
+        p0.composite(p, 0, 0, sw, sh, 0, 0, s, s, GdkPixbuf.InterpType.BILINEAR, 255)
+        p0.composite(p, w1, h1, sw, sh, w1, h1, s, s, GdkPixbuf.InterpType.BILINEAR, 255)
+        factory.add(DIFFUSE_STOCK_NEW_2WAY_MERGE, Gtk.IconSet(p))
 
         # render new 3-way merge icon
         s = 0.7
         sw, sh = int(s * w), int(s * h)
         w1, h1 = (w - sw) / 2, (h - sh) / 2
         w2, h2 = w - sw, h - sh
-        p = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, w, h)
+        p = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, w, h)
         p.fill(0)
-        p0.composite(p, 0, 0, sw, sh, 0, 0, s, s, gtk.gdk.INTERP_BILINEAR, 255)
-        p0.composite(p, w1, h1, sw, sh, w1, h1, s, s, gtk.gdk.INTERP_BILINEAR, 255)
-        p0.composite(p, w2, h2, sw, sh, w2, h2, s, s, gtk.gdk.INTERP_BILINEAR, 255)
-        factory.add(DIFFUSE_STOCK_NEW_3WAY_MERGE, gtk.IconSet(p))
+        p0.composite(p, 0, 0, sw, sh, 0, 0, s, s, GdkPixbuf.InterpType.BILINEAR, 255)
+        p0.composite(p, w1, h1, sw, sh, w1, h1, s, s, GdkPixbuf.InterpType.BILINEAR, 255)
+        p0.composite(p, w2, h2, sw, sh, w2, h2, s, s, GdkPixbuf.InterpType.BILINEAR, 255)
+        factory.add(DIFFUSE_STOCK_NEW_3WAY_MERGE, Gtk.IconSet(p))
 
         # render the left and right arrow we will use in our custom icons
-        p0 = self.render_icon(gtk.STOCK_GO_FORWARD, gtk.ICON_SIZE_LARGE_TOOLBAR)
-        p1 = self.render_icon(gtk.STOCK_GO_BACK, gtk.ICON_SIZE_LARGE_TOOLBAR)
+        p0 = self.render_icon(Gtk.STOCK_GO_FORWARD, Gtk.IconSize.LARGE_TOOLBAR)
+        p1 = self.render_icon(Gtk.STOCK_GO_BACK, Gtk.IconSize.LARGE_TOOLBAR)
         w, h, s = p0.get_width(), p0.get_height(), 0.65
         sw, sh = int(s * w), int(s * h)
         w1, h1 = w - sw, h - sh
 
         # create merge from left then right icon
-        p = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, w, h)
+        p = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, w, h)
         p.fill(0)
-        p1.composite(p, w1, h1, sw, sh, w1, h1, s, s, gtk.gdk.INTERP_BILINEAR, 255)
-        p0.composite(p, 0, 0, sw, sh, 0, 0, s, s, gtk.gdk.INTERP_BILINEAR, 255)
-        factory.add(DIFFUSE_STOCK_LEFT_RIGHT, gtk.IconSet(p))
+        p1.composite(p, w1, h1, sw, sh, w1, h1, s, s, GdkPixbuf.InterpType.BILINEAR, 255)
+        p0.composite(p, 0, 0, sw, sh, 0, 0, s, s, GdkPixbuf.InterpType.BILINEAR, 255)
+        factory.add(DIFFUSE_STOCK_LEFT_RIGHT, Gtk.IconSet(p))
 
         # create merge from right then left icon
-        p = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, w, h)
+        p = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, True, 8, w, h)
         p.fill(0)
-        p0.composite(p, 0, h1, sw, sh, 0, h1, s, s, gtk.gdk.INTERP_BILINEAR, 255)
-        p1.composite(p, w1, 0, sw, sh, w1, 0, s, s, gtk.gdk.INTERP_BILINEAR, 255)
-        factory.add(DIFFUSE_STOCK_RIGHT_LEFT, gtk.IconSet(p))
+        p0.composite(p, 0, h1, sw, sh, 0, h1, s, s, GdkPixbuf.InterpType.BILINEAR, 255)
+        p1.composite(p, w1, 0, sw, sh, w1, 0, s, s, GdkPixbuf.InterpType.BILINEAR, 255)
+        factory.add(DIFFUSE_STOCK_RIGHT_LEFT, Gtk.IconSet(p))
 
         # make the icons available for use
         factory.add_default()
 
         menuspecs = []
         menuspecs.append([ _('_File'), [
-                     [_('_Open File...'), self.open_file_cb, None, gtk.STOCK_OPEN, 'open_file'],
+                     [_('_Open File...'), self.open_file_cb, None, Gtk.STOCK_OPEN, 'open_file'],
                      [_('Open File In New _Tab...'), self.open_file_in_new_tab_cb, None, None, 'open_file_in_new_tab'],
                      [_('Open _Modified Files...'), self.open_modified_files_cb, None, None, 'open_modified_files'],
                      [_('Open Commi_t...'), self.open_commit_cb, None, None, 'open_commit'],
-                     [_('_Reload File'), self.reload_file_cb, None, gtk.STOCK_REFRESH, 'reload_file'],
+                     [_('_Reload File'), self.reload_file_cb, None, Gtk.STOCK_REFRESH, 'reload_file'],
                      [],
-                     [_('_Save File'), self.save_file_cb, None, gtk.STOCK_SAVE, 'save_file'],
-                     [_('Save File _As...'), self.save_file_as_cb, None, gtk.STOCK_SAVE_AS, 'save_file_as'],
+                     [_('_Save File'), self.save_file_cb, None, Gtk.STOCK_SAVE, 'save_file'],
+                     [_('Save File _As...'), self.save_file_as_cb, None, Gtk.STOCK_SAVE_AS, 'save_file_as'],
                      [_('Save A_ll'), self.save_all_cb, None, None, 'save_all'],
                      [],
                      [_('New _2-Way File Merge'), self.new_2_way_file_merge_cb, None, DIFFUSE_STOCK_NEW_2WAY_MERGE, 'new_2_way_file_merge'],
                      [_('New _3-Way File Merge'), self.new_3_way_file_merge_cb, None, DIFFUSE_STOCK_NEW_3WAY_MERGE, 'new_3_way_file_merge'],
                      [_('New _N-Way File Merge...'), self.new_n_way_file_merge_cb, None, None, 'new_n_way_file_merge'],
                      [],
-                     [_('_Close Tab'), self.close_tab_cb, None, gtk.STOCK_CLOSE, 'close_tab'],
+                     [_('_Close Tab'), self.close_tab_cb, None, Gtk.STOCK_CLOSE, 'close_tab'],
                      [_('_Undo Close Tab'), self.undo_close_tab_cb, None, None, 'undo_close_tab'],
-                     [_('_Quit'), self.quit_cb, None, gtk.STOCK_QUIT, 'quit'] ] ])
+                     [_('_Quit'), self.quit_cb, None, Gtk.STOCK_QUIT, 'quit'] ] ])
 
         menuspecs.append([ _('_Edit'), [
-                     [_('_Undo'), self.button_cb, 'undo', gtk.STOCK_UNDO, 'undo'],
-                     [_('_Redo'), self.button_cb, 'redo', gtk.STOCK_REDO, 'redo'],
+                     [_('_Undo'), self.button_cb, 'undo', Gtk.STOCK_UNDO, 'undo'],
+                     [_('_Redo'), self.button_cb, 'redo', Gtk.STOCK_REDO, 'redo'],
                      [],
-                     [_('Cu_t'), self.button_cb, 'cut', gtk.STOCK_CUT, 'cut'],
-                     [_('_Copy'), self.button_cb, 'copy', gtk.STOCK_COPY, 'copy'],
-                     [_('_Paste'), self.button_cb, 'paste', gtk.STOCK_PASTE, 'paste'],
+                     [_('Cu_t'), self.button_cb, 'cut', Gtk.STOCK_CUT, 'cut'],
+                     [_('_Copy'), self.button_cb, 'copy', Gtk.STOCK_COPY, 'copy'],
+                     [_('_Paste'), self.button_cb, 'paste', Gtk.STOCK_PASTE, 'paste'],
                      [],
                      [_('Select _All'), self.button_cb, 'select_all', None, 'select_all'],
-                     [_('C_lear Edits'), self.button_cb, 'clear_edits', gtk.STOCK_CLEAR, 'clear_edits'],
+                     [_('C_lear Edits'), self.button_cb, 'clear_edits', Gtk.STOCK_CLEAR, 'clear_edits'],
                      [_('_Dismiss All Edits'), self.button_cb, 'dismiss_all_edits', None, 'dismiss_all_edits'],
                      [],
-                     [_('_Find...'), self.find_cb, None, gtk.STOCK_FIND, 'find'],
+                     [_('_Find...'), self.find_cb, None, Gtk.STOCK_FIND, 'find'],
                      [_('Find _Next'), self.find_next_cb, None, None, 'find_next'],
                      [_('Find Pre_vious'), self.find_previous_cb, None, None, 'find_previous'],
-                     [_('_Go To Line...'), self.go_to_line_cb, None, gtk.STOCK_JUMP_TO, 'go_to_line'],
+                     [_('_Go To Line...'), self.go_to_line_cb, None, Gtk.STOCK_JUMP_TO, 'go_to_line'],
                      [],
-                     [_('Pr_eferences...'), self.preferences_cb, None, gtk.STOCK_PREFERENCES, 'preferences'] ] ])
+                     [_('Pr_eferences...'), self.preferences_cb, None, Gtk.STOCK_PREFERENCES, 'preferences'] ] ])
 
         submenudef = [ [_('None'), self.syntax_cb, None, None, 'no_syntax_highlighting', True, None, ('syntax', None) ] ]
         names = theResources.getSyntaxNames()
         if len(names) > 0:
             submenudef.append([])
-            names.sort(key=unicode.lower)
+            names.sort(key=str.lower)
             for name in names:
                 submenudef.append([name, self.syntax_cb, name, None, 'syntax_highlighting_' + name, True, None, ('syntax', name) ])
 
         menuspecs.append([ _('_View'), [
                      [_('_Syntax Highlighting'), None, None, None, None, True, submenudef],
                      [],
-                     [_('Re_align All'), self.button_cb, 'realign_all', gtk.STOCK_EXECUTE, 'realign_all'],
+                     [_('Re_align All'), self.button_cb, 'realign_all', Gtk.STOCK_EXECUTE, 'realign_all'],
                      [_('_Isolate'), self.button_cb, 'isolate', None, 'isolate'],
                      [],
-                     [_('_First Difference'), self.button_cb, 'first_difference', gtk.STOCK_GOTO_TOP, 'first_difference'],
-                     [_('_Previous Difference'), self.button_cb, 'previous_difference', gtk.STOCK_GO_UP, 'previous_difference'],
-                     [_('_Next Difference'), self.button_cb, 'next_difference', gtk.STOCK_GO_DOWN, 'next_difference'],
-                     [_('_Last Difference'), self.button_cb, 'last_difference', gtk.STOCK_GOTO_BOTTOM, 'last_difference'],
+                     [_('_First Difference'), self.button_cb, 'first_difference', Gtk.STOCK_GOTO_TOP, 'first_difference'],
+                     [_('_Previous Difference'), self.button_cb, 'previous_difference', Gtk.STOCK_GO_UP, 'previous_difference'],
+                     [_('_Next Difference'), self.button_cb, 'next_difference', Gtk.STOCK_GO_DOWN, 'next_difference'],
+                     [_('_Last Difference'), self.button_cb, 'last_difference', Gtk.STOCK_GOTO_BOTTOM, 'last_difference'],
                      [],
                      [_('Fir_st Tab'), self.first_tab_cb, None, None, 'first_tab'],
                      [_('Pre_vious Tab'), self.previous_tab_cb, None, None, 'previous_tab'],
@@ -7630,33 +7639,33 @@ class Diffuse(gtk.Window):
                      [_('Convert To _Upper Case'), self.button_cb, 'convert_to_upper_case', None, 'convert_to_upper_case'],
                      [_('Convert To _Lower Case'), self.button_cb, 'convert_to_lower_case', None, 'convert_to_lower_case'],
                      [],
-                     [_('Sort Lines In _Ascending Order'), self.button_cb, 'sort_lines_in_ascending_order', gtk.STOCK_SORT_ASCENDING, 'sort_lines_in_ascending_order'],
-                     [_('Sort Lines In D_escending Order'), self.button_cb, 'sort_lines_in_descending_order', gtk.STOCK_SORT_DESCENDING, 'sort_lines_in_descending_order'],
+                     [_('Sort Lines In _Ascending Order'), self.button_cb, 'sort_lines_in_ascending_order', Gtk.STOCK_SORT_ASCENDING, 'sort_lines_in_ascending_order'],
+                     [_('Sort Lines In D_escending Order'), self.button_cb, 'sort_lines_in_descending_order', Gtk.STOCK_SORT_DESCENDING, 'sort_lines_in_descending_order'],
                      [],
                      [_('Remove Trailing _White Space'), self.button_cb, 'remove_trailing_white_space', None, 'remove_trailing_white_space'],
                      [_('Convert Tabs To _Spaces'), self.button_cb, 'convert_tabs_to_spaces', None, 'convert_tabs_to_spaces'],
                      [_('Convert Leading Spaces To _Tabs'), self.button_cb, 'convert_leading_spaces_to_tabs', None, 'convert_leading_spaces_to_tabs'],
                      [],
-                     [_('_Increase Indenting'), self.button_cb, 'increase_indenting', gtk.STOCK_INDENT, 'increase_indenting'],
-                     [_('De_crease Indenting'), self.button_cb, 'decrease_indenting', gtk.STOCK_UNINDENT, 'decrease_indenting'],
+                     [_('_Increase Indenting'), self.button_cb, 'increase_indenting', Gtk.STOCK_INDENT, 'increase_indenting'],
+                     [_('De_crease Indenting'), self.button_cb, 'decrease_indenting', Gtk.STOCK_UNINDENT, 'decrease_indenting'],
                      [],
                      [_('Convert To _DOS Format'), self.button_cb, 'convert_to_dos', None, 'convert_to_dos'],
                      [_('Convert To _Mac Format'), self.button_cb, 'convert_to_mac', None, 'convert_to_mac'],
                      [_('Convert To Uni_x Format'), self.button_cb, 'convert_to_unix', None, 'convert_to_unix'] ] ])
 
         menuspecs.append([ _('_Merge'), [
-                     [_('Copy Selection _Right'), self.button_cb, 'copy_selection_right', gtk.STOCK_GOTO_LAST, 'copy_selection_right'],
-                     [_('Copy Selection _Left'), self.button_cb, 'copy_selection_left', gtk.STOCK_GOTO_FIRST, 'copy_selection_left'],
+                     [_('Copy Selection _Right'), self.button_cb, 'copy_selection_right', Gtk.STOCK_GOTO_LAST, 'copy_selection_right'],
+                     [_('Copy Selection _Left'), self.button_cb, 'copy_selection_left', Gtk.STOCK_GOTO_FIRST, 'copy_selection_left'],
                      [],
-                     [_('Copy Left _Into Selection'), self.button_cb, 'copy_left_into_selection', gtk.STOCK_GO_FORWARD, 'copy_left_into_selection'],
-                     [_('Copy Right I_nto Selection'), self.button_cb, 'copy_right_into_selection', gtk.STOCK_GO_BACK, 'copy_right_into_selection'],
+                     [_('Copy Left _Into Selection'), self.button_cb, 'copy_left_into_selection', Gtk.STOCK_GO_FORWARD, 'copy_left_into_selection'],
+                     [_('Copy Right I_nto Selection'), self.button_cb, 'copy_right_into_selection', Gtk.STOCK_GO_BACK, 'copy_right_into_selection'],
                      [_('_Merge From Left Then Right'), self.button_cb, 'merge_from_left_then_right', DIFFUSE_STOCK_LEFT_RIGHT, 'merge_from_left_then_right'],
                      [_('M_erge From Right Then Left'), self.button_cb, 'merge_from_right_then_left', DIFFUSE_STOCK_RIGHT_LEFT, 'merge_from_right_then_left'] ] ])
 
         menuspecs.append([ _('_Help'), [
-                     [_('_Help Contents...'), self.help_contents_cb, None, gtk.STOCK_HELP, 'help_contents'],
+                     [_('_Help Contents...'), self.help_contents_cb, None, Gtk.STOCK_HELP, 'help_contents'],
                      [],
-                     [_('_About %s...') % (APP_NAME, ), self.about_cb, None, gtk.STOCK_ABOUT, 'about'] ] ])
+                     [_('_About %s...') % (APP_NAME, ), self.about_cb, None, Gtk.STOCK_ABOUT, 'about'] ] ])
 
         # used to disable menu events when switching tabs
         self.menu_update_depth = 0
@@ -7668,44 +7677,44 @@ class Diffuse(gtk.Window):
         menu_bar.show()
 
         # create button bar
-        hbox = gtk.HBox()
-        appendButtons(hbox, gtk.ICON_SIZE_LARGE_TOOLBAR, [
+        hbox = Gtk.HBox()
+        appendButtons(hbox, Gtk.IconSize.LARGE_TOOLBAR, [
            [ DIFFUSE_STOCK_NEW_2WAY_MERGE, self.new_2_way_file_merge_cb, None, _('New 2-Way File Merge') ],
            [ DIFFUSE_STOCK_NEW_3WAY_MERGE, self.new_3_way_file_merge_cb, None, _('New 3-Way File Merge') ],
            [],
-           [ gtk.STOCK_EXECUTE, self.button_cb, 'realign_all', _('Realign All') ],
-           [ gtk.STOCK_GOTO_TOP, self.button_cb, 'first_difference', _('First Difference') ],
-           [ gtk.STOCK_GO_UP, self.button_cb, 'previous_difference', _('Previous Difference') ],
-           [ gtk.STOCK_GO_DOWN, self.button_cb, 'next_difference', _('Next Difference') ],
-           [ gtk.STOCK_GOTO_BOTTOM, self.button_cb, 'last_difference', _('Last Difference') ],
+           [ Gtk.STOCK_EXECUTE, self.button_cb, 'realign_all', _('Realign All') ],
+           [ Gtk.STOCK_GOTO_TOP, self.button_cb, 'first_difference', _('First Difference') ],
+           [ Gtk.STOCK_GO_UP, self.button_cb, 'previous_difference', _('Previous Difference') ],
+           [ Gtk.STOCK_GO_DOWN, self.button_cb, 'next_difference', _('Next Difference') ],
+           [ Gtk.STOCK_GOTO_BOTTOM, self.button_cb, 'last_difference', _('Last Difference') ],
            [],
-           [ gtk.STOCK_GOTO_LAST, self.button_cb, 'copy_selection_right', _('Copy Selection Right') ],
-           [ gtk.STOCK_GOTO_FIRST, self.button_cb, 'copy_selection_left', _('Copy Selection Left') ],
-           [ gtk.STOCK_GO_FORWARD, self.button_cb, 'copy_left_into_selection', _('Copy Left Into Selection') ],
-           [ gtk.STOCK_GO_BACK, self.button_cb, 'copy_right_into_selection', _('Copy Right Into Selection') ],
+           [ Gtk.STOCK_GOTO_LAST, self.button_cb, 'copy_selection_right', _('Copy Selection Right') ],
+           [ Gtk.STOCK_GOTO_FIRST, self.button_cb, 'copy_selection_left', _('Copy Selection Left') ],
+           [ Gtk.STOCK_GO_FORWARD, self.button_cb, 'copy_left_into_selection', _('Copy Left Into Selection') ],
+           [ Gtk.STOCK_GO_BACK, self.button_cb, 'copy_right_into_selection', _('Copy Right Into Selection') ],
            [ DIFFUSE_STOCK_LEFT_RIGHT, self.button_cb, 'merge_from_left_then_right', _('Merge From Left Then Right') ],
            [ DIFFUSE_STOCK_RIGHT_LEFT, self.button_cb, 'merge_from_right_then_left', _('Merge From Right Then Left') ],
            [],
-           [ gtk.STOCK_UNDO, self.button_cb, 'undo', _('Undo') ],
-           [ gtk.STOCK_REDO, self.button_cb, 'redo', _('Redo') ],
-           [ gtk.STOCK_CUT, self.button_cb, 'cut', _('Cut') ],
-           [ gtk.STOCK_COPY, self.button_cb, 'copy', _('Copy') ],
-           [ gtk.STOCK_PASTE, self.button_cb, 'paste', _('Paste') ],
-           [ gtk.STOCK_CLEAR, self.button_cb, 'clear_edits', _('Clear Edits') ] ])
+           [ Gtk.STOCK_UNDO, self.button_cb, 'undo', _('Undo') ],
+           [ Gtk.STOCK_REDO, self.button_cb, 'redo', _('Redo') ],
+           [ Gtk.STOCK_CUT, self.button_cb, 'cut', _('Cut') ],
+           [ Gtk.STOCK_COPY, self.button_cb, 'copy', _('Copy') ],
+           [ Gtk.STOCK_PASTE, self.button_cb, 'paste', _('Paste') ],
+           [ Gtk.STOCK_CLEAR, self.button_cb, 'clear_edits', _('Clear Edits') ] ])
         # avoid the button bar from dictating the minimum window size
         hbox.set_size_request(0, hbox.get_size_request()[1])
         vbox.pack_start(hbox, False, False, 0)
         hbox.show()
 
         self.closed_tabs = []
-        self.notebook = notebook = gtk.Notebook()
+        self.notebook = notebook = Gtk.Notebook()
         notebook.set_scrollable(True)
         notebook.connect('switch-page', self.switch_page_cb)
         vbox.pack_start(notebook, True, True, 0)
         notebook.show()
 
         # Add a status bar to the bottom
-        self.statusbar = statusbar = gtk.Statusbar()
+        self.statusbar = statusbar = Gtk.Statusbar()
         vbox.pack_start(statusbar, False, False, 0)
         statusbar.show()
 
@@ -7724,14 +7733,14 @@ class Diffuse(gtk.Window):
     def configure_cb(self, widget, event):
         # read the state directly instead of using window_maximized as the order
         # of configure/window_state events is undefined
-        if (widget.window.get_state() & gtk.gdk.WINDOW_STATE_MAXIMIZED) == 0:
+        if (widget.window.get_state() & Gdk.WindowState.MAXIMIZED) == 0:
             self.int_state['window_x'], self.int_state['window_y'] = widget.window.get_root_origin()
             self.int_state['window_width'] = event.width
             self.int_state['window_height'] = event.height
 
     # record the window's maximised state
     def window_state_cb(self, window, event):
-        self.bool_state['window_maximized'] = ((event.new_window_state & gtk.gdk.WINDOW_STATE_MAXIMIZED) != 0)
+        self.bool_state['window_maximized'] = ((event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0)
 
     # load state information that should persist across sessions
     def loadState(self, statepath):
@@ -7767,9 +7776,9 @@ class Diffuse(gtk.Window):
     def saveState(self, statepath):
         try:
             ss = []
-            for k, v in self.bool_state.items():
+            for k, v in list(self.bool_state.items()):
                 ss.append('%s %s\n' % (k, v))
-            for k, v in self.int_state.items():
+            for k, v in list(self.int_state.items()):
                 ss.append('%s %s\n' % (k, v))
             ss.sort()
             f = open(statepath, 'w')
@@ -7793,7 +7802,7 @@ class Diffuse(gtk.Window):
     # given a chance to save any modified files before this method completes.
     def confirmCloseViewers(self, viewers):
         # make a list of modified files
-        model = gtk.ListStore(gobject.TYPE_BOOLEAN, gobject.TYPE_STRING, gobject.TYPE_INT, gobject.TYPE_OBJECT)
+        model = Gtk.ListStore(GObject.TYPE_BOOLEAN, GObject.TYPE_STRING, GObject.TYPE_INT, GObject.TYPE_OBJECT)
         for v in viewers:
             for f, h in enumerate(v.headers):
                 if h.has_edits:
@@ -7803,25 +7812,25 @@ class Diffuse(gtk.Window):
             return True
 
         # ask the user which files should be saved
-        dialog = gtk.MessageDialog(self.get_toplevel(), gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_WARNING, gtk.BUTTONS_NONE, _('Some files have unsaved changes.  Select the files to save before closing.'))
+        dialog = Gtk.MessageDialog(self.get_toplevel(), Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT, Gtk.MessageType.WARNING, Gtk.ButtonsType.NONE, _('Some files have unsaved changes.  Select the files to save before closing.'))
         dialog.set_resizable(True)
         dialog.set_title(APP_NAME)
         # add list of files with unsaved changes
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        treeview = gtk.TreeView(model)
-        r = gtk.CellRendererToggle()
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        treeview = Gtk.TreeView(model)
+        r = Gtk.CellRendererToggle()
         r.connect('toggled', self.__confirmClose_toggle_cb, model)
-        column = gtk.TreeViewColumn(None, r)
+        column = Gtk.TreeViewColumn(None, r)
         column.add_attribute(r, 'active', 0)
         treeview.append_column(column)
-        r = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(_('Tab'), r, text=1)
+        r = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(_('Tab'), r, text=1)
         column.set_resizable(True)
         column.set_expand(True)
         column.set_sort_column_id(1)
         treeview.append_column(column)
-        column = gtk.TreeViewColumn(_('Pane'), r, text=2)
+        column = Gtk.TreeViewColumn(_('Pane'), r, text=2)
         column.set_resizable(True)
         column.set_sort_column_id(2)
         treeview.append_column(column)
@@ -7831,15 +7840,15 @@ class Diffuse(gtk.Window):
         dialog.vbox.pack_start(sw, True, True, 0)
         sw.show()
         # add custom set of action buttons
-        dialog.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-        button = gtk.Button(_('Close _Without Saving'))
-        dialog.add_action_widget(button, gtk.RESPONSE_REJECT)
+        dialog.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
+        button = Gtk.Button(_('Close _Without Saving'))
+        dialog.add_action_widget(button, Gtk.ResponseType.REJECT)
         button.show()
-        dialog.add_button(gtk.STOCK_SAVE, gtk.RESPONSE_OK)
-        dialog.set_default_response(gtk.RESPONSE_CANCEL)
+        dialog.add_button(Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
+        dialog.set_default_response(Gtk.ResponseType.CANCEL)
         response = dialog.run()
         dialog.destroy()
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             # save all checked files
             it = model.get_iter_first()
             while it:
@@ -7852,7 +7861,7 @@ class Diffuse(gtk.Window):
                 it = model.iter_next(it)
             return True
         # cancel if the user did not choose 'Close Without Saving' or 'Save'
-        return response == gtk.RESPONSE_REJECT
+        return response == Gtk.ResponseType.REJECT
 
     # callback for the close button on each tab
     def remove_tab_cb(self, widget, data):
@@ -7877,11 +7886,11 @@ class Diffuse(gtk.Window):
             self.remove_tab_cb(widget, data)
         elif event.button == 3:
             # create a popup to pick a tab for focus on RMB
-            menu = gtk.Menu()
+            menu = Gtk.Menu()
             nb = self.notebook
             for i in range(nb.get_n_pages()):
                 viewer = nb.get_nth_page(i)
-                item = gtk.MenuItem(nb.get_tab_label(viewer).get_text(), False)
+                item = Gtk.MenuItem(nb.get_tab_label(viewer).get_text(), False)
                 item.connect('activate', self.notebooktab_pick_cb, i)
                 menu.append(item)
                 item.show()
@@ -7944,7 +7953,7 @@ class Diffuse(gtk.Window):
     def newFileDiffViewer(self, n):
         self.viewer_count += 1
         tabname = _('File Merge %d') % (self.viewer_count, )
-        tab = NotebookTab(tabname, gtk.STOCK_FILE)
+        tab = NotebookTab(tabname, Gtk.STOCK_FILE)
         viewer = Diffuse.FileDiffViewer(n, self.prefs, tabname)
         tab.button.connect('clicked', self.remove_tab_cb, viewer)
         tab.connect('button_press_event', self.notebooktab_button_press_cb, viewer)
@@ -8046,7 +8055,7 @@ class Diffuse(gtk.Window):
                             viewer.load(i, FileInfo(name, encoding, vcs, rev))
                         viewer.setOptions(options)
                 except (IOError, OSError, WindowsError):
-                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving commits for %s.') % (dn, ))
+                    dialog = MessageDialog(self.get_toplevel(), Gtk.MessageType.ERROR, _('Error retrieving commits for %s.') % (dn, ))
                     dialog.run()
                     dialog.destroy()
 
@@ -8077,7 +8086,7 @@ class Diffuse(gtk.Window):
                             viewer.load(i, FileInfo(name, encoding, vcs, rev))
                         viewer.setOptions(options)
                 except (IOError, OSError, WindowsError):
-                    dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_ERROR, _('Error retrieving modifications for %s.') % (dn, ))
+                    dialog = MessageDialog(self.get_toplevel(), Gtk.MessageType.ERROR, _('Error retrieving modifications for %s.') % (dn, ))
                     dialog.run()
                     dialog.destroy()
 
@@ -8095,7 +8104,7 @@ class Diffuse(gtk.Window):
     # respond to close window request from the window manager
     def delete_cb(self, widget, event):
         if self.confirmQuit():
-            gtk.main_quit()
+            Gtk.main_quit()
             return False
         return True
 
@@ -8110,9 +8119,9 @@ class Diffuse(gtk.Window):
     # callback for the open file menu item
     def open_file_in_new_tab_cb(self, widget, data):
         specs = None
-        dialog = FileChooserDialog(_('Open File In New Tab'), self.get_toplevel(), self.prefs, gtk.FILE_CHOOSER_ACTION_OPEN, gtk.STOCK_OPEN, True)
-        dialog.set_default_response(gtk.RESPONSE_OK)
-        accept = (dialog.run() == gtk.RESPONSE_OK)
+        dialog = FileChooserDialog(_('Open File In New Tab'), self.get_toplevel(), self.prefs, Gtk.FileChooserAction.OPEN, Gtk.STOCK_OPEN, True)
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        accept = (dialog.run() == Gtk.ResponseType.OK)
         name, encoding = dialog.get_filename(), dialog.get_encoding()
         rev = dialog.get_revision().strip()
         if rev == '':
@@ -8126,9 +8135,9 @@ class Diffuse(gtk.Window):
     # callback for the open modified files menu item
     def open_modified_files_cb(self, widget, data):
         parent = self.get_toplevel()
-        dialog = FileChooserDialog(_('Choose Folder With Modified Files'), parent, self.prefs, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, gtk.STOCK_OPEN)
-        dialog.set_default_response(gtk.RESPONSE_OK)
-        accept = (dialog.run() == gtk.RESPONSE_OK)
+        dialog = FileChooserDialog(_('Choose Folder With Modified Files'), parent, self.prefs, Gtk.FileChooserAction.SELECT_FOLDER, Gtk.STOCK_OPEN)
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        accept = (dialog.run() == Gtk.ResponseType.OK)
         name, encoding = dialog.get_filename(), dialog.get_encoding()
         dialog.destroy()
         if accept:
@@ -8139,16 +8148,16 @@ class Diffuse(gtk.Window):
                 self.notebook.set_current_page(n)
                 self.getCurrentViewer().grab_focus()
             else:
-                m = MessageDialog(parent, gtk.MESSAGE_ERROR, _('No modified files found.'))
+                m = MessageDialog(parent, Gtk.MessageType.ERROR, _('No modified files found.'))
                 m.run()
                 m.destroy()
 
     # callback for the open commit menu item
     def open_commit_cb(self, widget, data):
         parent = self.get_toplevel()
-        dialog = FileChooserDialog(_('Choose Folder With Commit'), parent, self.prefs, gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER, gtk.STOCK_OPEN, True)
-        dialog.set_default_response(gtk.RESPONSE_OK)
-        accept = (dialog.run() == gtk.RESPONSE_OK)
+        dialog = FileChooserDialog(_('Choose Folder With Commit'), parent, self.prefs, Gtk.FileChooserAction.SELECT_FOLDER, Gtk.STOCK_OPEN, True)
+        dialog.set_default_response(Gtk.ResponseType.OK)
+        accept = (dialog.run() == Gtk.ResponseType.OK)
         name, rev, encoding = dialog.get_filename(), dialog.get_revision(), dialog.get_encoding()
         dialog.destroy()
         if accept:
@@ -8159,7 +8168,7 @@ class Diffuse(gtk.Window):
                 self.notebook.set_current_page(n)
                 self.getCurrentViewer().grab_focus()
             else:
-                m = MessageDialog(parent, gtk.MESSAGE_ERROR, _('No committed files found.'))
+                m = MessageDialog(parent, Gtk.MessageType.ERROR, _('No committed files found.'))
                 m.run()
                 m.destroy()
 
@@ -8196,7 +8205,7 @@ class Diffuse(gtk.Window):
     def new_n_way_file_merge_cb(self, widget, data):
         parent = self.get_toplevel()
         dialog = NumericDialog(parent, _('New N-Way File Merge...'), _('Number of panes: '), 4, 2, 16)
-        okay = (dialog.run() == gtk.RESPONSE_ACCEPT)
+        okay = (dialog.run() == Gtk.ResponseType.ACCEPT)
         npanes = dialog.button.get_value_as_int()
         dialog.destroy()
         if okay:
@@ -8219,7 +8228,7 @@ class Diffuse(gtk.Window):
     # callback for the quit menu item
     def quit_cb(self, widget, data):
         if self.confirmQuit():
-            gtk.main_quit()
+            Gtk.main_quit()
 
     # request search parameters if force=True and then perform a search in the
     # current viewer pane
@@ -8236,7 +8245,7 @@ class Diffuse(gtk.Window):
             dialog = SearchDialog(self.get_toplevel(), pattern, history)
             dialog.match_case_button.set_active(self.bool_state['search_matchcase'])
             dialog.backwards_button.set_active(self.bool_state['search_backwards'])
-            keep = (dialog.run() == gtk.RESPONSE_ACCEPT)
+            keep = (dialog.run() == Gtk.ResponseType.ACCEPT)
             # persist the search options
             pattern = dialog.entry.get_text()
             match_case = dialog.match_case_button.get_active()
@@ -8263,9 +8272,9 @@ class Diffuse(gtk.Window):
                 msg = _('Phrase not found.  Continue from the end of the file?')
             else:
                 msg = _('Phrase not found.  Continue from the start of the file?')
-            dialog = MessageDialog(self.get_toplevel(), gtk.MESSAGE_QUESTION, msg)
-            dialog.set_default_response(gtk.RESPONSE_OK)
-            more = (dialog.run() == gtk.RESPONSE_OK)
+            dialog = MessageDialog(self.get_toplevel(), Gtk.MessageType.QUESTION, msg)
+            dialog.set_default_response(Gtk.ResponseType.OK)
+            more = (dialog.run() == Gtk.ResponseType.OK)
             dialog.destroy()
             from_start = True
 
@@ -8390,13 +8399,13 @@ class Diffuse(gtk.Window):
         dialog.run()
         dialog.destroy()
 
-gobject.signal_new('title_changed', Diffuse.FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
-gobject.signal_new('status_changed', Diffuse.FileDiffViewer, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, (str, ))
-gobject.signal_new('title_changed', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-gobject.signal_new('open', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-gobject.signal_new('reload', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-gobject.signal_new('save', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
-gobject.signal_new('save_as', Diffuse.FileDiffViewer.PaneHeader, gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ())
+GObject.signal_new('title_changed', Diffuse.FileDiffViewer, GObject.SignalFlags.RUN_LAST, None, (str, ))
+GObject.signal_new('status_changed', Diffuse.FileDiffViewer, GObject.SignalFlags.RUN_LAST, None, (str, ))
+GObject.signal_new('title_changed', Diffuse.FileDiffViewer.PaneHeader, GObject.SignalFlags.RUN_LAST, None, ())
+GObject.signal_new('open', Diffuse.FileDiffViewer.PaneHeader, GObject.SignalFlags.RUN_LAST, None, ())
+GObject.signal_new('reload', Diffuse.FileDiffViewer.PaneHeader, GObject.SignalFlags.RUN_LAST, None, ())
+GObject.signal_new('save', Diffuse.FileDiffViewer.PaneHeader, GObject.SignalFlags.RUN_LAST, None, ())
+GObject.signal_new('save_as', Diffuse.FileDiffViewer.PaneHeader, GObject.SignalFlags.RUN_LAST, None, ())
 
 # create nested subdirectories and return the complete path
 def make_subdirs(p, ss):
@@ -8412,16 +8421,16 @@ def make_subdirs(p, ss):
 # process the command line arguments
 if __name__ == '__main__':
     # find the config directory and create it if it didn't exist
-    rc_dir, subdirs = os.environ.get('XDG_CONFIG_HOME', None), [u'diffuse']
+    rc_dir, subdirs = os.environ.get('XDG_CONFIG_HOME', None), ['diffuse']
     if rc_dir is None:
-        rc_dir = os.path.expanduser(u'~')
-        subdirs.insert(0, u'.config')
+        rc_dir = os.path.expanduser('~')
+        subdirs.insert(0, '.config')
     rc_dir = make_subdirs(rc_dir, subdirs)
     # find the local data directory and create it if it didn't exist
-    data_dir, subdirs = os.environ.get('XDG_DATA_HOME', None), [u'diffuse']
+    data_dir, subdirs = os.environ.get('XDG_DATA_HOME', None), ['diffuse']
     if data_dir is None:
-        data_dir = os.path.expanduser(u'~')
-        subdirs[:0] = [ u'.local', u'share' ]
+        data_dir = os.path.expanduser('~')
+        subdirs[:0] = [ '.local', 'share' ]
     data_dir = make_subdirs(data_dir, subdirs)
     # load resource files
     i, rc_files = 1, []
@@ -8434,10 +8443,10 @@ if __name__ == '__main__':
     else:
         # parse system wide then personal initialisation files
         if isWindows():
-            rc_file = os.path.join(bin_dir, u'diffuserc')
+            rc_file = os.path.join(bin_dir, 'diffuserc')
         else:
-            rc_file = os.path.join(bin_dir, u'../../etc/diffuserc')
-        for rc_file in rc_file, os.path.join(rc_dir, u'diffuserc'):
+            rc_file = os.path.join(bin_dir, '../../etc/diffuserc')
+        for rc_file in rc_file, os.path.join(rc_dir, 'diffuserc'):
             if os.path.isfile(rc_file):
                 rc_files.append(rc_file)
     for rc_file in rc_files:
@@ -8485,7 +8494,7 @@ if __name__ == '__main__':
             elif i + 1 < argc and arg in [ '-r', '--revision' ]:
                 # specified revision
                 i += 1
-                revs.append((unicode(args[i], sys.getfilesystemencoding()), encoding))
+                revs.append((str(args[i], sys.getfilesystemencoding()), encoding))
             elif arg in [ '-s', '--separate' ]:
                 funcs[mode](specs, labels, options)
                 specs, labels, options = [], [], {}
@@ -8498,7 +8507,7 @@ if __name__ == '__main__':
                 mode = 'single'
             elif i + 1 < argc and arg in [ '-V', '--vcs' ]:
                 i += 1
-                diff.prefs.setString('vcs_search_order', unicode(args[i], sys.getfilesystemencoding()))
+                diff.prefs.setString('vcs_search_order', str(args[i], sys.getfilesystemencoding()))
                 diff.preferences_updated()
             elif arg in [ '-b', '--ignore-space-change' ]:
                 diff.prefs.setBool('display_ignore_whitespace_changes', True)
@@ -8522,7 +8531,7 @@ if __name__ == '__main__':
                 diff.preferences_updated()
             elif i + 1 < argc and arg == '-L':
                 i += 1
-                labels.append(unicode(args[i], sys.getfilesystemencoding()))
+                labels.append(str(args[i], sys.getfilesystemencoding()))
             elif i + 1 < argc and arg == '--line':
                 i += 1
                 try:
@@ -8571,6 +8580,6 @@ if __name__ == '__main__':
         nb.set_show_tabs(diff.prefs.getBool('tabs_always_show') or n > 1)
         nb.get_nth_page(0).grab_focus()
         diff.show()
-        gtk.main()
+        Gtk.main()
         # save state
         diff.saveState(statepath)

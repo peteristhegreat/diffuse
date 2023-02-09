@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright (C) 2009-2010 Derrick Moser <derrick_moser@yahoo.com>
@@ -51,7 +51,7 @@ files_only = False
 
 # process --help option
 if len(sys.argv) == 2 and sys.argv[1] == '--help':
-    print """Usage: %s [OPTION...]
+    print("""Usage: %s [OPTION...]
 
 Install or remove Diffuse.
 
@@ -87,7 +87,7 @@ Options:
      default: %s
 
   --files-only
-     only install/remove files; skip the post install/removal tasks""" % (app_path, options['destdir'], options['prefix'], options['sysconfdir'], options['examplesdir'], options['mandir'], options['pythonbin'])
+     only install/remove files; skip the post install/removal tasks""" % (app_path, options['destdir'], options['prefix'], options['sysconfdir'], options['examplesdir'], options['mandir'], options['pythonbin']))
     sys.exit(0)
  
 # returns the list of components used in a path
@@ -107,6 +107,7 @@ def relpath(src, dst):
 def replace(s, rules, i=0):
     if i < len(rules):
         k, v = rules[i]
+        print(s, k)
         a = s.split(k)
         for j in range(len(a)):
             a[j] = replace(a[j], rules, i + 1)
@@ -130,7 +131,7 @@ def removeFile(f):
 
 # install/remove sets of files
 def processFiles(install, dst, src, template):
-    for k, v in template.items():
+    for k, v in list(template.items()):
         for s in glob.glob(os.path.join(src, k)):
             d = s.replace(src, dst, 1)
             if install:
@@ -141,13 +142,13 @@ def processFiles(install, dst, src, template):
                 f.close()
                 if v is not None:
                     c = replace(c, v)
-                print 'Installing %s' % (d, )
+                print('Installing %s' % (d, ))
                 f = open(d, 'wb')
                 f.write(c)
                 f.close()
                 if k == 'bin/diffuse':
                     # turn on the execute bits
-                    os.chmod(d, 0755)
+                    os.chmod(d, 0o755)
             else:
                 # remove file
                 removeFile(d)
@@ -160,7 +161,7 @@ def processTranslations(install, dst):
         if install:
             # install file
             try:
-                print 'Installing %s' % (d, )
+                print('Installing %s' % (d, ))
                 createDirs(os.path.dirname(d))
                 if subprocess.Popen(['msgfmt', '-o', d, s]).wait() != 0:
                     raise OSError()
@@ -177,7 +178,7 @@ for arg in sys.argv[1:]:
     elif arg == '--files-only':
         files_only = True
     else:
-        for opt in options.keys():
+        for opt in list(options.keys()):
             key = '--%s=' % (opt, )
             if arg.startswith(key):
                 options[opt] = arg[len(key):]
@@ -217,13 +218,13 @@ if install:
     stage = 'install'
 else:
     stage = 'removal'
-print '''Performing %s with:
+print('''Performing %s with:
     destdir=%s
     prefix=%s
     sysconfdir=%s
     examplesdir=%s
     mandir=%s
-    pythonbin=%s''' % (stage, destdir, prefix, sysconfdir, examplesdir, mandir, pythonbin)
+    pythonbin=%s''' % (stage, destdir, prefix, sysconfdir, examplesdir, mandir, pythonbin))
 
 # install files to prefix
 processFiles(install, os.path.join(destdir, prefix[1:]), 'src/usr/', {
@@ -258,7 +259,7 @@ if not install:
 
 # do post install/removal tasks
 if not files_only:
-    print 'Performing post %s tasks.' % (stage, )
+    print('Performing post %s tasks.' % (stage, ))
 
     cmds = [ [ 'update-desktop-database' ],
              [ 'gtk-update-icon-cache', os.path.join(destdir, os.path.join(prefix, 'icons/hicolor')[1:]) ] ]
@@ -269,7 +270,7 @@ if not files_only:
     for c in cmds:
         for p in os.environ['PATH'].split(os.pathsep):
             if os.path.exists(os.path.join(p, c[0])):
-                print ' '.join(c)
+                print(' '.join(c))
                 try:
                     if subprocess.Popen(c).wait() != 0:
                         raise OSError()
@@ -277,4 +278,4 @@ if not files_only:
                     logError('WARNING: Failed to update documentation database with %s.' % (c[0], ))
                 break
         else:
-            print 'WARNING: %s is not installed' % (c[0], )
+            print('WARNING: %s is not installed' % (c[0], ))
